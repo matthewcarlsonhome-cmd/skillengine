@@ -1,37 +1,36 @@
 
-import { GoogleGenAI, GenerateContentResponse } from '@google/genai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // --- IMPORTANT ---
 // PASTE YOUR GOOGLE GEMINI API KEY HERE
 // Replace "your_actual_api_key_here" with your real key.
 const API_KEY = "your_actual_api_key_here";
 
-let ai: GoogleGenAI | undefined;
+let ai: GoogleGenerativeAI | undefined;
 
 // FIX: Corrected the condition to check against the placeholder string.
 if (API_KEY && API_KEY !== "your_actual_api_key_here") {
-    ai = new GoogleGenAI({ apiKey: API_KEY, vertexai: true });
+    ai = new GoogleGenerativeAI(API_KEY);
 } else {
     console.error("API_KEY not set in lib/gemini.ts. The application's AI features will not work. Please open this file and add your key.");
 }
 
-export async function runSkillStream(
+export async function* runSkillStream(
   prompt: string
-): Promise<AsyncGenerator<GenerateContentResponse, any, unknown>> {
+): AsyncGenerator<{ text: string }, void, unknown> {
   if (!ai) {
     const errorMessage = "Gemini AI client is not initialized. Please ensure you have added your API key to lib/gemini.ts.";
     throw new Error(errorMessage);
   }
-  
+
   try {
-    const response = await ai.models.generateContentStream({
-      model: 'gemini-2.5-flash',
-      contents: { role: 'user', parts: [{ text: prompt }] },
-      config: {
-        // Omit thinkingConfig to default to higher quality
-      }
-    });
-    return response;
+    const model = ai.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    const result = await model.generateContentStream(prompt);
+
+    for await (const chunk of result.stream) {
+      const text = chunk.text();
+      yield { text };
+    }
   } catch (error) {
     console.error("Error calling Gemini API:", error);
     if (error instanceof Error && error.message.includes('API key not valid')) {
