@@ -42,9 +42,9 @@ Place each file you have into the correct folder. **Crucially, make sure to add 
 *   **Inside `aicareerskills-app/hooks/`:**
     *   `useAppContext.tsx`, `useTheme.tsx`, `useToast.tsx`
 *   **Inside `aicareerskills-app/lib/`:**
-    *   `gemini.ts`, `skills.ts`
+    *   `gemini.ts`, `claude.ts` (new), `skills.ts`
 *   **Inside `aicareerskills-app/pages/`:**
-    *   `HomePage.tsx`, `SkillRunnerPage.tsx`, `ApiKeyInstructionsPage.tsx` (new)
+    *   `HomePage.tsx`, `SkillRunnerPage.tsx`, `ApiKeyInstructionsPage.tsx`
 
 ### Step 4: Run the Local Development Server
 
@@ -68,5 +68,5 @@ Place each file you have into the correct folder. **Crucially, make sure to add 
 
 1.  On the home page, use the upload buttons to provide your **Resume** and a **Job Description**.
 2.  Click "Launch" on any skill.
-3.  On the skill page, **enter your API key** in the designated field. If you need a key, click the "Get API Key" link for instructions.
+3.  On the skill page, select your AI Provider and **enter your API key** in the designated field. If you need a key, click the "Get API Key" link for instructions.
 4.  Click "Run Skill".

@@ -6,6 +6,7 @@ import remarkGfm from 'remark-gfm';
 import { SKILLS } from '../lib/skills.ts';
 import { Skill, FormInput as FormInputType, ApiProviderType } from '../types.ts';
 import { runSkillStream as runGeminiSkillStream } from '../lib/gemini.ts';
+import { runSkillStream as runClaudeSkillStream } from '../lib/claude.ts';
 import { useToast } from '../hooks/useToast.tsx';
 import { useAppContext } from '../hooks/useAppContext.tsx';
 import { Button } from '../components/ui/Button.tsx';
@@ -15,7 +16,6 @@ import { Select } from '../components/ui/Select.tsx';
 import { Checkbox } from '../components/ui/Checkbox.tsx';
 import { Progress } from '../components/ui/Progress.tsx';
 import { Sparkles, Clipboard, Download, AlertTriangle, ArrowLeft, KeyRound, Link as LinkIcon, Upload, HelpCircle } from 'lucide-react';
-import { GenerateContentResponse } from '@google/genai';
 
 const SkillRunnerPage: React.FC = () => {
   const { skillId } = useParams<{ skillId: string }>();
@@ -108,40 +108,54 @@ const SkillRunnerPage: React.FC = () => {
 
     try {
       const promptData = skill.generatePrompt(formState);
-      let result;
-
-      switch (selectedApi) {
-        case 'gemini':
-          result = await runGeminiSkillStream(apiKey, promptData, skill.useGoogleSearch);
-          break;
-        default:
-          throw new Error(`API provider "${selectedApi}" is not supported yet.`);
-      }
-      
-      const stream = result && result.stream ? result.stream : result;
-
-      if (!stream || typeof stream[Symbol.asyncIterator] !== 'function') {
-        console.error("API response is invalid or not a stream.", result);
-        throw new Error("Received an invalid or non-streamable response from the AI service.");
-      }
-
       let fullResponseText = '';
-      
-      for await (const chunk of stream) {
-        const text = chunk.text;
-        if (text) {
-          fullResponseText += text;
-          setOutput(fullResponseText);
+
+      if (selectedApi === 'gemini') {
+        const result = await runGeminiSkillStream(apiKey, promptData, skill.useGoogleSearch);
+        const stream = result && result.stream ? result.stream : result;
+        if (!stream || typeof stream[Symbol.asyncIterator] !== 'function') {
+          throw new Error("Received an invalid response from the Gemini service.");
         }
+        for await (const chunk of stream) {
+          const text = chunk.text;
+          if (text) {
+            fullResponseText += text;
+            setOutput(fullResponseText);
+          }
+        }
+        const finalResponse = await result.response;
+        if (finalResponse.candidates?.[0]?.groundingMetadata?.groundingChunks) {
+          setCitations(finalResponse.candidates[0].groundingMetadata.groundingChunks);
+        }
+      } else if (selectedApi === 'claude') {
+        const response = await runClaudeSkillStream(apiKey, promptData);
+        if (!response.body) throw new Error("Response body is null");
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            const chunk = decoder.decode(value);
+            const lines = chunk.split('\n');
+            for (const line of lines) {
+                if (line.startsWith('data: ')) {
+                    const jsonStr = line.substring(6);
+                    if (jsonStr.trim() === '[DONE]') break;
+                    try {
+                        const parsed = JSON.parse(jsonStr);
+                        if (parsed.type === 'content_block_delta' && parsed.delta.type === 'text_delta') {
+                            fullResponseText += parsed.delta.text;
+                            setOutput(fullResponseText);
+                        }
+                    } catch (e) {
+                        // Ignore parsing errors for incomplete JSON chunks
+                    }
+                }
+            }
+        }
+      } else {
+        throw new Error(`API provider "${selectedApi}" is not supported yet.`);
       }
-      
-      const finalResponsePromise = result && result.response ? result.response : Promise.resolve(null);
-      const finalResponse = await finalResponsePromise;
-
-      if (finalResponse && finalResponse.candidates?.[0]?.groundingMetadata?.groundingChunks) {
-        setCitations(finalResponse.candidates[0].groundingMetadata.groundingChunks);
-      }
-
     } catch (e: any) {
       setError(e.message || 'An unknown error occurred.');
       addToast(e.message || 'An unknown error occurred.', 'error');
@@ -248,7 +262,7 @@ const SkillRunnerPage: React.FC = () => {
                         <label htmlFor="api-provider" className="text-sm font-medium">AI Provider</label>
                         <Select id="api-provider" value={selectedApi} onChange={(e) => setSelectedApi(e.target.value as ApiProviderType)}>
                             <option value="gemini">Gemini</option>
-                            <option value="claude" disabled>Claude (Coming Soon)</option>
+                            <option value="claude">Claude</option>
                             <option value="chatgpt" disabled>ChatGPT (Coming Soon)</option>
                         </Select>
                         <Link to="/api-keys" className="text-xs text-muted-foreground hover:underline flex items-center gap-1">
