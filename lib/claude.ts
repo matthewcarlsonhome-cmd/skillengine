@@ -1,5 +1,5 @@
 
-export async function runClaudeSkillStream(
+export async function runSkillStream(
   apiKey: string,
   promptData: { systemInstruction: string; userPrompt: string; }
 ): Promise<Response> {
