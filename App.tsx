@@ -7,6 +7,7 @@ import { AppProvider } from './hooks/useAppContext.tsx';
 import Header from './components/Header.tsx';
 import HomePage from './pages/HomePage.tsx';
 import SkillRunnerPage from './pages/SkillRunnerPage.tsx';
+import ApiKeyInstructionsPage from './pages/ApiKeyInstructionsPage.tsx';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
                 <Routes>
                   <Route path="/" element={<HomePage />} />
                   <Route path="/skill/:skillId" element={<SkillRunnerPage />} />
+                  <Route path="/api-keys" element={<ApiKeyInstructionsPage />} />
                 </Routes>
               </main>
             </div>

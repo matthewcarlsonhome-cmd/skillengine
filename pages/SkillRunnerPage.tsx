@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { SKILLS } from '../lib/skills.ts';
@@ -14,7 +14,7 @@ import { Textarea } from '../components/ui/Textarea.tsx';
 import { Select } from '../components/ui/Select.tsx';
 import { Checkbox } from '../components/ui/Checkbox.tsx';
 import { Progress } from '../components/ui/Progress.tsx';
-import { Sparkles, Clipboard, Download, AlertTriangle, ArrowLeft, KeyRound, Link as LinkIcon, Upload } from 'lucide-react';
+import { Sparkles, Clipboard, Download, AlertTriangle, ArrowLeft, KeyRound, Link as LinkIcon, Upload, HelpCircle } from 'lucide-react';
 import { GenerateContentResponse } from '@google/genai';
 
 const SkillRunnerPage: React.FC = () => {
@@ -251,6 +251,10 @@ const SkillRunnerPage: React.FC = () => {
                             <option value="claude" disabled>Claude (Coming Soon)</option>
                             <option value="chatgpt" disabled>ChatGPT (Coming Soon)</option>
                         </Select>
+                        <Link to="/api-keys" className="text-xs text-muted-foreground hover:underline flex items-center gap-1">
+                            <HelpCircle className="h-3 w-3" />
+                            Get API Key
+                        </Link>
                     </div>
                     <div className="space-y-2">
                         <label htmlFor="api-key" className="text-sm font-medium">API Key<span className="text-red-500 ml-1">*</span></label>

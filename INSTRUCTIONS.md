@@ -25,14 +25,14 @@ aicareerskills-app/
 Place each file you have into the correct folder. **Crucially, make sure to add the new `package.json`, `vite.config.ts`, `tailwind.config.js`, `postcss.config.js`, and `index.css` files to the root of your `aicareerskills-app` folder.**
 
 *   **Inside `aicareerskills-app/`:**
-    *   `package.json` (new)
-    *   `vite.config.ts` (new)
-    *   `tailwind.config.js` (new)
-    *   `postcss.config.js` (new)
-    *   `index.css` (new)
+    *   `package.json`
+    *   `vite.config.ts`
+    *   `tailwind.config.js`
+    *   `postcss.config.js`
+    *   `index.css`
     *   `App.tsx`
-    *   `index.html` (updated)
-    *   `index.tsx` (updated)
+    *   `index.html`
+    *   `index.tsx`
     *   `metadata.json`
     *   `types.ts`
 *   **Inside `aicareerskills-app/components/`:**
@@ -44,7 +44,7 @@ Place each file you have into the correct folder. **Crucially, make sure to add 
 *   **Inside `aicareerskills-app/lib/`:**
     *   `gemini.ts`, `skills.ts`
 *   **Inside `aicareerskills-app/pages/`:**
-    *   `HomePage.tsx`, `SkillRunnerPage.tsx`
+    *   `HomePage.tsx`, `SkillRunnerPage.tsx`, `ApiKeyInstructionsPage.tsx` (new)
 
 ### Step 4: Run the Local Development Server
 
@@ -68,5 +68,5 @@ Place each file you have into the correct folder. **Crucially, make sure to add 
 
 1.  On the home page, use the upload buttons to provide your **Resume** and a **Job Description**.
 2.  Click "Launch" on any skill.
-3.  On the skill page, **enter your API key** in the designated field.
+3.  On the skill page, **enter your API key** in the designated field. If you need a key, click the "Get API Key" link for instructions.
 4.  Click "Run Skill".
