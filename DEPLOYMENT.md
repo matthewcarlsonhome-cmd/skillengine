@@ -21,13 +21,15 @@ This guide provides the correct instructions for deploying your production-ready
     These settings tell Netlify to run the Vite build process and to deploy the resulting `dist` folder.
 
 6.  **Add Environment Variable (Crucial for API Key):**
-    *   Before clicking "Deploy", click on **"Show advanced"** and then **"New variable"**.
+    *   After selecting the repository and before deploying, go to your new site's settings.
+    *   Navigate to **Site configuration > Environment variables**.
+    *   Click **"Add a variable"**.
     *   **Key:** `VITE_GEMINI_API_KEY`
     *   **Value:** Paste your actual Google Gemini API key here.
-    *   Click "Add variable".
+    *   Click "Save".
 
-    This securely stores your API key so your live application can use it without exposing it in the code.
+    This securely stores your API key so your live application can use it without exposing it in the code. The app will use this key if the user doesn't provide one in the UI.
 
-7.  **Deploy Site:** Click the "Deploy site" button.
+7.  **Deploy Site:** Go to the "Deploys" tab for your site and click "Trigger deploy" -> "Deploy site".
 
-Netlify will now pull your code from GitHub, run the build command, and deploy the contents of your `dist` folder. After a minute or two, your site will be live on a public URL!
+Netlify will now pull your code from GitHub, run the build command with your environment variable, and deploy the contents of your `dist` folder. After a minute or two, your site will be live on a public URL!

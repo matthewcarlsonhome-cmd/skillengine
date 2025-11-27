@@ -22,14 +22,17 @@ aicareerskills-app/
 
 ### Step 3: Save All Your Files
 
-Place each file you have into the correct folder. **Crucially, make sure to add the new `package.json` and `vite.config.ts` files to the root of your `aicareerskills-app` folder.**
+Place each file you have into the correct folder. **Crucially, make sure to add the new `package.json`, `vite.config.ts`, `tailwind.config.js`, `postcss.config.js`, and `index.css` files to the root of your `aicareerskills-app` folder.**
 
 *   **Inside `aicareerskills-app/`:**
     *   `package.json` (new)
     *   `vite.config.ts` (new)
+    *   `tailwind.config.js` (new)
+    *   `postcss.config.js` (new)
+    *   `index.css` (new)
     *   `App.tsx`
-    *   `index.html`
-    *   `index.tsx`
+    *   `index.html` (updated)
+    *   `index.tsx` (updated)
     *   `metadata.json`
     *   `types.ts`
 *   **Inside `aicareerskills-app/components/`:**
