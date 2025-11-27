@@ -1,42 +1,37 @@
 
-import { GoogleGenAI, GenerateContentResponse } from '@google/genai';
-
-// --- IMPORTANT ---
-// PASTE YOUR GOOGLE GEMINI API KEY HERE
-// Replace "your_actual_api_key_here" with your real key.
-const API_KEY = "your_actual_api_key_here";
-
-let ai: GoogleGenAI | undefined;
-
-// FIX: Corrected the condition to check against the placeholder string.
-if (API_KEY && API_KEY !== "your_actual_api_key_here") {
-    ai = new GoogleGenAI({ apiKey: API_KEY, vertexai: true });
-} else {
-    console.error("API_KEY not set in lib/gemini.ts. The application's AI features will not work. Please open this file and add your key.");
-}
+import { GoogleGenAI, GenerateContentStreamResult, GenerateContentRequest } from '@google/genai';
 
 export async function runSkillStream(
-  prompt: string
-): Promise<AsyncGenerator<GenerateContentResponse, any, unknown>> {
-  if (!ai) {
-    const errorMessage = "Gemini AI client is not initialized. Please ensure you have added your API key to lib/gemini.ts.";
-    throw new Error(errorMessage);
+  apiKey: string,
+  promptData: { systemInstruction: string; userPrompt: string; },
+  useGoogleSearch: boolean = false
+): Promise<GenerateContentStreamResult> {
+  if (!apiKey) {
+    throw new Error("API key is missing. Please provide a valid API key.");
   }
+
+  const ai = new GoogleGenAI({ apiKey, vertexai: true });
   
+  const request: GenerateContentRequest = {
+      contents: [{ role: 'user', parts: [{ text: promptData.userPrompt }] }],
+      systemInstruction: { parts: [{ text: promptData.systemInstruction }] }
+  };
+
+  if (useGoogleSearch) {
+    request.tools = [{ googleSearch: {} }];
+  }
+
   try {
-    const response = await ai.models.generateContentStream({
-      model: 'gemini-2.5-flash',
-      contents: { role: 'user', parts: [{ text: prompt }] },
-      config: {
-        // Omit thinkingConfig to default to higher quality
-      }
+    const result = await ai.models.generateContentStream({
+        model: 'gemini-2.5-flash',
+        ...request
     });
-    return response;
+    return result;
   } catch (error) {
     console.error("Error calling Gemini API:", error);
     if (error instanceof Error && error.message.includes('API key not valid')) {
-        throw new Error("The provided API key is not valid. Please check your configuration in lib/gemini.ts.");
+        throw new Error("The provided API key is not valid. Please check your key and try again.");
     }
-    throw new Error("Failed to get response from AI. Please check your network connection.");
+    throw new Error("Failed to get response from AI. Please check your API key and network connection.");
   }
 }
