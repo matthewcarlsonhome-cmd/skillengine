@@ -91,7 +91,7 @@ export const SKILLS: Record<string, Skill> = {
         })
     }),
   },
-  'linkedin-optimizer': {
+  'linkedin-optimizer-pro': {
     id: 'linkedin-optimizer-pro',
     name: 'LinkedIn Optimizer Pro',
     description: 'Comprehensive LinkedIn profile optimization to maximize recruiter discovery and engagement.',
