@@ -1,43 +1,33 @@
 
-# How to Deploy Your SkillEngine App (Make it Live on the Internet)
+# How to Deploy Your AICareerSkills App to Netlify
 
-This guide will show you how to publish your application so anyone can use it. Because your project is a "static site," this process is very easy and free.
+This guide provides the correct instructions for deploying your production-ready application to Netlify.
 
-We will use a service called **Netlify**, which is perfect for this.
+### Step 1: Push Your Project to GitHub
 
-### The Easiest Method: Netlify Drag-and-Drop
+1.  Create a new repository on [GitHub](https://github.com).
+2.  Follow the instructions to push your entire `aicareerskills-app` project folder to this new repository.
 
-This method takes less than 5 minutes and requires no technical setup.
+### Step 2: Deploy on Netlify
 
-**Step 1: Sign Up for Netlify**
+1.  **Sign Up/Log In:** Go to [https://www.netlify.com/](https://www.netlify.com/) and create a free account or log in.
+2.  **New Site from Git:** From your Netlify dashboard, click "Add new site" -> "Import an existing project".
+3.  **Connect to GitHub:** Connect to GitHub and authorize Netlify to access your repositories.
+4.  **Select Your Repository:** Choose the GitHub repository you just created for your `aicareerskills-app`.
+5.  **Configure Build Settings:** This is the most important step. Netlify will ask for your build settings. Enter the following:
+    *   **Build command:** `npm run build`
+    *   **Publish directory:** `dist`
 
-1.  Go to [https://www.netlify.com/](https://www.netlify.com/).
-2.  Click "Sign up" and create a free account.
+    These settings tell Netlify to run the Vite build process and to deploy the resulting `dist` folder.
 
-**Step 2: Prepare Your Project Folder**
+6.  **Add Environment Variable (Crucial for API Key):**
+    *   Before clicking "Deploy", click on **"Show advanced"** and then **"New variable"**.
+    *   **Key:** `VITE_GEMINI_API_KEY`
+    *   **Value:** Paste your actual Google Gemini API key here.
+    *   Click "Add variable".
 
--   Make sure your entire project is in a single folder (e.g., `skill-engine-app`).
--   **Crucially, ensure you have added your API key** to the `lib/gemini.ts` file as instructed previously.
+    This securely stores your API key so your live application can use it without exposing it in the code.
 
-**Step 3: Deploy the Site**
+7.  **Deploy Site:** Click the "Deploy site" button.
 
-1.  Log in to your Netlify account. You will see a dashboard.
-2.  Go to the **"Sites"** section.
-3.  You will see a box that says: **"Want to deploy a new site without connecting to Git? Drag and drop your site folder here."**
-
-    
-
-4.  **Drag your entire `skill-engine-app` folder** from your computer and drop it onto that box in your browser.
-
-**Step 4: You're Live!**
-
-That's it! Netlify will take a few moments to upload and deploy your files.
-
--   It will automatically give you a random, public URL (like `https://random-adjective-noun-12345.netlify.app`).
--   You can click on this URL to see your live SkillEngine application.
--   You can customize this URL for free in the site's settings (e.g., `skill-engine.netlify.app`).
-
-### Other Options (More Traditional)
-
--   **Vercel:** Another excellent, free hosting service very similar to Netlify. It also offers drag-and-drop deployment.
--   **Traditional Web Hosts (GoDaddy, Bluehost, etc.):** If you have a traditional hosting plan, you would use their "File Manager" tool. You would open the `public_html` or `www` directory and upload all the files and folders from your `skill-engine-app` folder into it.
+Netlify will now pull your code from GitHub, run the build command, and deploy the contents of your `dist` folder. After a minute or two, your site will be live on a public URL!

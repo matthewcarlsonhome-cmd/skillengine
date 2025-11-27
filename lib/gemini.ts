@@ -1,16 +1,23 @@
 
 import { GoogleGenAI, GenerateContentStreamResult, GenerateContentRequest } from '@google/genai';
 
+// This is the standard way to access environment variables in a Vite project.
+// Netlify will automatically populate this from your site's settings.
+const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+
 export async function runSkillStream(
-  apiKey: string,
+  apiKey: string, // The key is passed from the UI for flexibility
   promptData: { systemInstruction: string; userPrompt: string; },
   useGoogleSearch: boolean = false
 ): Promise<GenerateContentStreamResult> {
-  if (!apiKey) {
-    throw new Error("API key is missing. Please provide a valid API key.");
+  
+  const keyToUse = apiKey || API_KEY;
+
+  if (!keyToUse) {
+    throw new Error("API key is missing. Please provide it in the UI or set it in your deployment environment.");
   }
 
-  const ai = new GoogleGenAI({ apiKey, vertexai: true });
+  const ai = new GoogleGenAI({ apiKey: keyToUse, vertexai: true });
   
   const request: GenerateContentRequest = {
       contents: [{ role: 'user', parts: [{ text: promptData.userPrompt }] }],

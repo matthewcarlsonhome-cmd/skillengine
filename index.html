@@ -6,8 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AICareerSkills - AI-Powered Career Tools</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Babel for in-browser JSX/TSX compilation -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <style>
       /* Custom scrollbar for webkit browsers */
       ::-webkit-scrollbar {
@@ -93,20 +91,6 @@
   </head>
   <body class="bg-background text-foreground antialiased">
     <div id="root"></div>
-    <script type="importmap">
-      {
-        "imports": {
-          "react": "https://esm.sh/react@18.3.1",
-          "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
-          "react-router-dom": "https://esm.sh/react-router-dom@6.23.1",
-          "lucide-react": "https://esm.sh/lucide-react@0.395.0",
-          "react-markdown": "https://esm.sh/react-markdown@9.0.1",
-          "remark-gfm": "https://esm.sh/remark-gfm@4.0.0",
-          "@google/genai": "https://esm.sh/@google/genai@0.14.0"
-        }
-      }
-    </script>
-    <!-- The type is changed to "text/babel" and data-type to "module" -->
-    <script type="text/babel" data-type="module" src="./index.tsx"></script>
+    <script type="module" src="/index.tsx"></script>
   </body>
 </html>

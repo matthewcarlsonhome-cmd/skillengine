@@ -1,14 +1,18 @@
 
 # Project Setup Guide: How to Run Your Application
 
-You have all the correct code! This guide will walk you through exactly how to set up and run the SkillEngine application.
+This guide has been updated to use a professional development and deployment workflow.
 
-### Step 1: Create Your Project Folder Structure
+### Step 1: Install Node.js
 
-First, create a main folder called `skill-engine-app`. Inside it, create the sub-folders as shown below.
+If you don't have it, install Node.js (which includes npm) from [nodejs.org](https://nodejs.org/).
+
+### Step 2: Create Your Project Folder Structure
+
+Create a main folder called `aicareerskills-app`. Inside it, create the sub-folders as shown below.
 
 ```
-skill-engine-app/
+aicareerskills-app/
 ├── components/
 │   └── ui/
 ├── hooks/
@@ -16,87 +20,50 @@ skill-engine-app/
 └── pages/
 ```
 
-### Step 2: Save All Your Files
+### Step 3: Save All Your Files
 
-Place each file you have into the correct folder, as detailed below.
+Place each file you have into the correct folder. **Crucially, make sure to add the new `package.json` and `vite.config.ts` files to the root of your `aicareerskills-app` folder.**
 
-*   **Inside `skill-engine-app/`:**
+*   **Inside `aicareerskills-app/`:**
+    *   `package.json` (new)
+    *   `vite.config.ts` (new)
     *   `App.tsx`
     *   `index.html`
     *   `index.tsx`
     *   `metadata.json`
     *   `types.ts`
-*   **Inside `skill-engine-app/components/`:**
-    *   `FileUploader.tsx` (This is a new file)
-    *   `Header.tsx`
-    *   `icons.tsx`
-    *   `SkillCard.tsx`
-*   **Inside `skill-engine-app/components/ui/`:**
+*   **Inside `aicareerskills-app/components/`:**
+    *   `FileUploader.tsx`, `Header.tsx`, `icons.tsx`, `SkillCard.tsx`
+*   **Inside `aicareerskills-app/components/ui/`:**
     *   `Button.tsx`, `Checkbox.tsx`, `Input.tsx`, `Progress.tsx`, `Select.tsx`, `Textarea.tsx`
-*   **Inside `skill-engine-app/hooks/`:**
-    *   `useAppContext.tsx`
-    *   `useTheme.tsx`
-    *   `useToast.tsx`
-*   **Inside `skill-engine-app/lib/`:**
-    *   `gemini.ts`
-    *   `skills.ts`
-*   **Inside `skill-engine-app/pages/`:**
-    *   `HomePage.tsx`
-    *   `SkillRunnerPage.tsx`
+*   **Inside `aicareerskills-app/hooks/`:**
+    *   `useAppContext.tsx`, `useTheme.tsx`, `useToast.tsx`
+*   **Inside `aicareerskills-app/lib/`:**
+    *   `gemini.ts`, `skills.ts`
+*   **Inside `aicareerskills-app/pages/`:**
+    *   `HomePage.tsx`, `SkillRunnerPage.tsx`
 
-### Step 3: Run a Local Web Server (Final Step)
-
-You cannot just open `index.html` in your browser due to modern web security policies. You must serve the files from a local server. This is very easy to do.
+### Step 4: Run the Local Development Server
 
 1.  **Open a terminal or command prompt.**
 2.  **Navigate into your project folder** using the `cd` command.
     ```bash
-    cd path/to/your/skill-engine-app
+    cd path/to/your/aicareerskills-app
     ```
-3.  **Run ONE of the following commands.** (If you have Python, the first one is easiest).
+3.  **Install all the necessary packages.** This command reads your `package.json` file and downloads everything needed to run the app.
+    ```bash
+    npm install
+    ```
+4.  **Start the development server.**
+    ```bash
+    npm run dev
+    ```
+5.  Your terminal will show a local address, usually `http://localhost:5173/`.
+6.  **Open that address in your web browser.** The application will now load and be fully functional.
 
-    *   **Option A: Using Python (Usually pre-installed on Mac/Linux)**
-        ```bash
-        python3 -m http.server
-        ```
-        (If that doesn't work, try `python -m SimpleHTTPServer`)
-
-    *   **Option B: Using Node.js/npx (No installation needed)**
-        ```bash
-        npx serve
-        ```
-
-4.  Your terminal will show a local address, usually `http://localhost:8000` or `http://localhost:3000`.
-5.  **Open that address in your web browser.**
-
-### Step 4: Using the App
+### Step 5: Using the App
 
 1.  On the home page, use the upload buttons to provide your **Resume** and a **Job Description**.
-2.  Once uploaded, click "Launch" on any skill.
-3.  On the skill page, the text from your uploaded files will be pre-filled.
-4.  Select your AI Provider and **enter your API key**.
-5.  Click "Run Skill".
-
----
-
-## How to Add New Skills
-
-The application is now designed to be easily extended.
-
-**To add a new skill, you only need to do one thing: edit the `lib/skills.ts` file.**
-
-1.  Open `lib/skills.ts`.
-2.  Inside the `export const SKILLS = { ... };` block, add a new object for your skill.
-3.  Copy the structure from an existing skill. You must define:
-    *   `id`: A unique, URL-friendly ID (e.g., `'my-new-skill'`).
-    *   `name`: The display name for the card (e.g., `'My New Skill'`).
-    *   `description`: The short text on the card.
-    *   `longDescription`: The text for the sidebar.
-    *   `whatYouGet`: A list of benefits for the sidebar.
-    *   `theme`: Colors for the card.
-    *   `icon`: An icon from `components/icons.tsx`.
-    *   `inputs`: The form fields the user will fill out.
-    *   `systemPrompt`: The instructions for the AI.
-    *   `useGoogleSearch`: (Optional) Set to `true` if the skill needs real-time web access.
-
-Once you save the file, a new card for your skill will automatically appear on the home page.
+2.  Click "Launch" on any skill.
+3.  On the skill page, **enter your API key** in the designated field.
+4.  Click "Run Skill".
