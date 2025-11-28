@@ -32,22 +32,24 @@ export async function* executeWithGemini(
   const systemPrompt = skill.prompts.systemInstruction;
   const userPrompt = interpolateTemplate(skill.prompts.userPromptTemplate, formInputs);
 
-  const { GoogleGenAI } = await import('@google/genai');
-  const ai = new GoogleGenAI({ apiKey });
+  const { GoogleGenerativeAI } = await import('@google/generative-ai');
 
-  const result = await ai.models.generateContentStream({
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const model = genAI.getGenerativeModel({
     model: 'gemini-2.0-flash',
+    systemInstruction: systemPrompt,
+  });
+
+  const result = await model.generateContentStream({
     contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
-    systemInstruction: { parts: [{ text: systemPrompt }] },
     generationConfig: {
       temperature: skill.config.temperature,
       maxOutputTokens: skill.config.maxTokens,
     },
-    ...(skill.config.useWebSearch ? { tools: [{ googleSearch: {} }] } : {}),
   });
 
-  for await (const chunk of result) {
-    const text = chunk.text;
+  for await (const chunk of result.stream) {
+    const text = chunk.text();
     if (text) {
       yield text;
     }

@@ -1,32 +1,25 @@
 
-import { GoogleGenAI, GenerateContentStreamResult, GenerateContentRequest } from '@google/genai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 export async function runSkillStream(
-  apiKeyFromInput: string, // The key is passed from the UI for flexibility
+  apiKeyFromInput: string,
   promptData: { systemInstruction: string; userPrompt: string; },
   useGoogleSearch: boolean = false
-): Promise<GenerateContentStreamResult> {
-  
+) {
+
   if (!apiKeyFromInput) {
     throw new Error("API key is missing. Please provide it in the UI.");
   }
 
-  // Use standard Gemini API (not Vertex AI) for direct API key authentication
-  const ai = new GoogleGenAI({ apiKey: apiKeyFromInput });
-  
-  const request: GenerateContentRequest = {
-      contents: [{ role: 'user', parts: [{ text: promptData.userPrompt }] }],
-      systemInstruction: { parts: [{ text: promptData.systemInstruction }] }
-  };
-
-  if (useGoogleSearch) {
-    request.tools = [{ googleSearch: {} }];
-  }
+  const genAI = new GoogleGenerativeAI(apiKeyFromInput);
+  const model = genAI.getGenerativeModel({
+    model: 'gemini-2.0-flash',
+    systemInstruction: promptData.systemInstruction,
+  });
 
   try {
-    const result = await ai.models.generateContentStream({
-        model: 'gemini-2.5-flash',
-        ...request
+    const result = await model.generateContentStream({
+      contents: [{ role: 'user', parts: [{ text: promptData.userPrompt }] }],
     });
     return result;
   } catch (error) {

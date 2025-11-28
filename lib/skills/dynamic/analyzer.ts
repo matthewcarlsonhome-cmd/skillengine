@@ -198,24 +198,25 @@ async function callGemini(
   systemPrompt: string,
   userPrompt: string
 ): Promise<string> {
-  const { GoogleGenAI } = await import('@google/genai');
+  const { GoogleGenerativeAI } = await import('@google/generative-ai');
 
-  // Use standard Gemini API (not Vertex AI) for direct API key authentication
-  const ai = new GoogleGenAI({ apiKey });
+  console.log('Calling Gemini API with @google/generative-ai SDK...');
 
-  console.log('Calling Gemini API...');
-
-  const result = await ai.models.generateContent({
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const model = genAI.getGenerativeModel({
     model: 'gemini-2.0-flash',
+    systemInstruction: systemPrompt,
+  });
+
+  const result = await model.generateContent({
     contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
-    systemInstruction: { parts: [{ text: systemPrompt }] },
     generationConfig: {
       temperature: 0.3,
       maxOutputTokens: 8192,
     }
   });
 
-  const text = result.text || '';
+  const text = result.response.text() || '';
   console.log('Gemini response length:', text.length);
   console.log('Gemini response preview:', text.substring(0, 500));
 
