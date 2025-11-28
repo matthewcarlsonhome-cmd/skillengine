@@ -200,10 +200,13 @@ async function callGemini(
 ): Promise<string> {
   const { GoogleGenAI } = await import('@google/genai');
 
-  const ai = new GoogleGenAI({ apiKey, vertexai: true });
+  // Use standard Gemini API (not Vertex AI) for direct API key authentication
+  const ai = new GoogleGenAI({ apiKey });
+
+  console.log('Calling Gemini API...');
 
   const result = await ai.models.generateContent({
-    model: 'gemini-2.5-flash',
+    model: 'gemini-2.0-flash',
     contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
     systemInstruction: { parts: [{ text: systemPrompt }] },
     generationConfig: {
@@ -212,7 +215,11 @@ async function callGemini(
     }
   });
 
-  return result.text || '';
+  const text = result.text || '';
+  console.log('Gemini response length:', text.length);
+  console.log('Gemini response preview:', text.substring(0, 500));
+
+  return text;
 }
 
 // Claude API call (non-streaming for JSON responses)

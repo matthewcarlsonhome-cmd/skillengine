@@ -11,7 +11,8 @@ export async function runSkillStream(
     throw new Error("API key is missing. Please provide it in the UI.");
   }
 
-  const ai = new GoogleGenAI({ apiKey: apiKeyFromInput, vertexai: true });
+  // Use standard Gemini API (not Vertex AI) for direct API key authentication
+  const ai = new GoogleGenAI({ apiKey: apiKeyFromInput });
   
   const request: GenerateContentRequest = {
       contents: [{ role: 'user', parts: [{ text: promptData.userPrompt }] }],
