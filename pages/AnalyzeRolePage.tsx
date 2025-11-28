@@ -1,12 +1,13 @@
 // Analyze Role Page - Enter JD and generate skill recommendations
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { analyzeJobDescription, generateSkillRecommendations } from '../lib/skills/dynamic';
 import { useWorkspaces } from '../hooks/useStorage';
 import { useAppContext } from '../hooks/useAppContext';
 import { useToast } from '../hooks/useToast';
 import type { Workspace, JDAnalysis, SkillRecommendation } from '../lib/storage/types';
+import type { ApiProviderType } from '../types';
 import { Button } from '../components/ui/Button';
 import { Textarea } from '../components/ui/Textarea';
 import { Input } from '../components/ui/Input';
@@ -19,7 +20,9 @@ import {
   Briefcase,
   Building,
   Users,
-  Zap
+  Zap,
+  KeyRound,
+  HelpCircle
 } from 'lucide-react';
 
 type AnalysisStep = 'input' | 'analyzing' | 'recommendations' | 'building';
@@ -27,7 +30,7 @@ type AnalysisStep = 'input' | 'analyzing' | 'recommendations' | 'building';
 const AnalyzeRolePage: React.FC = () => {
   const navigate = useNavigate();
   const { addToast } = useToast();
-  const { selectedApi } = useAppContext();
+  const { selectedApi, setSelectedApi } = useAppContext();
   const { createWorkspace } = useWorkspaces();
 
   const [step, setStep] = useState<AnalysisStep>('input');
@@ -57,8 +60,21 @@ const AnalyzeRolePage: React.FC = () => {
 
     try {
       // Step 1: Analyze JD
+      console.log('Starting JD analysis with provider:', selectedApi);
       setProgress(20);
-      const jdAnalysis = await analyzeJobDescription(jobDescription, apiKey, selectedApi as 'gemini' | 'claude');
+
+      const jdAnalysis = await analyzeJobDescription(
+        jobDescription,
+        apiKey,
+        selectedApi as 'gemini' | 'claude'
+      );
+
+      console.log('JD Analysis result:', jdAnalysis);
+
+      if (!jdAnalysis || !jdAnalysis.role) {
+        throw new Error('Invalid analysis response - missing role data');
+      }
+
       setAnalysis(jdAnalysis);
       setProgress(50);
 
@@ -70,7 +86,21 @@ const AnalyzeRolePage: React.FC = () => {
       // Step 2: Generate recommendations
       setStatusMessage('Generating skill recommendations...');
       setProgress(60);
-      const skillRecs = await generateSkillRecommendations(jdAnalysis, jobDescription, apiKey, selectedApi as 'gemini' | 'claude');
+      console.log('Generating skill recommendations...');
+
+      const skillRecs = await generateSkillRecommendations(
+        jdAnalysis,
+        jobDescription,
+        apiKey,
+        selectedApi as 'gemini' | 'claude'
+      );
+
+      console.log('Skill recommendations:', skillRecs);
+
+      if (!skillRecs || skillRecs.length === 0) {
+        throw new Error('No skill recommendations generated');
+      }
+
       setRecommendations(skillRecs);
 
       // Pre-select high-impact skills
@@ -83,9 +113,11 @@ const AnalyzeRolePage: React.FC = () => {
 
       setProgress(100);
       setStep('recommendations');
+      addToast('Analysis complete!', 'success');
     } catch (error) {
       console.error('Analysis failed:', error);
-      addToast(error instanceof Error ? error.message : 'Analysis failed', 'error');
+      const errorMessage = error instanceof Error ? error.message : 'Analysis failed. Please try again.';
+      addToast(errorMessage, 'error');
       setStep('input');
     }
   };
@@ -159,23 +191,46 @@ const AnalyzeRolePage: React.FC = () => {
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Workspace Name (Optional)</label>
-              <Input
-                placeholder="Auto-generated from role title"
-                value={workspaceName}
-                onChange={(e) => setWorkspaceName(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">API Key *</label>
-              <Input
-                type="password"
-                placeholder={`Enter your ${selectedApi === 'gemini' ? 'Gemini' : 'Claude'} API key`}
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-              />
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Workspace Name (Optional)</label>
+            <Input
+              placeholder="Auto-generated from role title"
+              value={workspaceName}
+              onChange={(e) => setWorkspaceName(e.target.value)}
+            />
+          </div>
+
+          {/* API Configuration */}
+          <div className="p-4 border rounded-lg bg-card">
+            <h3 className="text-lg font-semibold mb-4">AI Configuration</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">AI Provider *</label>
+                <Select
+                  value={selectedApi}
+                  onChange={(e) => setSelectedApi(e.target.value as ApiProviderType)}
+                >
+                  <option value="gemini">Gemini</option>
+                  <option value="claude">Claude</option>
+                  <option value="chatgpt" disabled>ChatGPT (Coming Soon)</option>
+                </Select>
+                <Link to="/api-keys" className="text-xs text-muted-foreground hover:underline flex items-center gap-1">
+                  <HelpCircle className="h-3 w-3" />
+                  How to get an API key
+                </Link>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium flex items-center gap-2">
+                  <KeyRound className="h-4 w-4" />
+                  {selectedApi === 'gemini' ? 'Gemini' : selectedApi === 'claude' ? 'Claude' : 'API'} Key *
+                </label>
+                <Input
+                  type="password"
+                  placeholder={`Enter your ${selectedApi === 'gemini' ? 'Gemini' : 'Claude'} API key`}
+                  value={apiKey}
+                  onChange={(e) => setApiKey(e.target.value)}
+                />
+              </div>
             </div>
           </div>
 
@@ -195,7 +250,7 @@ const AnalyzeRolePage: React.FC = () => {
           <h2 className="text-xl font-semibold">{statusMessage}</h2>
           <Progress value={progress} className="max-w-md mx-auto" />
           <p className="text-muted-foreground text-sm">
-            This may take 15-30 seconds...
+            Using {selectedApi === 'gemini' ? 'Gemini' : 'Claude'} • This may take 15-30 seconds...
           </p>
         </div>
       )}
