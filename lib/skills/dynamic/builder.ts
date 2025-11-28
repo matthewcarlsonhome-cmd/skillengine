@@ -323,10 +323,10 @@ async function callGemini(
   userPrompt: string
 ): Promise<string> {
   const { GoogleGenAI } = await import('@google/genai');
-  const ai = new GoogleGenAI({ apiKey, vertexai: true });
+  const ai = new GoogleGenAI({ apiKey });
 
   const result = await ai.models.generateContent({
-    model: 'gemini-2.5-flash',
+    model: 'gemini-2.0-flash',
     contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
     systemInstruction: { parts: [{ text: systemPrompt }] },
     generationConfig: {
