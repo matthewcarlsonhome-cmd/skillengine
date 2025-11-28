@@ -3,7 +3,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { SKILLS } from '../lib/skills.ts';
+import { SKILLS } from '../lib/skills';
 import { Skill, FormInput as FormInputType, ApiProviderType } from '../types.ts';
 import { runSkillStream as runGeminiSkillStream } from '../lib/gemini.ts';
 import { runSkillStream as runClaudeSkillStream } from '../lib/claude.ts';
