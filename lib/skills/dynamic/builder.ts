@@ -356,7 +356,7 @@ async function callClaude(
     },
     body: JSON.stringify({
       model: 'claude-3-haiku-20240307',
-      max_tokens: 8192,
+      max_tokens: 4096,
       system: systemPrompt,
       messages: [{ role: 'user', content: userPrompt }],
     }),
