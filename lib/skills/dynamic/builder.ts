@@ -322,20 +322,23 @@ async function callGemini(
   systemPrompt: string,
   userPrompt: string
 ): Promise<string> {
-  const { GoogleGenAI } = await import('@google/genai');
-  const ai = new GoogleGenAI({ apiKey });
+  const { GoogleGenerativeAI } = await import('@google/generative-ai');
 
-  const result = await ai.models.generateContent({
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const model = genAI.getGenerativeModel({
     model: 'gemini-2.0-flash',
+    systemInstruction: systemPrompt,
+  });
+
+  const result = await model.generateContent({
     contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
-    systemInstruction: { parts: [{ text: systemPrompt }] },
     generationConfig: {
       temperature: 0.3,
       maxOutputTokens: 8192,
     }
   });
 
-  return result.text || '';
+  return result.response.text() || '';
 }
 
 async function callClaude(
