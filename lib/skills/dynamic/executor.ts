@@ -33,7 +33,7 @@ export async function* executeWithGemini(
   const userPrompt = interpolateTemplate(skill.prompts.userPromptTemplate, formInputs);
 
   const { GoogleGenAI } = await import('@google/genai');
-  const ai = new GoogleGenAI({ apiKey });
+  const ai = new GoogleGenAI({ apiKey, vertexai: true });
 
   const result = await ai.models.generateContentStream({
     model: 'gemini-2.5-flash',
