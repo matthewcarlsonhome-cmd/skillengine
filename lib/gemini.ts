@@ -13,7 +13,7 @@ export async function runSkillStream(
 
   const genAI = new GoogleGenerativeAI(apiKeyFromInput);
   const model = genAI.getGenerativeModel({
-    model: 'gemini-1.5-flash',
+    model: 'gemini-pro',
     systemInstruction: promptData.systemInstruction,
   });
 
