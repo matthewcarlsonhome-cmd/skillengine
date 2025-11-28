@@ -212,12 +212,18 @@ const AnalyzeRolePage: React.FC = () => {
                 >
                   <option value="gemini">Gemini</option>
                   <option value="claude">Claude</option>
-                  <option value="chatgpt" disabled>ChatGPT (Coming Soon)</option>
+                  <option value="chatgpt" disabled>ChatGPT (Requires Backend - No CORS)</option>
                 </Select>
-                <Link to="/api-keys" className="text-xs text-muted-foreground hover:underline flex items-center gap-1">
-                  <HelpCircle className="h-3 w-3" />
-                  How to get an API key
-                </Link>
+                {selectedApi === 'gemini' && (
+                  <p className="text-xs text-amber-500">
+                    Requires API key from Google AI Studio (aistudio.google.com)
+                  </p>
+                )}
+                {selectedApi === 'claude' && (
+                  <p className="text-xs text-muted-foreground">
+                    Get key from console.anthropic.com
+                  </p>
+                )}
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium flex items-center gap-2">
