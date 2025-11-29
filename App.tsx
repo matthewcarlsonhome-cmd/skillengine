@@ -6,6 +6,7 @@ import { ToastProvider } from './hooks/useToast';
 import { AppProvider } from './hooks/useAppContext';
 import Header from './components/Header';
 import HomePage from './pages/HomePage';
+import BrowseSkillsPage from './pages/BrowseSkillsPage';
 import SkillRunnerPage from './pages/SkillRunnerPage';
 import ApiKeyInstructionsPage from './pages/ApiKeyInstructionsPage';
 import AnalyzeRolePage from './pages/AnalyzeRolePage';
@@ -27,6 +28,7 @@ function App() {
                   <Route path="/" element={<HomePage />} />
 
                   {/* Static skills (Job Applicant) */}
+                  <Route path="/skills" element={<BrowseSkillsPage />} />
                   <Route path="/skill/:skillId" element={<SkillRunnerPage />} />
 
                   {/* Dynamic skill generation */}

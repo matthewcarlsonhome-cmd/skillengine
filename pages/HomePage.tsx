@@ -86,9 +86,9 @@ const HomePage: React.FC = () => {
               <p className="text-muted-foreground text-sm mt-1">
                 15 pre-built skills for job seekers: resume optimization, interview prep, salary negotiation, and more.
               </p>
-              <a href="#job-applicant-skills" className="inline-flex items-center text-sm font-medium text-primary mt-3 hover:underline">
+              <Link to="/skills" className="inline-flex items-center text-sm font-medium text-primary mt-3 hover:underline">
                 Browse Skills <ChevronRight className="ml-1 h-4 w-4" />
-              </a>
+              </Link>
             </div>
           </div>
         </div>
