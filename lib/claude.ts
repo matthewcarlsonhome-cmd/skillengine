@@ -8,7 +8,7 @@ export async function runSkillStream(
   }
 
   const API_URL = "https://api.anthropic.com/v1/messages";
-  const MODEL_NAME = "claude-3-haiku-20240307";
+  const MODEL_NAME = "claude-3-5-sonnet-20240620";
 
   try {
     const response = await fetch(API_URL, {
@@ -17,6 +17,7 @@ export async function runSkillStream(
         'x-api-key': apiKey,
         'anthropic-version': '2023-06-01',
         'content-type': 'application/json',
+        'anthropic-dangerous-direct-browser-access': 'true',
       },
       body: JSON.stringify({
         model: MODEL_NAME,
@@ -36,6 +37,9 @@ export async function runSkillStream(
     return response;
   } catch (error) {
     console.error("Error calling Claude API:", error);
+    if (error instanceof TypeError && error.message === 'Failed to fetch') {
+      throw new Error('Failed to connect to Claude API. Try disabling ad blockers or check network restrictions.');
+    }
     if (error instanceof Error) {
         throw new Error(`Failed to get response from Claude: ${error.message}`);
     }

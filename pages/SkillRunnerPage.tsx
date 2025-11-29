@@ -117,15 +117,21 @@ const SkillRunnerPage: React.FC = () => {
           throw new Error("Received an invalid response from the Gemini service.");
         }
         for await (const chunk of stream) {
-          const text = chunk.text;
+          // Use chunk.text() for @google/generative-ai SDK
+          const text = typeof chunk.text === 'function' ? chunk.text() : chunk.text;
           if (text) {
             fullResponseText += text;
             setOutput(fullResponseText);
           }
         }
-        const finalResponse = await result.response;
-        if (finalResponse.candidates?.[0]?.groundingMetadata?.groundingChunks) {
-          setCitations(finalResponse.candidates[0].groundingMetadata.groundingChunks);
+        // Get final response for citations
+        try {
+          const finalResponse = await result.response;
+          if (finalResponse?.candidates?.[0]?.groundingMetadata?.groundingChunks) {
+            setCitations(finalResponse.candidates[0].groundingMetadata.groundingChunks);
+          }
+        } catch (e) {
+          // Citations may not be available, continue without them
         }
       } else if (selectedApi === 'claude') {
         const response = await runClaudeSkillStream(apiKey, promptData);
