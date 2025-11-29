@@ -229,27 +229,39 @@ async function callClaude(
   systemPrompt: string,
   userPrompt: string
 ): Promise<string> {
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true',
-    },
-    body: JSON.stringify({
-      model: 'claude-3-5-sonnet-20240620',
-      max_tokens: 8192,
-      system: systemPrompt,
-      messages: [{ role: 'user', content: userPrompt }],
-    }),
-  });
+  console.log('Calling Claude API...');
 
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`Claude API error: ${error}`);
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-3-5-sonnet-20240620',
+        max_tokens: 4096,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: userPrompt }],
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      console.error('Claude API error response:', error);
+      throw new Error(`Claude API error: ${error}`);
+    }
+
+    const data = await response.json();
+    console.log('Claude response received, length:', data.content?.[0]?.text?.length || 0);
+    return data.content?.[0]?.text || '';
+  } catch (error) {
+    console.error('Claude fetch error:', error);
+    if (error instanceof TypeError && error.message === 'Failed to fetch') {
+      throw new Error('Failed to connect to Claude API. This may be due to: 1) Ad blocker blocking api.anthropic.com, 2) Network/firewall restrictions, 3) CORS issues. Try disabling ad blockers or check browser console for details.');
+    }
+    throw error;
   }
-
-  const data = await response.json();
-  return data.content?.[0]?.text || '';
 }
