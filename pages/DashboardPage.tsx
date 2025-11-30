@@ -41,6 +41,7 @@ const DashboardPage: React.FC = () => {
   const [favoriteSkills, setFavoriteSkills] = useState<FavoriteSkill[]>([]);
   const [recentExecutions, setRecentExecutions] = useState<SkillExecution[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedOutputId, setExpandedOutputId] = useState<string | null>(null);
   const [editingTitleId, setEditingTitleId] = useState<string | null>(null);
@@ -52,17 +53,33 @@ const DashboardPage: React.FC = () => {
 
   const loadData = async () => {
     setLoading(true);
+    setError(null);
     try {
+      // Initialize db first
+      await db.init();
+      console.log('Dashboard: DB initialized');
+
       const [outputs, favorites, executions] = await Promise.all([
-        db.getAllSavedOutputs(),
-        db.getAllFavoriteSkills(),
-        db.getRecentExecutions(100)
+        db.getAllSavedOutputs().catch((e) => {
+          console.error('Failed to load saved outputs:', e);
+          return [] as SavedOutput[];
+        }),
+        db.getAllFavoriteSkills().catch((e) => {
+          console.error('Failed to load favorites:', e);
+          return [] as FavoriteSkill[];
+        }),
+        db.getRecentExecutions(100).catch((e) => {
+          console.error('Failed to load executions:', e);
+          return [] as SkillExecution[];
+        })
       ]);
+      console.log('Dashboard: Data loaded', { outputs: outputs.length, favorites: favorites.length, executions: executions.length });
       setSavedOutputs(outputs);
       setFavoriteSkills(favorites);
       setRecentExecutions(executions);
-    } catch (error) {
-      console.error('Failed to load dashboard data:', error);
+    } catch (err) {
+      console.error('Failed to load dashboard data:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load data');
       addToast('Failed to load dashboard data', 'error');
     } finally {
       setLoading(false);
@@ -186,8 +203,20 @@ const DashboardPage: React.FC = () => {
   if (loading) {
     return (
       <div className="container mx-auto max-w-7xl px-4 py-8">
-        <div className="flex items-center justify-center py-20">
+        <div className="flex flex-col items-center justify-center py-20">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto max-w-7xl px-4 py-8">
+        <div className="flex flex-col items-center justify-center py-20">
+          <p className="text-destructive mb-4">Error: {error}</p>
+          <Button onClick={loadData}>Try Again</Button>
         </div>
       </div>
     );
