@@ -152,6 +152,20 @@ export async function publishSkillToCommunity(skill: {
   const user = await getCurrentUser();
   if (!user) throw new Error('Must be signed in to publish skills');
 
+  // Ensure user profile exists (upsert to handle first-time users)
+  const { error: profileError } = await supabase
+    .from('profiles')
+    .upsert({
+      id: user.id,
+      display_name: user.user_metadata?.full_name || user.email || 'Anonymous',
+      avatar_url: user.user_metadata?.avatar_url || null,
+    }, { onConflict: 'id' });
+
+  if (profileError) {
+    console.error('Error ensuring profile exists:', profileError);
+    // Continue anyway - profile might already exist
+  }
+
   const { data, error } = await supabase
     .from('skill_templates')
     .insert({
@@ -178,9 +192,10 @@ export async function publishSkillToCommunity(skill: {
 
   if (error) {
     console.error('Error publishing skill:', error);
-    throw error;
+    throw new Error(`Failed to publish skill: ${error.message}`);
   }
 
+  console.log('Skill published successfully:', data);
   return data as CommunitySkill;
 }
 
