@@ -46,30 +46,41 @@ const CommunitySkillsPage: React.FC = () => {
   const navigate = useNavigate();
 
   const [skills, setSkills] = useState<CommunitySkill[]>([]);
+  const [allSkills, setAllSkills] = useState<CommunitySkill[]>([]); // Store all skills for role extraction
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
+  const [availableRoles, setAvailableRoles] = useState<string[]>([]);
 
 
   // Delete confirmation state
   const [deleteConfirmSkill, setDeleteConfirmSkill] = useState<CommunitySkill | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // Load all skills on mount to extract available roles
   useEffect(() => {
-    loadSkills();
-  }, [selectedCategory, roleFilter]);
+    loadAllSkills();
+  }, []);
 
-  const loadSkills = async () => {
+  // Filter skills when filters change
+  useEffect(() => {
+    filterSkills();
+  }, [selectedCategory, roleFilter, allSkills]);
+
+  const loadAllSkills = async () => {
     setLoading(true);
     try {
       const data = await fetchCommunitySkills({
-        category: selectedCategory || undefined,
-        roleTitle: roleFilter || undefined,
-        search: searchQuery || undefined,
-        limit: 50,
+        limit: 200, // Load more to get all roles
       });
+      setAllSkills(data);
       setSkills(data);
+
+      // Extract unique roles
+      const roles = [...new Set(data.map(s => s.role_title).filter((r): r is string => Boolean(r)))];
+      roles.sort();
+      setAvailableRoles(roles);
     } catch (error) {
       console.error('Failed to load skills:', error);
     } finally {
@@ -77,8 +88,30 @@ const CommunitySkillsPage: React.FC = () => {
     }
   };
 
+  const filterSkills = () => {
+    let filtered = allSkills;
+
+    if (selectedCategory) {
+      filtered = filtered.filter(s => s.category === selectedCategory);
+    }
+
+    if (roleFilter) {
+      filtered = filtered.filter(s => s.role_title === roleFilter);
+    }
+
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(s =>
+        s.name.toLowerCase().includes(query) ||
+        (s.description && s.description.toLowerCase().includes(query))
+      );
+    }
+
+    setSkills(filtered);
+  };
+
   const handleSearch = () => {
-    loadSkills();
+    filterSkills();
   };
 
   const handleSignIn = async () => {
@@ -109,7 +142,7 @@ const CommunitySkillsPage: React.FC = () => {
       addToast('Skill deleted successfully', 'success');
       setDeleteConfirmSkill(null);
       // Refresh the skills list
-      loadSkills();
+      loadAllSkills();
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to delete skill';
       addToast(message, 'error');
@@ -214,18 +247,58 @@ const CommunitySkillsPage: React.FC = () => {
                 </option>
               ))}
             </Select>
-            <Input
-              placeholder="Filter by role..."
+            <Select
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value)}
               className="w-48"
-            />
+            >
+              <option value="">All Roles</option>
+              {availableRoles.map((role) => (
+                <option key={role} value={role}>
+                  {role}
+                </option>
+              ))}
+            </Select>
             <Button onClick={handleSearch}>
               <Filter className="h-4 w-4 mr-2" />
               Search
             </Button>
           </div>
         </div>
+
+        {/* Roles Tags */}
+        {availableRoles.length > 0 && (
+          <div className="mt-4 pt-4 border-t">
+            <div className="flex items-center gap-2 mb-2">
+              <Briefcase className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium">Roles Covered:</span>
+              {roleFilter && (
+                <button
+                  onClick={() => setRoleFilter('')}
+                  className="text-xs text-primary hover:text-primary/80 flex items-center gap-1"
+                >
+                  <X className="h-3 w-3" />
+                  Clear filter
+                </button>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {availableRoles.map((role) => (
+                <button
+                  key={role}
+                  onClick={() => setRoleFilter(role === roleFilter ? '' : role)}
+                  className={`px-3 py-1 text-sm rounded-full transition-colors ${
+                    role === roleFilter
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  {role}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Stats Bar */}
