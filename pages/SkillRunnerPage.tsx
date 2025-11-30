@@ -15,7 +15,9 @@ import { Textarea } from '../components/ui/Textarea.tsx';
 import { Select } from '../components/ui/Select.tsx';
 import { Checkbox } from '../components/ui/Checkbox.tsx';
 import { Progress } from '../components/ui/Progress.tsx';
-import { Sparkles, Clipboard, Download, AlertTriangle, ArrowLeft, KeyRound, Link as LinkIcon, Upload, HelpCircle } from 'lucide-react';
+import { Sparkles, Clipboard, Download, AlertTriangle, ArrowLeft, KeyRound, Link as LinkIcon, Upload, HelpCircle, Save, Star, Check } from 'lucide-react';
+import { db } from '../lib/storage/indexeddb';
+import type { SavedOutput, FavoriteSkill } from '../lib/storage/types';
 
 const SkillRunnerPage: React.FC = () => {
   const { skillId } = useParams<{ skillId: string }>();
@@ -32,6 +34,11 @@ const SkillRunnerPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [saveTitle, setSaveTitle] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+  const [isFavorited, setIsFavorited] = useState(false);
+  const [outputSaved, setOutputSaved] = useState(false);
 
   useEffect(() => {
     if (skill) {
@@ -52,6 +59,18 @@ const SkillRunnerPage: React.FC = () => {
       setFormState(initialFormState);
     }
   }, [skill, resumeText, jobDescriptionText, additionalInfoText]);
+
+  // Check if skill is favorited
+  useEffect(() => {
+    if (skillId) {
+      db.isSkillFavorited(skillId).then(setIsFavorited);
+    }
+  }, [skillId]);
+
+  // Reset saved state when output changes
+  useEffect(() => {
+    setOutputSaved(false);
+  }, [output]);
 
   const handleInputChange = (id: string, value: string | boolean) => {
     setFormState(prev => ({ ...prev, [id]: value }));
@@ -190,6 +209,63 @@ const SkillRunnerPage: React.FC = () => {
     addToast('Text file downloaded.', 'success');
   };
 
+  const handleSaveOutput = async () => {
+    if (!skill || !saveTitle.trim()) return;
+
+    setIsSaving(true);
+    try {
+      const savedOutput: SavedOutput = {
+        id: crypto.randomUUID(),
+        title: saveTitle.trim(),
+        skillId: skill.id,
+        skillName: skill.name,
+        skillSource: 'static',
+        output: output,
+        inputs: formState,
+        model: selectedApi as 'gemini' | 'claude',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        isFavorite: false
+      };
+      await db.saveOutput(savedOutput);
+      setShowSaveDialog(false);
+      setSaveTitle('');
+      setOutputSaved(true);
+      addToast('Output saved to dashboard!', 'success');
+    } catch (error) {
+      addToast('Failed to save output', 'error');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleToggleFavorite = async () => {
+    if (!skill) return;
+
+    try {
+      if (isFavorited) {
+        await db.removeFavoriteBySkillId(skill.id);
+        setIsFavorited(false);
+        addToast('Removed from favorites', 'success');
+      } else {
+        const favorite: FavoriteSkill = {
+          id: crypto.randomUUID(),
+          skillId: skill.id,
+          skillName: skill.name,
+          skillDescription: skill.description,
+          skillSource: 'static',
+          category: skill.category,
+          createdAt: new Date().toISOString()
+        };
+        await db.addFavoriteSkill(favorite);
+        setIsFavorited(true);
+        addToast('Added to favorites!', 'success');
+      }
+    } catch (error) {
+      addToast('Failed to update favorite', 'error');
+    }
+  };
+
   if (!skill) {
     return (
       <div className="container mx-auto max-w-4xl text-center py-20">
@@ -256,6 +332,16 @@ const SkillRunnerPage: React.FC = () => {
             <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
               {skill.whatYouGet.map((item, i) => <li key={i}>{item}</li>)}
             </ul>
+            <div className="mt-4 pt-4 border-t">
+              <Button
+                variant={isFavorited ? 'secondary' : 'outline'}
+                className="w-full"
+                onClick={handleToggleFavorite}
+              >
+                <Star className={`h-4 w-4 mr-2 ${isFavorited ? 'fill-current text-yellow-500' : ''}`} />
+                {isFavorited ? 'Favorited' : 'Add to Favorites'}
+              </Button>
+            </div>
           </div>
         </aside>
 
@@ -302,8 +388,20 @@ const SkillRunnerPage: React.FC = () => {
                 {isLoading && <div className="p-4"><Progress value={progress} className="w-full" /><p className="text-center text-sm text-muted-foreground mt-2">AI is thinking...</p></div>}
                 {output && !isLoading && (
                   <div className="absolute top-2 right-2 flex gap-2">
-                    <Button variant="ghost" size="icon" onClick={copyToClipboard}><Clipboard className="h-4 w-4" /></Button>
-                    <Button variant="ghost" size="icon" onClick={downloadTextFile}><Download className="h-4 w-4" /></Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        setSaveTitle(`${skill.name} - ${new Date().toLocaleDateString()}`);
+                        setShowSaveDialog(true);
+                      }}
+                      title="Save to Dashboard"
+                      className={outputSaved ? 'text-green-500' : ''}
+                    >
+                      {outputSaved ? <Check className="h-4 w-4" /> : <Save className="h-4 w-4" />}
+                    </Button>
+                    <Button variant="ghost" size="icon" onClick={copyToClipboard} title="Copy to Clipboard"><Clipboard className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="icon" onClick={downloadTextFile} title="Download"><Download className="h-4 w-4" /></Button>
                   </div>
                 )}
                 <div className="prose prose-sm sm:prose-base dark:prose-invert max-w-none p-4 overflow-x-auto">
@@ -344,6 +442,41 @@ const SkillRunnerPage: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Save Output Dialog */}
+      {showSaveDialog && (
+        <>
+          <div
+            className="fixed inset-0 bg-black/50 z-50"
+            onClick={() => setShowSaveDialog(false)}
+          />
+          <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-card rounded-xl border shadow-lg p-6 z-50">
+            <h3 className="text-lg font-semibold mb-4">Save Output to Dashboard</h3>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label htmlFor="save-title" className="text-sm font-medium">
+                  Title
+                </label>
+                <Input
+                  id="save-title"
+                  value={saveTitle}
+                  onChange={(e) => setSaveTitle(e.target.value)}
+                  placeholder="Enter a title for this output"
+                  autoFocus
+                />
+              </div>
+              <div className="flex gap-3 justify-end">
+                <Button variant="outline" onClick={() => setShowSaveDialog(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleSaveOutput} disabled={isSaving || !saveTitle.trim()}>
+                  {isSaving ? 'Saving...' : 'Save'}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };

@@ -9,7 +9,8 @@ import { incrementSkillUseCount, rateSkill, type CommunitySkill } from '../lib/s
 import { useAppContext } from '../hooks/useAppContext';
 import { useToast } from '../hooks/useToast';
 import { useAuth } from '../hooks/useAuth';
-import type { DynamicSkill, DynamicFormInput } from '../lib/storage/types';
+import type { DynamicSkill, DynamicFormInput, SavedOutput } from '../lib/storage/types';
+import { db } from '../lib/storage/indexeddb';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Textarea } from '../components/ui/Textarea';
@@ -32,6 +33,8 @@ import {
   Users,
   Star,
   Briefcase,
+  Save,
+  Check,
 } from 'lucide-react';
 
 // Theme palette for display
@@ -61,6 +64,10 @@ const CommunitySkillRunnerPage: React.FC = () => {
   const [progress, setProgress] = useState(0);
   const [startTime, setStartTime] = useState<number | null>(null);
   const [showPrompts, setShowPrompts] = useState(false);
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [saveTitle, setSaveTitle] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+  const [outputSaved, setOutputSaved] = useState(false);
 
   // Load skill from sessionStorage
   useEffect(() => {
@@ -245,6 +252,36 @@ const CommunitySkillRunnerPage: React.FC = () => {
   const copyPromptToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
     addToast(`${label} copied!`, 'success');
+  };
+
+  const handleSaveOutput = async () => {
+    if (!communitySkill || !saveTitle.trim()) return;
+
+    setIsSaving(true);
+    try {
+      const savedOutput: SavedOutput = {
+        id: crypto.randomUUID(),
+        title: saveTitle.trim(),
+        skillId: communitySkill.id,
+        skillName: communitySkill.name,
+        skillSource: 'community',
+        output: output,
+        inputs: formState,
+        model: selectedApi as 'gemini' | 'claude',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        isFavorite: false
+      };
+      await db.saveOutput(savedOutput);
+      setShowSaveDialog(false);
+      setSaveTitle('');
+      setOutputSaved(true);
+      addToast('Output saved to dashboard!', 'success');
+    } catch (error) {
+      addToast('Failed to save output', 'error');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const getAverageRating = (): number => {
@@ -635,10 +672,22 @@ const CommunitySkillRunnerPage: React.FC = () => {
 
                 {output && !isRunning && (
                   <div className="absolute top-2 right-2 flex gap-2">
-                    <Button variant="ghost" size="icon" onClick={copyToClipboard}>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        setSaveTitle(`${communitySkill.name} - ${new Date().toLocaleDateString()}`);
+                        setShowSaveDialog(true);
+                      }}
+                      title="Save to Dashboard"
+                      className={outputSaved ? 'text-green-500' : ''}
+                    >
+                      {outputSaved ? <Check className="h-4 w-4" /> : <Save className="h-4 w-4" />}
+                    </Button>
+                    <Button variant="ghost" size="icon" onClick={copyToClipboard} title="Copy">
                       <Clipboard className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" onClick={downloadOutput}>
+                    <Button variant="ghost" size="icon" onClick={downloadOutput} title="Download">
                       <Download className="h-4 w-4" />
                     </Button>
                   </div>
@@ -661,6 +710,41 @@ const CommunitySkillRunnerPage: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Save Output Dialog */}
+      {showSaveDialog && (
+        <>
+          <div
+            className="fixed inset-0 bg-black/50 z-50"
+            onClick={() => setShowSaveDialog(false)}
+          />
+          <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-card rounded-xl border shadow-lg p-6 z-50">
+            <h3 className="text-lg font-semibold mb-4">Save Output to Dashboard</h3>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label htmlFor="save-title" className="text-sm font-medium">
+                  Title
+                </label>
+                <Input
+                  id="save-title"
+                  value={saveTitle}
+                  onChange={(e) => setSaveTitle(e.target.value)}
+                  placeholder="Enter a title for this output"
+                  autoFocus
+                />
+              </div>
+              <div className="flex gap-3 justify-end">
+                <Button variant="outline" onClick={() => setShowSaveDialog(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleSaveOutput} disabled={isSaving || !saveTitle.trim()}>
+                  {isSaving ? 'Saving...' : 'Save'}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };

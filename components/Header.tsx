@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Moon, Sun, Briefcase, Users, Sparkles, FolderOpen, LogIn, LogOut, Loader2, ChevronDown } from 'lucide-react';
+import { Moon, Sun, Briefcase, Users, Sparkles, FolderOpen, LogIn, LogOut, Loader2, ChevronDown, LayoutDashboard } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme.tsx';
 import { useAuth } from '../hooks/useAuth.tsx';
 import { useToast } from '../hooks/useToast.tsx';
@@ -52,6 +52,16 @@ const Header: React.FC = () => {
           </Link>
 
           <nav className="hidden md:flex items-center gap-1">
+            <Link to="/dashboard">
+              <Button
+                variant={isActive('/dashboard') ? 'secondary' : 'ghost'}
+                size="sm"
+                className="gap-2"
+              >
+                <LayoutDashboard className="h-4 w-4" />
+                Dashboard
+              </Button>
+            </Link>
             <Link to="/skills">
               <Button
                 variant={isActive('/skills') ? 'secondary' : 'ghost'}
