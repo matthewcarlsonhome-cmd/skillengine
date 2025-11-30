@@ -221,3 +221,21 @@ export async function rateSkill(skillId: string, rating: number): Promise<void> 
 
   if (error) throw error;
 }
+
+export async function deleteCommunitySkill(skillId: string): Promise<void> {
+  if (!supabase) throw new Error('Supabase not configured');
+
+  const user = await getCurrentUser();
+  if (!user) throw new Error('Must be signed in to delete skills');
+
+  const { error } = await supabase
+    .from('skill_templates')
+    .delete()
+    .eq('id', skillId)
+    .eq('created_by', user.id); // RLS also enforces this, but double-check
+
+  if (error) {
+    console.error('Error deleting skill:', error);
+    throw new Error(`Failed to delete skill: ${error.message}`);
+  }
+}

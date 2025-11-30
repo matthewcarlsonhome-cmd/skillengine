@@ -8,6 +8,7 @@ import { db } from '../lib/storage';
 import {
   fetchCommunitySkills,
   incrementSkillUseCount,
+  deleteCommunitySkill,
   type CommunitySkill,
   isSupabaseConfigured,
 } from '../lib/supabase';
@@ -31,6 +32,7 @@ import {
   X,
   FolderPlus,
   Play,
+  Trash2,
 } from 'lucide-react';
 
 const CATEGORIES = [
@@ -67,6 +69,10 @@ const CommunitySkillsPage: React.FC = () => {
   const [importModalSkill, setImportModalSkill] = useState<CommunitySkill | null>(null);
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string>('');
   const [isImporting, setIsImporting] = useState(false);
+
+  // Delete confirmation state
+  const [deleteConfirmSkill, setDeleteConfirmSkill] = useState<CommunitySkill | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     loadSkills();
@@ -110,6 +116,24 @@ const CommunitySkillsPage: React.FC = () => {
     // Store skill in sessionStorage and navigate to runner
     sessionStorage.setItem('communitySkillToRun', JSON.stringify(skill));
     navigate('/community-skill-runner');
+  };
+
+  const handleDeleteSkill = async () => {
+    if (!deleteConfirmSkill) return;
+
+    setIsDeleting(true);
+    try {
+      await deleteCommunitySkill(deleteConfirmSkill.id);
+      addToast('Skill deleted successfully', 'success');
+      setDeleteConfirmSkill(null);
+      // Refresh the skills list
+      loadSkills();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to delete skill';
+      addToast(message, 'error');
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const handleImportSkill = async () => {
@@ -398,6 +422,17 @@ const CommunitySkillsPage: React.FC = () => {
                 >
                   <Download className="h-4 w-4" />
                 </Button>
+                {user && skill.created_by === user.id && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setDeleteConfirmSkill(skill)}
+                    title="Delete skill"
+                    className="text-red-500 hover:text-red-600 hover:border-red-500"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
               </div>
             </div>
           ))}
@@ -493,6 +528,61 @@ const CommunitySkillsPage: React.FC = () => {
                   )}
                 </Button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirmSkill && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-card rounded-xl border shadow-lg w-full max-w-md mx-4 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold text-red-500">Delete Skill</h2>
+              <button
+                onClick={() => setDeleteConfirmSkill(null)}
+                className="p-1 hover:bg-muted rounded"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="mb-4 p-3 rounded-lg bg-muted/50">
+              <h3 className="font-medium">{deleteConfirmSkill.name}</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                {deleteConfirmSkill.description}
+              </p>
+            </div>
+
+            <p className="text-sm text-muted-foreground mb-4">
+              Are you sure you want to delete this skill from the community library? This action cannot be undone.
+            </p>
+
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => setDeleteConfirmSkill(null)}
+              >
+                Cancel
+              </Button>
+              <Button
+                className="flex-1 bg-red-600 hover:bg-red-700"
+                onClick={handleDeleteSkill}
+                disabled={isDeleting}
+              >
+                {isDeleting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete
+                  </>
+                )}
+              </Button>
             </div>
           </div>
         </div>
