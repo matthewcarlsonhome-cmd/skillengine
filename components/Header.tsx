@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Moon, Sun, Briefcase, Users, Sparkles, FolderOpen, LogIn, LogOut, Loader2, ChevronDown, LayoutDashboard } from 'lucide-react';
+import { Moon, Sun, Briefcase, Users, Sparkles, FolderOpen, LogIn, LogOut, Loader2, ChevronDown, LayoutDashboard, Package } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme.tsx';
 import { useAuth } from '../hooks/useAuth.tsx';
 import { useToast } from '../hooks/useToast.tsx';
@@ -60,6 +60,16 @@ const Header: React.FC = () => {
               >
                 <LayoutDashboard className="h-4 w-4" />
                 Dashboard
+              </Button>
+            </Link>
+            <Link to="/role-templates">
+              <Button
+                variant={isActive('/role-templates') ? 'secondary' : 'ghost'}
+                size="sm"
+                className="gap-2"
+              >
+                <Package className="h-4 w-4" />
+                Roles
               </Button>
             </Link>
             <Link to="/skills">

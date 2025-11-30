@@ -18,6 +18,8 @@ import CommunitySkillsPage from './pages/CommunitySkillsPage';
 import CommunitySkillRunnerPage from './pages/CommunitySkillRunnerPage';
 import ImportSkillPage from './pages/ImportSkillPage';
 import DashboardPage from './pages/DashboardPage';
+import RoleTemplatesPage from './pages/RoleTemplatesPage';
+import MySkillsPage from './pages/MySkillsPage';
 
 function App() {
   return (
@@ -33,6 +35,10 @@ function App() {
                     {/* Home */}
                     <Route path="/" element={<HomePage />} />
                     <Route path="/dashboard" element={<DashboardPage />} />
+
+                    {/* Role Templates */}
+                    <Route path="/role-templates" element={<RoleTemplatesPage />} />
+                    <Route path="/my-skills" element={<MySkillsPage />} />
 
                     {/* Static skills (Job Applicant) */}
                     <Route path="/skills" element={<BrowseSkillsPage />} />
