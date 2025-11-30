@@ -3,13 +3,21 @@
 // See: https://docs.anthropic.com/en/api/client-sdks#browser-usage
 
 // Available Claude models (fastest to most capable):
-// - claude-3-5-haiku-20241022: Fastest, most cost-effective
-// - claude-3-5-sonnet-20241022: Balanced speed and capability
-// - claude-3-opus-20240229: Most capable, slowest
+// Using -latest aliases for reliability - these auto-update to newest snapshots
+// - claude-3-5-haiku-latest: Fastest, most cost-effective
+// - claude-3-5-sonnet-latest: Balanced speed and capability
+// - claude-3-opus-latest: Most capable, slowest (may require higher API tier)
 const CLAUDE_MODELS = {
-  haiku: 'claude-3-5-haiku-20241022',
-  sonnet: 'claude-3-5-sonnet-20241022',
-  opus: 'claude-3-opus-20240229',
+  haiku: 'claude-3-5-haiku-latest',
+  sonnet: 'claude-3-5-sonnet-latest',
+  opus: 'claude-3-opus-latest',
+} as const;
+
+// Human-readable names for error messages
+const MODEL_NAMES = {
+  haiku: 'Claude 3.5 Haiku',
+  sonnet: 'Claude 3.5 Sonnet',
+  opus: 'Claude 3 Opus',
 } as const;
 
 // Default to Haiku for fastest responses
@@ -48,20 +56,27 @@ export async function runSkillStream(
 
     if (!response.ok) {
       const errorBody = await response.json().catch(() => ({}));
-      console.error("Error from Claude API:", errorBody);
+      const modelDisplayName = MODEL_NAMES[modelType] || modelType;
+      console.error(`Error from Claude API (${modelDisplayName}):`, errorBody);
 
       // Provide specific error messages
       if (response.status === 401) {
         throw new Error('Invalid API key. Please check your Claude API key.');
       }
       if (response.status === 403) {
-        throw new Error('Access denied. Your Claude API key may not have browser access enabled. Contact Anthropic support to enable "anthropic-dangerous-direct-browser-access" for your key.');
+        throw new Error(`Access denied for ${modelDisplayName}. Your API key may not have access to this model or browser access may not be enabled.`);
+      }
+      if (response.status === 404) {
+        throw new Error(`Model ${modelDisplayName} not found. This model may not be available for your API key tier. Try using Haiku instead.`);
       }
       if (response.status === 429) {
         throw new Error('Rate limit exceeded. Please wait a moment and try again.');
       }
+      if (response.status === 400 && errorBody.error?.message?.includes('model')) {
+        throw new Error(`${modelDisplayName} is not available. Try using Haiku or Sonnet instead.`);
+      }
 
-      throw new Error(`Claude API Error: ${errorBody.error?.message || response.statusText}`);
+      throw new Error(`Claude API Error (${modelDisplayName}): ${errorBody.error?.message || response.statusText}`);
     }
 
     return response;
