@@ -58,6 +58,7 @@ const CommunitySkillRunnerPage: React.FC = () => {
   const [isRating, setIsRating] = useState(false);
   const [hasRated, setHasRated] = useState(false);
   const [apiKey, setApiKey] = useState('');
+  const [claudeModel, setClaudeModel] = useState<'haiku' | 'sonnet' | 'opus'>('haiku');
   const [output, setOutput] = useState('');
   const [isRunning, setIsRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -171,6 +172,7 @@ const CommunitySkillRunnerPage: React.FC = () => {
         formInputs: formState,
         apiKey,
         provider: selectedApi as 'gemini' | 'claude',
+        claudeModel,
       })) {
         fullOutput += chunk;
         setOutput(fullOutput);
@@ -645,6 +647,24 @@ const CommunitySkillRunnerPage: React.FC = () => {
                   onChange={(e) => setApiKey(e.target.value)}
                 />
               </div>
+              {selectedApi === 'claude' && (
+                <div className="space-y-2 md:col-span-2">
+                  <label className="text-sm font-medium">Claude Model</label>
+                  <Select
+                    value={claudeModel}
+                    onChange={(e) => setClaudeModel(e.target.value as 'haiku' | 'sonnet' | 'opus')}
+                  >
+                    <option value="haiku">Haiku (Fastest, Most Cost-Effective)</option>
+                    <option value="sonnet">Sonnet (Balanced Speed & Quality)</option>
+                    <option value="opus">Opus (Most Capable, Slowest)</option>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    {claudeModel === 'haiku' && 'Best for quick tasks and high-volume usage.'}
+                    {claudeModel === 'sonnet' && 'Great balance of speed and intelligence for most tasks.'}
+                    {claudeModel === 'opus' && 'Best for complex reasoning and nuanced outputs.'}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 

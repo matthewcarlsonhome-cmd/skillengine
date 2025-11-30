@@ -29,6 +29,7 @@ const SkillRunnerPage: React.FC = () => {
 
   const [formState, setFormState] = useState<Record<string, any>>({});
   const [apiKey, setApiKey] = useState('');
+  const [claudeModel, setClaudeModel] = useState<'haiku' | 'sonnet' | 'opus'>('haiku');
   const [output, setOutput] = useState('');
   const [citations, setCitations] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -154,7 +155,7 @@ const SkillRunnerPage: React.FC = () => {
           // Citations may not be available, continue without them
         }
       } else if (selectedApi === 'claude') {
-        const response = await runClaudeSkillStream(apiKey, promptData);
+        const response = await runClaudeSkillStream(apiKey, promptData, claudeModel);
         if (!response.body) throw new Error("Response body is null");
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
@@ -384,6 +385,25 @@ const SkillRunnerPage: React.FC = () => {
                             <Input id="api-key" type="password" placeholder="Enter your API key" value={apiKey} onChange={(e) => setApiKey(e.target.value)} required className="pl-10" />
                         </div>
                     </div>
+                    {selectedApi === 'claude' && (
+                      <div className="space-y-2 md:col-span-2">
+                        <label htmlFor="claude-model" className="text-sm font-medium">Claude Model</label>
+                        <Select
+                          id="claude-model"
+                          value={claudeModel}
+                          onChange={(e) => setClaudeModel(e.target.value as 'haiku' | 'sonnet' | 'opus')}
+                        >
+                          <option value="haiku">Haiku (Fastest, Most Cost-Effective)</option>
+                          <option value="sonnet">Sonnet (Balanced Speed & Quality)</option>
+                          <option value="opus">Opus (Most Capable, Slowest)</option>
+                        </Select>
+                        <p className="text-xs text-muted-foreground">
+                          {claudeModel === 'haiku' && 'Best for quick tasks and high-volume usage.'}
+                          {claudeModel === 'sonnet' && 'Great balance of speed and intelligence for most tasks.'}
+                          {claudeModel === 'opus' && 'Best for complex reasoning and nuanced outputs.'}
+                        </p>
+                      </div>
+                    )}
                 </div>
             </div>
 

@@ -7,7 +7,15 @@ export interface ExecuteSkillOptions {
   formInputs: Record<string, unknown>;
   apiKey: string;
   provider: 'gemini' | 'claude';
+  claudeModel?: 'haiku' | 'sonnet' | 'opus';
 }
+
+// Claude model mapping
+const CLAUDE_MODELS = {
+  haiku: 'claude-3-5-haiku-20241022',
+  sonnet: 'claude-3-5-sonnet-20241022',
+  opus: 'claude-3-opus-20240229',
+} as const;
 
 // Interpolate template placeholders with form values
 export function interpolateTemplate(
@@ -60,10 +68,11 @@ export async function* executeWithGemini(
 export async function* executeWithClaude(
   options: ExecuteSkillOptions
 ): AsyncGenerator<string> {
-  const { skill, formInputs, apiKey } = options;
+  const { skill, formInputs, apiKey, claudeModel = 'haiku' } = options;
 
   const systemPrompt = skill.prompts.systemInstruction;
   const userPrompt = interpolateTemplate(skill.prompts.userPromptTemplate, formInputs);
+  const modelId = CLAUDE_MODELS[claudeModel];
 
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
@@ -74,7 +83,7 @@ export async function* executeWithClaude(
       'anthropic-dangerous-direct-browser-access': 'true',
     },
     body: JSON.stringify({
-      model: 'claude-3-sonnet-20240229',
+      model: modelId,
       max_tokens: skill.config.maxTokens,
       system: systemPrompt,
       messages: [{ role: 'user', content: userPrompt }],
