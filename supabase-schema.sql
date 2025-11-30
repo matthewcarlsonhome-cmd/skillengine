@@ -174,6 +174,7 @@ ALTER TABLE public.skill_ratings ENABLE ROW LEVEL SECURITY;
 
 -- Drop existing policies first (allows re-running this script)
 DROP POLICY IF EXISTS "Profiles are viewable by everyone" ON public.profiles;
+DROP POLICY IF EXISTS "Users can insert own profile" ON public.profiles;
 DROP POLICY IF EXISTS "Users can update own profile" ON public.profiles;
 DROP POLICY IF EXISTS "Public skills are viewable by everyone" ON public.skill_templates;
 DROP POLICY IF EXISTS "Authenticated users can create skills" ON public.skill_templates;
@@ -185,10 +186,14 @@ DROP POLICY IF EXISTS "Ratings are viewable by everyone" ON public.skill_ratings
 DROP POLICY IF EXISTS "Authenticated users can rate skills" ON public.skill_ratings;
 DROP POLICY IF EXISTS "Users can update own ratings" ON public.skill_ratings;
 
--- Profiles: Users can read all profiles, update their own
+-- Profiles: Users can read all profiles, insert/update their own
 CREATE POLICY "Profiles are viewable by everyone"
   ON public.profiles FOR SELECT
   USING (true);
+
+CREATE POLICY "Users can insert own profile"
+  ON public.profiles FOR INSERT
+  WITH CHECK (auth.uid() = id);
 
 CREATE POLICY "Users can update own profile"
   ON public.profiles FOR UPDATE
