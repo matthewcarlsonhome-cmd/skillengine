@@ -15,6 +15,7 @@ import WorkspacePage from './pages/WorkspacePage';
 import BuildSkillsPage from './pages/BuildSkillsPage';
 import DynamicSkillRunnerPage from './pages/DynamicSkillRunnerPage';
 import CommunitySkillsPage from './pages/CommunitySkillsPage';
+import CommunitySkillRunnerPage from './pages/CommunitySkillRunnerPage';
 
 function App() {
   return (
@@ -42,6 +43,7 @@ function App() {
 
                     {/* Community */}
                     <Route path="/community" element={<CommunitySkillsPage />} />
+                    <Route path="/community-skill-runner" element={<CommunitySkillRunnerPage />} />
 
                     {/* Utility */}
                     <Route path="/api-keys" element={<ApiKeyInstructionsPage />} />

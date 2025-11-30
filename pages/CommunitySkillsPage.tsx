@@ -30,6 +30,7 @@ import {
   Download,
   X,
   FolderPlus,
+  Play,
 } from 'lucide-react';
 
 const CATEGORIES = [
@@ -103,6 +104,12 @@ const CommunitySkillsPage: React.FC = () => {
   const getAverageRating = (skill: CommunitySkill): number => {
     if (skill.rating_count === 0) return 0;
     return skill.rating_sum / skill.rating_count;
+  };
+
+  const handleLaunchSkill = (skill: CommunitySkill) => {
+    // Store skill in sessionStorage and navigate to runner
+    sessionStorage.setItem('communitySkillToRun', JSON.stringify(skill));
+    navigate('/community-skill-runner');
   };
 
   const handleImportSkill = async () => {
@@ -366,23 +373,32 @@ const CommunitySkillsPage: React.FC = () => {
                 </span>
               </div>
 
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full mt-4"
-                onClick={() => {
-                  if (workspaces.length === 0) {
-                    addToast('Create a workspace first by analyzing a job description', 'info');
-                    navigate('/analyze');
-                    return;
-                  }
-                  setSelectedWorkspaceId(workspaces[0]?.id || '');
-                  setImportModalSkill(skill);
-                }}
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Import Skill
-              </Button>
+              <div className="flex gap-2 mt-4">
+                <Button
+                  size="sm"
+                  className="flex-1"
+                  onClick={() => handleLaunchSkill(skill)}
+                >
+                  <Play className="h-4 w-4 mr-2" />
+                  Launch
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    if (workspaces.length === 0) {
+                      addToast('Create a workspace first by analyzing a job description', 'info');
+                      navigate('/analyze');
+                      return;
+                    }
+                    setSelectedWorkspaceId(workspaces[0]?.id || '');
+                    setImportModalSkill(skill);
+                  }}
+                  title="Import to workspace"
+                >
+                  <Download className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           ))}
         </div>
