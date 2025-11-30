@@ -93,7 +93,7 @@ Skill Categories:
 - optimization: Improves existing processes or content
 - communication: Helps with stakeholder communication
 
-Output JSON Schema (array of exactly 10 skills):
+Output JSON Schema (array of exactly 15 skills):
 [
   {
     "id": "string - kebab-case-id",
@@ -152,7 +152,7 @@ ${originalJD}
 ## Analysis Results
 ${JSON.stringify(jdAnalysis, null, 2)}
 
-Generate exactly 10 skill recommendations as a JSON array.`;
+Generate exactly 15 skill recommendations as a JSON array.`;
 
   let responseText: string;
 
@@ -166,8 +166,8 @@ Generate exactly 10 skill recommendations as a JSON array.`;
   try {
     const cleaned = cleanJsonResponse(responseText);
     const recommendations = JSON.parse(cleaned) as SkillRecommendation[];
-    // Ensure we have exactly 10 (or at least some)
-    return recommendations.slice(0, 10);
+    // Ensure we have exactly 15 (or at least some)
+    return recommendations.slice(0, 15);
   } catch (error) {
     console.error('Failed to parse skill recommendations:', error, responseText);
     throw new Error('Failed to generate skill recommendations. Please try again.');

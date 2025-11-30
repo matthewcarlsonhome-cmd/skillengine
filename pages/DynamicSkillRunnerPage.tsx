@@ -23,7 +23,11 @@ import {
   AlertTriangle,
   KeyRound,
   Loader2,
-  Clock
+  Clock,
+  Code,
+  ChevronDown,
+  ChevronUp,
+  FileCode
 } from 'lucide-react';
 
 const DynamicSkillRunnerPage: React.FC = () => {
@@ -41,6 +45,7 @@ const DynamicSkillRunnerPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
   const [startTime, setStartTime] = useState<number | null>(null);
+  const [showPrompts, setShowPrompts] = useState(false);
 
   // Load skill
   useEffect(() => {
@@ -151,6 +156,46 @@ const DynamicSkillRunnerPage: React.FC = () => {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     addToast('Downloaded!', 'success');
+  };
+
+  const downloadPrompts = () => {
+    if (!skill) return;
+
+    const promptExport = {
+      skillName: skill.name,
+      skillDescription: skill.description,
+      category: skill.category,
+      exportedAt: new Date().toISOString(),
+      prompts: {
+        systemInstruction: skill.prompts.systemInstruction,
+        userPromptTemplate: skill.prompts.userPromptTemplate,
+        outputFormat: skill.prompts.outputFormat,
+      },
+      config: skill.config,
+      inputs: skill.inputs.map(input => ({
+        id: input.id,
+        label: input.label,
+        type: input.type,
+        placeholder: input.placeholder,
+        required: input.validation?.required || false,
+      })),
+    };
+
+    const blob = new Blob([JSON.stringify(promptExport, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${skill.name.toLowerCase().replace(/\s+/g, '-')}-prompt.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    addToast('Prompt exported!', 'success');
+  };
+
+  const copyPromptToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text);
+    addToast(`${label} copied!`, 'success');
   };
 
   const renderInput = (input: DynamicFormInput) => {
@@ -281,7 +326,107 @@ const DynamicSkillRunnerPage: React.FC = () => {
                 Used {skill.executionCount} times
               </p>
             )}
+
+            {/* View Prompts Toggle */}
+            <div className="mt-6 pt-4 border-t">
+              <button
+                onClick={() => setShowPrompts(!showPrompts)}
+                className="flex items-center justify-between w-full text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <span className="flex items-center gap-2">
+                  <Code className="h-4 w-4" />
+                  View Skill Prompts
+                </span>
+                {showPrompts ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              </button>
+            </div>
           </div>
+
+          {/* Prompts Panel */}
+          {showPrompts && (
+            <div className="mt-4 rounded-xl border bg-card p-4 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold flex items-center gap-2">
+                  <FileCode className="h-4 w-4" />
+                  Production Prompts
+                </h3>
+                <Button variant="outline" size="sm" onClick={downloadPrompts}>
+                  <Download className="h-3 w-3 mr-1" />
+                  Export JSON
+                </Button>
+              </div>
+
+              {/* System Instruction */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    System Instruction
+                  </label>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => copyPromptToClipboard(skill.prompts.systemInstruction, 'System instruction')}
+                    className="h-6 text-xs"
+                  >
+                    <Clipboard className="h-3 w-3 mr-1" />
+                    Copy
+                  </Button>
+                </div>
+                <div className="bg-muted/50 rounded-lg p-3 max-h-48 overflow-y-auto">
+                  <pre className="text-xs whitespace-pre-wrap font-mono text-muted-foreground">
+                    {skill.prompts.systemInstruction}
+                  </pre>
+                </div>
+              </div>
+
+              {/* User Prompt Template */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    User Prompt Template
+                  </label>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => copyPromptToClipboard(skill.prompts.userPromptTemplate, 'User prompt template')}
+                    className="h-6 text-xs"
+                  >
+                    <Clipboard className="h-3 w-3 mr-1" />
+                    Copy
+                  </Button>
+                </div>
+                <div className="bg-muted/50 rounded-lg p-3 max-h-48 overflow-y-auto">
+                  <pre className="text-xs whitespace-pre-wrap font-mono text-muted-foreground">
+                    {skill.prompts.userPromptTemplate}
+                  </pre>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Variables like <code className="bg-muted px-1 rounded">{'{{inputId}}'}</code> are replaced with form values at runtime.
+                </p>
+              </div>
+
+              {/* Config */}
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  Configuration
+                </label>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div className="bg-muted/50 rounded p-2">
+                    <span className="text-muted-foreground">Output:</span> {skill.prompts.outputFormat}
+                  </div>
+                  <div className="bg-muted/50 rounded p-2">
+                    <span className="text-muted-foreground">Model:</span> {skill.config.recommendedModel}
+                  </div>
+                  <div className="bg-muted/50 rounded p-2">
+                    <span className="text-muted-foreground">Max Tokens:</span> {skill.config.maxTokens}
+                  </div>
+                  <div className="bg-muted/50 rounded p-2">
+                    <span className="text-muted-foreground">Temperature:</span> {skill.config.temperature}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </aside>
 
         {/* Main Content */}
