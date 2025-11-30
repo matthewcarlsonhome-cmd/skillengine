@@ -8,7 +8,9 @@ import { executeDynamicSkill } from '../lib/skills/dynamic';
 import { db } from '../lib/storage';
 import { useAppContext } from '../hooks/useAppContext';
 import { useToast } from '../hooks/useToast';
-import type { DynamicSkill, SkillExecution, DynamicFormInput } from '../lib/storage/types';
+import { useAuth } from '../hooks/useAuth';
+import { publishSkillToCommunity, isSupabaseConfigured } from '../lib/supabase';
+import type { DynamicSkill, SkillExecution, DynamicFormInput, Workspace } from '../lib/storage/types';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Textarea } from '../components/ui/Textarea';
@@ -27,7 +29,9 @@ import {
   Code,
   ChevronDown,
   ChevronUp,
-  FileCode
+  FileCode,
+  Share2,
+  Users
 } from 'lucide-react';
 
 const DynamicSkillRunnerPage: React.FC = () => {
@@ -35,8 +39,10 @@ const DynamicSkillRunnerPage: React.FC = () => {
   const navigate = useNavigate();
   const { addToast } = useToast();
   const { selectedApi, setSelectedApi } = useAppContext();
+  const { user, isConfigured: isAuthConfigured, signInWithGoogle } = useAuth();
 
   const [skill, setSkill] = useState<DynamicSkill | null>(null);
+  const [workspace, setWorkspace] = useState<Workspace | null>(null);
   const [loading, setLoading] = useState(true);
   const [formState, setFormState] = useState<Record<string, unknown>>({});
   const [apiKey, setApiKey] = useState('');
@@ -46,24 +52,37 @@ const DynamicSkillRunnerPage: React.FC = () => {
   const [progress, setProgress] = useState(0);
   const [startTime, setStartTime] = useState<number | null>(null);
   const [showPrompts, setShowPrompts] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
 
-  // Load skill
+  // Load skill and workspace
   useEffect(() => {
-    if (skillId) {
-      db.getDynamicSkill(skillId)
-        .then(s => {
-          setSkill(s || null);
-          if (s) {
-            // Initialize form state with defaults
-            const initial: Record<string, unknown> = {};
-            s.inputs.forEach(input => {
-              initial[input.id] = input.defaultValue ?? (input.type === 'checkbox' ? false : '');
-            });
-            setFormState(initial);
+    const loadData = async () => {
+      if (!skillId) return;
+
+      try {
+        const s = await db.getDynamicSkill(skillId);
+        setSkill(s || null);
+
+        if (s) {
+          // Initialize form state with defaults
+          const initial: Record<string, unknown> = {};
+          s.inputs.forEach(input => {
+            initial[input.id] = input.defaultValue ?? (input.type === 'checkbox' ? false : '');
+          });
+          setFormState(initial);
+
+          // Load workspace for role info
+          if (s.workspaceId) {
+            const ws = await db.getWorkspace(s.workspaceId);
+            setWorkspace(ws || null);
           }
-        })
-        .finally(() => setLoading(false));
-    }
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
   }, [skillId]);
 
   const handleInputChange = (id: string, value: unknown) => {
@@ -196,6 +215,53 @@ const DynamicSkillRunnerPage: React.FC = () => {
   const copyPromptToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
     addToast(`${label} copied!`, 'success');
+  };
+
+  const handleShareToCommunity = async () => {
+    if (!skill) return;
+
+    if (!isAuthConfigured) {
+      addToast('Community features are not configured', 'error');
+      return;
+    }
+
+    if (!user) {
+      try {
+        await signInWithGoogle();
+        addToast('Please try sharing again after signing in', 'info');
+      } catch {
+        addToast('Failed to sign in', 'error');
+      }
+      return;
+    }
+
+    setIsSharing(true);
+    try {
+      await publishSkillToCommunity({
+        name: skill.name,
+        description: skill.description,
+        longDescription: skill.longDescription,
+        category: skill.category,
+        estimatedTimeSaved: skill.estimatedTimeSaved,
+        roleTitle: workspace?.jdAnalysis?.role?.title,
+        roleDepartment: workspace?.jdAnalysis?.role?.department,
+        roleLevel: workspace?.jdAnalysis?.role?.level,
+        systemInstruction: skill.prompts.systemInstruction,
+        userPromptTemplate: skill.prompts.userPromptTemplate,
+        outputFormat: skill.prompts.outputFormat,
+        recommendedModel: skill.config.recommendedModel,
+        maxTokens: skill.config.maxTokens,
+        temperature: skill.config.temperature,
+        inputs: skill.inputs,
+      });
+
+      addToast('Skill shared to community!', 'success');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to share skill';
+      addToast(message, 'error');
+    } finally {
+      setIsSharing(false);
+    }
   };
 
   const renderInput = (input: DynamicFormInput) => {
@@ -340,6 +406,36 @@ const DynamicSkillRunnerPage: React.FC = () => {
                 {showPrompts ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
               </button>
             </div>
+
+            {/* Share to Community */}
+            {isSupabaseConfigured() && (
+              <div className="mt-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
+                  onClick={handleShareToCommunity}
+                  disabled={isSharing}
+                >
+                  {isSharing ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Sharing...
+                    </>
+                  ) : (
+                    <>
+                      <Share2 className="h-4 w-4 mr-2" />
+                      {user ? 'Share to Community' : 'Sign in to Share'}
+                    </>
+                  )}
+                </Button>
+                {!user && (
+                  <p className="text-xs text-muted-foreground mt-2 text-center">
+                    Help others by sharing this skill
+                  </p>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Prompts Panel */}
