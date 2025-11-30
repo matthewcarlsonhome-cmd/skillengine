@@ -202,7 +202,29 @@ export async function publishSkillToCommunity(skill: {
 export async function incrementSkillUseCount(skillId: string): Promise<void> {
   if (!supabase) return;
 
-  await supabase.rpc('increment_skill_use_count', { skill_id: skillId });
+  try {
+    // Try RPC first (uses SECURITY DEFINER to bypass RLS)
+    const { error: rpcError } = await supabase.rpc('increment_skill_use_count', { skill_id: skillId });
+
+    if (rpcError) {
+      console.warn('RPC increment failed:', rpcError.message);
+      // Fall back: fetch current count and update
+      const { data: skill } = await supabase
+        .from('skill_templates')
+        .select('use_count')
+        .eq('id', skillId)
+        .single();
+
+      if (skill) {
+        await supabase
+          .from('skill_templates')
+          .update({ use_count: (skill.use_count || 0) + 1 })
+          .eq('id', skillId);
+      }
+    }
+  } catch (err) {
+    console.error('Failed to increment use count:', err);
+  }
 }
 
 export async function rateSkill(skillId: string, rating: number): Promise<void> {

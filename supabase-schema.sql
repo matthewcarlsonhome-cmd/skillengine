@@ -180,6 +180,7 @@ DROP POLICY IF EXISTS "Public skills are viewable by everyone" ON public.skill_t
 DROP POLICY IF EXISTS "Authenticated users can create skills" ON public.skill_templates;
 DROP POLICY IF EXISTS "Users can update own skills" ON public.skill_templates;
 DROP POLICY IF EXISTS "Users can delete own skills" ON public.skill_templates;
+DROP POLICY IF EXISTS "Anyone can increment use count" ON public.skill_templates;
 DROP POLICY IF EXISTS "Tags for public skills are viewable" ON public.skill_tags;
 DROP POLICY IF EXISTS "Skill owners can manage tags" ON public.skill_tags;
 DROP POLICY IF EXISTS "Ratings are viewable by everyone" ON public.skill_ratings;
@@ -218,6 +219,12 @@ CREATE POLICY "Users can update own skills"
 CREATE POLICY "Users can delete own skills"
   ON public.skill_templates FOR DELETE
   USING (auth.uid() = created_by);
+
+-- Skills: Anyone can increment use count (for tracking skill usage)
+CREATE POLICY "Anyone can increment use count"
+  ON public.skill_templates FOR UPDATE
+  USING (is_public = true)
+  WITH CHECK (is_public = true);
 
 -- Tags: Anyone can read tags for public skills
 CREATE POLICY "Tags for public skills are viewable"

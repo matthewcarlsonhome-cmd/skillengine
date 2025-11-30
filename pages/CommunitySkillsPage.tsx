@@ -51,11 +51,6 @@ const CommunitySkillsPage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
 
-  // Import from JSON state
-  const [showImportModal, setShowImportModal] = useState(false);
-  const [importJsonText, setImportJsonText] = useState('');
-  const [isImporting, setIsImporting] = useState(false);
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   // Delete confirmation state
   const [deleteConfirmSkill, setDeleteConfirmSkill] = useState<CommunitySkill | null>(null);
@@ -123,78 +118,6 @@ const CommunitySkillsPage: React.FC = () => {
     }
   };
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const text = e.target?.result as string;
-      setImportJsonText(text);
-      setShowImportModal(true);
-    };
-    reader.readAsText(file);
-
-    // Reset the input
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-  };
-
-  const handleImportFromJson = async () => {
-    if (!importJsonText.trim()) {
-      addToast('Please provide skill JSON', 'error');
-      return;
-    }
-
-    if (!user) {
-      addToast('Please sign in to publish skills', 'error');
-      return;
-    }
-
-    setIsImporting(true);
-    try {
-      const parsed = JSON.parse(importJsonText);
-
-      // Support both exported prompt format and direct skill format
-      const skillData = {
-        name: parsed.skillName || parsed.name || 'Imported Skill',
-        description: parsed.skillDescription || parsed.description || '',
-        longDescription: parsed.prompts?.longDescription || parsed.longDescription || parsed.description || '',
-        category: parsed.category || 'automation',
-        estimatedTimeSaved: parsed.estimatedTimeSaved || '10-30 minutes',
-        roleTitle: parsed.roleTitle || undefined,
-        roleDepartment: parsed.roleDepartment || undefined,
-        roleLevel: parsed.roleLevel || undefined,
-        systemInstruction: parsed.prompts?.systemInstruction || parsed.systemInstruction || '',
-        userPromptTemplate: parsed.prompts?.userPromptTemplate || parsed.userPromptTemplate || '',
-        outputFormat: parsed.prompts?.outputFormat || parsed.outputFormat || 'markdown',
-        recommendedModel: parsed.config?.recommendedModel || parsed.recommendedModel || 'any',
-        maxTokens: parsed.config?.maxTokens || parsed.maxTokens || 4096,
-        temperature: parsed.config?.temperature || parsed.temperature || 0.4,
-        inputs: parsed.inputs || [],
-      };
-
-      // Validate required fields
-      if (!skillData.systemInstruction || !skillData.userPromptTemplate) {
-        throw new Error('Skill must include systemInstruction and userPromptTemplate');
-      }
-
-      // Import the publishSkillToCommunity function
-      const { publishSkillToCommunity } = await import('../lib/supabase');
-      await publishSkillToCommunity(skillData);
-
-      addToast('Skill published to community!', 'success');
-      setShowImportModal(false);
-      setImportJsonText('');
-      loadSkills();
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to import skill';
-      addToast(message, 'error');
-    } finally {
-      setIsImporting(false);
-    }
-  };
 
   // Show configuration message if Supabase is not set up
   if (!isConfigured) {
@@ -244,10 +167,10 @@ const CommunitySkillsPage: React.FC = () => {
           <div className="flex items-center gap-3">
             <Button
               variant="outline"
-              onClick={() => fileInputRef.current?.click()}
+              onClick={() => navigate('/community/import')}
             >
               <Upload className="h-4 w-4 mr-2" />
-              Import Skill
+              Create Skill
             </Button>
             <img
               src={user.user_metadata?.avatar_url || ''}
@@ -262,14 +185,6 @@ const CommunitySkillsPage: React.FC = () => {
             Sign in to Share Skills
           </Button>
         )}
-        {/* Hidden file input for JSON upload */}
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".json"
-          onChange={handleFileUpload}
-          className="hidden"
-        />
       </div>
 
       {/* Filters */}
@@ -437,69 +352,6 @@ const CommunitySkillsPage: React.FC = () => {
               </div>
             </div>
           ))}
-        </div>
-      )}
-
-      {/* Import from JSON Modal */}
-      {showImportModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-card rounded-xl border shadow-lg w-full max-w-2xl mx-4 p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold">Import Skill from JSON</h2>
-              <button
-                onClick={() => {
-                  setShowImportModal(false);
-                  setImportJsonText('');
-                }}
-                className="p-1 hover:bg-muted rounded"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <p className="text-sm text-muted-foreground mb-4">
-              Paste your skill JSON below. This should include the system instruction and user prompt template.
-            </p>
-
-            <div className="space-y-4">
-              <textarea
-                value={importJsonText}
-                onChange={(e) => setImportJsonText(e.target.value)}
-                placeholder='{"skillName": "My Skill", "prompts": {"systemInstruction": "...", "userPromptTemplate": "..."}, ...}'
-                className="w-full h-64 p-3 rounded-lg border bg-muted/50 font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-
-              <div className="flex gap-3">
-                <Button
-                  variant="outline"
-                  className="flex-1"
-                  onClick={() => {
-                    setShowImportModal(false);
-                    setImportJsonText('');
-                  }}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  className="flex-1"
-                  onClick={handleImportFromJson}
-                  disabled={isImporting || !importJsonText.trim()}
-                >
-                  {isImporting ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Publishing...
-                    </>
-                  ) : (
-                    <>
-                      <Upload className="h-4 w-4 mr-2" />
-                      Publish to Community
-                    </>
-                  )}
-                </Button>
-              </div>
-            </div>
-          </div>
         </div>
       )}
 

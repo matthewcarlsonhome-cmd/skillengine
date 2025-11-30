@@ -5,9 +5,10 @@ import { useNavigate } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { executeDynamicSkill } from '../lib/skills/dynamic';
-import { incrementSkillUseCount, type CommunitySkill } from '../lib/supabase';
+import { incrementSkillUseCount, rateSkill, type CommunitySkill } from '../lib/supabase';
 import { useAppContext } from '../hooks/useAppContext';
 import { useToast } from '../hooks/useToast';
+import { useAuth } from '../hooks/useAuth';
 import type { DynamicSkill, DynamicFormInput } from '../lib/storage/types';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
@@ -44,10 +45,15 @@ const CommunitySkillRunnerPage: React.FC = () => {
   const navigate = useNavigate();
   const { addToast } = useToast();
   const { selectedApi, setSelectedApi } = useAppContext();
+  const { user } = useAuth();
 
   const [communitySkill, setCommunitySkill] = useState<CommunitySkill | null>(null);
   const [loading, setLoading] = useState(true);
   const [formState, setFormState] = useState<Record<string, unknown>>({});
+  const [userRating, setUserRating] = useState<number>(0);
+  const [hoverRating, setHoverRating] = useState<number>(0);
+  const [isRating, setIsRating] = useState(false);
+  const [hasRated, setHasRated] = useState(false);
   const [apiKey, setApiKey] = useState('');
   const [output, setOutput] = useState('');
   const [isRunning, setIsRunning] = useState(false);
@@ -246,6 +252,26 @@ const CommunitySkillRunnerPage: React.FC = () => {
     return communitySkill.rating_sum / communitySkill.rating_count;
   };
 
+  const handleRate = async (rating: number) => {
+    if (!communitySkill || !user) {
+      addToast('Please sign in to rate skills', 'error');
+      return;
+    }
+
+    setIsRating(true);
+    try {
+      await rateSkill(communitySkill.id, rating);
+      setUserRating(rating);
+      setHasRated(true);
+      addToast('Rating submitted!', 'success');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to rate skill';
+      addToast(message, 'error');
+    } finally {
+      setIsRating(false);
+    }
+  };
+
   const renderInput = (input: DynamicFormInput) => {
     const value = formState[input.id];
 
@@ -413,6 +439,41 @@ const CommunitySkillRunnerPage: React.FC = () => {
                 </span>
                 {showPrompts ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
               </button>
+            </div>
+
+            {/* Rate This Skill */}
+            <div className="mt-4 pt-4 border-t">
+              <h3 className="text-sm font-medium mb-2">Rate This Skill</h3>
+              <div className="flex items-center gap-1">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    onClick={() => handleRate(star)}
+                    onMouseEnter={() => setHoverRating(star)}
+                    onMouseLeave={() => setHoverRating(0)}
+                    disabled={isRating}
+                    className="p-1 transition-transform hover:scale-110 disabled:opacity-50"
+                  >
+                    <Star
+                      className={`h-6 w-6 ${
+                        star <= (hoverRating || userRating)
+                          ? 'text-yellow-500 fill-yellow-500'
+                          : 'text-muted-foreground'
+                      }`}
+                    />
+                  </button>
+                ))}
+              </div>
+              {hasRated && (
+                <p className="text-xs text-muted-foreground mt-2">
+                  Thanks for rating!
+                </p>
+              )}
+              {!user && (
+                <p className="text-xs text-muted-foreground mt-2">
+                  Sign in to rate this skill
+                </p>
+              )}
             </div>
           </div>
 
