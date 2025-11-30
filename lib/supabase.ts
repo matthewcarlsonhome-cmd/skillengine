@@ -233,62 +233,104 @@ export async function rateSkill(skillId: string, rating: number): Promise<void> 
   const user = await getCurrentUser();
   if (!user) throw new Error('Must be signed in to rate skills');
 
+  console.log('Rating skill:', skillId, 'with rating:', rating);
+
   // Check if user has already rated this skill
-  const { data: existingRating } = await supabase
+  const { data: existingRating, error: fetchError } = await supabase
     .from('skill_ratings')
     .select('id, rating')
     .eq('skill_id', skillId)
     .eq('user_id', user.id)
     .maybeSingle();
 
+  if (fetchError) {
+    console.error('Error checking existing rating:', fetchError);
+  }
+
   const oldRating = existingRating?.rating || 0;
   const isNewRating = !existingRating;
 
+  console.log('Existing rating:', existingRating, 'isNewRating:', isNewRating);
+
   // Upsert the rating
-  const { error } = await supabase
+  const { error: upsertError } = await supabase
     .from('skill_ratings')
     .upsert({
       skill_id: skillId,
       user_id: user.id,
       rating,
-    }, { onConflict: 'skill_id,user_id' });
+    });
 
-  if (error) throw error;
+  if (upsertError) {
+    console.error('Error upserting rating:', upsertError);
+    throw upsertError;
+  }
+
+  console.log('Rating upserted successfully');
 
   // Directly update skill_templates rating aggregates
   // This ensures ratings work even if the trigger isn't set up
   if (isNewRating) {
     // New rating: increment count and add to sum
-    const { data: skill } = await supabase
+    const { data: skill, error: skillFetchError } = await supabase
       .from('skill_templates')
       .select('rating_sum, rating_count')
       .eq('id', skillId)
       .single();
 
+    if (skillFetchError) {
+      console.error('Error fetching skill for rating update:', skillFetchError);
+    }
+
+    console.log('Current skill rating data:', skill);
+
     if (skill) {
-      await supabase
+      const newSum = (skill.rating_sum || 0) + rating;
+      const newCount = (skill.rating_count || 0) + 1;
+      console.log('Updating to:', { rating_sum: newSum, rating_count: newCount });
+
+      const { error: updateError } = await supabase
         .from('skill_templates')
         .update({
-          rating_sum: (skill.rating_sum || 0) + rating,
-          rating_count: (skill.rating_count || 0) + 1,
+          rating_sum: newSum,
+          rating_count: newCount,
         })
         .eq('id', skillId);
+
+      if (updateError) {
+        console.error('Error updating skill rating aggregates:', updateError);
+      } else {
+        console.log('Rating aggregates updated successfully');
+      }
     }
   } else {
     // Updated rating: adjust the sum (count stays same)
-    const { data: skill } = await supabase
+    const { data: skill, error: skillFetchError } = await supabase
       .from('skill_templates')
       .select('rating_sum')
       .eq('id', skillId)
       .single();
 
+    if (skillFetchError) {
+      console.error('Error fetching skill for rating update:', skillFetchError);
+    }
+
     if (skill) {
-      await supabase
+      const newSum = (skill.rating_sum || 0) - oldRating + rating;
+      console.log('Updating sum from', skill.rating_sum, 'to', newSum);
+
+      const { error: updateError } = await supabase
         .from('skill_templates')
         .update({
-          rating_sum: (skill.rating_sum || 0) - oldRating + rating,
+          rating_sum: newSum,
         })
         .eq('id', skillId);
+
+      if (updateError) {
+        console.error('Error updating skill rating sum:', updateError);
+      } else {
+        console.log('Rating sum updated successfully');
+      }
     }
   }
 }
