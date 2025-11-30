@@ -3,8 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
-import { useWorkspaces } from '../hooks/useStorage';
-import { db } from '../lib/storage';
 import {
   fetchCommunitySkills,
   incrementSkillUseCount,
@@ -12,7 +10,6 @@ import {
   type CommunitySkill,
   isSupabaseConfigured,
 } from '../lib/supabase';
-import type { DynamicSkill, DynamicFormInput } from '../lib/storage/types';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
@@ -28,11 +25,10 @@ import {
   Briefcase,
   TrendingUp,
   Filter,
-  Download,
   X,
-  FolderPlus,
   Play,
   Trash2,
+  Upload,
 } from 'lucide-react';
 
 const CATEGORIES = [
@@ -44,20 +40,10 @@ const CATEGORIES = [
   { value: 'communication', label: 'Communication' },
 ];
 
-// Theme palette for imported skills
-const THEME_PALETTE = [
-  { primary: 'text-blue-400', secondary: 'bg-blue-900/20', gradient: 'from-blue-500/20 to-transparent', iconName: 'FileText' },
-  { primary: 'text-emerald-400', secondary: 'bg-emerald-900/20', gradient: 'from-emerald-500/20 to-transparent', iconName: 'CheckCircle' },
-  { primary: 'text-purple-400', secondary: 'bg-purple-900/20', gradient: 'from-purple-500/20 to-transparent', iconName: 'Users' },
-  { primary: 'text-orange-400', secondary: 'bg-orange-900/20', gradient: 'from-orange-500/20 to-transparent', iconName: 'Zap' },
-  { primary: 'text-cyan-400', secondary: 'bg-cyan-900/20', gradient: 'from-cyan-500/20 to-transparent', iconName: 'BarChart' },
-];
-
 const CommunitySkillsPage: React.FC = () => {
   const { user, loading: authLoading, signInWithGoogle, isConfigured } = useAuth();
   const { addToast } = useToast();
   const navigate = useNavigate();
-  const { workspaces, loading: workspacesLoading } = useWorkspaces();
 
   const [skills, setSkills] = useState<CommunitySkill[]>([]);
   const [loading, setLoading] = useState(true);
@@ -65,10 +51,11 @@ const CommunitySkillsPage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
 
-  // Import modal state
-  const [importModalSkill, setImportModalSkill] = useState<CommunitySkill | null>(null);
-  const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string>('');
+  // Import from JSON state
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [importJsonText, setImportJsonText] = useState('');
   const [isImporting, setIsImporting] = useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   // Delete confirmation state
   const [deleteConfirmSkill, setDeleteConfirmSkill] = useState<CommunitySkill | null>(null);
@@ -136,56 +123,71 @@ const CommunitySkillsPage: React.FC = () => {
     }
   };
 
-  const handleImportSkill = async () => {
-    if (!importModalSkill || !selectedWorkspaceId) {
-      addToast('Please select a workspace', 'error');
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target?.result as string;
+      setImportJsonText(text);
+      setShowImportModal(true);
+    };
+    reader.readAsText(file);
+
+    // Reset the input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleImportFromJson = async () => {
+    if (!importJsonText.trim()) {
+      addToast('Please provide skill JSON', 'error');
+      return;
+    }
+
+    if (!user) {
+      addToast('Please sign in to publish skills', 'error');
       return;
     }
 
     setIsImporting(true);
     try {
-      // Convert community skill to local DynamicSkill
-      const now = new Date().toISOString();
-      const themeIndex = Math.floor(Math.random() * THEME_PALETTE.length);
+      const parsed = JSON.parse(importJsonText);
 
-      const localSkill: DynamicSkill = {
-        id: crypto.randomUUID(),
-        workspaceId: selectedWorkspaceId,
-        version: 1,
-        createdAt: now,
-        updatedAt: now,
-        name: importModalSkill.name,
-        description: importModalSkill.description || '',
-        longDescription: importModalSkill.long_description || '',
-        category: importModalSkill.category as DynamicSkill['category'],
-        estimatedTimeSaved: importModalSkill.estimated_time_saved || '',
-        theme: THEME_PALETTE[themeIndex],
-        inputs: (importModalSkill.inputs as DynamicFormInput[]) || [],
-        prompts: {
-          systemInstruction: importModalSkill.system_instruction,
-          userPromptTemplate: importModalSkill.user_prompt_template,
-          outputFormat: (importModalSkill.output_format as 'markdown' | 'json' | 'table') || 'markdown',
-        },
-        config: {
-          recommendedModel: (importModalSkill.recommended_model as 'gemini' | 'claude' | 'any') || 'any',
-          useWebSearch: false,
-          maxTokens: importModalSkill.max_tokens || 4096,
-          temperature: importModalSkill.temperature || 0.4,
-        },
-        executionCount: 0,
+      // Support both exported prompt format and direct skill format
+      const skillData = {
+        name: parsed.skillName || parsed.name || 'Imported Skill',
+        description: parsed.skillDescription || parsed.description || '',
+        longDescription: parsed.prompts?.longDescription || parsed.longDescription || parsed.description || '',
+        category: parsed.category || 'automation',
+        estimatedTimeSaved: parsed.estimatedTimeSaved || '10-30 minutes',
+        roleTitle: parsed.roleTitle || undefined,
+        roleDepartment: parsed.roleDepartment || undefined,
+        roleLevel: parsed.roleLevel || undefined,
+        systemInstruction: parsed.prompts?.systemInstruction || parsed.systemInstruction || '',
+        userPromptTemplate: parsed.prompts?.userPromptTemplate || parsed.userPromptTemplate || '',
+        outputFormat: parsed.prompts?.outputFormat || parsed.outputFormat || 'markdown',
+        recommendedModel: parsed.config?.recommendedModel || parsed.recommendedModel || 'any',
+        maxTokens: parsed.config?.maxTokens || parsed.maxTokens || 4096,
+        temperature: parsed.config?.temperature || parsed.temperature || 0.4,
+        inputs: parsed.inputs || [],
       };
 
-      // Save to local IndexedDB
-      await db.saveDynamicSkill(localSkill);
+      // Validate required fields
+      if (!skillData.systemInstruction || !skillData.userPromptTemplate) {
+        throw new Error('Skill must include systemInstruction and userPromptTemplate');
+      }
 
-      // Increment use count in Supabase
-      await incrementSkillUseCount(importModalSkill.id);
+      // Import the publishSkillToCommunity function
+      const { publishSkillToCommunity } = await import('../lib/supabase');
+      await publishSkillToCommunity(skillData);
 
-      addToast('Skill imported successfully!', 'success');
-      setImportModalSkill(null);
-
-      // Navigate to the workspace
-      navigate(`/workspace/${selectedWorkspaceId}`);
+      addToast('Skill published to community!', 'success');
+      setShowImportModal(false);
+      setImportJsonText('');
+      loadSkills();
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to import skill';
       addToast(message, 'error');
@@ -240,6 +242,13 @@ const CommunitySkillsPage: React.FC = () => {
           <Loader2 className="h-5 w-5 animate-spin" />
         ) : user ? (
           <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <Upload className="h-4 w-4 mr-2" />
+              Import Skill
+            </Button>
             <img
               src={user.user_metadata?.avatar_url || ''}
               alt=""
@@ -253,6 +262,14 @@ const CommunitySkillsPage: React.FC = () => {
             Sign in to Share Skills
           </Button>
         )}
+        {/* Hidden file input for JSON upload */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".json"
+          onChange={handleFileUpload}
+          className="hidden"
+        />
       </div>
 
       {/* Filters */}
@@ -406,22 +423,6 @@ const CommunitySkillsPage: React.FC = () => {
                   <Play className="h-4 w-4 mr-2" />
                   Launch
                 </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    if (workspaces.length === 0) {
-                      addToast('Create a workspace first by analyzing a job description', 'info');
-                      navigate('/analyze');
-                      return;
-                    }
-                    setSelectedWorkspaceId(workspaces[0]?.id || '');
-                    setImportModalSkill(skill);
-                  }}
-                  title="Import to workspace"
-                >
-                  <Download className="h-4 w-4" />
-                </Button>
                 {user && skill.created_by === user.id && (
                   <Button
                     variant="outline"
@@ -439,91 +440,60 @@ const CommunitySkillsPage: React.FC = () => {
         </div>
       )}
 
-      {/* Import Modal */}
-      {importModalSkill && (
+      {/* Import from JSON Modal */}
+      {showImportModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-card rounded-xl border shadow-lg w-full max-w-md mx-4 p-6">
+          <div className="bg-card rounded-xl border shadow-lg w-full max-w-2xl mx-4 p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold">Import Skill</h2>
+              <h2 className="text-xl font-semibold">Import Skill from JSON</h2>
               <button
-                onClick={() => setImportModalSkill(null)}
+                onClick={() => {
+                  setShowImportModal(false);
+                  setImportJsonText('');
+                }}
                 className="p-1 hover:bg-muted rounded"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
-            <div className="mb-4 p-3 rounded-lg bg-muted/50">
-              <h3 className="font-medium">{importModalSkill.name}</h3>
-              <p className="text-sm text-muted-foreground mt-1">
-                {importModalSkill.description}
-              </p>
-            </div>
+            <p className="text-sm text-muted-foreground mb-4">
+              Paste your skill JSON below. This should include the system instruction and user prompt template.
+            </p>
 
             <div className="space-y-4">
-              <div>
-                <label className="text-sm font-medium mb-2 block">
-                  Select Workspace
-                </label>
-                {workspacesLoading ? (
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Loading workspaces...
-                  </div>
-                ) : workspaces.length === 0 ? (
-                  <div className="text-center py-4">
-                    <FolderPlus className="h-8 w-8 mx-auto text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground mt-2">
-                      No workspaces found
-                    </p>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="mt-2"
-                      onClick={() => {
-                        setImportModalSkill(null);
-                        navigate('/analyze');
-                      }}
-                    >
-                      Create Workspace
-                    </Button>
-                  </div>
-                ) : (
-                  <Select
-                    value={selectedWorkspaceId}
-                    onChange={(e) => setSelectedWorkspaceId(e.target.value)}
-                  >
-                    {workspaces.map((ws) => (
-                      <option key={ws.id} value={ws.id}>
-                        {ws.name} ({ws.jdAnalysis?.role?.title || 'No role'})
-                      </option>
-                    ))}
-                  </Select>
-                )}
-              </div>
+              <textarea
+                value={importJsonText}
+                onChange={(e) => setImportJsonText(e.target.value)}
+                placeholder='{"skillName": "My Skill", "prompts": {"systemInstruction": "...", "userPromptTemplate": "..."}, ...}'
+                className="w-full h-64 p-3 rounded-lg border bg-muted/50 font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary"
+              />
 
               <div className="flex gap-3">
                 <Button
                   variant="outline"
                   className="flex-1"
-                  onClick={() => setImportModalSkill(null)}
+                  onClick={() => {
+                    setShowImportModal(false);
+                    setImportJsonText('');
+                  }}
                 >
                   Cancel
                 </Button>
                 <Button
                   className="flex-1"
-                  onClick={handleImportSkill}
-                  disabled={isImporting || !selectedWorkspaceId}
+                  onClick={handleImportFromJson}
+                  disabled={isImporting || !importJsonText.trim()}
                 >
                   {isImporting ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Importing...
+                      Publishing...
                     </>
                   ) : (
                     <>
-                      <Download className="h-4 w-4 mr-2" />
-                      Import
+                      <Upload className="h-4 w-4 mr-2" />
+                      Publish to Community
                     </>
                   )}
                 </Button>
