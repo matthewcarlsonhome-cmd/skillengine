@@ -36,7 +36,7 @@ export async function* executeWithGemini(
 
   const genAI = new GoogleGenerativeAI(apiKey);
   const model = genAI.getGenerativeModel({
-    model: 'gemini-3-pro-preview',
+    model: 'gemini-2.0-flash',
     systemInstruction: systemPrompt,
   });
 
