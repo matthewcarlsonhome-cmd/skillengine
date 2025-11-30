@@ -74,7 +74,7 @@ export async function* executeWithClaude(
       'anthropic-dangerous-direct-browser-access': 'true',
     },
     body: JSON.stringify({
-      model: 'claude-3-5-sonnet-latest',
+      model: 'claude-3-sonnet-20240229',
       max_tokens: skill.config.maxTokens,
       system: systemPrompt,
       messages: [{ role: 'user', content: userPrompt }],

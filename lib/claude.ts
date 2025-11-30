@@ -8,7 +8,7 @@ export async function runSkillStream(
   }
 
   const API_URL = "https://api.anthropic.com/v1/messages";
-  const MODEL_NAME = "claude-3-5-sonnet-latest";
+  const MODEL_NAME = "claude-3-sonnet-20240229";
 
   try {
     const response = await fetch(API_URL, {
