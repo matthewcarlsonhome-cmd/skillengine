@@ -3,15 +3,13 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
-import { useWorkspaces } from '../hooks/useStorage';
-import { db } from '../lib/storage';
 import {
   fetchCommunitySkills,
   incrementSkillUseCount,
+  deleteCommunitySkill,
   type CommunitySkill,
   isSupabaseConfigured,
 } from '../lib/supabase';
-import type { DynamicSkill, DynamicFormInput } from '../lib/storage/types';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
@@ -27,10 +25,10 @@ import {
   Briefcase,
   TrendingUp,
   Filter,
-  Download,
   X,
-  FolderPlus,
   Play,
+  Trash2,
+  Upload,
 } from 'lucide-react';
 
 const CATEGORIES = [
@@ -42,20 +40,10 @@ const CATEGORIES = [
   { value: 'communication', label: 'Communication' },
 ];
 
-// Theme palette for imported skills
-const THEME_PALETTE = [
-  { primary: 'text-blue-400', secondary: 'bg-blue-900/20', gradient: 'from-blue-500/20 to-transparent', iconName: 'FileText' },
-  { primary: 'text-emerald-400', secondary: 'bg-emerald-900/20', gradient: 'from-emerald-500/20 to-transparent', iconName: 'CheckCircle' },
-  { primary: 'text-purple-400', secondary: 'bg-purple-900/20', gradient: 'from-purple-500/20 to-transparent', iconName: 'Users' },
-  { primary: 'text-orange-400', secondary: 'bg-orange-900/20', gradient: 'from-orange-500/20 to-transparent', iconName: 'Zap' },
-  { primary: 'text-cyan-400', secondary: 'bg-cyan-900/20', gradient: 'from-cyan-500/20 to-transparent', iconName: 'BarChart' },
-];
-
 const CommunitySkillsPage: React.FC = () => {
   const { user, loading: authLoading, signInWithGoogle, isConfigured } = useAuth();
   const { addToast } = useToast();
   const navigate = useNavigate();
-  const { workspaces, loading: workspacesLoading } = useWorkspaces();
 
   const [skills, setSkills] = useState<CommunitySkill[]>([]);
   const [loading, setLoading] = useState(true);
@@ -63,10 +51,10 @@ const CommunitySkillsPage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
 
-  // Import modal state
-  const [importModalSkill, setImportModalSkill] = useState<CommunitySkill | null>(null);
-  const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string>('');
-  const [isImporting, setIsImporting] = useState(false);
+
+  // Delete confirmation state
+  const [deleteConfirmSkill, setDeleteConfirmSkill] = useState<CommunitySkill | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     loadSkills();
@@ -112,63 +100,24 @@ const CommunitySkillsPage: React.FC = () => {
     navigate('/community-skill-runner');
   };
 
-  const handleImportSkill = async () => {
-    if (!importModalSkill || !selectedWorkspaceId) {
-      addToast('Please select a workspace', 'error');
-      return;
-    }
+  const handleDeleteSkill = async () => {
+    if (!deleteConfirmSkill) return;
 
-    setIsImporting(true);
+    setIsDeleting(true);
     try {
-      // Convert community skill to local DynamicSkill
-      const now = new Date().toISOString();
-      const themeIndex = Math.floor(Math.random() * THEME_PALETTE.length);
-
-      const localSkill: DynamicSkill = {
-        id: crypto.randomUUID(),
-        workspaceId: selectedWorkspaceId,
-        version: 1,
-        createdAt: now,
-        updatedAt: now,
-        name: importModalSkill.name,
-        description: importModalSkill.description || '',
-        longDescription: importModalSkill.long_description || '',
-        category: importModalSkill.category as DynamicSkill['category'],
-        estimatedTimeSaved: importModalSkill.estimated_time_saved || '',
-        theme: THEME_PALETTE[themeIndex],
-        inputs: (importModalSkill.inputs as DynamicFormInput[]) || [],
-        prompts: {
-          systemInstruction: importModalSkill.system_instruction,
-          userPromptTemplate: importModalSkill.user_prompt_template,
-          outputFormat: (importModalSkill.output_format as 'markdown' | 'json' | 'table') || 'markdown',
-        },
-        config: {
-          recommendedModel: (importModalSkill.recommended_model as 'gemini' | 'claude' | 'any') || 'any',
-          useWebSearch: false,
-          maxTokens: importModalSkill.max_tokens || 4096,
-          temperature: importModalSkill.temperature || 0.4,
-        },
-        executionCount: 0,
-      };
-
-      // Save to local IndexedDB
-      await db.saveDynamicSkill(localSkill);
-
-      // Increment use count in Supabase
-      await incrementSkillUseCount(importModalSkill.id);
-
-      addToast('Skill imported successfully!', 'success');
-      setImportModalSkill(null);
-
-      // Navigate to the workspace
-      navigate(`/workspace/${selectedWorkspaceId}`);
+      await deleteCommunitySkill(deleteConfirmSkill.id);
+      addToast('Skill deleted successfully', 'success');
+      setDeleteConfirmSkill(null);
+      // Refresh the skills list
+      loadSkills();
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to import skill';
+      const message = err instanceof Error ? err.message : 'Failed to delete skill';
       addToast(message, 'error');
     } finally {
-      setIsImporting(false);
+      setIsDeleting(false);
     }
   };
+
 
   // Show configuration message if Supabase is not set up
   if (!isConfigured) {
@@ -216,6 +165,13 @@ const CommunitySkillsPage: React.FC = () => {
           <Loader2 className="h-5 w-5 animate-spin" />
         ) : user ? (
           <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              onClick={() => navigate('/community/import')}
+            >
+              <Upload className="h-4 w-4 mr-2" />
+              Create Skill
+            </Button>
             <img
               src={user.user_metadata?.avatar_url || ''}
               alt=""
@@ -382,36 +338,31 @@ const CommunitySkillsPage: React.FC = () => {
                   <Play className="h-4 w-4 mr-2" />
                   Launch
                 </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    if (workspaces.length === 0) {
-                      addToast('Create a workspace first by analyzing a job description', 'info');
-                      navigate('/analyze');
-                      return;
-                    }
-                    setSelectedWorkspaceId(workspaces[0]?.id || '');
-                    setImportModalSkill(skill);
-                  }}
-                  title="Import to workspace"
-                >
-                  <Download className="h-4 w-4" />
-                </Button>
+                {user && skill.created_by === user.id && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setDeleteConfirmSkill(skill)}
+                    title="Delete skill"
+                    className="text-red-500 hover:text-red-600 hover:border-red-500"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
               </div>
             </div>
           ))}
         </div>
       )}
 
-      {/* Import Modal */}
-      {importModalSkill && (
+      {/* Delete Confirmation Modal */}
+      {deleteConfirmSkill && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="bg-card rounded-xl border shadow-lg w-full max-w-md mx-4 p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold">Import Skill</h2>
+              <h2 className="text-xl font-semibold text-red-500">Delete Skill</h2>
               <button
-                onClick={() => setImportModalSkill(null)}
+                onClick={() => setDeleteConfirmSkill(null)}
                 className="p-1 hover:bg-muted rounded"
               >
                 <X className="h-5 w-5" />
@@ -419,80 +370,41 @@ const CommunitySkillsPage: React.FC = () => {
             </div>
 
             <div className="mb-4 p-3 rounded-lg bg-muted/50">
-              <h3 className="font-medium">{importModalSkill.name}</h3>
+              <h3 className="font-medium">{deleteConfirmSkill.name}</h3>
               <p className="text-sm text-muted-foreground mt-1">
-                {importModalSkill.description}
+                {deleteConfirmSkill.description}
               </p>
             </div>
 
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm font-medium mb-2 block">
-                  Select Workspace
-                </label>
-                {workspacesLoading ? (
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Loading workspaces...
-                  </div>
-                ) : workspaces.length === 0 ? (
-                  <div className="text-center py-4">
-                    <FolderPlus className="h-8 w-8 mx-auto text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground mt-2">
-                      No workspaces found
-                    </p>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="mt-2"
-                      onClick={() => {
-                        setImportModalSkill(null);
-                        navigate('/analyze');
-                      }}
-                    >
-                      Create Workspace
-                    </Button>
-                  </div>
-                ) : (
-                  <Select
-                    value={selectedWorkspaceId}
-                    onChange={(e) => setSelectedWorkspaceId(e.target.value)}
-                  >
-                    {workspaces.map((ws) => (
-                      <option key={ws.id} value={ws.id}>
-                        {ws.name} ({ws.jdAnalysis?.role?.title || 'No role'})
-                      </option>
-                    ))}
-                  </Select>
-                )}
-              </div>
+            <p className="text-sm text-muted-foreground mb-4">
+              Are you sure you want to delete this skill from the community library? This action cannot be undone.
+            </p>
 
-              <div className="flex gap-3">
-                <Button
-                  variant="outline"
-                  className="flex-1"
-                  onClick={() => setImportModalSkill(null)}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  className="flex-1"
-                  onClick={handleImportSkill}
-                  disabled={isImporting || !selectedWorkspaceId}
-                >
-                  {isImporting ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Importing...
-                    </>
-                  ) : (
-                    <>
-                      <Download className="h-4 w-4 mr-2" />
-                      Import
-                    </>
-                  )}
-                </Button>
-              </div>
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => setDeleteConfirmSkill(null)}
+              >
+                Cancel
+              </Button>
+              <Button
+                className="flex-1 bg-red-600 hover:bg-red-700"
+                onClick={handleDeleteSkill}
+                disabled={isDeleting}
+              >
+                {isDeleting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete
+                  </>
+                )}
+              </Button>
             </div>
           </div>
         </div>

@@ -202,7 +202,29 @@ export async function publishSkillToCommunity(skill: {
 export async function incrementSkillUseCount(skillId: string): Promise<void> {
   if (!supabase) return;
 
-  await supabase.rpc('increment_skill_use_count', { skill_id: skillId });
+  try {
+    // Try RPC first (uses SECURITY DEFINER to bypass RLS)
+    const { error: rpcError } = await supabase.rpc('increment_skill_use_count', { skill_id: skillId });
+
+    if (rpcError) {
+      console.warn('RPC increment failed:', rpcError.message);
+      // Fall back: fetch current count and update
+      const { data: skill } = await supabase
+        .from('skill_templates')
+        .select('use_count')
+        .eq('id', skillId)
+        .single();
+
+      if (skill) {
+        await supabase
+          .from('skill_templates')
+          .update({ use_count: (skill.use_count || 0) + 1 })
+          .eq('id', skillId);
+      }
+    }
+  } catch (err) {
+    console.error('Failed to increment use count:', err);
+  }
 }
 
 export async function rateSkill(skillId: string, rating: number): Promise<void> {
@@ -220,4 +242,22 @@ export async function rateSkill(skillId: string, rating: number): Promise<void> 
     });
 
   if (error) throw error;
+}
+
+export async function deleteCommunitySkill(skillId: string): Promise<void> {
+  if (!supabase) throw new Error('Supabase not configured');
+
+  const user = await getCurrentUser();
+  if (!user) throw new Error('Must be signed in to delete skills');
+
+  const { error } = await supabase
+    .from('skill_templates')
+    .delete()
+    .eq('id', skillId)
+    .eq('created_by', user.id); // RLS also enforces this, but double-check
+
+  if (error) {
+    console.error('Error deleting skill:', error);
+    throw new Error(`Failed to delete skill: ${error.message}`);
+  }
 }
