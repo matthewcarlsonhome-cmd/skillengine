@@ -17,6 +17,7 @@ import DynamicSkillRunnerPage from './pages/DynamicSkillRunnerPage';
 import CommunitySkillsPage from './pages/CommunitySkillsPage';
 import CommunitySkillRunnerPage from './pages/CommunitySkillRunnerPage';
 import ImportSkillPage from './pages/ImportSkillPage';
+import DashboardPage from './pages/DashboardPage';
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
                   <Routes>
                     {/* Home */}
                     <Route path="/" element={<HomePage />} />
+                    <Route path="/dashboard" element={<DashboardPage />} />
 
                     {/* Static skills (Job Applicant) */}
                     <Route path="/skills" element={<BrowseSkillsPage />} />

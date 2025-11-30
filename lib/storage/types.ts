@@ -159,3 +159,29 @@ export interface UserPreferences {
   defaultResume?: string;
   defaultJobDescription?: string;
 }
+
+export interface SavedOutput {
+  id: string;
+  title: string;
+  notes?: string;
+  skillId: string;
+  skillName: string;
+  skillSource: 'static' | 'dynamic' | 'community';
+  output: string;
+  inputs: Record<string, unknown>;
+  model: 'gemini' | 'claude';
+  createdAt: string;
+  updatedAt: string;
+  tags?: string[];
+  isFavorite: boolean;
+}
+
+export interface FavoriteSkill {
+  id: string;
+  skillId: string;
+  skillName: string;
+  skillDescription: string;
+  skillSource: 'static' | 'dynamic' | 'community';
+  category: string;
+  createdAt: string;
+}

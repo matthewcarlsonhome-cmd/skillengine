@@ -4,17 +4,21 @@ import type {
   Workspace,
   DynamicSkill,
   SkillExecution,
-  UserPreferences
+  UserPreferences,
+  SavedOutput,
+  FavoriteSkill
 } from './types';
 
 const DB_NAME = 'skillengine';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 export const STORES = {
   WORKSPACES: 'workspaces',
   DYNAMIC_SKILLS: 'dynamicSkills',
   SKILL_EXECUTIONS: 'skillExecutions',
-  USER_PREFERENCES: 'userPreferences'
+  USER_PREFERENCES: 'userPreferences',
+  SAVED_OUTPUTS: 'savedOutputs',
+  FAVORITE_SKILLS: 'favoriteSkills'
 } as const;
 
 class SkillEngineDB {
@@ -68,6 +72,21 @@ class SkillEngineDB {
         // User Preferences store
         if (!db.objectStoreNames.contains(STORES.USER_PREFERENCES)) {
           db.createObjectStore(STORES.USER_PREFERENCES, { keyPath: 'id' });
+        }
+
+        // Saved Outputs store (new in v2)
+        if (!db.objectStoreNames.contains(STORES.SAVED_OUTPUTS)) {
+          const savedStore = db.createObjectStore(STORES.SAVED_OUTPUTS, { keyPath: 'id' });
+          savedStore.createIndex('skillId', 'skillId');
+          savedStore.createIndex('createdAt', 'createdAt');
+          savedStore.createIndex('isFavorite', 'isFavorite');
+        }
+
+        // Favorite Skills store (new in v2)
+        if (!db.objectStoreNames.contains(STORES.FAVORITE_SKILLS)) {
+          const favStore = db.createObjectStore(STORES.FAVORITE_SKILLS, { keyPath: 'id' });
+          favStore.createIndex('skillId', 'skillId');
+          favStore.createIndex('createdAt', 'createdAt');
         }
       };
     });
@@ -185,6 +204,87 @@ class SkillEngineDB {
 
   async savePreferences(prefs: UserPreferences): Promise<void> {
     return this.put(STORES.USER_PREFERENCES, prefs);
+  }
+
+  // ─── SAVED OUTPUTS ─────────────────────────────────────────────────
+
+  async saveOutput(output: SavedOutput): Promise<void> {
+    return this.put(STORES.SAVED_OUTPUTS, output);
+  }
+
+  async getSavedOutput(id: string): Promise<SavedOutput | undefined> {
+    return this.get(STORES.SAVED_OUTPUTS, id);
+  }
+
+  async getAllSavedOutputs(): Promise<SavedOutput[]> {
+    const outputs = await this.getAll<SavedOutput>(STORES.SAVED_OUTPUTS);
+    return outputs.sort((a, b) =>
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+  }
+
+  async getSavedOutputsBySkill(skillId: string): Promise<SavedOutput[]> {
+    return this.getAllByIndex(STORES.SAVED_OUTPUTS, 'skillId', skillId);
+  }
+
+  async getFavoriteSavedOutputs(): Promise<SavedOutput[]> {
+    const all = await this.getAll<SavedOutput>(STORES.SAVED_OUTPUTS);
+    return all
+      .filter(o => o.isFavorite)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  async updateSavedOutput(id: string, updates: Partial<SavedOutput>): Promise<void> {
+    const output = await this.getSavedOutput(id);
+    if (output) {
+      await this.put(STORES.SAVED_OUTPUTS, {
+        ...output,
+        ...updates,
+        updatedAt: new Date().toISOString()
+      });
+    }
+  }
+
+  async deleteSavedOutput(id: string): Promise<void> {
+    return this.delete(STORES.SAVED_OUTPUTS, id);
+  }
+
+  // ─── FAVORITE SKILLS ───────────────────────────────────────────────
+
+  async addFavoriteSkill(favorite: FavoriteSkill): Promise<void> {
+    return this.put(STORES.FAVORITE_SKILLS, favorite);
+  }
+
+  async getFavoriteSkill(id: string): Promise<FavoriteSkill | undefined> {
+    return this.get(STORES.FAVORITE_SKILLS, id);
+  }
+
+  async getAllFavoriteSkills(): Promise<FavoriteSkill[]> {
+    const favorites = await this.getAll<FavoriteSkill>(STORES.FAVORITE_SKILLS);
+    return favorites.sort((a, b) =>
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+  }
+
+  async getFavoriteBySkillId(skillId: string): Promise<FavoriteSkill | undefined> {
+    const favorites = await this.getAllByIndex<FavoriteSkill>(STORES.FAVORITE_SKILLS, 'skillId', skillId);
+    return favorites[0];
+  }
+
+  async isSkillFavorited(skillId: string): Promise<boolean> {
+    const favorite = await this.getFavoriteBySkillId(skillId);
+    return !!favorite;
+  }
+
+  async removeFavoriteSkill(id: string): Promise<void> {
+    return this.delete(STORES.FAVORITE_SKILLS, id);
+  }
+
+  async removeFavoriteBySkillId(skillId: string): Promise<void> {
+    const favorite = await this.getFavoriteBySkillId(skillId);
+    if (favorite) {
+      await this.delete(STORES.FAVORITE_SKILLS, favorite.id);
+    }
   }
 
   // ─── EXPORT / IMPORT ──────────────────────────────────────────────
