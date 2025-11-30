@@ -141,7 +141,8 @@ export interface DynamicSkill {
 export interface SkillExecution {
   id: string;
   skillId: string;
-  skillSource: 'static' | 'dynamic';
+  skillName: string;
+  skillSource: 'static' | 'dynamic' | 'community';
   workspaceId?: string;
   createdAt: string;
 

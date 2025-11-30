@@ -9,7 +9,7 @@ import { incrementSkillUseCount, rateSkill, type CommunitySkill } from '../lib/s
 import { useAppContext } from '../hooks/useAppContext';
 import { useToast } from '../hooks/useToast';
 import { useAuth } from '../hooks/useAuth';
-import type { DynamicSkill, DynamicFormInput, SavedOutput } from '../lib/storage/types';
+import type { DynamicSkill, DynamicFormInput, SavedOutput, SkillExecution } from '../lib/storage/types';
 import { db } from '../lib/storage/indexeddb';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
@@ -179,6 +179,22 @@ const CommunitySkillRunnerPage: React.FC = () => {
       // Increment use count in Supabase
       if (communitySkill) {
         await incrementSkillUseCount(communitySkill.id);
+      }
+
+      // Save execution to history
+      if (communitySkill && startTime) {
+        const execution: SkillExecution = {
+          id: crypto.randomUUID(),
+          skillId: communitySkill.id,
+          skillName: communitySkill.name,
+          skillSource: 'community',
+          createdAt: new Date().toISOString(),
+          inputs: formState,
+          output: fullOutput,
+          model: selectedApi as 'gemini' | 'claude',
+          durationMs: Date.now() - startTime,
+        };
+        await db.saveExecution(execution);
       }
 
       setProgress(100);

@@ -17,7 +17,7 @@ import { Checkbox } from '../components/ui/Checkbox.tsx';
 import { Progress } from '../components/ui/Progress.tsx';
 import { Sparkles, Clipboard, Download, AlertTriangle, ArrowLeft, KeyRound, Link as LinkIcon, Upload, HelpCircle, Save, Star, Check } from 'lucide-react';
 import { db } from '../lib/storage/indexeddb';
-import type { SavedOutput, FavoriteSkill } from '../lib/storage/types';
+import type { SavedOutput, FavoriteSkill, SkillExecution } from '../lib/storage/types';
 
 const SkillRunnerPage: React.FC = () => {
   const { skillId } = useParams<{ skillId: string }>();
@@ -121,6 +121,7 @@ const SkillRunnerPage: React.FC = () => {
     setError(null);
     setProgress(0);
 
+    const startTime = Date.now();
     const progressInterval = setInterval(() => {
       setProgress(prev => Math.min(prev + 2, 95));
     }, 200);
@@ -181,6 +182,20 @@ const SkillRunnerPage: React.FC = () => {
       } else {
         throw new Error(`API provider "${selectedApi}" is not supported yet.`);
       }
+
+      // Save execution to history
+      const execution: SkillExecution = {
+        id: crypto.randomUUID(),
+        skillId: skill.id,
+        skillName: skill.name,
+        skillSource: 'static',
+        createdAt: new Date().toISOString(),
+        inputs: formState,
+        output: fullResponseText,
+        model: selectedApi as 'gemini' | 'claude',
+        durationMs: Date.now() - startTime,
+      };
+      await db.saveExecution(execution);
     } catch (e: any) {
       setError(e.message || 'An unknown error occurred.');
       addToast(e.message || 'An unknown error occurred.', 'error');
