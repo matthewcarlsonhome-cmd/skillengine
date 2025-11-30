@@ -233,15 +233,64 @@ export async function rateSkill(skillId: string, rating: number): Promise<void> 
   const user = await getCurrentUser();
   if (!user) throw new Error('Must be signed in to rate skills');
 
+  // Check if user has already rated this skill
+  const { data: existingRating } = await supabase
+    .from('skill_ratings')
+    .select('id, rating')
+    .eq('skill_id', skillId)
+    .eq('user_id', user.id)
+    .maybeSingle();
+
+  const oldRating = existingRating?.rating || 0;
+  const isNewRating = !existingRating;
+
+  // Upsert the rating
   const { error } = await supabase
     .from('skill_ratings')
     .upsert({
       skill_id: skillId,
       user_id: user.id,
       rating,
-    });
+    }, { onConflict: 'skill_id,user_id' });
 
   if (error) throw error;
+
+  // Directly update skill_templates rating aggregates
+  // This ensures ratings work even if the trigger isn't set up
+  if (isNewRating) {
+    // New rating: increment count and add to sum
+    const { data: skill } = await supabase
+      .from('skill_templates')
+      .select('rating_sum, rating_count')
+      .eq('id', skillId)
+      .single();
+
+    if (skill) {
+      await supabase
+        .from('skill_templates')
+        .update({
+          rating_sum: (skill.rating_sum || 0) + rating,
+          rating_count: (skill.rating_count || 0) + 1,
+        })
+        .eq('id', skillId);
+    }
+  } else {
+    // Updated rating: adjust the sum (count stays same)
+    const { data: skill } = await supabase
+      .from('skill_templates')
+      .select('rating_sum')
+      .eq('id', skillId)
+      .single();
+
+    if (skill) {
+      await supabase
+        .from('skill_templates')
+        .update({
+          rating_sum: (skill.rating_sum || 0) - oldRating + rating,
+        })
+        .eq('id', skillId);
+    }
+  }
 }
 
 export async function deleteCommunitySkill(skillId: string): Promise<void> {
