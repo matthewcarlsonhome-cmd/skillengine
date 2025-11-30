@@ -4,7 +4,6 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { db } from '../lib/storage/indexeddb';
 import type { SavedOutput, FavoriteSkill, SkillExecution } from '../lib/storage/types';
-import { SKILLS } from '../lib/skills';
 import { useToast } from '../hooks/useToast.tsx';
 import { Button } from '../components/ui/Button.tsx';
 import { Input } from '../components/ui/Input.tsx';
@@ -44,6 +43,7 @@ const DashboardPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedOutputId, setExpandedOutputId] = useState<string | null>(null);
+  const [expandedHistoryId, setExpandedHistoryId] = useState<string | null>(null);
   const [editingTitleId, setEditingTitleId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState('');
 
@@ -522,52 +522,68 @@ const DashboardPage: React.FC = () => {
                 </Button>
               </div>
             ) : (
-              <div className="border rounded-xl overflow-hidden">
-                <table className="w-full">
-                  <thead className="bg-muted/50">
-                    <tr>
-                      <th className="text-left p-3 text-sm font-medium">Skill</th>
-                      <th className="text-left p-3 text-sm font-medium">Type</th>
-                      <th className="text-left p-3 text-sm font-medium">Model</th>
-                      <th className="text-left p-3 text-sm font-medium">Duration</th>
-                      <th className="text-left p-3 text-sm font-medium">Date</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y">
-                    {recentExecutions.slice(0, 20).map((execution) => {
-                      const skill = SKILLS[execution.skillId];
-                      return (
-                        <tr key={execution.id} className="hover:bg-muted/30">
-                          <td className="p-3">
-                            <span className="font-medium">
-                              {skill?.name || execution.skillId}
-                            </span>
-                          </td>
-                          <td className="p-3">
-                            <span className="text-xs px-2 py-1 rounded bg-muted">
-                              {execution.skillSource}
-                            </span>
-                          </td>
-                          <td className="p-3">
-                            <span className="text-sm text-muted-foreground">
-                              {execution.model}
-                            </span>
-                          </td>
-                          <td className="p-3">
-                            <span className="text-sm text-muted-foreground">
-                              {(execution.durationMs / 1000).toFixed(1)}s
-                            </span>
-                          </td>
-                          <td className="p-3">
-                            <span className="text-sm text-muted-foreground">
-                              {formatDate(execution.createdAt)}
-                            </span>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+              <div className="space-y-2">
+                {recentExecutions.slice(0, 20).map((execution) => (
+                  <div key={execution.id} className="border rounded-xl bg-card overflow-hidden">
+                    <button
+                      onClick={() => setExpandedHistoryId(
+                        expandedHistoryId === execution.id ? null : execution.id
+                      )}
+                      className="w-full p-4 flex items-center justify-between gap-4 hover:bg-muted/30 transition-colors text-left"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-3 mb-1">
+                          <span className="font-semibold truncate">
+                            {execution.skillName || execution.skillId}
+                          </span>
+                          <span className="text-xs px-2 py-0.5 rounded bg-muted shrink-0">
+                            {execution.skillSource}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <Sparkles className="h-3 w-3" />
+                            {execution.model}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            {(execution.durationMs / 1000).toFixed(1)}s
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Calendar className="h-3 w-3" />
+                            {formatDate(execution.createdAt)}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleCopyOutput(execution.output);
+                          }}
+                        >
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                        {expandedHistoryId === execution.id ? (
+                          <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                        ) : (
+                          <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                        )}
+                      </div>
+                    </button>
+                    {expandedHistoryId === execution.id && (
+                      <div className="border-t bg-muted/30 p-4">
+                        <div className="prose prose-sm dark:prose-invert max-w-none max-h-96 overflow-y-auto">
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            {execution.output}
+                          </ReactMarkdown>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
             )}
           </>
