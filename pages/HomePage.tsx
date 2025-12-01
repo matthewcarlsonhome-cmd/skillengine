@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useWorkspaces } from '../hooks/useStorage';
 import { Button } from '../components/ui/Button';
@@ -9,60 +9,150 @@ import {
   Clock,
   ChevronRight,
   Plus,
-  Trash2
+  Trash2,
+  User,
+  Package,
+  Wand2,
+  ArrowRight,
+  CheckCircle2
 } from 'lucide-react';
+import { getUserProfile } from './UserProfilePage';
 
 const HomePage: React.FC = () => {
   const { workspaces, deleteWorkspace, loading: workspacesLoading } = useWorkspaces();
+  const [hasProfile, setHasProfile] = useState(false);
+
+  useEffect(() => {
+    const profile = getUserProfile();
+    // Check if user has any meaningful profile data
+    const hasData = profile.fullName || profile.resumeText || profile.professionalTitle;
+    setHasProfile(!!hasData);
+  }, []);
 
   return (
     <div className="container mx-auto max-w-7xl px-4 py-12 sm:py-16">
       {/* Hero Section */}
-      <section className="text-center mb-12">
+      <section className="text-center mb-10">
         <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight">
-          AI-Powered Skill Engine
+          AI-Powered Career Tools
         </h1>
         <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
-          Generate custom AI skills for any role, or use our pre-built career tools.
+          Optimize your job search with AI. Build resumes, prep for interviews, and accelerate your career.
         </p>
       </section>
 
-      {/* Quick Start Cards */}
-      <section className="mb-12 grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Job Applicant Card */}
-        <div className="rounded-xl border bg-card p-6 hover:border-primary/50 transition-colors">
-          <div className="flex items-start gap-4">
-            <div className="h-12 w-12 rounded-lg bg-blue-500/20 flex items-center justify-center">
-              <Briefcase className="h-6 w-6 text-blue-400" />
+      {/* Profile Setup Banner - Show if no profile */}
+      {!hasProfile && (
+        <section className="mb-8">
+          <Link to="/profile">
+            <div className="rounded-xl border-2 border-dashed border-primary/30 bg-gradient-to-r from-blue-500/5 to-purple-500/5 p-6 hover:border-primary/50 transition-colors">
+              <div className="flex items-center gap-4">
+                <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                  <User className="h-7 w-7 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <h2 className="text-lg font-bold flex items-center gap-2">
+                    Set Up Your Profile
+                    <span className="text-xs font-normal px-2 py-0.5 rounded-full bg-primary/20 text-primary">Recommended</span>
+                  </h2>
+                  <p className="text-muted-foreground text-sm mt-1">
+                    Add your resume and background info once, then all AI skills will use it automatically for personalized results.
+                  </p>
+                </div>
+                <ArrowRight className="h-5 w-5 text-primary shrink-0" />
+              </div>
             </div>
-            <div className="flex-1">
-              <h2 className="text-xl font-bold">Job Applicant Tools</h2>
-              <p className="text-muted-foreground text-sm mt-1">
-                15 pre-built skills for job seekers: resume optimization, interview prep, salary negotiation, and more.
-              </p>
-              <Link to="/skills" className="inline-flex items-center text-sm font-medium text-primary mt-3 hover:underline">
-                Browse Skills <ChevronRight className="ml-1 h-4 w-4" />
-              </Link>
+          </Link>
+        </section>
+      )}
+
+      {/* Getting Started Steps */}
+      <section className="mb-10 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Link to="/profile" className="group">
+          <div className={`rounded-xl border p-5 h-full transition-colors ${hasProfile ? 'bg-green-500/5 border-green-500/30' : 'hover:border-primary/50'}`}>
+            <div className="flex items-center gap-3 mb-2">
+              <div className={`h-8 w-8 rounded-full flex items-center justify-center text-sm font-bold ${hasProfile ? 'bg-green-500 text-white' : 'bg-muted text-muted-foreground'}`}>
+                {hasProfile ? <CheckCircle2 className="h-5 w-5" /> : '1'}
+              </div>
+              <h3 className="font-semibold">Set Up Profile</h3>
             </div>
+            <p className="text-sm text-muted-foreground pl-11">
+              Add your resume and background for personalized AI results
+            </p>
           </div>
+        </Link>
+        <Link to="/skills" className="group">
+          <div className="rounded-xl border p-5 h-full hover:border-primary/50 transition-colors">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-sm font-bold text-muted-foreground">2</div>
+              <h3 className="font-semibold">Run AI Skills</h3>
+            </div>
+            <p className="text-sm text-muted-foreground pl-11">
+              Use 15+ AI tools for resumes, cover letters, and interview prep
+            </p>
+          </div>
+        </Link>
+        <Link to="/job-tracker" className="group">
+          <div className="rounded-xl border p-5 h-full hover:border-primary/50 transition-colors">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-sm font-bold text-muted-foreground">3</div>
+              <h3 className="font-semibold">Track Applications</h3>
+            </div>
+            <p className="text-sm text-muted-foreground pl-11">
+              Manage your job search with tracking, reminders, and progress reports
+            </p>
+          </div>
+        </Link>
+      </section>
+
+      {/* Main Feature Cards */}
+      <section className="mb-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* AI Skills Card */}
+        <div className="rounded-xl border bg-card p-6 hover:border-blue-500/50 transition-colors">
+          <div className="h-12 w-12 rounded-lg bg-blue-500/20 flex items-center justify-center mb-4">
+            <Sparkles className="h-6 w-6 text-blue-400" />
+          </div>
+          <h2 className="text-xl font-bold mb-2">AI Skills</h2>
+          <p className="text-muted-foreground text-sm mb-4">
+            15+ AI-powered tools for job seekers: resume optimization, cover letters, interview prep, salary negotiation.
+          </p>
+          <Link to="/skills">
+            <Button variant="outline" className="w-full">
+              Browse Skills <ChevronRight className="ml-1 h-4 w-4" />
+            </Button>
+          </Link>
         </div>
 
-        {/* Role-Based Card */}
-        <div className="rounded-xl border bg-card p-6 hover:border-primary/50 transition-colors">
-          <div className="flex items-start gap-4">
-            <div className="h-12 w-12 rounded-lg bg-purple-500/20 flex items-center justify-center">
-              <Sparkles className="h-6 w-6 text-purple-400" />
-            </div>
-            <div className="flex-1">
-              <h2 className="text-xl font-bold">Generate Role-Based Skills</h2>
-              <p className="text-muted-foreground text-sm mt-1">
-                Paste any job description to generate custom AI skills tailored to that role. Perfect for analysts, marketers, creatives, and more.
-              </p>
-              <Link to="/analyze" className="inline-flex items-center text-sm font-medium text-primary mt-3 hover:underline">
-                Analyze a Role <ChevronRight className="ml-1 h-4 w-4" />
-              </Link>
-            </div>
+        {/* Role Templates Card */}
+        <div className="rounded-xl border bg-card p-6 hover:border-purple-500/50 transition-colors">
+          <div className="h-12 w-12 rounded-lg bg-purple-500/20 flex items-center justify-center mb-4">
+            <Package className="h-6 w-6 text-purple-400" />
           </div>
+          <h2 className="text-xl font-bold mb-2">Role Templates</h2>
+          <p className="text-muted-foreground text-sm mb-4">
+            Pre-built skill bundles for 20 professions. Install skills designed for your career in one click.
+          </p>
+          <Link to="/role-templates">
+            <Button variant="outline" className="w-full">
+              View Templates <ChevronRight className="ml-1 h-4 w-4" />
+            </Button>
+          </Link>
+        </div>
+
+        {/* Custom Skills Card */}
+        <div className="rounded-xl border bg-card p-6 hover:border-orange-500/50 transition-colors">
+          <div className="h-12 w-12 rounded-lg bg-orange-500/20 flex items-center justify-center mb-4">
+            <Wand2 className="h-6 w-6 text-orange-400" />
+          </div>
+          <h2 className="text-xl font-bold mb-2">Custom Skills</h2>
+          <p className="text-muted-foreground text-sm mb-4">
+            Paste any job description to generate AI skills tailored to that specific role and company.
+          </p>
+          <Link to="/analyze">
+            <Button variant="outline" className="w-full">
+              Create Skills <ChevronRight className="ml-1 h-4 w-4" />
+            </Button>
+          </Link>
         </div>
       </section>
 

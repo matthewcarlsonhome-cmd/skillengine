@@ -27,6 +27,8 @@ import {
   Lock,
   TrendingUp,
   Calendar,
+  User,
+  Wand2,
 } from 'lucide-react';
 
 interface Command {
@@ -47,6 +49,14 @@ const CommandPalette: React.FC = () => {
 
   const commands: Command[] = [
     {
+      id: 'profile',
+      name: 'My Profile',
+      description: 'Manage your resume and background info',
+      icon: User,
+      action: () => navigate('/profile'),
+      keywords: ['profile', 'resume', 'background', 'info', 'personal', 'me'],
+    },
+    {
       id: 'dashboard',
       name: 'Dashboard',
       description: 'View your saved outputs and history',
@@ -56,11 +66,11 @@ const CommandPalette: React.FC = () => {
     },
     {
       id: 'skills',
-      name: 'Job Tools',
+      name: 'AI Skills',
       description: 'Browse AI-powered job search tools',
       icon: Sparkles,
       action: () => navigate('/skills'),
-      keywords: ['skills', 'tools', 'resume', 'interview', 'cover letter'],
+      keywords: ['skills', 'tools', 'resume', 'interview', 'cover letter', 'ai'],
     },
     {
       id: 'roles',
@@ -72,11 +82,11 @@ const CommandPalette: React.FC = () => {
     },
     {
       id: 'analyze',
-      name: 'Analyze Role',
+      name: 'Custom Skills',
       description: 'Generate custom skills from job postings',
-      icon: FolderOpen,
+      icon: Wand2,
       action: () => navigate('/analyze'),
-      keywords: ['analyze', 'job', 'posting', 'custom', 'generate'],
+      keywords: ['analyze', 'job', 'posting', 'custom', 'generate', 'create'],
     },
     {
       id: 'community',

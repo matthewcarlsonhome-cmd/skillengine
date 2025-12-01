@@ -40,6 +40,7 @@ import AutoFillVaultPage from './pages/AutoFillVaultPage';
 import ReferralNetworkPage from './pages/ReferralNetworkPage';
 import MarketInsightsPage from './pages/MarketInsightsPage';
 import DailyPlannerPage from './pages/DailyPlannerPage';
+import UserProfilePage from './pages/UserProfilePage';
 
 function App() {
   return (
@@ -56,6 +57,7 @@ function App() {
                     <Route path="/" element={<HomePage />} />
                     <Route path="/dashboard" element={<DashboardPage />} />
                     <Route path="/welcome" element={<WelcomePage />} />
+                    <Route path="/profile" element={<UserProfilePage />} />
 
                     {/* Role Templates */}
                     <Route path="/role-templates" element={<RoleTemplatesPage />} />

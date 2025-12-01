@@ -1544,6 +1544,1450 @@ Generate a professional, persuasive proposal.`,
       },
     ],
   },
+
+  // 11. HR Professional
+  {
+    id: 'hr-professional',
+    name: 'HR Professional',
+    description: 'Talent acquisition, employee relations, HR policies, and organizational development.',
+    icon: 'Users',
+    color: 'text-teal-500',
+    staticSkillIds: [
+      'job-readiness-score',
+      'interview-prep',
+      'linkedin-optimizer-pro',
+      'networking-script-generator',
+      'company-research',
+    ],
+    dynamicSkills: [
+      {
+        name: 'Job Description Writer',
+        description: 'Create compelling, inclusive job descriptions that attract top talent.',
+        longDescription: 'Generates well-structured job descriptions with clear responsibilities, requirements, and company culture highlights while ensuring inclusive language.',
+        category: 'generation',
+        estimatedTimeSaved: '1-2 hours per JD',
+        theme: {
+          primary: 'text-teal-400',
+          secondary: 'bg-teal-900/20',
+          gradient: 'from-teal-500/20 to-transparent',
+          iconName: 'FileText',
+        },
+        inputs: [
+          { id: 'jobTitle', label: 'Job Title', type: 'text', placeholder: 'e.g., Senior Software Engineer', validation: { required: true } },
+          { id: 'department', label: 'Department/Team', type: 'text', placeholder: 'e.g., Engineering, Marketing' },
+          { id: 'requirements', label: 'Key Requirements', type: 'textarea', placeholder: 'Must-have skills, experience level, qualifications...', validation: { required: true } },
+          { id: 'responsibilities', label: 'Main Responsibilities', type: 'textarea', placeholder: 'What will this person do day-to-day?' },
+          { id: 'companyInfo', label: 'Company/Culture Info', type: 'textarea', placeholder: 'Company description, values, benefits...' },
+        ],
+        prompts: {
+          systemInstruction: `You are an experienced HR professional and talent acquisition specialist. Create compelling job descriptions that:
+- Use clear, inclusive language (avoid gendered terms, jargon)
+- Distinguish between required and preferred qualifications
+- Highlight growth opportunities and company culture
+- Are scannable with bullet points
+- Include salary range placeholder and benefits section
+- Follow best practices for attracting diverse candidates`,
+          userPromptTemplate: `Create a job description for:
+
+**Title**: {{jobTitle}}
+**Department**: {{department}}
+**Requirements**: {{requirements}}
+**Responsibilities**: {{responsibilities}}
+**Company Info**: {{companyInfo}}
+
+Generate a compelling, inclusive job description.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'any',
+          useWebSearch: false,
+          maxTokens: 2048,
+          temperature: 0.4,
+        },
+      },
+      {
+        name: 'Interview Question Generator',
+        description: 'Generate behavioral and technical interview questions for any role.',
+        longDescription: 'Creates structured interview questions including behavioral, situational, and role-specific questions with evaluation criteria.',
+        category: 'generation',
+        estimatedTimeSaved: '1-2 hours per interview',
+        theme: {
+          primary: 'text-blue-400',
+          secondary: 'bg-blue-900/20',
+          gradient: 'from-blue-500/20 to-transparent',
+          iconName: 'MessageSquare',
+        },
+        inputs: [
+          { id: 'role', label: 'Role Being Interviewed', type: 'text', placeholder: 'e.g., Product Manager', validation: { required: true } },
+          { id: 'level', label: 'Seniority Level', type: 'select', options: ['Entry Level', 'Mid Level', 'Senior', 'Lead/Manager', 'Director+'] },
+          { id: 'competencies', label: 'Key Competencies to Assess', type: 'textarea', placeholder: 'Leadership, problem-solving, technical skills...' },
+          { id: 'interviewType', label: 'Interview Type', type: 'select', options: ['Phone Screen', 'Behavioral', 'Technical', 'Culture Fit', 'Final Round'] },
+        ],
+        prompts: {
+          systemInstruction: `You are an experienced HR interviewer. Create structured interview questions that:
+- Follow STAR format for behavioral questions
+- Include scoring rubrics/what to look for
+- Cover the key competencies
+- Are legally compliant (avoid discriminatory questions)
+- Progress from warm-up to in-depth questions
+- Include follow-up probes`,
+          userPromptTemplate: `Create interview questions for:
+
+**Role**: {{role}}
+**Level**: {{level}}
+**Competencies**: {{competencies}}
+**Interview Type**: {{interviewType}}
+
+Generate comprehensive interview questions with evaluation criteria.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'any',
+          useWebSearch: false,
+          maxTokens: 3072,
+          temperature: 0.4,
+        },
+      },
+      {
+        name: 'HR Policy Drafter',
+        description: 'Draft clear HR policies and employee handbook sections.',
+        longDescription: 'Creates professional HR policies covering various topics with clear language, procedures, and compliance considerations.',
+        category: 'generation',
+        estimatedTimeSaved: '3-5 hours per policy',
+        theme: {
+          primary: 'text-purple-400',
+          secondary: 'bg-purple-900/20',
+          gradient: 'from-purple-500/20 to-transparent',
+          iconName: 'FileText',
+        },
+        inputs: [
+          { id: 'policyType', label: 'Policy Type', type: 'select', options: ['Remote Work', 'PTO/Leave', 'Code of Conduct', 'Anti-Harassment', 'Performance Management', 'Onboarding', 'Termination', 'Other'], validation: { required: true } },
+          { id: 'companyContext', label: 'Company Context', type: 'textarea', placeholder: 'Company size, industry, existing policies...' },
+          { id: 'specificRequirements', label: 'Specific Requirements', type: 'textarea', placeholder: 'What should this policy cover? Any specific situations?' },
+        ],
+        prompts: {
+          systemInstruction: `You are an HR policy expert. Draft clear, comprehensive policies that:
+- Use plain language employees can understand
+- Include purpose, scope, and procedures
+- Define roles and responsibilities
+- Address common scenarios and exceptions
+- Include compliance considerations
+- Are fair and consistently applicable`,
+          userPromptTemplate: `Draft an HR policy:
+
+**Policy Type**: {{policyType}}
+**Company Context**: {{companyContext}}
+**Requirements**: {{specificRequirements}}
+
+Create a comprehensive, clear HR policy document.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'any',
+          useWebSearch: false,
+          maxTokens: 4096,
+          temperature: 0.3,
+        },
+      },
+    ],
+  },
+
+  // 12. Financial Analyst
+  {
+    id: 'financial-analyst',
+    name: 'Financial Analyst',
+    description: 'Financial modeling, reporting, budgeting, and investment analysis.',
+    icon: 'DollarSign',
+    color: 'text-green-600',
+    staticSkillIds: [
+      'job-readiness-score',
+      'skills-gap-analyzer',
+      'interview-prep',
+      'salary-negotiation-master',
+      'company-research',
+    ],
+    dynamicSkills: [
+      {
+        name: 'Financial Report Summarizer',
+        description: 'Summarize and analyze financial reports and earnings calls.',
+        longDescription: 'Analyzes financial statements, earnings reports, and investor communications to extract key insights and trends.',
+        category: 'analysis',
+        estimatedTimeSaved: '2-3 hours per report',
+        theme: {
+          primary: 'text-green-400',
+          secondary: 'bg-green-900/20',
+          gradient: 'from-green-500/20 to-transparent',
+          iconName: 'FileBarChart',
+        },
+        inputs: [
+          { id: 'reportContent', label: 'Report Content', type: 'textarea', placeholder: 'Paste financial report, earnings call transcript, or key metrics...', validation: { required: true } },
+          { id: 'reportType', label: 'Report Type', type: 'select', options: ['Quarterly Earnings', 'Annual Report', '10-K/10-Q', 'Earnings Call Transcript', 'Investor Presentation'] },
+          { id: 'focusAreas', label: 'Focus Areas', type: 'textarea', placeholder: 'What aspects are most important? Revenue, margins, guidance...' },
+        ],
+        prompts: {
+          systemInstruction: `You are a senior financial analyst. Analyze financial reports and provide:
+1. Executive summary of key highlights
+2. Revenue and profitability analysis
+3. Key metrics and YoY/QoQ comparisons
+4. Management guidance and outlook
+5. Risks and concerns
+6. Investment implications
+Use clear financial terminology and cite specific numbers.`,
+          userPromptTemplate: `Analyze this {{reportType}}:
+
+{{reportContent}}
+
+**Focus Areas**: {{focusAreas}}
+
+Provide a comprehensive financial analysis.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'any',
+          useWebSearch: false,
+          maxTokens: 4096,
+          temperature: 0.3,
+        },
+      },
+      {
+        name: 'Budget Variance Analyzer',
+        description: 'Analyze budget vs actual variances and provide insights.',
+        longDescription: 'Compares budgeted figures to actuals, identifies variances, and provides actionable recommendations.',
+        category: 'analysis',
+        estimatedTimeSaved: '2-4 hours per analysis',
+        theme: {
+          primary: 'text-blue-400',
+          secondary: 'bg-blue-900/20',
+          gradient: 'from-blue-500/20 to-transparent',
+          iconName: 'Calculator',
+        },
+        inputs: [
+          { id: 'budgetData', label: 'Budget vs Actual Data', type: 'textarea', placeholder: 'Paste budget and actual figures...', validation: { required: true } },
+          { id: 'period', label: 'Time Period', type: 'text', placeholder: 'e.g., Q3 2024, FY 2024' },
+          { id: 'context', label: 'Business Context', type: 'textarea', placeholder: 'Any known factors affecting variances?' },
+        ],
+        prompts: {
+          systemInstruction: `You are a financial planning and analysis (FP&A) expert. Analyze budget variances by:
+1. Calculating variance amounts and percentages
+2. Categorizing variances (favorable/unfavorable)
+3. Identifying root causes
+4. Distinguishing volume vs. price variances where applicable
+5. Providing actionable recommendations
+6. Highlighting items requiring management attention`,
+          userPromptTemplate: `Analyze budget variances for {{period}}:
+
+**Data**:
+{{budgetData}}
+
+**Context**: {{context}}
+
+Provide detailed variance analysis with recommendations.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'any',
+          useWebSearch: false,
+          maxTokens: 4096,
+          temperature: 0.3,
+        },
+      },
+      {
+        name: 'Financial Model Documentation',
+        description: 'Create documentation for financial models and assumptions.',
+        longDescription: 'Generates clear documentation for financial models including assumptions, methodology, and user guides.',
+        category: 'generation',
+        estimatedTimeSaved: '2-3 hours per model',
+        theme: {
+          primary: 'text-purple-400',
+          secondary: 'bg-purple-900/20',
+          gradient: 'from-purple-500/20 to-transparent',
+          iconName: 'FileText',
+        },
+        inputs: [
+          { id: 'modelDescription', label: 'Model Description', type: 'textarea', placeholder: 'Describe your financial model, its purpose, and structure...', validation: { required: true } },
+          { id: 'assumptions', label: 'Key Assumptions', type: 'textarea', placeholder: 'List major assumptions and drivers...' },
+          { id: 'docType', label: 'Documentation Type', type: 'select', options: ['Full Documentation', 'Assumptions Log', 'User Guide', 'Methodology Note'] },
+        ],
+        prompts: {
+          systemInstruction: `You are a financial modeling expert. Create clear documentation that:
+- Explains the model's purpose and scope
+- Documents all key assumptions with rationale
+- Describes calculation methodology
+- Includes sensitivity analysis guidance
+- Provides user instructions
+- Notes limitations and caveats`,
+          userPromptTemplate: `Create {{docType}} for:
+
+**Model**: {{modelDescription}}
+**Assumptions**: {{assumptions}}
+
+Generate comprehensive financial model documentation.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'any',
+          useWebSearch: false,
+          maxTokens: 4096,
+          temperature: 0.4,
+        },
+      },
+    ],
+  },
+
+  // 13. Content Writer
+  {
+    id: 'content-writer',
+    name: 'Content Writer',
+    description: 'Blog posts, articles, copywriting, and content strategy.',
+    icon: 'PenTool',
+    color: 'text-orange-500',
+    staticSkillIds: [
+      'job-readiness-score',
+      'linkedin-optimizer-pro',
+      'cover-letter-generator',
+      'networking-script-generator',
+      'interview-prep',
+    ],
+    dynamicSkills: [
+      {
+        name: 'Blog Post Generator',
+        description: 'Create engaging, SEO-optimized blog posts on any topic.',
+        longDescription: 'Generates well-structured blog posts with compelling headlines, clear sections, and SEO best practices.',
+        category: 'generation',
+        estimatedTimeSaved: '2-4 hours per post',
+        theme: {
+          primary: 'text-orange-400',
+          secondary: 'bg-orange-900/20',
+          gradient: 'from-orange-500/20 to-transparent',
+          iconName: 'FileText',
+        },
+        inputs: [
+          { id: 'topic', label: 'Blog Topic', type: 'text', placeholder: 'What should the blog post be about?', validation: { required: true } },
+          { id: 'targetKeyword', label: 'Target Keyword (Optional)', type: 'text', placeholder: 'Primary SEO keyword' },
+          { id: 'audience', label: 'Target Audience', type: 'text', placeholder: 'Who is this for?' },
+          { id: 'tone', label: 'Tone', type: 'select', options: ['Professional', 'Conversational', 'Educational', 'Entertaining', 'Authoritative'] },
+          { id: 'wordCount', label: 'Approximate Length', type: 'select', options: ['Short (500-800)', 'Medium (1000-1500)', 'Long (2000+)'] },
+        ],
+        prompts: {
+          systemInstruction: `You are an expert content writer and SEO specialist. Create blog posts that:
+- Have compelling, click-worthy headlines
+- Include a strong hook in the introduction
+- Use clear subheadings (H2, H3)
+- Incorporate the target keyword naturally
+- Include actionable takeaways
+- End with a clear call-to-action
+- Are scannable with bullet points where appropriate`,
+          userPromptTemplate: `Write a {{wordCount}} blog post:
+
+**Topic**: {{topic}}
+**Keyword**: {{targetKeyword}}
+**Audience**: {{audience}}
+**Tone**: {{tone}}
+
+Create an engaging, well-structured blog post.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'any',
+          useWebSearch: false,
+          maxTokens: 4096,
+          temperature: 0.6,
+        },
+      },
+      {
+        name: 'Content Brief Creator',
+        description: 'Create detailed content briefs for writers and teams.',
+        longDescription: 'Generates comprehensive content briefs including outline, keywords, competitor analysis, and success criteria.',
+        category: 'generation',
+        estimatedTimeSaved: '1-2 hours per brief',
+        theme: {
+          primary: 'text-blue-400',
+          secondary: 'bg-blue-900/20',
+          gradient: 'from-blue-500/20 to-transparent',
+          iconName: 'ClipboardList',
+        },
+        inputs: [
+          { id: 'contentTopic', label: 'Content Topic', type: 'text', placeholder: 'What content needs to be created?', validation: { required: true } },
+          { id: 'contentType', label: 'Content Type', type: 'select', options: ['Blog Post', 'Landing Page', 'Email', 'Social Media', 'White Paper', 'Case Study'] },
+          { id: 'goals', label: 'Content Goals', type: 'textarea', placeholder: 'What should this content achieve?' },
+          { id: 'competitorUrls', label: 'Competitor Content (Optional)', type: 'textarea', placeholder: 'URLs or descriptions of competitor content...' },
+        ],
+        prompts: {
+          systemInstruction: `You are a content strategist. Create detailed briefs including:
+1. Content overview and goals
+2. Target audience persona
+3. Primary and secondary keywords
+4. Detailed outline with section descriptions
+5. Key points to cover
+6. Tone and style guidelines
+7. Internal/external linking suggestions
+8. Success metrics
+9. SEO requirements`,
+          userPromptTemplate: `Create a content brief for {{contentType}}:
+
+**Topic**: {{contentTopic}}
+**Goals**: {{goals}}
+**Competitor Reference**: {{competitorUrls}}
+
+Generate a comprehensive content brief.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'any',
+          useWebSearch: false,
+          maxTokens: 3072,
+          temperature: 0.4,
+        },
+      },
+      {
+        name: 'Content Repurposer',
+        description: 'Transform content into multiple formats and platforms.',
+        longDescription: 'Takes existing content and repurposes it for different channels, formats, and audiences.',
+        category: 'generation',
+        estimatedTimeSaved: '1-2 hours per piece',
+        theme: {
+          primary: 'text-purple-400',
+          secondary: 'bg-purple-900/20',
+          gradient: 'from-purple-500/20 to-transparent',
+          iconName: 'RefreshCw',
+        },
+        inputs: [
+          { id: 'originalContent', label: 'Original Content', type: 'textarea', placeholder: 'Paste your existing content...', validation: { required: true } },
+          { id: 'targetFormats', label: 'Target Formats', type: 'select', options: ['Social Media Posts', 'Email Newsletter', 'Video Script', 'Infographic Outline', 'Podcast Talking Points', 'All Formats'] },
+          { id: 'brandVoice', label: 'Brand Voice', type: 'text', placeholder: 'e.g., Professional, Friendly, Bold' },
+        ],
+        prompts: {
+          systemInstruction: `You are a content repurposing expert. Transform content while:
+- Maintaining the core message and value
+- Adapting tone and format for each platform
+- Optimizing length for each channel
+- Adding platform-specific elements (hashtags, hooks, etc.)
+- Ensuring consistency across formats`,
+          userPromptTemplate: `Repurpose this content for {{targetFormats}}:
+
+**Original Content**:
+{{originalContent}}
+
+**Brand Voice**: {{brandVoice}}
+
+Create optimized versions for each target format.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'any',
+          useWebSearch: false,
+          maxTokens: 4096,
+          temperature: 0.6,
+        },
+      },
+    ],
+  },
+
+  // 14. Customer Success Manager
+  {
+    id: 'customer-success-manager',
+    name: 'Customer Success Manager',
+    description: 'Client relationships, retention strategies, onboarding, and account growth.',
+    icon: 'HeartHandshake',
+    color: 'text-pink-500',
+    staticSkillIds: [
+      'job-readiness-score',
+      'interview-prep',
+      'linkedin-optimizer-pro',
+      'networking-script-generator',
+      'salary-negotiation-master',
+    ],
+    dynamicSkills: [
+      {
+        name: 'Customer Health Score Analyzer',
+        description: 'Analyze customer data and generate health assessments.',
+        longDescription: 'Evaluates customer engagement, usage, and satisfaction data to identify at-risk accounts and growth opportunities.',
+        category: 'analysis',
+        estimatedTimeSaved: '1-2 hours per analysis',
+        theme: {
+          primary: 'text-pink-400',
+          secondary: 'bg-pink-900/20',
+          gradient: 'from-pink-500/20 to-transparent',
+          iconName: 'Heart',
+        },
+        inputs: [
+          { id: 'customerData', label: 'Customer Data', type: 'textarea', placeholder: 'Usage metrics, support tickets, engagement data, NPS scores...', validation: { required: true } },
+          { id: 'accountInfo', label: 'Account Info', type: 'textarea', placeholder: 'Contract value, tenure, key stakeholders, goals...' },
+          { id: 'recentActivity', label: 'Recent Activity', type: 'textarea', placeholder: 'Recent interactions, meetings, concerns raised...' },
+        ],
+        prompts: {
+          systemInstruction: `You are a customer success expert. Analyze customer health by:
+1. Evaluating engagement and usage trends
+2. Identifying risk indicators
+3. Spotting expansion opportunities
+4. Recommending proactive actions
+5. Prioritizing outreach focus areas
+6. Suggesting talking points for next interaction`,
+          userPromptTemplate: `Analyze customer health:
+
+**Customer Data**: {{customerData}}
+**Account Info**: {{accountInfo}}
+**Recent Activity**: {{recentActivity}}
+
+Provide a comprehensive health assessment with recommendations.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'any',
+          useWebSearch: false,
+          maxTokens: 3072,
+          temperature: 0.4,
+        },
+      },
+      {
+        name: 'QBR Deck Generator',
+        description: 'Create Quarterly Business Review presentations.',
+        longDescription: 'Generates structured QBR content including performance metrics, achievements, recommendations, and next steps.',
+        category: 'generation',
+        estimatedTimeSaved: '3-4 hours per QBR',
+        theme: {
+          primary: 'text-blue-400',
+          secondary: 'bg-blue-900/20',
+          gradient: 'from-blue-500/20 to-transparent',
+          iconName: 'Presentation',
+        },
+        inputs: [
+          { id: 'accountName', label: 'Account Name', type: 'text', placeholder: 'Customer/Account name', validation: { required: true } },
+          { id: 'metrics', label: 'Key Metrics & Results', type: 'textarea', placeholder: 'Usage stats, ROI achieved, goals met...', validation: { required: true } },
+          { id: 'highlights', label: 'Key Highlights', type: 'textarea', placeholder: 'Major wins, milestones, initiatives...' },
+          { id: 'challenges', label: 'Challenges & Opportunities', type: 'textarea', placeholder: 'Issues faced, areas for improvement...' },
+        ],
+        prompts: {
+          systemInstruction: `You are a customer success manager creating a QBR. Structure the presentation with:
+1. Executive Summary
+2. Goals Recap & Progress
+3. Key Metrics Dashboard
+4. Wins & Success Stories
+5. Challenges & Solutions
+6. Product Updates & Roadmap
+7. Recommendations
+8. Next Quarter Goals
+9. Action Items`,
+          userPromptTemplate: `Create a QBR presentation for {{accountName}}:
+
+**Metrics**: {{metrics}}
+**Highlights**: {{highlights}}
+**Challenges**: {{challenges}}
+
+Generate a comprehensive QBR deck outline with talking points.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'any',
+          useWebSearch: false,
+          maxTokens: 4096,
+          temperature: 0.4,
+        },
+      },
+      {
+        name: 'Customer Email Composer',
+        description: 'Write professional customer communications for various scenarios.',
+        longDescription: 'Creates tailored customer emails for onboarding, check-ins, escalations, renewals, and more.',
+        category: 'communication',
+        estimatedTimeSaved: '15-30 min per email',
+        theme: {
+          primary: 'text-green-400',
+          secondary: 'bg-green-900/20',
+          gradient: 'from-green-500/20 to-transparent',
+          iconName: 'Mail',
+        },
+        inputs: [
+          { id: 'emailType', label: 'Email Type', type: 'select', options: ['Onboarding Welcome', 'Check-in', 'Escalation Response', 'Renewal Reminder', 'Upsell/Cross-sell', 'Win-back', 'Feedback Request'], validation: { required: true } },
+          { id: 'customerContext', label: 'Customer Context', type: 'textarea', placeholder: 'Customer name, situation, history...', validation: { required: true } },
+          { id: 'keyPoints', label: 'Key Points to Cover', type: 'textarea', placeholder: 'What needs to be communicated?' },
+          { id: 'tone', label: 'Tone', type: 'select', options: ['Warm & Friendly', 'Professional', 'Empathetic', 'Urgent'] },
+        ],
+        prompts: {
+          systemInstruction: `You are a customer success manager writing customer emails. Create emails that:
+- Are personalized and reference specific context
+- Have a clear purpose and call-to-action
+- Maintain the appropriate tone
+- Are concise but thorough
+- Build relationship and trust
+- Include next steps`,
+          userPromptTemplate: `Write a {{emailType}} email:
+
+**Context**: {{customerContext}}
+**Key Points**: {{keyPoints}}
+**Tone**: {{tone}}
+
+Create a professional, effective customer email.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'any',
+          useWebSearch: false,
+          maxTokens: 1024,
+          temperature: 0.5,
+        },
+      },
+    ],
+  },
+
+  // 15. DevOps Engineer
+  {
+    id: 'devops-engineer',
+    name: 'DevOps Engineer',
+    description: 'CI/CD pipelines, infrastructure automation, monitoring, and cloud operations.',
+    icon: 'Server',
+    color: 'text-slate-500',
+    staticSkillIds: [
+      'job-readiness-score',
+      'skills-gap-analyzer',
+      'interview-prep',
+      'salary-negotiation-master',
+      'linkedin-optimizer-pro',
+    ],
+    dynamicSkills: [
+      {
+        name: 'Infrastructure as Code Generator',
+        description: 'Generate Terraform, CloudFormation, or other IaC templates.',
+        longDescription: 'Creates infrastructure as code templates with best practices for security, scalability, and maintainability.',
+        category: 'generation',
+        estimatedTimeSaved: '2-4 hours per template',
+        theme: {
+          primary: 'text-slate-400',
+          secondary: 'bg-slate-900/20',
+          gradient: 'from-slate-500/20 to-transparent',
+          iconName: 'Code2',
+        },
+        inputs: [
+          { id: 'infrastructure', label: 'Infrastructure Requirements', type: 'textarea', placeholder: 'Describe the infrastructure needed (VPC, EC2, RDS, etc.)', validation: { required: true } },
+          { id: 'tool', label: 'IaC Tool', type: 'select', options: ['Terraform', 'AWS CloudFormation', 'Pulumi', 'Ansible', 'Kubernetes YAML'], validation: { required: true } },
+          { id: 'cloud', label: 'Cloud Provider', type: 'select', options: ['AWS', 'GCP', 'Azure', 'Multi-cloud'] },
+          { id: 'environment', label: 'Environment', type: 'select', options: ['Development', 'Staging', 'Production', 'All'] },
+        ],
+        prompts: {
+          systemInstruction: `You are a senior DevOps engineer. Generate IaC code that:
+- Follows security best practices (least privilege, encryption)
+- Is modular and reusable
+- Includes proper tagging and naming conventions
+- Has appropriate comments
+- Considers cost optimization
+- Includes variable definitions and outputs`,
+          userPromptTemplate: `Generate {{tool}} code for {{cloud}}:
+
+**Infrastructure**: {{infrastructure}}
+**Environment**: {{environment}}
+
+Create production-ready infrastructure as code.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'any',
+          useWebSearch: false,
+          maxTokens: 4096,
+          temperature: 0.2,
+        },
+      },
+      {
+        name: 'CI/CD Pipeline Designer',
+        description: 'Design and document CI/CD pipelines for various platforms.',
+        longDescription: 'Creates CI/CD pipeline configurations and documentation for GitHub Actions, GitLab CI, Jenkins, and more.',
+        category: 'generation',
+        estimatedTimeSaved: '2-3 hours per pipeline',
+        theme: {
+          primary: 'text-blue-400',
+          secondary: 'bg-blue-900/20',
+          gradient: 'from-blue-500/20 to-transparent',
+          iconName: 'GitBranch',
+        },
+        inputs: [
+          { id: 'projectType', label: 'Project Type', type: 'text', placeholder: 'e.g., Node.js API, Python ML, React App', validation: { required: true } },
+          { id: 'platform', label: 'CI/CD Platform', type: 'select', options: ['GitHub Actions', 'GitLab CI', 'Jenkins', 'CircleCI', 'Azure DevOps'], validation: { required: true } },
+          { id: 'stages', label: 'Required Stages', type: 'textarea', placeholder: 'Build, test, lint, deploy, etc.' },
+          { id: 'deployTarget', label: 'Deployment Target', type: 'text', placeholder: 'e.g., AWS ECS, Kubernetes, Vercel' },
+        ],
+        prompts: {
+          systemInstruction: `You are a DevOps expert. Create CI/CD pipelines that:
+- Include all standard stages (lint, test, build, deploy)
+- Use caching for faster builds
+- Include security scanning
+- Have proper environment separation
+- Include rollback capabilities
+- Are well-documented with comments`,
+          userPromptTemplate: `Design a {{platform}} pipeline for {{projectType}}:
+
+**Stages**: {{stages}}
+**Deploy Target**: {{deployTarget}}
+
+Create a comprehensive CI/CD pipeline configuration.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'any',
+          useWebSearch: false,
+          maxTokens: 4096,
+          temperature: 0.2,
+        },
+      },
+      {
+        name: 'Runbook Generator',
+        description: 'Create operational runbooks for incident response and procedures.',
+        longDescription: 'Generates detailed runbooks with step-by-step procedures for common operations and incident response.',
+        category: 'generation',
+        estimatedTimeSaved: '2-4 hours per runbook',
+        theme: {
+          primary: 'text-red-400',
+          secondary: 'bg-red-900/20',
+          gradient: 'from-red-500/20 to-transparent',
+          iconName: 'AlertTriangle',
+        },
+        inputs: [
+          { id: 'runbookType', label: 'Runbook Type', type: 'select', options: ['Incident Response', 'Deployment', 'Rollback', 'Scaling', 'Database Operations', 'Security Incident', 'Disaster Recovery'], validation: { required: true } },
+          { id: 'system', label: 'System/Service', type: 'text', placeholder: 'What system is this for?', validation: { required: true } },
+          { id: 'context', label: 'System Context', type: 'textarea', placeholder: 'Architecture, dependencies, access info...' },
+        ],
+        prompts: {
+          systemInstruction: `You are a site reliability engineer. Create runbooks that:
+- Have clear, numbered steps
+- Include prerequisites and access requirements
+- Provide commands that can be copy-pasted
+- Include verification steps after each action
+- Have rollback procedures
+- Include escalation paths
+- Are usable by on-call engineers at 3 AM`,
+          userPromptTemplate: `Create a {{runbookType}} runbook for {{system}}:
+
+**Context**: {{context}}
+
+Generate a comprehensive, actionable runbook.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'any',
+          useWebSearch: false,
+          maxTokens: 4096,
+          temperature: 0.3,
+        },
+      },
+    ],
+  },
+
+  // 16. Healthcare Professional
+  {
+    id: 'healthcare-professional',
+    name: 'Healthcare Professional',
+    description: 'Patient care documentation, clinical notes, and healthcare communication.',
+    icon: 'Stethoscope',
+    color: 'text-red-500',
+    staticSkillIds: [
+      'job-readiness-score',
+      'interview-prep',
+      'linkedin-optimizer-pro',
+      'skills-gap-analyzer',
+      'networking-script-generator',
+    ],
+    dynamicSkills: [
+      {
+        name: 'Patient Education Material Creator',
+        description: 'Create clear, accessible patient education materials.',
+        longDescription: 'Generates patient-friendly educational content about conditions, procedures, and treatments at appropriate reading levels.',
+        category: 'generation',
+        estimatedTimeSaved: '1-2 hours per document',
+        theme: {
+          primary: 'text-red-400',
+          secondary: 'bg-red-900/20',
+          gradient: 'from-red-500/20 to-transparent',
+          iconName: 'FileText',
+        },
+        inputs: [
+          { id: 'topic', label: 'Topic', type: 'text', placeholder: 'e.g., Diabetes Management, Post-Surgery Care', validation: { required: true } },
+          { id: 'audience', label: 'Patient Audience', type: 'select', options: ['General Adult', 'Elderly', 'Pediatric (for parents)', 'Low Health Literacy', 'Caregiver'] },
+          { id: 'keyPoints', label: 'Key Points to Cover', type: 'textarea', placeholder: 'What should patients understand?' },
+          { id: 'format', label: 'Format', type: 'select', options: ['Information Sheet', 'FAQ', 'Step-by-Step Guide', 'Checklist'] },
+        ],
+        prompts: {
+          systemInstruction: `You are a healthcare educator. Create patient materials that:
+- Use plain language (6th-8th grade reading level)
+- Avoid medical jargon or explain it clearly
+- Include actionable steps
+- Address common questions and concerns
+- Use bullet points for scannability
+- Include when to seek help
+- Are culturally sensitive`,
+          userPromptTemplate: `Create a {{format}} about {{topic}} for {{audience}} patients:
+
+**Key Points**: {{keyPoints}}
+
+Generate clear, accessible patient education material.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'any',
+          useWebSearch: false,
+          maxTokens: 2048,
+          temperature: 0.4,
+        },
+      },
+      {
+        name: 'Clinical Documentation Assistant',
+        description: 'Help structure and improve clinical documentation.',
+        longDescription: 'Assists with organizing clinical notes, ensuring completeness, and improving clarity while maintaining accuracy.',
+        category: 'analysis',
+        estimatedTimeSaved: '30-60 min per note',
+        theme: {
+          primary: 'text-blue-400',
+          secondary: 'bg-blue-900/20',
+          gradient: 'from-blue-500/20 to-transparent',
+          iconName: 'ClipboardCheck',
+        },
+        inputs: [
+          { id: 'noteContent', label: 'Draft Notes', type: 'textarea', placeholder: 'Paste your draft clinical notes...', validation: { required: true } },
+          { id: 'noteType', label: 'Note Type', type: 'select', options: ['Progress Note', 'H&P', 'Discharge Summary', 'Consultation Note', 'Procedure Note'] },
+          { id: 'improvements', label: 'Areas to Improve', type: 'select', options: ['Organization', 'Completeness', 'Clarity', 'All Areas'] },
+        ],
+        prompts: {
+          systemInstruction: `You are a clinical documentation specialist. Help improve notes by:
+- Organizing into standard sections (subjective, objective, assessment, plan)
+- Ensuring completeness of required elements
+- Improving clarity while maintaining accuracy
+- Suggesting areas that may need more detail
+- DO NOT fabricate any clinical information
+- Only reorganize and clarify what is provided`,
+          userPromptTemplate: `Review and improve this {{noteType}}:
+
+{{noteContent}}
+
+**Focus**: {{improvements}}
+
+Provide suggestions for improving this documentation.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'any',
+          useWebSearch: false,
+          maxTokens: 3072,
+          temperature: 0.3,
+        },
+      },
+      {
+        name: 'Care Plan Generator',
+        description: 'Create structured patient care plans.',
+        longDescription: 'Generates comprehensive care plans with goals, interventions, and evaluation criteria.',
+        category: 'generation',
+        estimatedTimeSaved: '1-2 hours per plan',
+        theme: {
+          primary: 'text-green-400',
+          secondary: 'bg-green-900/20',
+          gradient: 'from-green-500/20 to-transparent',
+          iconName: 'Heart',
+        },
+        inputs: [
+          { id: 'patientSummary', label: 'Patient Summary', type: 'textarea', placeholder: 'Brief patient background, conditions, needs...', validation: { required: true } },
+          { id: 'primaryDiagnosis', label: 'Primary Diagnosis/Concern', type: 'text', placeholder: 'Main health issue being addressed' },
+          { id: 'careSetting', label: 'Care Setting', type: 'select', options: ['Inpatient', 'Outpatient', 'Home Health', 'Long-term Care', 'Rehabilitation'] },
+        ],
+        prompts: {
+          systemInstruction: `You are a nursing care planning expert. Create care plans that:
+- Use nursing diagnosis format (problem, etiology, evidence)
+- Include SMART goals (specific, measurable, achievable, relevant, time-bound)
+- List evidence-based interventions
+- Include patient/family teaching
+- Specify evaluation criteria
+- Are individualized to patient needs`,
+          userPromptTemplate: `Create a care plan for {{careSetting}}:
+
+**Patient**: {{patientSummary}}
+**Primary Issue**: {{primaryDiagnosis}}
+
+Generate a comprehensive, individualized care plan.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'any',
+          useWebSearch: false,
+          maxTokens: 4096,
+          temperature: 0.4,
+        },
+      },
+    ],
+  },
+
+  // 17. Operations Manager
+  {
+    id: 'operations-manager',
+    name: 'Operations Manager',
+    description: 'Process optimization, team management, resource planning, and operational excellence.',
+    icon: 'Settings',
+    color: 'text-gray-500',
+    staticSkillIds: [
+      'job-readiness-score',
+      'interview-prep',
+      'linkedin-optimizer-pro',
+      'salary-negotiation-master',
+      'company-research',
+    ],
+    dynamicSkills: [
+      {
+        name: 'SOP Generator',
+        description: 'Create detailed Standard Operating Procedures.',
+        longDescription: 'Generates comprehensive SOPs with clear steps, roles, and quality checkpoints.',
+        category: 'generation',
+        estimatedTimeSaved: '3-5 hours per SOP',
+        theme: {
+          primary: 'text-gray-400',
+          secondary: 'bg-gray-900/20',
+          gradient: 'from-gray-500/20 to-transparent',
+          iconName: 'FileText',
+        },
+        inputs: [
+          { id: 'processName', label: 'Process Name', type: 'text', placeholder: 'e.g., Customer Order Fulfillment', validation: { required: true } },
+          { id: 'processDescription', label: 'Process Description', type: 'textarea', placeholder: 'Describe the process, who does it, when...', validation: { required: true } },
+          { id: 'currentSteps', label: 'Current Steps (if any)', type: 'textarea', placeholder: 'Existing process steps or notes...' },
+          { id: 'compliance', label: 'Compliance Requirements', type: 'text', placeholder: 'ISO, HIPAA, SOX, etc.' },
+        ],
+        prompts: {
+          systemInstruction: `You are an operations expert. Create SOPs that:
+- Have clear purpose and scope
+- Define roles and responsibilities
+- Include numbered, actionable steps
+- Specify required tools/materials
+- Include quality checkpoints
+- Address exceptions and escalations
+- Are audit-ready with version control section`,
+          userPromptTemplate: `Create an SOP for {{processName}}:
+
+**Description**: {{processDescription}}
+**Current Steps**: {{currentSteps}}
+**Compliance**: {{compliance}}
+
+Generate a comprehensive Standard Operating Procedure.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'any',
+          useWebSearch: false,
+          maxTokens: 4096,
+          temperature: 0.3,
+        },
+      },
+      {
+        name: 'Resource Capacity Planner',
+        description: 'Analyze workload and plan resource allocation.',
+        longDescription: 'Helps analyze team capacity, workload distribution, and resource planning.',
+        category: 'analysis',
+        estimatedTimeSaved: '2-4 hours per plan',
+        theme: {
+          primary: 'text-blue-400',
+          secondary: 'bg-blue-900/20',
+          gradient: 'from-blue-500/20 to-transparent',
+          iconName: 'Users',
+        },
+        inputs: [
+          { id: 'teamInfo', label: 'Team Information', type: 'textarea', placeholder: 'Team size, roles, current allocation...', validation: { required: true } },
+          { id: 'workload', label: 'Workload/Demand', type: 'textarea', placeholder: 'Projects, tasks, expected demand...' },
+          { id: 'constraints', label: 'Constraints', type: 'textarea', placeholder: 'Budget, skills gaps, availability...' },
+          { id: 'timeframe', label: 'Planning Timeframe', type: 'select', options: ['Weekly', 'Monthly', 'Quarterly', 'Annual'] },
+        ],
+        prompts: {
+          systemInstruction: `You are an operations planning expert. Analyze capacity and provide:
+1. Current utilization analysis
+2. Capacity vs demand comparison
+3. Bottleneck identification
+4. Resource allocation recommendations
+5. Hiring/training needs
+6. Risk mitigation strategies
+7. Optimization opportunities`,
+          userPromptTemplate: `Create a {{timeframe}} resource plan:
+
+**Team**: {{teamInfo}}
+**Workload**: {{workload}}
+**Constraints**: {{constraints}}
+
+Provide comprehensive capacity analysis and recommendations.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'any',
+          useWebSearch: false,
+          maxTokens: 4096,
+          temperature: 0.4,
+        },
+      },
+      {
+        name: 'Operational Metrics Dashboard Designer',
+        description: 'Design KPI dashboards and metrics frameworks.',
+        longDescription: 'Creates operational metrics frameworks with KPIs, targets, and visualization recommendations.',
+        category: 'generation',
+        estimatedTimeSaved: '2-3 hours per framework',
+        theme: {
+          primary: 'text-green-400',
+          secondary: 'bg-green-900/20',
+          gradient: 'from-green-500/20 to-transparent',
+          iconName: 'BarChart3',
+        },
+        inputs: [
+          { id: 'operationType', label: 'Operation Type', type: 'text', placeholder: 'e.g., Customer Service, Manufacturing, Logistics', validation: { required: true } },
+          { id: 'goals', label: 'Business Goals', type: 'textarea', placeholder: 'What are you trying to achieve?' },
+          { id: 'currentMetrics', label: 'Current Metrics (if any)', type: 'textarea', placeholder: 'What do you currently track?' },
+        ],
+        prompts: {
+          systemInstruction: `You are an operations metrics expert. Design dashboards that:
+- Include leading and lagging indicators
+- Define clear KPI calculations
+- Set realistic targets and benchmarks
+- Recommend visualization types
+- Include drill-down hierarchies
+- Consider data availability
+- Enable actionable insights`,
+          userPromptTemplate: `Design a metrics dashboard for {{operationType}}:
+
+**Goals**: {{goals}}
+**Current Metrics**: {{currentMetrics}}
+
+Create a comprehensive operational metrics framework.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'any',
+          useWebSearch: false,
+          maxTokens: 4096,
+          temperature: 0.4,
+        },
+      },
+    ],
+  },
+
+  // 18. Teacher / Educator
+  {
+    id: 'teacher-educator',
+    name: 'Teacher / Educator',
+    description: 'Lesson planning, curriculum design, assessment creation, and student engagement.',
+    icon: 'GraduationCap',
+    color: 'text-blue-600',
+    staticSkillIds: [
+      'job-readiness-score',
+      'interview-prep',
+      'linkedin-optimizer-pro',
+      'skills-gap-analyzer',
+      'cover-letter-generator',
+    ],
+    dynamicSkills: [
+      {
+        name: 'Lesson Plan Generator',
+        description: 'Create comprehensive lesson plans for any subject.',
+        longDescription: 'Generates detailed lesson plans with objectives, activities, assessments, and differentiation strategies.',
+        category: 'generation',
+        estimatedTimeSaved: '1-2 hours per lesson',
+        theme: {
+          primary: 'text-blue-400',
+          secondary: 'bg-blue-900/20',
+          gradient: 'from-blue-500/20 to-transparent',
+          iconName: 'BookOpen',
+        },
+        inputs: [
+          { id: 'subject', label: 'Subject', type: 'text', placeholder: 'e.g., Math, English, Science', validation: { required: true } },
+          { id: 'topic', label: 'Topic', type: 'text', placeholder: 'Specific lesson topic', validation: { required: true } },
+          { id: 'gradeLevel', label: 'Grade Level', type: 'select', options: ['K-2', '3-5', '6-8', '9-12', 'Higher Education', 'Adult Education'] },
+          { id: 'duration', label: 'Class Duration', type: 'select', options: ['30 minutes', '45 minutes', '60 minutes', '90 minutes'] },
+          { id: 'standards', label: 'Standards (Optional)', type: 'text', placeholder: 'Common Core, State standards...' },
+        ],
+        prompts: {
+          systemInstruction: `You are an experienced educator. Create lesson plans that include:
+1. Learning objectives (measurable)
+2. Materials needed
+3. Warm-up/hook activity
+4. Direct instruction
+5. Guided practice
+6. Independent practice
+7. Assessment/check for understanding
+8. Closure
+9. Differentiation strategies (ELL, advanced, struggling)
+10. Extension activities`,
+          userPromptTemplate: `Create a {{duration}} lesson plan for {{gradeLevel}} {{subject}}:
+
+**Topic**: {{topic}}
+**Standards**: {{standards}}
+
+Generate a comprehensive, engaging lesson plan.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'any',
+          useWebSearch: false,
+          maxTokens: 4096,
+          temperature: 0.5,
+        },
+      },
+      {
+        name: 'Assessment Generator',
+        description: 'Create quizzes, tests, and rubrics.',
+        longDescription: 'Generates various assessment types including multiple choice, short answer, essays, and rubrics.',
+        category: 'generation',
+        estimatedTimeSaved: '1-2 hours per assessment',
+        theme: {
+          primary: 'text-green-400',
+          secondary: 'bg-green-900/20',
+          gradient: 'from-green-500/20 to-transparent',
+          iconName: 'ClipboardCheck',
+        },
+        inputs: [
+          { id: 'assessmentType', label: 'Assessment Type', type: 'select', options: ['Multiple Choice Quiz', 'Short Answer Test', 'Essay Prompts', 'Rubric', 'Performance Task', 'Exit Ticket'], validation: { required: true } },
+          { id: 'topic', label: 'Topic/Content', type: 'textarea', placeholder: 'What should be assessed?', validation: { required: true } },
+          { id: 'gradeLevel', label: 'Grade Level', type: 'select', options: ['K-2', '3-5', '6-8', '9-12', 'Higher Education'] },
+          { id: 'bloomsLevel', label: 'Cognitive Level', type: 'select', options: ['Remember/Understand', 'Apply/Analyze', 'Evaluate/Create', 'Mixed'] },
+        ],
+        prompts: {
+          systemInstruction: `You are an assessment design expert. Create assessments that:
+- Align with learning objectives
+- Include various difficulty levels
+- Have clear instructions
+- Include answer keys where appropriate
+- Follow best practices for the assessment type
+- Are fair and unbiased
+- Include rubrics with clear criteria for open-ended items`,
+          userPromptTemplate: `Create a {{assessmentType}} for {{gradeLevel}}:
+
+**Topic**: {{topic}}
+**Cognitive Level**: {{bloomsLevel}}
+
+Generate a comprehensive assessment with answer key/rubric.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'any',
+          useWebSearch: false,
+          maxTokens: 4096,
+          temperature: 0.4,
+        },
+      },
+      {
+        name: 'Parent Communication Drafter',
+        description: 'Write professional communications to parents and guardians.',
+        longDescription: 'Creates various parent communications including progress reports, newsletters, and meeting notes.',
+        category: 'communication',
+        estimatedTimeSaved: '30-60 min per communication',
+        theme: {
+          primary: 'text-purple-400',
+          secondary: 'bg-purple-900/20',
+          gradient: 'from-purple-500/20 to-transparent',
+          iconName: 'Mail',
+        },
+        inputs: [
+          { id: 'commType', label: 'Communication Type', type: 'select', options: ['Progress Report', 'Newsletter', 'Behavior Update', 'Conference Summary', 'Event Announcement', 'Welcome Letter'], validation: { required: true } },
+          { id: 'content', label: 'Key Information', type: 'textarea', placeholder: 'What needs to be communicated?', validation: { required: true } },
+          { id: 'tone', label: 'Tone', type: 'select', options: ['Warm & Positive', 'Concerned but Supportive', 'Informational', 'Celebratory'] },
+        ],
+        prompts: {
+          systemInstruction: `You are an experienced teacher communicating with parents. Write messages that:
+- Are professional yet warm
+- Focus on student growth and potential
+- Include specific examples when relevant
+- Offer partnership language
+- Include clear action items if needed
+- Are culturally sensitive
+- Avoid educational jargon`,
+          userPromptTemplate: `Write a {{commType}} to parents:
+
+**Content**: {{content}}
+**Tone**: {{tone}}
+
+Create a professional, effective parent communication.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'any',
+          useWebSearch: false,
+          maxTokens: 1536,
+          temperature: 0.5,
+        },
+      },
+    ],
+  },
+
+  // 19. Legal Professional
+  {
+    id: 'legal-professional',
+    name: 'Legal Professional',
+    description: 'Legal research, contract review, document drafting, and case analysis.',
+    icon: 'Scale',
+    color: 'text-amber-600',
+    staticSkillIds: [
+      'job-readiness-score',
+      'interview-prep',
+      'linkedin-optimizer-pro',
+      'skills-gap-analyzer',
+      'salary-negotiation-master',
+    ],
+    dynamicSkills: [
+      {
+        name: 'Contract Clause Analyzer',
+        description: 'Analyze contract clauses and identify key terms and risks.',
+        longDescription: 'Reviews contract language, identifies important clauses, and highlights potential risks or issues.',
+        category: 'analysis',
+        estimatedTimeSaved: '1-2 hours per contract',
+        theme: {
+          primary: 'text-amber-400',
+          secondary: 'bg-amber-900/20',
+          gradient: 'from-amber-500/20 to-transparent',
+          iconName: 'FileSearch',
+        },
+        inputs: [
+          { id: 'contractText', label: 'Contract Text', type: 'textarea', placeholder: 'Paste the contract or specific clauses...', validation: { required: true } },
+          { id: 'contractType', label: 'Contract Type', type: 'select', options: ['Employment', 'NDA', 'SaaS/Software', 'Vendor/Supplier', 'Lease', 'Partnership', 'Other'] },
+          { id: 'perspective', label: 'Reviewing As', type: 'select', options: ['Party A (Drafter)', 'Party B (Recipient)', 'Neutral Review'] },
+        ],
+        prompts: {
+          systemInstruction: `You are a contract review specialist. Analyze contracts to:
+1. Identify key terms and obligations
+2. Highlight unusual or concerning clauses
+3. Note missing standard protections
+4. Flag ambiguous language
+5. Summarize rights and obligations by party
+6. Suggest negotiation points
+
+DISCLAIMER: This is for informational purposes only and not legal advice.`,
+          userPromptTemplate: `Analyze this {{contractType}} contract from {{perspective}} perspective:
+
+{{contractText}}
+
+Provide a comprehensive clause-by-clause analysis.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'any',
+          useWebSearch: false,
+          maxTokens: 4096,
+          temperature: 0.3,
+        },
+      },
+      {
+        name: 'Legal Document Summarizer',
+        description: 'Summarize complex legal documents in plain language.',
+        longDescription: 'Creates clear, accessible summaries of legal documents for non-lawyers.',
+        category: 'analysis',
+        estimatedTimeSaved: '1-2 hours per document',
+        theme: {
+          primary: 'text-blue-400',
+          secondary: 'bg-blue-900/20',
+          gradient: 'from-blue-500/20 to-transparent',
+          iconName: 'FileText',
+        },
+        inputs: [
+          { id: 'document', label: 'Legal Document', type: 'textarea', placeholder: 'Paste the legal document...', validation: { required: true } },
+          { id: 'audience', label: 'Summary For', type: 'select', options: ['Executive/Business', 'General Public', 'Technical Team', 'Compliance'] },
+          { id: 'focusAreas', label: 'Focus Areas', type: 'textarea', placeholder: 'Any specific aspects to emphasize?' },
+        ],
+        prompts: {
+          systemInstruction: `You are a legal communications specialist. Create summaries that:
+- Use plain language (no legalese)
+- Highlight key takeaways first
+- Explain implications clearly
+- Note important dates and deadlines
+- Identify action items
+- Flag areas requiring attention
+
+DISCLAIMER: This summary is for informational purposes and not legal advice.`,
+          userPromptTemplate: `Summarize this legal document for {{audience}}:
+
+{{document}}
+
+**Focus Areas**: {{focusAreas}}
+
+Create a clear, accessible summary.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'any',
+          useWebSearch: false,
+          maxTokens: 3072,
+          temperature: 0.3,
+        },
+      },
+      {
+        name: 'Legal Memo Drafter',
+        description: 'Draft legal research memos and analysis.',
+        longDescription: 'Creates structured legal memoranda with issue analysis, relevant law, and conclusions.',
+        category: 'generation',
+        estimatedTimeSaved: '2-4 hours per memo',
+        theme: {
+          primary: 'text-purple-400',
+          secondary: 'bg-purple-900/20',
+          gradient: 'from-purple-500/20 to-transparent',
+          iconName: 'FileText',
+        },
+        inputs: [
+          { id: 'issue', label: 'Legal Issue', type: 'textarea', placeholder: 'What is the legal question?', validation: { required: true } },
+          { id: 'facts', label: 'Relevant Facts', type: 'textarea', placeholder: 'Key facts of the situation...' },
+          { id: 'jurisdiction', label: 'Jurisdiction', type: 'text', placeholder: 'e.g., California, Federal, UK' },
+          { id: 'memoType', label: 'Memo Type', type: 'select', options: ['Objective Analysis', 'Advocacy/Brief', 'Client Advisory'] },
+        ],
+        prompts: {
+          systemInstruction: `You are a legal research specialist. Draft memos with:
+1. Issue statement
+2. Brief answer
+3. Statement of facts
+4. Discussion/analysis
+5. Conclusion
+
+Follow IRAC format. Note that legal research may need verification.
+DISCLAIMER: This is a draft for informational purposes and requires attorney review.`,
+          userPromptTemplate: `Draft a {{memoType}} memo:
+
+**Issue**: {{issue}}
+**Facts**: {{facts}}
+**Jurisdiction**: {{jurisdiction}}
+
+Create a structured legal memorandum.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'any',
+          useWebSearch: false,
+          maxTokens: 4096,
+          temperature: 0.3,
+        },
+      },
+    ],
+  },
+
+  // 20. Supply Chain Manager
+  {
+    id: 'supply-chain-manager',
+    name: 'Supply Chain Manager',
+    description: 'Logistics, inventory management, vendor relations, and supply chain optimization.',
+    icon: 'Truck',
+    color: 'text-indigo-500',
+    staticSkillIds: [
+      'job-readiness-score',
+      'interview-prep',
+      'linkedin-optimizer-pro',
+      'salary-negotiation-master',
+      'company-research',
+    ],
+    dynamicSkills: [
+      {
+        name: 'Vendor Evaluation Scorecard',
+        description: 'Create comprehensive vendor evaluation frameworks.',
+        longDescription: 'Generates vendor assessment scorecards with weighted criteria and evaluation methodology.',
+        category: 'generation',
+        estimatedTimeSaved: '2-3 hours per scorecard',
+        theme: {
+          primary: 'text-indigo-400',
+          secondary: 'bg-indigo-900/20',
+          gradient: 'from-indigo-500/20 to-transparent',
+          iconName: 'ClipboardList',
+        },
+        inputs: [
+          { id: 'vendorType', label: 'Vendor Type', type: 'text', placeholder: 'e.g., Raw Materials, Logistics, IT Services', validation: { required: true } },
+          { id: 'priorities', label: 'Key Priorities', type: 'textarea', placeholder: 'Cost, quality, reliability, sustainability...', validation: { required: true } },
+          { id: 'industryContext', label: 'Industry Context', type: 'text', placeholder: 'e.g., Manufacturing, Retail, Healthcare' },
+        ],
+        prompts: {
+          systemInstruction: `You are a procurement expert. Create vendor scorecards that include:
+1. Evaluation categories with weights
+2. Specific criteria under each category
+3. Scoring scale with definitions
+4. Red flag indicators
+5. Documentation requirements
+6. Scoring methodology
+7. Decision framework`,
+          userPromptTemplate: `Create a vendor evaluation scorecard for {{vendorType}} in {{industryContext}}:
+
+**Priorities**: {{priorities}}
+
+Generate a comprehensive vendor evaluation framework.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'any',
+          useWebSearch: false,
+          maxTokens: 4096,
+          temperature: 0.4,
+        },
+      },
+      {
+        name: 'Supply Chain Risk Analyzer',
+        description: 'Identify and assess supply chain risks.',
+        longDescription: 'Analyzes supply chain vulnerabilities and provides risk mitigation strategies.',
+        category: 'analysis',
+        estimatedTimeSaved: '3-5 hours per analysis',
+        theme: {
+          primary: 'text-red-400',
+          secondary: 'bg-red-900/20',
+          gradient: 'from-red-500/20 to-transparent',
+          iconName: 'AlertTriangle',
+        },
+        inputs: [
+          { id: 'supplyChain', label: 'Supply Chain Description', type: 'textarea', placeholder: 'Describe your supply chain, key suppliers, locations...', validation: { required: true } },
+          { id: 'knownRisks', label: 'Known Risks/Concerns', type: 'textarea', placeholder: 'Any current issues or concerns?' },
+          { id: 'industry', label: 'Industry', type: 'text', placeholder: 'e.g., Electronics, Food & Beverage' },
+        ],
+        prompts: {
+          systemInstruction: `You are a supply chain risk expert. Analyze risks including:
+1. Supplier concentration risk
+2. Geographic/geopolitical risks
+3. Single points of failure
+4. Demand volatility risks
+5. Quality/compliance risks
+6. Financial stability risks
+7. Sustainability/ESG risks
+
+Provide risk ratings and mitigation strategies.`,
+          userPromptTemplate: `Analyze supply chain risks for {{industry}}:
+
+**Supply Chain**: {{supplyChain}}
+**Known Risks**: {{knownRisks}}
+
+Provide comprehensive risk analysis with mitigation strategies.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'any',
+          useWebSearch: false,
+          maxTokens: 4096,
+          temperature: 0.4,
+        },
+      },
+      {
+        name: 'Inventory Optimization Advisor',
+        description: 'Get recommendations for inventory management.',
+        longDescription: 'Analyzes inventory data and provides optimization recommendations for stock levels and ordering.',
+        category: 'analysis',
+        estimatedTimeSaved: '2-4 hours per analysis',
+        theme: {
+          primary: 'text-green-400',
+          secondary: 'bg-green-900/20',
+          gradient: 'from-green-500/20 to-transparent',
+          iconName: 'Package',
+        },
+        inputs: [
+          { id: 'inventoryData', label: 'Inventory Information', type: 'textarea', placeholder: 'SKU data, turnover rates, lead times, current stock levels...', validation: { required: true } },
+          { id: 'challenges', label: 'Current Challenges', type: 'textarea', placeholder: 'Stockouts, excess inventory, carrying costs...' },
+          { id: 'goals', label: 'Optimization Goals', type: 'select', options: ['Reduce Carrying Costs', 'Improve Service Levels', 'Reduce Stockouts', 'Balance All'] },
+        ],
+        prompts: {
+          systemInstruction: `You are an inventory management expert. Provide recommendations for:
+1. Safety stock levels
+2. Reorder points
+3. Order quantities (EOQ considerations)
+4. ABC/XYZ classification
+5. Slow-moving inventory actions
+6. Seasonal planning
+7. KPIs to track`,
+          userPromptTemplate: `Optimize inventory with goal to {{goals}}:
+
+**Inventory Data**: {{inventoryData}}
+**Challenges**: {{challenges}}
+
+Provide actionable inventory optimization recommendations.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'any',
+          useWebSearch: false,
+          maxTokens: 4096,
+          temperature: 0.4,
+        },
+      },
+    ],
+  },
 ];
 
 export function getRoleTemplate(roleId: string): RoleTemplate | undefined {
