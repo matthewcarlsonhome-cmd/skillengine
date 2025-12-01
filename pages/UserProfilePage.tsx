@@ -3,6 +3,7 @@ import { ArrowLeft, User, Save, FileText, Briefcase, GraduationCap, Award, Uploa
 import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { useToast } from '../hooks/useToast';
+import { useAppContext } from '../hooks/useAppContext';
 
 export interface UserProfile {
   // Personal Information
@@ -102,6 +103,7 @@ export const saveUserProfile = (profile: UserProfile): void => {
 
 const UserProfilePage: React.FC = () => {
   const { addToast } = useToast();
+  const { refreshProfileFromStorage } = useAppContext();
   const [profile, setProfile] = useState<UserProfile>(DEFAULT_PROFILE);
   const [activeSection, setActiveSection] = useState('personal');
   const [hasChanges, setHasChanges] = useState(false);
@@ -120,6 +122,7 @@ const UserProfilePage: React.FC = () => {
 
   const handleSave = () => {
     saveUserProfile(profile);
+    refreshProfileFromStorage(); // Update AppContext so skills get latest data
     setHasChanges(false);
     addToast('Profile saved successfully!', 'success');
   };
