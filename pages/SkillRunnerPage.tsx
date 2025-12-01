@@ -15,7 +15,7 @@ import { Textarea } from '../components/ui/Textarea.tsx';
 import { Select } from '../components/ui/Select.tsx';
 import { Checkbox } from '../components/ui/Checkbox.tsx';
 import { Progress } from '../components/ui/Progress.tsx';
-import { Sparkles, Clipboard, Download, AlertTriangle, ArrowLeft, KeyRound, Link as LinkIcon, Upload, HelpCircle, Save, Star, Check } from 'lucide-react';
+import { Sparkles, Clipboard, Download, AlertTriangle, ArrowLeft, KeyRound, Link as LinkIcon, Upload, HelpCircle, Save, Star, Check, Code, ChevronDown, ChevronUp, FileCode } from 'lucide-react';
 import { db } from '../lib/storage/indexeddb';
 import type { SavedOutput, FavoriteSkill, SkillExecution } from '../lib/storage/types';
 import { getApiKey, saveApiKey as storeApiKey } from '../lib/apiKeyStorage';
@@ -41,6 +41,7 @@ const SkillRunnerPage: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [isFavorited, setIsFavorited] = useState(false);
   const [outputSaved, setOutputSaved] = useState(false);
+  const [showPrompts, setShowPrompts] = useState(false);
 
   // Refresh profile from storage on mount to ensure we have latest data
   useEffect(() => {
@@ -296,6 +297,50 @@ const SkillRunnerPage: React.FC = () => {
     }
   };
 
+  const copyPromptToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text);
+    addToast(`${label} copied to clipboard!`, 'success');
+  };
+
+  const downloadPrompts = () => {
+    if (!skill) return;
+
+    const promptData = skill.generatePrompt(formState);
+    const promptExport = {
+      skillName: skill.name,
+      skillDescription: skill.description,
+      exportedAt: new Date().toISOString(),
+      prompts: {
+        systemInstruction: promptData.systemInstruction,
+        userPrompt: promptData.userPrompt,
+      },
+      inputs: skill.inputs.map(input => ({
+        id: input.id,
+        label: input.label,
+        type: input.type,
+        required: input.required || false,
+        currentValue: formState[input.id] || '',
+      })),
+    };
+
+    const blob = new Blob([JSON.stringify(promptExport, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${skill.id}-prompts.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    addToast('Prompts exported!', 'success');
+  };
+
+  // Get current prompts based on form state
+  const getCurrentPrompts = () => {
+    if (!skill) return { systemInstruction: '', userPrompt: '' };
+    return skill.generatePrompt(formState);
+  };
+
   if (!skill) {
     return (
       <div className="container mx-auto max-w-4xl text-center py-20">
@@ -372,7 +417,103 @@ const SkillRunnerPage: React.FC = () => {
                 {isFavorited ? 'Favorited' : 'Add to Favorites'}
               </Button>
             </div>
+
+            {/* View Prompts Toggle */}
+            <div className="mt-4 pt-4 border-t">
+              <button
+                onClick={() => setShowPrompts(!showPrompts)}
+                className="flex items-center justify-between w-full text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <span className="flex items-center gap-2">
+                  <Code className="h-4 w-4" />
+                  View Skill Prompts
+                </span>
+                {showPrompts ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              </button>
+            </div>
           </div>
+
+          {/* Prompts Panel */}
+          {showPrompts && (
+            <div className="mt-4 rounded-xl border bg-card p-4 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold flex items-center gap-2">
+                  <FileCode className="h-4 w-4" />
+                  Skill Prompts
+                </h3>
+                <Button variant="outline" size="sm" onClick={downloadPrompts}>
+                  <Download className="h-3 w-3 mr-1" />
+                  Export JSON
+                </Button>
+              </div>
+
+              {/* System Instruction */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    System Instruction
+                  </label>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => copyPromptToClipboard(getCurrentPrompts().systemInstruction, 'System instruction')}
+                    className="h-6 text-xs"
+                  >
+                    <Clipboard className="h-3 w-3 mr-1" />
+                    Copy
+                  </Button>
+                </div>
+                <div className="bg-muted/50 rounded-lg p-3 max-h-48 overflow-y-auto">
+                  <pre className="text-xs whitespace-pre-wrap font-mono text-muted-foreground">
+                    {getCurrentPrompts().systemInstruction}
+                  </pre>
+                </div>
+              </div>
+
+              {/* User Prompt */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    User Prompt (with current inputs)
+                  </label>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => copyPromptToClipboard(getCurrentPrompts().userPrompt, 'User prompt')}
+                    className="h-6 text-xs"
+                  >
+                    <Clipboard className="h-3 w-3 mr-1" />
+                    Copy
+                  </Button>
+                </div>
+                <div className="bg-muted/50 rounded-lg p-3 max-h-48 overflow-y-auto">
+                  <pre className="text-xs whitespace-pre-wrap font-mono text-muted-foreground">
+                    {getCurrentPrompts().userPrompt}
+                  </pre>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  This prompt is generated based on your current form inputs. Fill in the form above to see the complete prompt.
+                </p>
+              </div>
+
+              {/* Copy Both Button */}
+              <div className="pt-2 border-t">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
+                  onClick={() => {
+                    const prompts = getCurrentPrompts();
+                    const fullPrompt = `=== SYSTEM INSTRUCTION ===\n\n${prompts.systemInstruction}\n\n=== USER PROMPT ===\n\n${prompts.userPrompt}`;
+                    copyPromptToClipboard(fullPrompt, 'Full prompt');
+                  }}
+                >
+                  <Clipboard className="h-4 w-4 mr-2" />
+                  Copy Full Prompt (System + User)
+                </Button>
+              </div>
+            </div>
+          )}
         </aside>
 
         <div className="lg:col-span-2">
