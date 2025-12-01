@@ -88,7 +88,7 @@ const HomePage: React.FC = () => {
               <h3 className="font-semibold">Run AI Skills</h3>
             </div>
             <p className="text-sm text-muted-foreground pl-11">
-              Use 15+ AI tools for resumes, cover letters, and interview prep
+              Use 16+ AI tools for resumes, cover letters, and interview prep
             </p>
           </div>
         </Link>
@@ -114,7 +114,7 @@ const HomePage: React.FC = () => {
           </div>
           <h2 className="text-xl font-bold mb-2">AI Skills</h2>
           <p className="text-muted-foreground text-sm mb-4">
-            15+ AI-powered tools for job seekers: resume optimization, cover letters, interview prep, salary negotiation.
+            16+ AI-powered tools for job seekers: resume optimization, cover letters, interview prep, salary negotiation.
           </p>
           <Link to="/skills">
             <Button variant="outline" className="w-full">
