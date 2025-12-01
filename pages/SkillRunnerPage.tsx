@@ -24,7 +24,7 @@ const SkillRunnerPage: React.FC = () => {
   const { skillId } = useParams<{ skillId: string }>();
   const navigate = useNavigate();
   const { addToast } = useToast();
-  const { selectedApi, setSelectedApi, resumeText, jobDescriptionText, additionalInfoText } = useAppContext();
+  const { selectedApi, setSelectedApi, resumeText, jobDescriptionText, additionalInfoText, refreshProfileFromStorage } = useAppContext();
 
   const skill: Skill | undefined = useMemo(() => skillId ? SKILLS[skillId] : undefined, [skillId]);
 
@@ -41,6 +41,11 @@ const SkillRunnerPage: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [isFavorited, setIsFavorited] = useState(false);
   const [outputSaved, setOutputSaved] = useState(false);
+
+  // Refresh profile from storage on mount to ensure we have latest data
+  useEffect(() => {
+    refreshProfileFromStorage();
+  }, [refreshProfileFromStorage]);
 
   useEffect(() => {
     if (skill) {
