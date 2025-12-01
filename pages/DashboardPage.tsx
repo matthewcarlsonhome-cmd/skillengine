@@ -33,6 +33,8 @@ import {
   FileSpreadsheet,
   FolderOpen,
   ArrowRight,
+  User,
+  Briefcase,
 } from 'lucide-react';
 
 type TabType = 'saved' | 'favorites' | 'history';
@@ -281,33 +283,40 @@ const DashboardPage: React.FC = () => {
           <Zap className="h-5 w-5 text-yellow-500" />
           Quick Actions
         </h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
-          <Link to="/skills">
-            <button className="w-full p-4 rounded-xl border bg-gradient-to-br from-blue-500/10 to-blue-500/5 hover:border-blue-500/50 transition-colors text-left group">
-              <Sparkles className="h-6 w-6 text-blue-500 mb-2" />
-              <p className="font-medium text-sm">Optimize Resume</p>
-              <p className="text-xs text-muted-foreground">AI-powered tailoring</p>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+          <Link to="/profile">
+            <button className="w-full p-4 rounded-xl border bg-gradient-to-br from-indigo-500/10 to-indigo-500/5 hover:border-indigo-500/50 transition-colors text-left group">
+              <User className="h-6 w-6 text-indigo-500 mb-2" />
+              <p className="font-medium text-sm">My Profile</p>
+              <p className="text-xs text-muted-foreground">Resume & background</p>
             </button>
           </Link>
           <Link to="/skills">
+            <button className="w-full p-4 rounded-xl border bg-gradient-to-br from-blue-500/10 to-blue-500/5 hover:border-blue-500/50 transition-colors text-left group">
+              <Sparkles className="h-6 w-6 text-blue-500 mb-2" />
+              <p className="font-medium text-sm">AI Skills</p>
+              <p className="text-xs text-muted-foreground">Resume, cover letter</p>
+            </button>
+          </Link>
+          <Link to="/job-tracker">
             <button className="w-full p-4 rounded-xl border bg-gradient-to-br from-green-500/10 to-green-500/5 hover:border-green-500/50 transition-colors text-left group">
-              <FileText className="h-6 w-6 text-green-500 mb-2" />
-              <p className="font-medium text-sm">Cover Letter</p>
-              <p className="text-xs text-muted-foreground">Generate instantly</p>
+              <Briefcase className="h-6 w-6 text-green-500 mb-2" />
+              <p className="font-medium text-sm">Job Tracker</p>
+              <p className="text-xs text-muted-foreground">Track applications</p>
             </button>
           </Link>
           <Link to="/role-templates">
             <button className="w-full p-4 rounded-xl border bg-gradient-to-br from-purple-500/10 to-purple-500/5 hover:border-purple-500/50 transition-colors text-left group">
               <Package className="h-6 w-6 text-purple-500 mb-2" />
               <p className="font-medium text-sm">Role Templates</p>
-              <p className="text-xs text-muted-foreground">Install skill bundles</p>
+              <p className="text-xs text-muted-foreground">Skill bundles</p>
             </button>
           </Link>
           <Link to="/analyze">
             <button className="w-full p-4 rounded-xl border bg-gradient-to-br from-orange-500/10 to-orange-500/5 hover:border-orange-500/50 transition-colors text-left group">
               <FolderOpen className="h-6 w-6 text-orange-500 mb-2" />
-              <p className="font-medium text-sm">Analyze Role</p>
-              <p className="text-xs text-muted-foreground">Custom skills from JD</p>
+              <p className="font-medium text-sm">Custom Skills</p>
+              <p className="text-xs text-muted-foreground">From job posting</p>
             </button>
           </Link>
           <Link to="/batch">
