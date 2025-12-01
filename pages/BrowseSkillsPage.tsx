@@ -62,9 +62,9 @@ const BrowseSkillsPage: React.FC = () => {
             Back to Home
           </Button>
         </Link>
-        <h1 className="text-3xl font-bold">Job Applicant Skills</h1>
+        <h1 className="text-3xl font-bold">AI Skills</h1>
         <p className="text-muted-foreground mt-2">
-          15 AI-powered skills to help you land your dream job. Upload your documents, then launch any skill.
+          16 AI-powered skills to help you land your dream job. Upload your documents, then launch any skill.
         </p>
       </div>
 
