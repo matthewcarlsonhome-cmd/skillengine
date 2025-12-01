@@ -1,11 +1,10 @@
 // Batch Processing Page - Upload CSV and run skills on multiple items
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Button } from '../components/ui/Button';
-import { Input } from '../components/ui/Input';
 import { useToast } from '../hooks/useToast';
 import { SKILLS } from '../lib/skills';
 import { getApiKey } from '../lib/apiKeyStorage';
@@ -26,6 +25,7 @@ import {
   Sparkles,
   FileText,
   Copy,
+  Info,
 } from 'lucide-react';
 
 interface BatchItem {
@@ -50,12 +50,16 @@ const BatchProcessingPage: React.FC = () => {
   const [expandedItemId, setExpandedItemId] = useState<string | null>(null);
   const [progress, setProgress] = useState({ completed: 0, total: 0 });
 
-  // Get skills that work well with batch processing
-  const batchableSkills = SKILLS.filter(
-    (s) => s.id !== 'analyze-role' && s.formFields.length <= 3
+  // Convert SKILLS object to array and filter for batchable skills
+  const skillsArray = useMemo(() => Object.values(SKILLS), []);
+
+  // Get skills that work well with batch processing (simpler skills with fewer inputs)
+  const batchableSkills = useMemo(() =>
+    skillsArray.filter((s) => s.inputs.length <= 5),
+    [skillsArray]
   );
 
-  const selectedSkill = SKILLS.find((s) => s.id === selectedSkillId);
+  const selectedSkill = selectedSkillId ? SKILLS[selectedSkillId] : null;
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -122,17 +126,20 @@ const BatchProcessingPage: React.FC = () => {
     return result;
   };
 
-  const mapDataToFormFields = (data: Record<string, string>): Record<string, string> => {
+  const mapDataToInputs = (data: Record<string, string>): Record<string, string> => {
     if (!selectedSkill) return {};
 
     const mapped: Record<string, string> = {};
-    selectedSkill.formFields.forEach((field) => {
-      // Try exact match first, then case-insensitive
+    selectedSkill.inputs.forEach((input) => {
+      // Try exact match first, then case-insensitive, then by label
       const key = Object.keys(data).find(
-        (k) => k === field.name || k.toLowerCase() === field.name.toLowerCase()
+        (k) =>
+          k === input.id ||
+          k.toLowerCase() === input.id.toLowerCase() ||
+          k.toLowerCase() === input.label.toLowerCase()
       );
       if (key) {
-        mapped[field.name] = data[key];
+        mapped[input.id] = data[key];
       }
     });
     return mapped;
@@ -163,7 +170,6 @@ const BatchProcessingPage: React.FC = () => {
       }
 
       const item = pendingItems[i];
-      const itemIndex = items.findIndex((it) => it.id === item.id);
 
       // Update status to running
       setItems((prev) =>
@@ -171,11 +177,11 @@ const BatchProcessingPage: React.FC = () => {
       );
 
       try {
-        const formData = mapDataToFormFields(item.data);
-        const userPrompt = selectedSkill.buildPrompt(formData);
+        const formData = mapDataToInputs(item.data);
+        const { systemInstruction, userPrompt } = selectedSkill.generatePrompt(formData);
 
         const response = await runSkillStream(apiKey, {
-          systemInstruction: selectedSkill.systemPrompt,
+          systemInstruction,
           userPrompt,
         });
 
@@ -267,6 +273,32 @@ const BatchProcessingPage: React.FC = () => {
     addToast('Results downloaded', 'success');
   };
 
+  const downloadTemplate = () => {
+    if (!selectedSkill) {
+      addToast('Please select a skill first', 'error');
+      return;
+    }
+
+    // Create CSV template with skill input IDs as headers
+    const headers = selectedSkill.inputs.map((input) => input.id);
+    const exampleRow = selectedSkill.inputs.map((input) =>
+      input.placeholder || `Enter ${input.label}`
+    );
+
+    const csv = [headers.join(','), exampleRow.map((v) => `"${v}"`).join(',')].join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `batch-template-${selectedSkillId}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    addToast('Template downloaded', 'success');
+  };
+
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text);
     addToast('Copied to clipboard', 'success');
@@ -282,6 +314,22 @@ const BatchProcessingPage: React.FC = () => {
         <div>
           <h1 className="text-3xl font-bold">Batch Processing</h1>
           <p className="text-muted-foreground">Upload a CSV and run AI skills on multiple items at once</p>
+        </div>
+      </div>
+
+      {/* Instructions */}
+      <div className="mb-8 p-4 border rounded-xl bg-blue-500/5 border-blue-500/20">
+        <div className="flex items-start gap-3">
+          <Info className="h-5 w-5 text-blue-500 shrink-0 mt-0.5" />
+          <div className="text-sm">
+            <p className="font-medium text-blue-500 mb-1">How to use Batch Processing</p>
+            <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
+              <li>Select an AI skill from the dropdown below</li>
+              <li>Download the CSV template to see required columns</li>
+              <li>Fill in your data (one row per item to process)</li>
+              <li>Upload your CSV and click "Start Batch"</li>
+            </ol>
+          </div>
         </div>
       </div>
 
@@ -307,13 +355,21 @@ const BatchProcessingPage: React.FC = () => {
           </select>
           {selectedSkill && (
             <div className="mt-4 p-3 bg-muted/50 rounded-lg">
-              <p className="text-sm text-muted-foreground mb-2">{selectedSkill.description}</p>
-              <p className="text-xs font-medium">Required columns:</p>
-              <ul className="text-xs text-muted-foreground">
-                {selectedSkill.formFields.map((field) => (
-                  <li key={field.name}>- {field.name}</li>
+              <p className="text-sm text-muted-foreground mb-3">{selectedSkill.description}</p>
+              <p className="text-xs font-medium mb-1">Required CSV columns:</p>
+              <ul className="text-xs text-muted-foreground mb-3">
+                {selectedSkill.inputs.map((input) => (
+                  <li key={input.id} className="flex items-center gap-2">
+                    <span className="font-mono bg-muted px-1 rounded">{input.id}</span>
+                    <span>- {input.label}</span>
+                    {input.required && <span className="text-red-400">*</span>}
+                  </li>
                 ))}
               </ul>
+              <Button variant="outline" size="sm" onClick={downloadTemplate}>
+                <Download className="h-3 w-3 mr-1" />
+                Download Template CSV
+              </Button>
             </div>
           )}
         </div>
@@ -340,7 +396,7 @@ const BatchProcessingPage: React.FC = () => {
               Click to upload CSV file
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              First row should be headers matching skill fields
+              First row should be headers matching skill input IDs
             </p>
           </button>
           {items.length > 0 && (
@@ -460,11 +516,11 @@ const BatchProcessingPage: React.FC = () => {
                   {/* Input Data */}
                   <div className="mb-4">
                     <h4 className="text-xs font-medium text-muted-foreground mb-2">Input Data</h4>
-                    <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
                       {Object.entries(item.data).map(([key, value]) => (
-                        <div key={key}>
-                          <span className="font-medium">{key}:</span>{' '}
-                          <span className="text-muted-foreground">{value.substring(0, 100)}</span>
+                        <div key={key} className="p-2 bg-background rounded">
+                          <span className="font-medium text-xs text-muted-foreground">{key}:</span>
+                          <p className="text-sm truncate">{value.substring(0, 100)}{value.length > 100 ? '...' : ''}</p>
                         </div>
                       ))}
                     </div>
