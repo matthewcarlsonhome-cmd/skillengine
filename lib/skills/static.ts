@@ -14,7 +14,8 @@ import {
   SalaryIcon,
   OnboardingIcon,
   DayInLifeIcon,
-  AutomationIcon
+  AutomationIcon,
+  HealthcareResumeIcon
 } from '../../components/icons';
 
 // Shared inputs for many job-seeker related skills to promote code reuse
@@ -425,6 +426,147 @@ export const SKILLS: Record<string, Skill> = {
             industry: "Industry",
             userBackground: "Resume",
             additionalContext: "Additional Context"
+        })
+    }),
+  },
+  'healthcare-resume-parser': {
+    id: 'healthcare-resume-parser',
+    name: 'Healthcare Resume Parser',
+    description: 'Parse healthcare consulting resumes and rewrite them to a specific format with structured data extraction.',
+    longDescription: 'Extracts structured information from healthcare consultant resumes including EHR systems experience, Epic modules, job history, certifications, and skills with confidence scoring. Rewrites resumes to your specified format.',
+    whatYouGet: ['Structured JSON Data Extraction', 'EHR & Epic Module Experience with Years', 'Confidence-Scored Fields', 'Reformatted Resume Output', 'Skills Matrix with Experience Levels'],
+    theme: { primary: 'text-emerald-400', secondary: 'bg-emerald-900/20', gradient: 'from-emerald-500/20 to-transparent' },
+    icon: HealthcareResumeIcon,
+    inputs: [
+        { id: 'userBackground', label: 'Resume to Parse', type: 'textarea', placeholder: 'Paste the healthcare consultant resume to parse and reformat.', required: true, rows: 12 },
+        { id: 'outputFormat', label: 'Output Format', type: 'select', options: ['JSON + Reformatted Resume', 'JSON Only', 'Reformatted Resume Only'], required: true },
+        { id: 'styleGuide', label: 'Style Guide / Format Instructions', type: 'textarea', placeholder: 'Describe the desired output format, structure, or paste a template/example of how you want the resume formatted.', required: true, rows: 8 },
+        { id: 'focusAreas', label: 'Focus Areas (Optional)', type: 'textarea', placeholder: 'e.g., Emphasize Epic Cadence experience, highlight revenue cycle skills, focus on implementation projects', rows: 3 },
+    ],
+    generatePrompt: (inputs) => ({
+        systemInstruction: `You are a healthcare consulting resume parser and rewriter. Your task is to extract structured information from consultant resumes AND rewrite them according to the provided style guide.
+
+## EXTRACTION RULES:
+
+### 1. Technical Skills - Years of Experience:
+- Parse format like "Epic (5 years)" or "worked with Epic from 2018-2023" → 5 years
+- If only job dates mention a system, calculate years between dates
+- Mark confidence: HIGH if explicitly stated, MEDIUM if calculated, LOW if ambiguous
+
+### 2. Healthcare Systems & EHR Applications:
+- Standardize names: "Epic EMR" → "Epic", "Cerner Millennium" → "Cerner"
+- Extract specific Epic modules: Cadence, Prelude, OpTime, Willow, Cupid, Beaker, Radiant, Tapestry, MyChart, etc.
+- Include ANY healthcare IT systems: Epic, Cerner, Meditech, Allscripts, athenahealth, etc.
+- Note certifications for each system if mentioned
+
+### 3. Job History:
+- Extract: Company, Title, Start Date, End Date, Location, Description
+- Handle "Present", "Current" as ongoing employment
+- If only year given (no month), use January for start, December for end
+- Preserve bullet points and achievements
+- Identify healthcare-specific projects and implementations
+
+### 4. Header Information:
+- Name, credentials (RN, MD, MBA, PMP, etc.)
+- Contact: email, phone, location (city, state)
+- Professional summary if present
+
+### 5. Education & Certifications:
+- Degrees with institution and year
+- Professional certifications with dates (Epic, Cerner, PMP, Six Sigma, etc.)
+- Healthcare-specific training
+
+### CONFIDENCE SCORING:
+Assign each extracted field a confidence level:
+- **HIGH**: Explicitly stated, unambiguous
+- **MEDIUM**: Inferred from context, requires minor assumptions
+- **LOW**: Ambiguous, unclear, or missing
+
+## OUTPUT STRUCTURE:
+
+Based on the user's selected output format, provide:
+
+### If JSON requested, use this schema:
+\`\`\`json
+{
+  "header": {
+    "name": { "value": "", "confidence": "HIGH|MEDIUM|LOW" },
+    "credentials": { "value": [], "confidence": "HIGH|MEDIUM|LOW" },
+    "email": { "value": "", "confidence": "HIGH|MEDIUM|LOW" },
+    "phone": { "value": "", "confidence": "HIGH|MEDIUM|LOW" },
+    "location": { "value": "", "confidence": "HIGH|MEDIUM|LOW" },
+    "professionalSummary": { "value": "", "confidence": "HIGH|MEDIUM|LOW" }
+  },
+  "technicalSkills": [
+    {
+      "name": "",
+      "category": "EHR|Module|Integration|Analytics|Other",
+      "yearsExperience": 0,
+      "confidence": "HIGH|MEDIUM|LOW",
+      "certifications": [],
+      "notes": ""
+    }
+  ],
+  "epicModules": [
+    {
+      "module": "",
+      "yearsExperience": 0,
+      "confidence": "HIGH|MEDIUM|LOW",
+      "certified": false,
+      "projectTypes": []
+    }
+  ],
+  "jobHistory": [
+    {
+      "company": { "value": "", "confidence": "HIGH|MEDIUM|LOW" },
+      "title": { "value": "", "confidence": "HIGH|MEDIUM|LOW" },
+      "startDate": { "value": "", "confidence": "HIGH|MEDIUM|LOW" },
+      "endDate": { "value": "", "confidence": "HIGH|MEDIUM|LOW" },
+      "location": { "value": "", "confidence": "HIGH|MEDIUM|LOW" },
+      "isCurrent": false,
+      "description": [],
+      "healthcareSystems": [],
+      "projectHighlights": []
+    }
+  ],
+  "education": [
+    {
+      "degree": { "value": "", "confidence": "HIGH|MEDIUM|LOW" },
+      "institution": { "value": "", "confidence": "HIGH|MEDIUM|LOW" },
+      "year": { "value": "", "confidence": "HIGH|MEDIUM|LOW" },
+      "field": { "value": "", "confidence": "HIGH|MEDIUM|LOW" }
+    }
+  ],
+  "certifications": [
+    {
+      "name": { "value": "", "confidence": "HIGH|MEDIUM|LOW" },
+      "issuer": { "value": "", "confidence": "HIGH|MEDIUM|LOW" },
+      "date": { "value": "", "confidence": "HIGH|MEDIUM|LOW" },
+      "expirationDate": { "value": "", "confidence": "HIGH|MEDIUM|LOW" }
+    }
+  ],
+  "extractionMetadata": {
+    "overallConfidence": "HIGH|MEDIUM|LOW",
+    "ambiguities": [],
+    "missingFields": [],
+    "assumptions": []
+  }
+}
+\`\`\`
+
+### If Reformatted Resume requested:
+Follow the user's style guide exactly to reformat the resume. Maintain all factual content while restructuring to match the requested format.
+
+## IMPORTANT:
+- Never invent information not in the source resume
+- Clearly flag assumptions in the metadata
+- Preserve quantified achievements (numbers, percentages, dollar amounts)
+- Identify and highlight healthcare-specific terminology and experience`,
+        userPrompt: createUserPrompt("Healthcare Resume Parser", inputs, {
+            userBackground: "Resume to Parse",
+            outputFormat: "Output Format",
+            styleGuide: "Style Guide / Format Instructions",
+            focusAreas: "Focus Areas"
         })
     }),
   },
