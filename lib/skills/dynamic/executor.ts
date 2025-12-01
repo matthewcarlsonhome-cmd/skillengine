@@ -10,11 +10,11 @@ export interface ExecuteSkillOptions {
   claudeModel?: 'haiku' | 'sonnet' | 'opus';
 }
 
-// Claude model mapping
+// Claude model mapping - using -latest aliases for reliability
 const CLAUDE_MODELS = {
-  haiku: 'claude-3-5-haiku-20241022',
-  sonnet: 'claude-3-5-sonnet-20241022',
-  opus: 'claude-3-opus-20240229',
+  haiku: 'claude-3-5-haiku-latest',
+  sonnet: 'claude-3-5-sonnet-latest',
+  opus: 'claude-3-opus-latest',
 } as const;
 
 // Interpolate template placeholders with form values
