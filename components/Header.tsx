@@ -1,7 +1,7 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Moon, Sun, Briefcase, Users, Sparkles, FolderOpen, LogIn, LogOut, Loader2, ChevronDown, LayoutDashboard, Package } from 'lucide-react';
+import { Moon, Sun, Briefcase, Users, Sparkles, FolderOpen, LogIn, LogOut, Loader2, ChevronDown, LayoutDashboard, Package, Menu, X, Settings, FileSpreadsheet, DollarSign } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme.tsx';
 import { useAuth } from '../hooks/useAuth.tsx';
 import { useToast } from '../hooks/useToast.tsx';
@@ -14,6 +14,12 @@ const Header: React.FC = () => {
   const { addToast } = useToast();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [isSigningIn, setIsSigningIn] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location.pathname]);
 
   const toggleTheme = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
@@ -106,6 +112,17 @@ const Header: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Mobile Menu Button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </Button>
+
           {/* Auth Section */}
           {isConfigured && (
             <>
@@ -187,6 +204,87 @@ const Header: React.FC = () => {
           </Button>
         </div>
       </div>
+
+      {/* Mobile Navigation Menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden border-t bg-background/95 backdrop-blur">
+          <nav className="container mx-auto max-w-7xl px-4 py-4 flex flex-col gap-1">
+            <Link to="/dashboard">
+              <Button
+                variant={isActive('/dashboard') ? 'secondary' : 'ghost'}
+                className="w-full justify-start gap-2"
+              >
+                <LayoutDashboard className="h-4 w-4" />
+                Dashboard
+              </Button>
+            </Link>
+            <Link to="/role-templates">
+              <Button
+                variant={isActive('/role-templates') ? 'secondary' : 'ghost'}
+                className="w-full justify-start gap-2"
+              >
+                <Package className="h-4 w-4" />
+                Role Templates
+              </Button>
+            </Link>
+            <Link to="/skills">
+              <Button
+                variant={isActive('/skills') ? 'secondary' : 'ghost'}
+                className="w-full justify-start gap-2"
+              >
+                <Sparkles className="h-4 w-4" />
+                Job Tools
+              </Button>
+            </Link>
+            <Link to="/analyze">
+              <Button
+                variant={isActive('/analyze') ? 'secondary' : 'ghost'}
+                className="w-full justify-start gap-2"
+              >
+                <FolderOpen className="h-4 w-4" />
+                Analyze Role
+              </Button>
+            </Link>
+            <Link to="/community">
+              <Button
+                variant={isActive('/community') ? 'secondary' : 'ghost'}
+                className="w-full justify-start gap-2"
+              >
+                <Users className="h-4 w-4" />
+                Community
+              </Button>
+            </Link>
+            <Link to="/batch">
+              <Button
+                variant={isActive('/batch') ? 'secondary' : 'ghost'}
+                className="w-full justify-start gap-2"
+              >
+                <FileSpreadsheet className="h-4 w-4" />
+                Batch Processing
+              </Button>
+            </Link>
+            <div className="border-t my-2" />
+            <Link to="/settings">
+              <Button
+                variant={isActive('/settings') ? 'secondary' : 'ghost'}
+                className="w-full justify-start gap-2"
+              >
+                <Settings className="h-4 w-4" />
+                Settings
+              </Button>
+            </Link>
+            <Link to="/pricing">
+              <Button
+                variant={isActive('/pricing') ? 'secondary' : 'ghost'}
+                className="w-full justify-start gap-2"
+              >
+                <DollarSign className="h-4 w-4" />
+                Pricing
+              </Button>
+            </Link>
+          </nav>
+        </div>
+      )}
     </header>
   );
 };

@@ -26,7 +26,13 @@ import {
   ExternalLink,
   X,
   Edit3,
-  Check
+  Check,
+  Zap,
+  Package,
+  Users,
+  FileSpreadsheet,
+  FolderOpen,
+  ArrowRight,
 } from 'lucide-react';
 
 type TabType = 'saved' | 'favorites' | 'history';
@@ -266,6 +272,51 @@ const DashboardPage: React.FC = () => {
             This Week
           </div>
           <p className="text-2xl font-bold mt-1">{stats.thisWeek}</p>
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="mb-8">
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Zap className="h-5 w-5 text-yellow-500" />
+          Quick Actions
+        </h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
+          <Link to="/skills">
+            <button className="w-full p-4 rounded-xl border bg-gradient-to-br from-blue-500/10 to-blue-500/5 hover:border-blue-500/50 transition-colors text-left group">
+              <Sparkles className="h-6 w-6 text-blue-500 mb-2" />
+              <p className="font-medium text-sm">Optimize Resume</p>
+              <p className="text-xs text-muted-foreground">AI-powered tailoring</p>
+            </button>
+          </Link>
+          <Link to="/skills">
+            <button className="w-full p-4 rounded-xl border bg-gradient-to-br from-green-500/10 to-green-500/5 hover:border-green-500/50 transition-colors text-left group">
+              <FileText className="h-6 w-6 text-green-500 mb-2" />
+              <p className="font-medium text-sm">Cover Letter</p>
+              <p className="text-xs text-muted-foreground">Generate instantly</p>
+            </button>
+          </Link>
+          <Link to="/role-templates">
+            <button className="w-full p-4 rounded-xl border bg-gradient-to-br from-purple-500/10 to-purple-500/5 hover:border-purple-500/50 transition-colors text-left group">
+              <Package className="h-6 w-6 text-purple-500 mb-2" />
+              <p className="font-medium text-sm">Role Templates</p>
+              <p className="text-xs text-muted-foreground">Install skill bundles</p>
+            </button>
+          </Link>
+          <Link to="/analyze">
+            <button className="w-full p-4 rounded-xl border bg-gradient-to-br from-orange-500/10 to-orange-500/5 hover:border-orange-500/50 transition-colors text-left group">
+              <FolderOpen className="h-6 w-6 text-orange-500 mb-2" />
+              <p className="font-medium text-sm">Analyze Role</p>
+              <p className="text-xs text-muted-foreground">Custom skills from JD</p>
+            </button>
+          </Link>
+          <Link to="/batch">
+            <button className="w-full p-4 rounded-xl border bg-gradient-to-br from-pink-500/10 to-pink-500/5 hover:border-pink-500/50 transition-colors text-left group">
+              <FileSpreadsheet className="h-6 w-6 text-pink-500 mb-2" />
+              <p className="font-medium text-sm">Batch Process</p>
+              <p className="text-xs text-muted-foreground">Process CSV files</p>
+            </button>
+          </Link>
         </div>
       </div>
 
