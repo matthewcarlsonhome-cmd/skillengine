@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, User, Save, FileText, Briefcase, GraduationCap, Award, Upload, Trash2, Check, Eye, EyeOff } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
@@ -106,6 +106,7 @@ const UserProfilePage: React.FC = () => {
   const [activeSection, setActiveSection] = useState('personal');
   const [hasChanges, setHasChanges] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const loadedProfile = getUserProfile();
@@ -421,17 +422,20 @@ const UserProfilePage: React.FC = () => {
                     <p className="text-sm text-muted-foreground mb-2">
                       Upload your resume (TXT, PDF text, or paste below)
                     </p>
-                    <label className="cursor-pointer">
-                      <input
-                        type="file"
-                        accept=".txt,.pdf,.doc,.docx"
-                        onChange={handleFileUpload}
-                        className="hidden"
-                      />
-                      <Button variant="outline" size="sm" asChild>
-                        <span>Choose File</span>
-                      </Button>
-                    </label>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".txt,.pdf,.doc,.docx"
+                      onChange={handleFileUpload}
+                      className="hidden"
+                    />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      Choose File
+                    </Button>
                   </>
                 )}
               </div>
