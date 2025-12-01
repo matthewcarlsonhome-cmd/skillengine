@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Moon, Sun, Briefcase, Users, Sparkles, FolderOpen, LogIn, LogOut, Loader2, ChevronDown, LayoutDashboard, Package, Menu, X, Settings, FileSpreadsheet, DollarSign, Wrench, MessageSquare, Calculator, Mail, Building2, Trophy, Target, BarChart3, Bot, Bell, Lock, TrendingUp, Calendar, User, PlusCircle, Wand2 } from 'lucide-react';
+import { Moon, Sun, Briefcase, Users, Sparkles, FolderOpen, LogIn, LogOut, Loader2, ChevronDown, LayoutDashboard, Package, Menu, X, Settings, FileSpreadsheet, DollarSign, Wrench, MessageSquare, Calculator, Mail, Building2, Trophy, Target, BarChart3, Bot, Bell, Lock, TrendingUp, Calendar, User, PlusCircle, Wand2, Heart } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme.tsx';
 import { useAuth } from '../hooks/useAuth.tsx';
 import { useToast } from '../hooks/useToast.tsx';
@@ -237,6 +237,12 @@ const Header: React.FC = () => {
                         <div className="flex items-center gap-2 px-3 py-2 rounded hover:bg-muted transition-colors">
                           <Trophy className="h-4 w-4 text-yellow-500" />
                           <span className="text-sm">Achievements</span>
+                        </div>
+                      </Link>
+                      <Link to="/skill/healthcare-resume-parser" onClick={() => setShowToolsMenu(false)}>
+                        <div className="flex items-center gap-2 px-3 py-2 rounded hover:bg-muted transition-colors">
+                          <Heart className="h-4 w-4 text-emerald-500" />
+                          <span className="text-sm">Healthcare Resume Parser</span>
                         </div>
                       </Link>
                     </div>
@@ -538,6 +544,12 @@ const Header: React.FC = () => {
               <Button variant={isActive('/achievements') ? 'secondary' : 'ghost'} className="w-full justify-start gap-2">
                 <Trophy className="h-4 w-4" />
                 Achievements
+              </Button>
+            </Link>
+            <Link to="/skill/healthcare-resume-parser">
+              <Button variant={isActive('/skill/healthcare-resume-parser') ? 'secondary' : 'ghost'} className="w-full justify-start gap-2">
+                <Heart className="h-4 w-4" />
+                Healthcare Resume Parser
               </Button>
             </Link>
 
