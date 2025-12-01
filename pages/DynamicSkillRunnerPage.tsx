@@ -11,6 +11,7 @@ import { useToast } from '../hooks/useToast';
 import { useAuth } from '../hooks/useAuth';
 import { publishSkillToCommunity, isSupabaseConfigured } from '../lib/supabase';
 import type { DynamicSkill, SkillExecution, DynamicFormInput, Workspace } from '../lib/storage/types';
+import { getApiKey } from '../lib/apiKeyStorage';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Textarea } from '../components/ui/Textarea';
@@ -84,6 +85,14 @@ const DynamicSkillRunnerPage: React.FC = () => {
 
     loadData();
   }, [skillId]);
+
+  // Load stored API key when provider changes
+  useEffect(() => {
+    const storedKey = getApiKey(selectedApi as 'gemini' | 'claude');
+    if (storedKey) {
+      setApiKey(storedKey);
+    }
+  }, [selectedApi]);
 
   const handleInputChange = (id: string, value: unknown) => {
     setFormState(prev => ({ ...prev, [id]: value }));

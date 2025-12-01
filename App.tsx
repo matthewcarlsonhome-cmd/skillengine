@@ -6,6 +6,8 @@ import { ToastProvider } from './hooks/useToast';
 import { AppProvider } from './hooks/useAppContext';
 import { AuthProvider } from './hooks/useAuth';
 import Header from './components/Header';
+import Footer from './components/Footer';
+import CommandPalette from './components/CommandPalette';
 import HomePage from './pages/HomePage';
 import BrowseSkillsPage from './pages/BrowseSkillsPage';
 import SkillRunnerPage from './pages/SkillRunnerPage';
@@ -20,6 +22,18 @@ import ImportSkillPage from './pages/ImportSkillPage';
 import DashboardPage from './pages/DashboardPage';
 import RoleTemplatesPage from './pages/RoleTemplatesPage';
 import MySkillsPage from './pages/MySkillsPage';
+import PricingPage from './pages/PricingPage';
+import SettingsPage from './pages/SettingsPage';
+import WelcomePage from './pages/WelcomePage';
+import BatchProcessingPage from './pages/BatchProcessingPage';
+import JobTrackerPage from './pages/JobTrackerPage';
+import InterviewBankPage from './pages/InterviewBankPage';
+import SalaryCalculatorPage from './pages/SalaryCalculatorPage';
+import NetworkingTemplatesPage from './pages/NetworkingTemplatesPage';
+import CompanyNotesPage from './pages/CompanyNotesPage';
+import AchievementsPage from './pages/AchievementsPage';
+import SkillsGapPage from './pages/SkillsGapPage';
+import ProgressReportPage from './pages/ProgressReportPage';
 
 function App() {
   return (
@@ -28,13 +42,14 @@ function App() {
         <Router>
           <ThemeProvider>
             <ToastProvider>
-              <div className="min-h-screen bg-background font-sans antialiased">
+              <div className="min-h-screen bg-background font-sans antialiased flex flex-col">
                 <Header />
-                <main>
+                <main className="flex-1">
                   <Routes>
                     {/* Home */}
                     <Route path="/" element={<HomePage />} />
                     <Route path="/dashboard" element={<DashboardPage />} />
+                    <Route path="/welcome" element={<WelcomePage />} />
 
                     {/* Role Templates */}
                     <Route path="/role-templates" element={<RoleTemplatesPage />} />
@@ -55,10 +70,27 @@ function App() {
                     <Route path="/community/import" element={<ImportSkillPage />} />
                     <Route path="/community-skill-runner" element={<CommunitySkillRunnerPage />} />
 
+                    {/* Batch Processing */}
+                    <Route path="/batch" element={<BatchProcessingPage />} />
+
+                    {/* Job Search Tools */}
+                    <Route path="/job-tracker" element={<JobTrackerPage />} />
+                    <Route path="/interview-bank" element={<InterviewBankPage />} />
+                    <Route path="/salary-calculator" element={<SalaryCalculatorPage />} />
+                    <Route path="/networking" element={<NetworkingTemplatesPage />} />
+                    <Route path="/company-notes" element={<CompanyNotesPage />} />
+                    <Route path="/skills-gap" element={<SkillsGapPage />} />
+                    <Route path="/progress" element={<ProgressReportPage />} />
+                    <Route path="/achievements" element={<AchievementsPage />} />
+
                     {/* Utility */}
                     <Route path="/api-keys" element={<ApiKeyInstructionsPage />} />
+                    <Route path="/settings" element={<SettingsPage />} />
+                    <Route path="/pricing" element={<PricingPage />} />
                   </Routes>
                 </main>
+                <Footer />
+                <CommandPalette />
               </div>
             </ToastProvider>
           </ThemeProvider>

@@ -18,6 +18,7 @@ import { Progress } from '../components/ui/Progress.tsx';
 import { Sparkles, Clipboard, Download, AlertTriangle, ArrowLeft, KeyRound, Link as LinkIcon, Upload, HelpCircle, Save, Star, Check } from 'lucide-react';
 import { db } from '../lib/storage/indexeddb';
 import type { SavedOutput, FavoriteSkill, SkillExecution } from '../lib/storage/types';
+import { getApiKey, saveApiKey as storeApiKey } from '../lib/apiKeyStorage';
 
 const SkillRunnerPage: React.FC = () => {
   const { skillId } = useParams<{ skillId: string }>();
@@ -67,6 +68,14 @@ const SkillRunnerPage: React.FC = () => {
       db.isSkillFavorited(skillId).then(setIsFavorited);
     }
   }, [skillId]);
+
+  // Load stored API key when provider changes
+  useEffect(() => {
+    const storedKey = getApiKey(selectedApi as 'gemini' | 'claude');
+    if (storedKey) {
+      setApiKey(storedKey);
+    }
+  }, [selectedApi]);
 
   // Reset saved state when output changes
   useEffect(() => {

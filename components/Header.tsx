@@ -1,7 +1,7 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Moon, Sun, Briefcase, Users, Sparkles, FolderOpen, LogIn, LogOut, Loader2, ChevronDown, LayoutDashboard, Package } from 'lucide-react';
+import { Moon, Sun, Briefcase, Users, Sparkles, FolderOpen, LogIn, LogOut, Loader2, ChevronDown, LayoutDashboard, Package, Menu, X, Settings, FileSpreadsheet, DollarSign, Wrench, MessageSquare, Calculator, Mail, Building2, Trophy, Target, BarChart3 } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme.tsx';
 import { useAuth } from '../hooks/useAuth.tsx';
 import { useToast } from '../hooks/useToast.tsx';
@@ -13,7 +13,14 @@ const Header: React.FC = () => {
   const { user, loading, isConfigured, signInWithGoogle, signOut } = useAuth();
   const { addToast } = useToast();
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showToolsMenu, setShowToolsMenu] = useState(false);
   const [isSigningIn, setIsSigningIn] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location.pathname]);
 
   const toggleTheme = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
@@ -102,10 +109,96 @@ const Header: React.FC = () => {
                 Community
               </Button>
             </Link>
+
+            {/* Tools Dropdown */}
+            <div className="relative">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-2"
+                onClick={() => setShowToolsMenu(!showToolsMenu)}
+              >
+                <Wrench className="h-4 w-4" />
+                Tools
+                <ChevronDown className="h-3 w-3" />
+              </Button>
+
+              {showToolsMenu && (
+                <>
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setShowToolsMenu(false)}
+                  />
+                  <div className="absolute left-0 mt-2 w-64 rounded-lg border bg-card shadow-lg z-50">
+                    <div className="p-2 grid grid-cols-1 gap-1">
+                      <Link to="/job-tracker" onClick={() => setShowToolsMenu(false)}>
+                        <div className="flex items-center gap-2 px-3 py-2 rounded hover:bg-muted transition-colors">
+                          <Briefcase className="h-4 w-4 text-blue-500" />
+                          <span className="text-sm">Job Tracker</span>
+                        </div>
+                      </Link>
+                      <Link to="/interview-bank" onClick={() => setShowToolsMenu(false)}>
+                        <div className="flex items-center gap-2 px-3 py-2 rounded hover:bg-muted transition-colors">
+                          <MessageSquare className="h-4 w-4 text-green-500" />
+                          <span className="text-sm">Interview Bank</span>
+                        </div>
+                      </Link>
+                      <Link to="/salary-calculator" onClick={() => setShowToolsMenu(false)}>
+                        <div className="flex items-center gap-2 px-3 py-2 rounded hover:bg-muted transition-colors">
+                          <Calculator className="h-4 w-4 text-purple-500" />
+                          <span className="text-sm">Salary Calculator</span>
+                        </div>
+                      </Link>
+                      <Link to="/networking" onClick={() => setShowToolsMenu(false)}>
+                        <div className="flex items-center gap-2 px-3 py-2 rounded hover:bg-muted transition-colors">
+                          <Mail className="h-4 w-4 text-cyan-500" />
+                          <span className="text-sm">Networking Templates</span>
+                        </div>
+                      </Link>
+                      <Link to="/company-notes" onClick={() => setShowToolsMenu(false)}>
+                        <div className="flex items-center gap-2 px-3 py-2 rounded hover:bg-muted transition-colors">
+                          <Building2 className="h-4 w-4 text-orange-500" />
+                          <span className="text-sm">Company Notes</span>
+                        </div>
+                      </Link>
+                      <Link to="/skills-gap" onClick={() => setShowToolsMenu(false)}>
+                        <div className="flex items-center gap-2 px-3 py-2 rounded hover:bg-muted transition-colors">
+                          <Target className="h-4 w-4 text-pink-500" />
+                          <span className="text-sm">Skills Gap Analyzer</span>
+                        </div>
+                      </Link>
+                      <Link to="/progress" onClick={() => setShowToolsMenu(false)}>
+                        <div className="flex items-center gap-2 px-3 py-2 rounded hover:bg-muted transition-colors">
+                          <BarChart3 className="h-4 w-4 text-indigo-500" />
+                          <span className="text-sm">Progress Report</span>
+                        </div>
+                      </Link>
+                      <Link to="/achievements" onClick={() => setShowToolsMenu(false)}>
+                        <div className="flex items-center gap-2 px-3 py-2 rounded hover:bg-muted transition-colors">
+                          <Trophy className="h-4 w-4 text-yellow-500" />
+                          <span className="text-sm">Achievements</span>
+                        </div>
+                      </Link>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
           </nav>
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Mobile Menu Button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </Button>
+
           {/* Auth Section */}
           {isConfigured && (
             <>
@@ -187,6 +280,161 @@ const Header: React.FC = () => {
           </Button>
         </div>
       </div>
+
+      {/* Mobile Navigation Menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden border-t bg-background/95 backdrop-blur">
+          <nav className="container mx-auto max-w-7xl px-4 py-4 flex flex-col gap-1">
+            <Link to="/dashboard">
+              <Button
+                variant={isActive('/dashboard') ? 'secondary' : 'ghost'}
+                className="w-full justify-start gap-2"
+              >
+                <LayoutDashboard className="h-4 w-4" />
+                Dashboard
+              </Button>
+            </Link>
+            <Link to="/role-templates">
+              <Button
+                variant={isActive('/role-templates') ? 'secondary' : 'ghost'}
+                className="w-full justify-start gap-2"
+              >
+                <Package className="h-4 w-4" />
+                Role Templates
+              </Button>
+            </Link>
+            <Link to="/skills">
+              <Button
+                variant={isActive('/skills') ? 'secondary' : 'ghost'}
+                className="w-full justify-start gap-2"
+              >
+                <Sparkles className="h-4 w-4" />
+                Job Tools
+              </Button>
+            </Link>
+            <Link to="/analyze">
+              <Button
+                variant={isActive('/analyze') ? 'secondary' : 'ghost'}
+                className="w-full justify-start gap-2"
+              >
+                <FolderOpen className="h-4 w-4" />
+                Analyze Role
+              </Button>
+            </Link>
+            <Link to="/community">
+              <Button
+                variant={isActive('/community') ? 'secondary' : 'ghost'}
+                className="w-full justify-start gap-2"
+              >
+                <Users className="h-4 w-4" />
+                Community
+              </Button>
+            </Link>
+            <Link to="/batch">
+              <Button
+                variant={isActive('/batch') ? 'secondary' : 'ghost'}
+                className="w-full justify-start gap-2"
+              >
+                <FileSpreadsheet className="h-4 w-4" />
+                Batch Processing
+              </Button>
+            </Link>
+            <div className="border-t my-2" />
+            <p className="px-3 py-1 text-xs font-semibold text-muted-foreground uppercase">Job Search Tools</p>
+            <Link to="/job-tracker">
+              <Button
+                variant={isActive('/job-tracker') ? 'secondary' : 'ghost'}
+                className="w-full justify-start gap-2"
+              >
+                <Briefcase className="h-4 w-4" />
+                Job Tracker
+              </Button>
+            </Link>
+            <Link to="/interview-bank">
+              <Button
+                variant={isActive('/interview-bank') ? 'secondary' : 'ghost'}
+                className="w-full justify-start gap-2"
+              >
+                <MessageSquare className="h-4 w-4" />
+                Interview Bank
+              </Button>
+            </Link>
+            <Link to="/salary-calculator">
+              <Button
+                variant={isActive('/salary-calculator') ? 'secondary' : 'ghost'}
+                className="w-full justify-start gap-2"
+              >
+                <Calculator className="h-4 w-4" />
+                Salary Calculator
+              </Button>
+            </Link>
+            <Link to="/networking">
+              <Button
+                variant={isActive('/networking') ? 'secondary' : 'ghost'}
+                className="w-full justify-start gap-2"
+              >
+                <Mail className="h-4 w-4" />
+                Networking Templates
+              </Button>
+            </Link>
+            <Link to="/company-notes">
+              <Button
+                variant={isActive('/company-notes') ? 'secondary' : 'ghost'}
+                className="w-full justify-start gap-2"
+              >
+                <Building2 className="h-4 w-4" />
+                Company Notes
+              </Button>
+            </Link>
+            <Link to="/skills-gap">
+              <Button
+                variant={isActive('/skills-gap') ? 'secondary' : 'ghost'}
+                className="w-full justify-start gap-2"
+              >
+                <Target className="h-4 w-4" />
+                Skills Gap Analyzer
+              </Button>
+            </Link>
+            <Link to="/progress">
+              <Button
+                variant={isActive('/progress') ? 'secondary' : 'ghost'}
+                className="w-full justify-start gap-2"
+              >
+                <BarChart3 className="h-4 w-4" />
+                Progress Report
+              </Button>
+            </Link>
+            <Link to="/achievements">
+              <Button
+                variant={isActive('/achievements') ? 'secondary' : 'ghost'}
+                className="w-full justify-start gap-2"
+              >
+                <Trophy className="h-4 w-4" />
+                Achievements
+              </Button>
+            </Link>
+            <div className="border-t my-2" />
+            <Link to="/settings">
+              <Button
+                variant={isActive('/settings') ? 'secondary' : 'ghost'}
+                className="w-full justify-start gap-2"
+              >
+                <Settings className="h-4 w-4" />
+                Settings
+              </Button>
+            </Link>
+            <Link to="/pricing">
+              <Button
+                variant={isActive('/pricing') ? 'secondary' : 'ghost'}
+                className="w-full justify-start gap-2"
+              >
+                <DollarSign className="h-4 w-4" />
+                Pricing
+              </Button>
+            </Link>
+          </nav>
+        </div>
+      )}
     </header>
   );
 };

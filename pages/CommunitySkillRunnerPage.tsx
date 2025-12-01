@@ -11,6 +11,7 @@ import { useToast } from '../hooks/useToast';
 import { useAuth } from '../hooks/useAuth';
 import type { DynamicSkill, DynamicFormInput, SavedOutput, SkillExecution } from '../lib/storage/types';
 import { db } from '../lib/storage/indexeddb';
+import { getApiKey } from '../lib/apiKeyStorage';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Textarea } from '../components/ui/Textarea';
@@ -96,6 +97,14 @@ const CommunitySkillRunnerPage: React.FC = () => {
 
     loadSkill();
   }, []);
+
+  // Load stored API key when provider changes
+  useEffect(() => {
+    const storedKey = getApiKey(selectedApi as 'gemini' | 'claude');
+    if (storedKey) {
+      setApiKey(storedKey);
+    }
+  }, [selectedApi]);
 
   // Convert community skill to format needed for execution
   const getExecutableSkill = (): DynamicSkill | null => {
