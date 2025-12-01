@@ -34,6 +34,12 @@ import CompanyNotesPage from './pages/CompanyNotesPage';
 import AchievementsPage from './pages/AchievementsPage';
 import SkillsGapPage from './pages/SkillsGapPage';
 import ProgressReportPage from './pages/ProgressReportPage';
+import MockInterviewPage from './pages/MockInterviewPage';
+import FollowUpRemindersPage from './pages/FollowUpRemindersPage';
+import AutoFillVaultPage from './pages/AutoFillVaultPage';
+import ReferralNetworkPage from './pages/ReferralNetworkPage';
+import MarketInsightsPage from './pages/MarketInsightsPage';
+import DailyPlannerPage from './pages/DailyPlannerPage';
 
 function App() {
   return (
@@ -82,6 +88,12 @@ function App() {
                     <Route path="/skills-gap" element={<SkillsGapPage />} />
                     <Route path="/progress" element={<ProgressReportPage />} />
                     <Route path="/achievements" element={<AchievementsPage />} />
+                    <Route path="/mock-interview" element={<MockInterviewPage />} />
+                    <Route path="/follow-ups" element={<FollowUpRemindersPage />} />
+                    <Route path="/autofill-vault" element={<AutoFillVaultPage />} />
+                    <Route path="/referral-network" element={<ReferralNetworkPage />} />
+                    <Route path="/market-insights" element={<MarketInsightsPage />} />
+                    <Route path="/daily-planner" element={<DailyPlannerPage />} />
 
                     {/* Utility */}
                     <Route path="/api-keys" element={<ApiKeyInstructionsPage />} />

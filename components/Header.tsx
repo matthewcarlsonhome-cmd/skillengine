@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Moon, Sun, Briefcase, Users, Sparkles, FolderOpen, LogIn, LogOut, Loader2, ChevronDown, LayoutDashboard, Package, Menu, X, Settings, FileSpreadsheet, DollarSign, Wrench, MessageSquare, Calculator, Mail, Building2, Trophy, Target, BarChart3 } from 'lucide-react';
+import { Moon, Sun, Briefcase, Users, Sparkles, FolderOpen, LogIn, LogOut, Loader2, ChevronDown, LayoutDashboard, Package, Menu, X, Settings, FileSpreadsheet, DollarSign, Wrench, MessageSquare, Calculator, Mail, Building2, Trophy, Target, BarChart3, Bot, Bell, Lock, TrendingUp, Calendar } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme.tsx';
 import { useAuth } from '../hooks/useAuth.tsx';
 import { useToast } from '../hooks/useToast.tsx';
@@ -177,6 +177,43 @@ const Header: React.FC = () => {
                         <div className="flex items-center gap-2 px-3 py-2 rounded hover:bg-muted transition-colors">
                           <Trophy className="h-4 w-4 text-yellow-500" />
                           <span className="text-sm">Achievements</span>
+                        </div>
+                      </Link>
+                      <div className="border-t my-1" />
+                      <Link to="/mock-interview" onClick={() => setShowToolsMenu(false)}>
+                        <div className="flex items-center gap-2 px-3 py-2 rounded hover:bg-muted transition-colors">
+                          <Bot className="h-4 w-4 text-violet-500" />
+                          <span className="text-sm">Mock Interview</span>
+                        </div>
+                      </Link>
+                      <Link to="/follow-ups" onClick={() => setShowToolsMenu(false)}>
+                        <div className="flex items-center gap-2 px-3 py-2 rounded hover:bg-muted transition-colors">
+                          <Bell className="h-4 w-4 text-red-500" />
+                          <span className="text-sm">Follow-up Reminders</span>
+                        </div>
+                      </Link>
+                      <Link to="/autofill-vault" onClick={() => setShowToolsMenu(false)}>
+                        <div className="flex items-center gap-2 px-3 py-2 rounded hover:bg-muted transition-colors">
+                          <Lock className="h-4 w-4 text-emerald-500" />
+                          <span className="text-sm">Auto-Fill Vault</span>
+                        </div>
+                      </Link>
+                      <Link to="/referral-network" onClick={() => setShowToolsMenu(false)}>
+                        <div className="flex items-center gap-2 px-3 py-2 rounded hover:bg-muted transition-colors">
+                          <Users className="h-4 w-4 text-blue-400" />
+                          <span className="text-sm">Referral Network</span>
+                        </div>
+                      </Link>
+                      <Link to="/market-insights" onClick={() => setShowToolsMenu(false)}>
+                        <div className="flex items-center gap-2 px-3 py-2 rounded hover:bg-muted transition-colors">
+                          <TrendingUp className="h-4 w-4 text-teal-500" />
+                          <span className="text-sm">Market Insights</span>
+                        </div>
+                      </Link>
+                      <Link to="/daily-planner" onClick={() => setShowToolsMenu(false)}>
+                        <div className="flex items-center gap-2 px-3 py-2 rounded hover:bg-muted transition-colors">
+                          <Calendar className="h-4 w-4 text-sky-500" />
+                          <span className="text-sm">Daily Planner</span>
                         </div>
                       </Link>
                     </div>
@@ -411,6 +448,60 @@ const Header: React.FC = () => {
               >
                 <Trophy className="h-4 w-4" />
                 Achievements
+              </Button>
+            </Link>
+            <Link to="/mock-interview">
+              <Button
+                variant={isActive('/mock-interview') ? 'secondary' : 'ghost'}
+                className="w-full justify-start gap-2"
+              >
+                <Bot className="h-4 w-4" />
+                Mock Interview
+              </Button>
+            </Link>
+            <Link to="/follow-ups">
+              <Button
+                variant={isActive('/follow-ups') ? 'secondary' : 'ghost'}
+                className="w-full justify-start gap-2"
+              >
+                <Bell className="h-4 w-4" />
+                Follow-up Reminders
+              </Button>
+            </Link>
+            <Link to="/autofill-vault">
+              <Button
+                variant={isActive('/autofill-vault') ? 'secondary' : 'ghost'}
+                className="w-full justify-start gap-2"
+              >
+                <Lock className="h-4 w-4" />
+                Auto-Fill Vault
+              </Button>
+            </Link>
+            <Link to="/referral-network">
+              <Button
+                variant={isActive('/referral-network') ? 'secondary' : 'ghost'}
+                className="w-full justify-start gap-2"
+              >
+                <Users className="h-4 w-4" />
+                Referral Network
+              </Button>
+            </Link>
+            <Link to="/market-insights">
+              <Button
+                variant={isActive('/market-insights') ? 'secondary' : 'ghost'}
+                className="w-full justify-start gap-2"
+              >
+                <TrendingUp className="h-4 w-4" />
+                Market Insights
+              </Button>
+            </Link>
+            <Link to="/daily-planner">
+              <Button
+                variant={isActive('/daily-planner') ? 'secondary' : 'ghost'}
+                className="w-full justify-start gap-2"
+              >
+                <Calendar className="h-4 w-4" />
+                Daily Planner
               </Button>
             </Link>
             <div className="border-t my-2" />

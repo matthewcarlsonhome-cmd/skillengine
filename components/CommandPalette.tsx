@@ -22,6 +22,11 @@ import {
   Trophy,
   Target,
   BarChart3,
+  Bot,
+  Bell,
+  Lock,
+  TrendingUp,
+  Calendar,
 } from 'lucide-react';
 
 interface Command {
@@ -184,6 +189,54 @@ const CommandPalette: React.FC = () => {
       icon: Trophy,
       action: () => navigate('/achievements'),
       keywords: ['achievements', 'badges', 'milestones', 'gamification'],
+    },
+    {
+      id: 'mock-interview',
+      name: 'Mock Interview',
+      description: 'Practice interviews with AI feedback',
+      icon: Bot,
+      action: () => navigate('/mock-interview'),
+      keywords: ['mock', 'interview', 'practice', 'ai', 'feedback', 'simulator'],
+    },
+    {
+      id: 'follow-ups',
+      name: 'Follow-up Reminders',
+      description: 'Manage application follow-up reminders',
+      icon: Bell,
+      action: () => navigate('/follow-ups'),
+      keywords: ['follow', 'up', 'reminders', 'notifications', 'schedule'],
+    },
+    {
+      id: 'autofill-vault',
+      name: 'Auto-Fill Vault',
+      description: 'Store reusable application answers',
+      icon: Lock,
+      action: () => navigate('/autofill-vault'),
+      keywords: ['autofill', 'vault', 'answers', 'store', 'reusable', 'data'],
+    },
+    {
+      id: 'referral-network',
+      name: 'Referral Network',
+      description: 'Track connections at target companies',
+      icon: Users,
+      action: () => navigate('/referral-network'),
+      keywords: ['referral', 'network', 'connections', 'contacts', 'companies'],
+    },
+    {
+      id: 'market-insights',
+      name: 'Market Insights',
+      description: 'View job market trends and salary data',
+      icon: TrendingUp,
+      action: () => navigate('/market-insights'),
+      keywords: ['market', 'insights', 'trends', 'salary', 'data', 'analytics'],
+    },
+    {
+      id: 'daily-planner',
+      name: 'Daily Planner',
+      description: 'Plan your job search activities',
+      icon: Calendar,
+      action: () => navigate('/daily-planner'),
+      keywords: ['daily', 'planner', 'schedule', 'time', 'block', 'activities'],
     },
   ];
 
