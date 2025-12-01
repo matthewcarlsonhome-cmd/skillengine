@@ -26,6 +26,14 @@ import PricingPage from './pages/PricingPage';
 import SettingsPage from './pages/SettingsPage';
 import WelcomePage from './pages/WelcomePage';
 import BatchProcessingPage from './pages/BatchProcessingPage';
+import JobTrackerPage from './pages/JobTrackerPage';
+import InterviewBankPage from './pages/InterviewBankPage';
+import SalaryCalculatorPage from './pages/SalaryCalculatorPage';
+import NetworkingTemplatesPage from './pages/NetworkingTemplatesPage';
+import CompanyNotesPage from './pages/CompanyNotesPage';
+import AchievementsPage from './pages/AchievementsPage';
+import SkillsGapPage from './pages/SkillsGapPage';
+import ProgressReportPage from './pages/ProgressReportPage';
 
 function App() {
   return (
@@ -64,6 +72,16 @@ function App() {
 
                     {/* Batch Processing */}
                     <Route path="/batch" element={<BatchProcessingPage />} />
+
+                    {/* Job Search Tools */}
+                    <Route path="/job-tracker" element={<JobTrackerPage />} />
+                    <Route path="/interview-bank" element={<InterviewBankPage />} />
+                    <Route path="/salary-calculator" element={<SalaryCalculatorPage />} />
+                    <Route path="/networking" element={<NetworkingTemplatesPage />} />
+                    <Route path="/company-notes" element={<CompanyNotesPage />} />
+                    <Route path="/skills-gap" element={<SkillsGapPage />} />
+                    <Route path="/progress" element={<ProgressReportPage />} />
+                    <Route path="/achievements" element={<AchievementsPage />} />
 
                     {/* Utility */}
                     <Route path="/api-keys" element={<ApiKeyInstructionsPage />} />
