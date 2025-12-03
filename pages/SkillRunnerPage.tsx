@@ -9,6 +9,7 @@ import { runSkillStream as runGeminiSkillStream } from '../lib/gemini.ts';
 import { runSkillStream as runClaudeSkillStream } from '../lib/claude.ts';
 import { useToast } from '../hooks/useToast.tsx';
 import { useAppContext } from '../hooks/useAppContext.tsx';
+import { useAuth } from '../hooks/useAuth.tsx';
 import { Button } from '../components/ui/Button.tsx';
 import { Input } from '../components/ui/Input.tsx';
 import { Textarea } from '../components/ui/Textarea.tsx';
@@ -19,12 +20,14 @@ import { Sparkles, Clipboard, Download, AlertTriangle, ArrowLeft, KeyRound, Link
 import { db } from '../lib/storage/indexeddb';
 import type { SavedOutput, FavoriteSkill, SkillExecution } from '../lib/storage/types';
 import { getApiKey, saveApiKey as storeApiKey } from '../lib/apiKeyStorage';
+import { trackSkillUsage } from '../lib/admin';
 
 const SkillRunnerPage: React.FC = () => {
   const { skillId } = useParams<{ skillId: string }>();
   const navigate = useNavigate();
   const { addToast } = useToast();
   const { selectedApi, setSelectedApi, resumeText, jobDescriptionText, additionalInfoText, refreshProfileFromStorage } = useAppContext();
+  const { user, appUser } = useAuth();
 
   const skill: Skill | undefined = useMemo(() => skillId ? SKILLS[skillId] : undefined, [skillId]);
 
@@ -212,6 +215,25 @@ const SkillRunnerPage: React.FC = () => {
         durationMs: Date.now() - startTime,
       };
       await db.saveExecution(execution);
+
+      // Track skill usage for admin analytics
+      if (appUser) {
+        trackSkillUsage(
+          appUser.id,
+          appUser.email,
+          skill.id,
+          skill.name,
+          'static'
+        );
+      } else if (user) {
+        trackSkillUsage(
+          user.id,
+          user.email || 'anonymous',
+          skill.id,
+          skill.name,
+          'static'
+        );
+      }
     } catch (e: any) {
       setError(e.message || 'An unknown error occurred.');
       addToast(e.message || 'An unknown error occurred.', 'error');

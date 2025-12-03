@@ -117,7 +117,7 @@ export const JOB_APPLICATION_WORKFLOW: Workflow = {
     },
     {
       id: 'step-ats',
-      skillId: 'ats-keyword-optimizer',
+      skillId: 'ats-optimization-checker',
       name: 'Optimize for ATS',
       description: 'Add missing keywords and optimize formatting for applicant tracking systems',
       inputMappings: {
