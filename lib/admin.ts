@@ -63,6 +63,15 @@ export function isAdminEmail(email: string): boolean {
   return adminEmails.includes(email.toLowerCase());
 }
 
+/**
+ * Check if admin setup has been completed (at least one admin email configured)
+ * Used for bootstrap - allows first user to access Settings tab to set up admin
+ */
+export function hasAdminSetup(): boolean {
+  const adminEmails = getAdminEmails();
+  return adminEmails.length > 0;
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // ROLE CONFIGURATION MANAGEMENT
 // ═══════════════════════════════════════════════════════════════════════════

@@ -50,6 +50,7 @@ import {
   getAdminEmails,
   setAdminEmails,
   isAdminEmail,
+  hasAdminSetup,
   getCurrentAppUser,
 } from '../lib/admin';
 import type {
@@ -80,7 +81,14 @@ const AdminPage: React.FC = () => {
   const { addToast } = useToast();
   const { user } = useAuth();
 
-  const [activeTab, setActiveTab] = useState<TabId>('overview');
+  // Check admin access
+  const currentUser = getCurrentAppUser();
+  const isAdmin = currentUser?.isAdmin || (user?.email && isAdminEmail(user.email));
+  const adminSetupComplete = hasAdminSetup();
+  const isBootstrapMode = !adminSetupComplete; // No admins configured yet
+
+  // In bootstrap mode, default to settings tab; otherwise overview
+  const [activeTab, setActiveTab] = useState<TabId>(isBootstrapMode ? 'settings' : 'overview');
   const [stats, setStats] = useState(getAdminStats());
   const [roleConfigs, setRoleConfigs] = useState<RoleConfig[]>(getRoleConfigs());
   const [emails, setEmails] = useState<CapturedEmail[]>(getCapturedEmails());
@@ -88,17 +96,13 @@ const AdminPage: React.FC = () => {
   const [adminEmailList, setAdminEmailList] = useState<string>(getAdminEmails().join('\n'));
   const [editingRole, setEditingRole] = useState<UserRole | null>(null);
 
-  // Check admin access
-  const currentUser = getCurrentAppUser();
-  const isAdmin = currentUser?.isAdmin || (user?.email && isAdminEmail(user.email));
-
   useEffect(() => {
-    if (!isAdmin) {
-      // Allow access for now, but show warning
-      // navigate('/');
-      // addToast('Admin access required', 'error');
+    // If admin setup is complete and user is not admin, redirect
+    if (adminSetupComplete && !isAdmin) {
+      navigate('/');
+      addToast('Admin access required', 'error');
     }
-  }, [isAdmin]);
+  }, [adminSetupComplete, isAdmin, navigate, addToast]);
 
   const refreshData = () => {
     setStats(getAdminStats());
@@ -166,7 +170,13 @@ const AdminPage: React.FC = () => {
       .map(e => e.trim().toLowerCase())
       .filter(e => e.length > 0 && e.includes('@'));
     setAdminEmails(emails);
-    addToast('Admin emails updated', 'success');
+    addToast('Admin emails updated. Refreshing...', 'success');
+
+    // Reload the page to apply new admin status
+    // This ensures the user gets full access if they added their email
+    setTimeout(() => {
+      window.location.reload();
+    }, 500);
   };
 
   const tabs: { id: TabId; label: string; icon: React.FC<{ className?: string }> }[] = [
@@ -196,33 +206,44 @@ const AdminPage: React.FC = () => {
         </Button>
       </div>
 
-      {/* Warning for non-admins */}
-      {!isAdmin && (
-        <div className="mb-6 p-4 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center gap-3">
-          <AlertTriangle className="h-5 w-5 text-amber-500" />
-          <p className="text-sm">
-            You are viewing the admin panel in preview mode. Add your email to the admin list to enable full access.
-          </p>
+      {/* Bootstrap Mode Notice */}
+      {isBootstrapMode && (
+        <div className="mb-6 p-4 rounded-lg bg-blue-500/10 border border-blue-500/30 flex items-start gap-3">
+          <Shield className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="font-medium text-blue-600 dark:text-blue-400">Initial Admin Setup</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              No admin has been configured yet. Add your email address in the Settings tab below to become the admin.
+              Once saved, only admin users will be able to access this panel.
+            </p>
+          </div>
         </div>
       )}
 
       {/* Tabs */}
       <div className="border-b mb-6">
         <div className="flex gap-1 -mb-px">
-          {tabs.map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-colors ${
-                activeTab === tab.id
-                  ? 'border-primary text-primary'
-                  : 'border-transparent text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              <tab.icon className="h-4 w-4" />
-              {tab.label}
-            </button>
-          ))}
+          {tabs.map(tab => {
+            // In bootstrap mode, only allow settings tab
+            const isDisabled = isBootstrapMode && tab.id !== 'settings';
+            return (
+              <button
+                key={tab.id}
+                onClick={() => !isDisabled && setActiveTab(tab.id)}
+                disabled={isDisabled}
+                className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-colors ${
+                  activeTab === tab.id
+                    ? 'border-primary text-primary'
+                    : isDisabled
+                    ? 'border-transparent text-muted-foreground/50 cursor-not-allowed'
+                    : 'border-transparent text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <tab.icon className="h-4 w-4" />
+                {tab.label}
+              </button>
+            );
+          })}
         </div>
       </div>
 
