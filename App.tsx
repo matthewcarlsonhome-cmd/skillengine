@@ -41,6 +41,7 @@ import ReferralNetworkPage from './pages/ReferralNetworkPage';
 import MarketInsightsPage from './pages/MarketInsightsPage';
 import DailyPlannerPage from './pages/DailyPlannerPage';
 import UserProfilePage from './pages/UserProfilePage';
+import SkillExportPage from './pages/SkillExportPage';
 
 function App() {
   return (
@@ -78,8 +79,9 @@ function App() {
                     <Route path="/community/import" element={<ImportSkillPage />} />
                     <Route path="/community-skill-runner" element={<CommunitySkillRunnerPage />} />
 
-                    {/* Batch Processing */}
+                    {/* Batch Processing & Export */}
                     <Route path="/batch" element={<BatchProcessingPage />} />
+                    <Route path="/export-skills" element={<SkillExportPage />} />
 
                     {/* Job Search Tools */}
                     <Route path="/job-tracker" element={<JobTrackerPage />} />

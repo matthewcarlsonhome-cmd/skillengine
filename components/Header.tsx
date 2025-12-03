@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Moon, Sun, Briefcase, Users, Sparkles, FolderOpen, LogIn, LogOut, Loader2, ChevronDown, LayoutDashboard, Package, Menu, X, Settings, FileSpreadsheet, DollarSign, Wrench, MessageSquare, Calculator, Mail, Building2, Trophy, Target, BarChart3, Bot, Bell, Lock, TrendingUp, Calendar, User, PlusCircle, Wand2, Heart } from 'lucide-react';
+import { Moon, Sun, Briefcase, Users, Sparkles, FolderOpen, LogIn, LogOut, Loader2, ChevronDown, LayoutDashboard, Package, Menu, X, Settings, FileSpreadsheet, DollarSign, Wrench, MessageSquare, Calculator, Mail, Building2, Trophy, Target, BarChart3, Bot, Bell, Lock, TrendingUp, Calendar, User, PlusCircle, Wand2, Heart, Download } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme.tsx';
 import { useAuth } from '../hooks/useAuth.tsx';
 import { useToast } from '../hooks/useToast.tsx';
@@ -231,6 +231,12 @@ const Header: React.FC = () => {
                         <div className="flex items-center gap-2 px-3 py-2 rounded hover:bg-muted transition-colors">
                           <FileSpreadsheet className="h-4 w-4 text-amber-500" />
                           <span className="text-sm">Batch Processing</span>
+                        </div>
+                      </Link>
+                      <Link to="/export-skills" onClick={() => setShowToolsMenu(false)}>
+                        <div className="flex items-center gap-2 px-3 py-2 rounded hover:bg-muted transition-colors">
+                          <Download className="h-4 w-4 text-orange-500" />
+                          <span className="text-sm">Export Skills</span>
                         </div>
                       </Link>
                       <Link to="/achievements" onClick={() => setShowToolsMenu(false)}>
@@ -538,6 +544,12 @@ const Header: React.FC = () => {
               <Button variant={isActive('/batch') ? 'secondary' : 'ghost'} className="w-full justify-start gap-2">
                 <FileSpreadsheet className="h-4 w-4" />
                 Batch Processing
+              </Button>
+            </Link>
+            <Link to="/export-skills">
+              <Button variant={isActive('/export-skills') ? 'secondary' : 'ghost'} className="w-full justify-start gap-2">
+                <Download className="h-4 w-4" />
+                Export Skills
               </Button>
             </Link>
             <Link to="/achievements">
