@@ -1,3 +1,64 @@
+/**
+ * static.ts - Static AI Skill Definitions
+ *
+ * This file contains all 16 built-in AI skills for job seekers. Each skill is
+ * a pre-configured AI prompt template that helps users with different aspects
+ * of their job search journey.
+ *
+ * SKILL STRUCTURE:
+ * ================
+ * Each skill in the SKILLS object contains:
+ *
+ * - id: Unique identifier used in URLs (e.g., 'resume-customizer')
+ * - name: Display name shown in the UI
+ * - description: Short description for skill cards
+ * - longDescription: Detailed description shown on skill detail pages
+ * - whatYouGet: Array of bullet points describing skill outputs
+ * - theme: Visual styling (primary color, secondary background, gradient)
+ * - icon: React component for the skill's icon
+ * - inputs: Array of form fields the user fills out
+ * - generatePrompt: Function that creates AI prompts from user inputs
+ * - useGoogleSearch: Optional flag for skills that need web search
+ *
+ * PROMPT GENERATION:
+ * ==================
+ * Each skill's generatePrompt() function returns:
+ * - systemInstruction: The system prompt that sets the AI's role and rules
+ * - userPrompt: The user message containing the actual data to process
+ *
+ * The systemInstruction contains detailed instructions for the AI including:
+ * - Role definition (e.g., "You are an expert career consultant...")
+ * - Methodology and scoring criteria
+ * - Output format specifications
+ * - Edge case handling
+ *
+ * SKILL CATEGORIES:
+ * =================
+ * Skills are organized by job search workflow stage:
+ *
+ * 1. ASSESSMENT: Job Readiness Score, Skills Gap Analyzer
+ * 2. OPTIMIZATION: LinkedIn Optimizer, ATS Checker, Resume Customizer
+ * 3. OUTREACH: Cover Letter Generator, Networking Scripts
+ * 4. RESEARCH: Company Research, Day in the Life, AI Automation Analyzer
+ * 5. INTERVIEW: Interview Prep, Thank You Notes
+ * 6. NEGOTIATION: Offer Evaluation, Salary Negotiation
+ * 7. TRANSITION: Onboarding Accelerator
+ * 8. SPECIALTY: Healthcare Resume Parser
+ *
+ * SHARED INPUTS:
+ * ==============
+ * Many skills share common input fields (job title, company, resume, etc.)
+ * These are defined in sharedJobSeekerInputs to promote code reuse and
+ * ensure consistent field names across skills.
+ *
+ * ADDING NEW SKILLS:
+ * ==================
+ * To add a new skill:
+ * 1. Create an icon in components/icons.tsx
+ * 2. Import the icon at the top of this file
+ * 3. Add a new entry to the SKILLS object with all required fields
+ * 4. The skill will automatically appear in BrowseSkillsPage and be accessible at /skill/[id]
+ */
 
 import { Skill, FormInput } from '../../types';
 import {
@@ -18,7 +79,15 @@ import {
   HealthcareResumeIcon
 } from '../../components/icons';
 
-// Shared inputs for many job-seeker related skills to promote code reuse
+// ─────────────────────────────────────────────────────────────────────────────
+// SHARED INPUT DEFINITIONS
+// Common form fields reused across multiple skills
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Standard job seeker inputs used by most skills
+ * These fields are pre-filled from the home page uploads when available
+ */
 const sharedJobSeekerInputs: FormInput[] = [
   { id: 'jobTitle', label: 'Job Title', type: 'text', placeholder: 'e.g., Senior Product Manager', required: true },
   { id: 'companyName', label: 'Company Name', type: 'text', placeholder: 'e.g., Google', required: true },
@@ -26,15 +95,48 @@ const sharedJobSeekerInputs: FormInput[] = [
   { id: 'userBackground', label: 'Your Resume / Background', type: 'textarea', placeholder: 'Content is pre-filled from home page upload.', required: true, rows: 8 },
 ];
 
-const additionalContextInput: FormInput = { 
-    id: 'additionalContext', 
-    label: 'Additional Context (Optional)', 
-    type: 'textarea', 
-    placeholder: 'Content is pre-filled from home page upload. Paste performance reviews, project details, or specific achievements here.', 
-    rows: 5 
+/**
+ * Optional additional context field for extra information
+ * (performance reviews, project details, specific achievements)
+ */
+const additionalContextInput: FormInput = {
+    id: 'additionalContext',
+    label: 'Additional Context (Optional)',
+    type: 'textarea',
+    placeholder: 'Content is pre-filled from home page upload. Paste performance reviews, project details, or specific achievements here.',
+    rows: 5
 };
 
-// Helper to create the final user prompt string
+// ─────────────────────────────────────────────────────────────────────────────
+// HELPER FUNCTIONS
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Creates a formatted user prompt from form inputs
+ *
+ * Takes the user's form data and formats it into a structured prompt
+ * with labeled sections in markdown format.
+ *
+ * @param title - The name of the skill/analysis being performed
+ * @param inputs - Record of form field values keyed by field ID
+ * @param inputMapping - Maps field IDs to display labels
+ * @returns Formatted prompt string with all non-empty inputs
+ *
+ * @example
+ * createUserPrompt("Resume Analysis", { jobTitle: "PM", company: "Google" }, { jobTitle: "Job", company: "Company" })
+ * // Returns:
+ * // "Based on the user's request, please now perform the Resume Analysis analysis.
+ * //
+ * // **Job:**
+ * // ```
+ * // PM
+ * // ```
+ * //
+ * // **Company:**
+ * // ```
+ * // Google
+ * // ```"
+ */
 const createUserPrompt = (title: string, inputs: Record<string, any>, inputMapping: Record<string, string>) => {
   let prompt = `Based on the user's request, please now perform the ${title} analysis.\n\n`;
   for (const [key, label] of Object.entries(inputMapping)) {
@@ -45,8 +147,16 @@ const createUserPrompt = (title: string, inputs: Record<string, any>, inputMappi
   return prompt;
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
+// SKILLS DEFINITIONS
+// The main export containing all 16 AI skills
+// ─────────────────────────────────────────────────────────────────────────────
+
 export const SKILLS: Record<string, Skill> = {
-  // --- ORDERED SKILLS FOR JOB SEARCH WORKFLOW ---
+  // ═══════════════════════════════════════════════════════════════════════════
+  // ASSESSMENT SKILLS
+  // Help candidates evaluate their fit for roles
+  // ═══════════════════════════════════════════════════════════════════════════
   'job-readiness-score': {
     id: 'job-readiness-score',
     name: 'Job Readiness Scorer',
