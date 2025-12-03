@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Moon, Sun, Briefcase, Users, Sparkles, FolderOpen, LogIn, LogOut, Loader2, ChevronDown, LayoutDashboard, Package, Menu, X, Settings, FileSpreadsheet, DollarSign, Wrench, MessageSquare, Calculator, Mail, Building2, Trophy, Target, BarChart3, Bot, Bell, Lock, TrendingUp, Calendar, User, PlusCircle, Wand2, Heart, Download } from 'lucide-react';
+import { Moon, Sun, Briefcase, Users, Sparkles, FolderOpen, LogIn, LogOut, Loader2, ChevronDown, LayoutDashboard, Package, Menu, X, Settings, FileSpreadsheet, DollarSign, Wrench, MessageSquare, Calculator, Mail, Building2, Trophy, Target, BarChart3, Bot, Bell, Lock, TrendingUp, Calendar, User, PlusCircle, Wand2, Heart, Download, Zap, Play } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme.tsx';
 import { useAuth } from '../hooks/useAuth.tsx';
 import { useToast } from '../hooks/useToast.tsx';
@@ -131,7 +131,38 @@ const Header: React.FC = () => {
                   />
                   <div className="absolute left-0 mt-2 w-72 rounded-lg border bg-card shadow-lg z-50 max-h-[80vh] overflow-y-auto">
                     <div className="p-2">
+                      {/* Workflows Section */}
+                      <p className="px-3 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">AI Workflows</p>
+                      <Link to="/workflow/job-application" onClick={() => setShowToolsMenu(false)}>
+                        <div className="flex items-center gap-2 px-3 py-2 rounded hover:bg-muted transition-colors">
+                          <Briefcase className="h-4 w-4 text-blue-500" />
+                          <div>
+                            <span className="text-sm">Job Application</span>
+                            <p className="text-xs text-muted-foreground">Complete application package</p>
+                          </div>
+                        </div>
+                      </Link>
+                      <Link to="/workflow/interview-prep" onClick={() => setShowToolsMenu(false)}>
+                        <div className="flex items-center gap-2 px-3 py-2 rounded hover:bg-muted transition-colors">
+                          <MessageSquare className="h-4 w-4 text-purple-500" />
+                          <div>
+                            <span className="text-sm">Interview Prep</span>
+                            <p className="text-xs text-muted-foreground">Full interview preparation</p>
+                          </div>
+                        </div>
+                      </Link>
+                      <Link to="/workflow/post-interview" onClick={() => setShowToolsMenu(false)}>
+                        <div className="flex items-center gap-2 px-3 py-2 rounded hover:bg-muted transition-colors">
+                          <Mail className="h-4 w-4 text-green-500" />
+                          <div>
+                            <span className="text-sm">Post-Interview</span>
+                            <p className="text-xs text-muted-foreground">Follow-up & thank you notes</p>
+                          </div>
+                        </div>
+                      </Link>
+
                       {/* Job Tracking Section */}
+                      <div className="border-t my-2" />
                       <p className="px-3 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Job Tracking</p>
                       <Link to="/job-tracker" onClick={() => setShowToolsMenu(false)}>
                         <div className="flex items-center gap-2 px-3 py-2 rounded hover:bg-muted transition-colors">
@@ -443,6 +474,29 @@ const Header: React.FC = () => {
                 Community
               </Button>
             </Link>
+
+            {/* AI Workflows */}
+            <div className="border-t my-2" />
+            <p className="px-3 py-1 text-xs font-semibold text-muted-foreground uppercase">AI Workflows</p>
+            <Link to="/workflow/job-application">
+              <Button variant="ghost" className="w-full justify-start gap-2">
+                <Briefcase className="h-4 w-4 text-blue-500" />
+                Job Application Package
+              </Button>
+            </Link>
+            <Link to="/workflow/interview-prep">
+              <Button variant="ghost" className="w-full justify-start gap-2">
+                <MessageSquare className="h-4 w-4 text-purple-500" />
+                Interview Preparation
+              </Button>
+            </Link>
+            <Link to="/workflow/post-interview">
+              <Button variant="ghost" className="w-full justify-start gap-2">
+                <Mail className="h-4 w-4 text-green-500" />
+                Post-Interview Follow-Up
+              </Button>
+            </Link>
+
             {/* Job Tracking */}
             <div className="border-t my-2" />
             <p className="px-3 py-1 text-xs font-semibold text-muted-foreground uppercase">Job Tracking</p>

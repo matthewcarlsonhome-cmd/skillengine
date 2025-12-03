@@ -14,9 +14,21 @@ import {
   Package,
   Wand2,
   ArrowRight,
-  CheckCircle2
+  CheckCircle2,
+  MessageSquare,
+  Mail,
+  Play,
+  Zap
 } from 'lucide-react';
 import { getUserProfile } from './UserProfilePage';
+import { WORKFLOW_LIST } from '../lib/workflows';
+
+// Icon mapping for workflows
+const WORKFLOW_ICONS: Record<string, React.FC<{ className?: string }>> = {
+  Briefcase,
+  MessageSquare,
+  Mail,
+};
 
 const HomePage: React.FC = () => {
   const { workspaces, deleteWorkspace, loading: workspacesLoading } = useWorkspaces();
@@ -153,6 +165,73 @@ const HomePage: React.FC = () => {
               Create Skills <ChevronRight className="ml-1 h-4 w-4" />
             </Button>
           </Link>
+        </div>
+      </section>
+
+      {/* AI Workflows Section */}
+      <section className="mb-12">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center">
+            <Zap className="h-5 w-5 text-indigo-400" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold">AI Workflows</h2>
+            <p className="text-muted-foreground text-sm">
+              Run multiple AI skills in sequence to complete complex job search tasks
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {WORKFLOW_LIST.map((workflow) => {
+            const WorkflowIcon = WORKFLOW_ICONS[workflow.icon] || Briefcase;
+            return (
+              <Link key={workflow.id} to={`/workflow/${workflow.id}`}>
+                <div className={`rounded-xl border bg-card p-6 h-full hover:border-${workflow.color}-500/50 transition-all hover:shadow-lg group`}>
+                  <div className={`h-12 w-12 rounded-lg bg-${workflow.color}-500/20 flex items-center justify-center mb-4`}>
+                    <WorkflowIcon className={`h-6 w-6 text-${workflow.color}-400`} />
+                  </div>
+                  <h3 className="text-lg font-bold mb-2">{workflow.name}</h3>
+                  <p className="text-muted-foreground text-sm mb-4">
+                    {workflow.description}
+                  </p>
+
+                  <div className="space-y-2 mb-4">
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Clock className="h-3 w-3" />
+                      <span>{workflow.estimatedTime}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <CheckCircle2 className="h-3 w-3" />
+                      <span>{workflow.steps.length} automated steps</span>
+                    </div>
+                  </div>
+
+                  <div className="text-sm font-medium text-muted-foreground mb-2">You'll receive:</div>
+                  <ul className="space-y-1">
+                    {workflow.outputs.slice(0, 3).map((output, i) => (
+                      <li key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
+                        <CheckCircle2 className="h-3 w-3 text-green-500 shrink-0 mt-0.5" />
+                        <span>{output}</span>
+                      </li>
+                    ))}
+                    {workflow.outputs.length > 3 && (
+                      <li className="text-xs text-muted-foreground pl-5">
+                        +{workflow.outputs.length - 3} more...
+                      </li>
+                    )}
+                  </ul>
+
+                  <div className="mt-4 pt-4 border-t">
+                    <Button variant="outline" className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                      <Play className="h-4 w-4 mr-2" />
+                      Start Workflow
+                    </Button>
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       </section>
 

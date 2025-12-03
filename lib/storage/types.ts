@@ -186,3 +186,103 @@ export interface FavoriteSkill {
   category: string;
   createdAt: string;
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// WORKFLOW TYPES
+// For chaining multiple skills together in automated sequences
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Defines how an input field gets its value
+ */
+export type WorkflowInputSource =
+  | { type: 'global'; inputId: string }           // From workflow's global inputs
+  | { type: 'previous'; stepId: string; outputKey: string }  // From a previous step's output
+  | { type: 'static'; value: string }             // Hardcoded value
+  | { type: 'computed'; template: string };       // Template with {{placeholders}}
+
+/**
+ * A single step in a workflow that runs one skill
+ */
+export interface WorkflowStep {
+  id: string;
+  skillId: string;              // Reference to skill in SKILLS
+  name: string;                 // Display name for this step
+  description: string;          // What this step accomplishes
+
+  // Map skill inputs to their sources
+  inputMappings: {
+    [skillInputId: string]: WorkflowInputSource;
+  };
+
+  // Key to store this step's output for later steps
+  outputKey: string;
+
+  // Optional settings
+  optional?: boolean;           // Can be skipped
+  reviewRequired?: boolean;     // Pause for user review before continuing
+}
+
+/**
+ * Global input collected at workflow start
+ */
+export interface WorkflowGlobalInput {
+  id: string;
+  label: string;
+  type: 'text' | 'textarea' | 'select';
+  placeholder?: string;
+  helpText?: string;
+  options?: string[];           // For select type
+  required: boolean;
+  rows?: number;                // For textarea
+  prefillFrom?: 'resume' | 'jobDescription' | 'companyName';  // Auto-fill from context
+}
+
+/**
+ * Complete workflow definition
+ */
+export interface Workflow {
+  id: string;
+  name: string;
+  description: string;
+  longDescription: string;
+  icon: string;                 // Lucide icon name
+  color: string;                // Tailwind color class
+  estimatedTime: string;        // e.g., "10-15 minutes"
+
+  // What the user will receive
+  outputs: string[];
+
+  // Inputs collected once at the start
+  globalInputs: WorkflowGlobalInput[];
+
+  // Ordered sequence of skills to run
+  steps: WorkflowStep[];
+}
+
+/**
+ * Runtime state for a workflow execution
+ */
+export interface WorkflowExecution {
+  id: string;
+  workflowId: string;
+  workflowName: string;
+  status: 'collecting_inputs' | 'running' | 'paused' | 'completed' | 'error';
+  currentStepIndex: number;
+
+  // Collected global inputs
+  globalInputs: Record<string, string>;
+
+  // Outputs from each completed step
+  stepOutputs: Record<string, string>;  // stepId -> output
+
+  // Step statuses
+  stepStatuses: Record<string, 'pending' | 'running' | 'completed' | 'skipped' | 'error'>;
+
+  // Error info if failed
+  error?: string;
+
+  // Timestamps
+  startedAt: string;
+  completedAt?: string;
+}
