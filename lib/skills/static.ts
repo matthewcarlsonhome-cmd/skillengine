@@ -1208,50 +1208,50 @@ Advise on:
   },
   'healthcare-resume-parser': {
     id: 'healthcare-resume-parser',
-    name: 'Healthcare Resume Parser',
-    description: 'Parse healthcare consulting resumes and rewrite them to a specific format with structured data extraction.',
-    longDescription: 'Extracts structured information from healthcare consultant resumes including EHR systems experience, Epic modules, job history, certifications, and skills with confidence scoring. Rewrites resumes to your specified format.',
-    whatYouGet: ['Structured JSON Data Extraction', 'EHR & Epic Module Experience with Years', 'Confidence-Scored Fields', 'Reformatted Resume Output', 'Skills Matrix with Experience Levels'],
+    name: 'Resume Parser',
+    description: 'Parse any resume and rewrite it to a specific format with structured data extraction and confidence scoring.',
+    longDescription: 'Extracts structured information from resumes including technical skills with years of experience, job history, certifications, and education. Rewrites resumes to your specified format with confidence-scored fields.',
+    whatYouGet: ['Structured JSON Data Extraction', 'Technical Skills with Years of Experience', 'Confidence-Scored Fields', 'Reformatted Resume Output', 'Skills Matrix with Experience Levels'],
     theme: { primary: 'text-emerald-400', secondary: 'bg-emerald-900/20', gradient: 'from-emerald-500/20 to-transparent' },
     icon: HealthcareResumeIcon,
     inputs: [
-        { id: 'userBackground', label: 'Resume to Parse', type: 'textarea', placeholder: 'Paste the healthcare consultant resume to parse and reformat.', required: true, rows: 12 },
+        { id: 'userBackground', label: 'Resume to Parse', type: 'textarea', placeholder: 'Paste the resume to parse and reformat.', required: true, rows: 12 },
         { id: 'outputFormat', label: 'Output Format', type: 'select', options: ['JSON + Reformatted Resume', 'JSON Only', 'Reformatted Resume Only'], required: true },
         { id: 'styleGuide', label: 'Style Guide / Format Instructions', type: 'textarea', placeholder: 'Describe the desired output format, structure, or paste a template/example of how you want the resume formatted.', required: true, rows: 8 },
-        { id: 'focusAreas', label: 'Focus Areas (Optional)', type: 'textarea', placeholder: 'e.g., Emphasize Epic Cadence experience, highlight revenue cycle skills, focus on implementation projects', rows: 3 },
+        { id: 'focusAreas', label: 'Focus Areas (Optional)', type: 'textarea', placeholder: 'e.g., Emphasize leadership experience, highlight technical certifications, focus on project management', rows: 3 },
     ],
     generatePrompt: (inputs) => ({
-        systemInstruction: `You are a healthcare consulting resume parser and rewriter. Your task is to extract structured information from consultant resumes AND rewrite them according to the provided style guide.
+        systemInstruction: `You are a professional resume parser and rewriter. Your task is to extract structured information from resumes AND rewrite them according to the provided style guide.
 
 ## EXTRACTION RULES:
 
 ### 1. Technical Skills - Years of Experience:
-- Parse format like "Epic (5 years)" or "worked with Epic from 2018-2023" → 5 years
-- If only job dates mention a system, calculate years between dates
+- Parse format like "Python (5 years)" or "worked with AWS from 2018-2023" → 5 years
+- If only job dates mention a technology, calculate years between dates
 - Mark confidence: HIGH if explicitly stated, MEDIUM if calculated, LOW if ambiguous
 
-### 2. Healthcare Systems & EHR Applications:
-- Standardize names: "Epic EMR" → "Epic", "Cerner Millennium" → "Cerner"
-- Extract specific Epic modules: Cadence, Prelude, OpTime, Willow, Cupid, Beaker, Radiant, Tapestry, MyChart, etc.
-- Include ANY healthcare IT systems: Epic, Cerner, Meditech, Allscripts, athenahealth, etc.
-- Note certifications for each system if mentioned
+### 2. Technical Systems & Tools:
+- Standardize technology names (e.g., "Amazon Web Services" → "AWS")
+- Extract specific tools, platforms, and frameworks
+- Categorize by type: Programming Languages, Cloud Platforms, Databases, Frameworks, Tools
+- Note certifications for each technology if mentioned
 
 ### 3. Job History:
 - Extract: Company, Title, Start Date, End Date, Location, Description
 - Handle "Present", "Current" as ongoing employment
 - If only year given (no month), use January for start, December for end
 - Preserve bullet points and achievements
-- Identify healthcare-specific projects and implementations
+- Identify key projects and implementations
 
 ### 4. Header Information:
-- Name, credentials (RN, MD, MBA, PMP, etc.)
+- Name, credentials (MBA, PMP, PhD, CPA, etc.)
 - Contact: email, phone, location (city, state)
 - Professional summary if present
 
 ### 5. Education & Certifications:
 - Degrees with institution and year
-- Professional certifications with dates (Epic, Cerner, PMP, Six Sigma, etc.)
-- Healthcare-specific training
+- Professional certifications with dates (AWS, PMP, Six Sigma, CISSP, etc.)
+- Relevant training and courses
 
 ### CONFIDENCE SCORING:
 Assign each extracted field a confidence level:
@@ -1277,16 +1277,16 @@ Based on the user's selected output format, provide:
   "technicalSkills": [
     {
       "name": "",
-      "category": "EHR|Module|Integration|Analytics|Other",
+      "category": "Programming|Cloud|Database|Framework|Tool|Other",
       "yearsExperience": 0,
       "confidence": "HIGH|MEDIUM|LOW",
       "certifications": [],
       "notes": ""
     }
   ],
-  "epicModules": [
+  "specializations": [
     {
-      "module": "",
+      "area": "",
       "yearsExperience": 0,
       "confidence": "HIGH|MEDIUM|LOW",
       "certified": false,
@@ -1302,7 +1302,7 @@ Based on the user's selected output format, provide:
       "location": { "value": "", "confidence": "HIGH|MEDIUM|LOW" },
       "isCurrent": false,
       "description": [],
-      "healthcareSystems": [],
+      "technologiesUsed": [],
       "projectHighlights": []
     }
   ],
@@ -1338,8 +1338,8 @@ Follow the user's style guide exactly to reformat the resume. Maintain all factu
 - Never invent information not in the source resume
 - Clearly flag assumptions in the metadata
 - Preserve quantified achievements (numbers, percentages, dollar amounts)
-- Identify and highlight healthcare-specific terminology and experience`,
-        userPrompt: createUserPrompt("Healthcare Resume Parser", inputs, {
+- Identify and highlight industry-specific terminology and experience`,
+        userPrompt: createUserPrompt("Resume Parser", inputs, {
             userBackground: "Resume to Parse",
             outputFormat: "Output Format",
             styleGuide: "Style Guide / Format Instructions",

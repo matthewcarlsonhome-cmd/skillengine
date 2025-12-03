@@ -248,7 +248,7 @@ const Header: React.FC = () => {
                       <Link to="/skill/healthcare-resume-parser" onClick={() => setShowToolsMenu(false)}>
                         <div className="flex items-center gap-2 px-3 py-2 rounded hover:bg-muted transition-colors">
                           <Heart className="h-4 w-4 text-emerald-500" />
-                          <span className="text-sm">Healthcare Resume Parser</span>
+                          <span className="text-sm">Resume Parser</span>
                         </div>
                       </Link>
                     </div>
@@ -561,7 +561,7 @@ const Header: React.FC = () => {
             <Link to="/skill/healthcare-resume-parser">
               <Button variant={isActive('/skill/healthcare-resume-parser') ? 'secondary' : 'ghost'} className="w-full justify-start gap-2">
                 <Heart className="h-4 w-4" />
-                Healthcare Resume Parser
+                Resume Parser
               </Button>
             </Link>
 
