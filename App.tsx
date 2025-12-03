@@ -126,6 +126,7 @@ import DailyPlannerPage from './pages/DailyPlannerPage';         // Daily task p
 import ApiKeyInstructionsPage from './pages/ApiKeyInstructionsPage'; // API key setup guide
 import SettingsPage from './pages/SettingsPage';                     // App settings
 import PricingPage from './pages/PricingPage';                       // Pricing information
+import AdminPage from './pages/AdminPage';                           // Admin control panel
 
 /**
  * Main App Component
@@ -245,6 +246,7 @@ function App() {
                     <Route path="/api-keys" element={<ApiKeyInstructionsPage />} />
                     <Route path="/settings" element={<SettingsPage />} />
                     <Route path="/pricing" element={<PricingPage />} />
+                    <Route path="/admin" element={<AdminPage />} />
                   </Routes>
                 </main>
 

@@ -286,3 +286,267 @@ export interface WorkflowExecution {
   startedAt: string;
   completedAt?: string;
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// USER ROLES & ADMIN TYPES
+// For managing user tiers, permissions, and admin functionality
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * User subscription/role tiers
+ */
+export type UserRole = 'free' | 'pro' | 'team' | 'custom';
+
+/**
+ * Feature flags that can be enabled/disabled per role
+ */
+export interface RoleFeatures {
+  // Skill access
+  canAccessAllSkills: boolean;
+  canCreateCustomSkills: boolean;
+  canAccessCommunitySkills: boolean;
+  canExportPrompts: boolean;
+  canUseBatchProcessing: boolean;
+  canUseWorkflows: boolean;
+
+  // Advanced features
+  canAccessAdminPanel: boolean;
+  canViewAnalytics: boolean;
+  canInviteTeamMembers: boolean;
+
+  // Export features
+  canDownloadOutputs: boolean;
+  canExportToCSV: boolean;
+}
+
+/**
+ * Usage limits per role
+ */
+export interface RoleLimits {
+  skillRunsPerDay: number;        // -1 = unlimited
+  skillRunsPerMonth: number;      // -1 = unlimited
+  savedOutputsLimit: number;      // -1 = unlimited
+  workspacesLimit: number;        // -1 = unlimited
+  customSkillsLimit: number;      // -1 = unlimited
+  batchRowsLimit: number;         // Max rows per batch job
+  teamMembersLimit: number;       // For team plans
+}
+
+/**
+ * Complete role configuration
+ */
+export interface RoleConfig {
+  role: UserRole;
+  displayName: string;
+  description: string;
+  price: number;                  // Monthly price in dollars, 0 = free
+  features: RoleFeatures;
+  limits: RoleLimits;
+  isDefault?: boolean;
+}
+
+/**
+ * User profile with role and tracking
+ */
+export interface AppUser {
+  id: string;
+  email: string;
+  displayName?: string;
+  avatarUrl?: string;
+
+  // Role & subscription
+  role: UserRole;
+  roleAssignedAt: string;
+  roleExpiresAt?: string;         // For time-limited subscriptions
+
+  // Custom role config (for 'custom' role)
+  customConfig?: Partial<RoleFeatures & RoleLimits>;
+
+  // Usage tracking
+  skillRunsToday: number;
+  skillRunsThisMonth: number;
+  lastSkillRunAt?: string;
+
+  // Timestamps
+  createdAt: string;
+  lastLoginAt: string;
+
+  // Admin notes
+  adminNotes?: string;
+  isAdmin?: boolean;
+}
+
+/**
+ * Track individual skill usage per user
+ */
+export interface SkillUsageRecord {
+  id: string;
+  userId: string;
+  userEmail: string;
+
+  skillId: string;
+  skillName: string;
+  skillSource: 'static' | 'dynamic' | 'community';
+
+  usageCount: number;
+  lastUsedAt: string;
+  firstUsedAt: string;
+}
+
+/**
+ * Email captured from sign-ins for marketing/follow-up
+ */
+export interface CapturedEmail {
+  id: string;
+  email: string;
+  displayName?: string;
+  source: 'google' | 'email' | 'manual';
+
+  // User info
+  userId?: string;
+  role?: UserRole;
+
+  // Engagement
+  firstSeenAt: string;
+  lastSeenAt: string;
+  loginCount: number;
+  skillsUsed: number;
+
+  // Marketing
+  hasOptedIn?: boolean;
+  followUpStatus?: 'pending' | 'contacted' | 'converted' | 'declined';
+  followUpNotes?: string;
+}
+
+/**
+ * Admin audit log entry
+ */
+export interface AdminAuditLog {
+  id: string;
+  adminEmail: string;
+  action: string;
+  targetType: 'user' | 'role' | 'config' | 'skill';
+  targetId: string;
+  details: Record<string, unknown>;
+  timestamp: string;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// DEFAULT ROLE CONFIGURATIONS
+// ═══════════════════════════════════════════════════════════════════════════
+
+export const DEFAULT_ROLE_CONFIGS: RoleConfig[] = [
+  {
+    role: 'free',
+    displayName: 'Free',
+    description: 'Basic access to get started with AI-powered job search tools',
+    price: 0,
+    isDefault: true,
+    features: {
+      canAccessAllSkills: true,
+      canCreateCustomSkills: false,
+      canAccessCommunitySkills: true,
+      canExportPrompts: true,        // Currently free, will be restricted later
+      canUseBatchProcessing: false,
+      canUseWorkflows: true,
+      canAccessAdminPanel: false,
+      canViewAnalytics: false,
+      canInviteTeamMembers: false,
+      canDownloadOutputs: true,
+      canExportToCSV: false,
+    },
+    limits: {
+      skillRunsPerDay: 10,
+      skillRunsPerMonth: 100,
+      savedOutputsLimit: 25,
+      workspacesLimit: 2,
+      customSkillsLimit: 0,
+      batchRowsLimit: 0,
+      teamMembersLimit: 0,
+    },
+  },
+  {
+    role: 'pro',
+    displayName: 'Pro',
+    description: 'Full access for serious job seekers with unlimited usage',
+    price: 19,
+    features: {
+      canAccessAllSkills: true,
+      canCreateCustomSkills: true,
+      canAccessCommunitySkills: true,
+      canExportPrompts: true,
+      canUseBatchProcessing: true,
+      canUseWorkflows: true,
+      canAccessAdminPanel: false,
+      canViewAnalytics: true,
+      canInviteTeamMembers: false,
+      canDownloadOutputs: true,
+      canExportToCSV: true,
+    },
+    limits: {
+      skillRunsPerDay: -1,           // Unlimited
+      skillRunsPerMonth: -1,
+      savedOutputsLimit: -1,
+      workspacesLimit: -1,
+      customSkillsLimit: 50,
+      batchRowsLimit: 100,
+      teamMembersLimit: 0,
+    },
+  },
+  {
+    role: 'team',
+    displayName: 'Team',
+    description: 'Collaborate with your team on job search and career development',
+    price: 49,
+    features: {
+      canAccessAllSkills: true,
+      canCreateCustomSkills: true,
+      canAccessCommunitySkills: true,
+      canExportPrompts: true,
+      canUseBatchProcessing: true,
+      canUseWorkflows: true,
+      canAccessAdminPanel: false,
+      canViewAnalytics: true,
+      canInviteTeamMembers: true,
+      canDownloadOutputs: true,
+      canExportToCSV: true,
+    },
+    limits: {
+      skillRunsPerDay: -1,
+      skillRunsPerMonth: -1,
+      savedOutputsLimit: -1,
+      workspacesLimit: -1,
+      customSkillsLimit: -1,
+      batchRowsLimit: 500,
+      teamMembersLimit: 10,
+    },
+  },
+  {
+    role: 'custom',
+    displayName: 'Custom',
+    description: 'Custom configuration for special arrangements',
+    price: 0,
+    features: {
+      canAccessAllSkills: true,
+      canCreateCustomSkills: true,
+      canAccessCommunitySkills: true,
+      canExportPrompts: true,
+      canUseBatchProcessing: true,
+      canUseWorkflows: true,
+      canAccessAdminPanel: true,
+      canViewAnalytics: true,
+      canInviteTeamMembers: true,
+      canDownloadOutputs: true,
+      canExportToCSV: true,
+    },
+    limits: {
+      skillRunsPerDay: -1,
+      skillRunsPerMonth: -1,
+      savedOutputsLimit: -1,
+      workspacesLimit: -1,
+      customSkillsLimit: -1,
+      batchRowsLimit: -1,
+      teamMembersLimit: -1,
+    },
+  },
+];

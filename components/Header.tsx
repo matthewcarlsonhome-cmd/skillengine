@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Moon, Sun, Briefcase, Users, Sparkles, FolderOpen, LogIn, LogOut, Loader2, ChevronDown, LayoutDashboard, Package, Menu, X, Settings, FileSpreadsheet, DollarSign, Wrench, MessageSquare, Calculator, Mail, Building2, Trophy, Target, BarChart3, Bot, Bell, Lock, TrendingUp, Calendar, User, PlusCircle, Wand2, Heart, Download, Zap, Play } from 'lucide-react';
+import { Moon, Sun, Briefcase, Users, Sparkles, FolderOpen, LogIn, LogOut, Loader2, ChevronDown, LayoutDashboard, Package, Menu, X, Settings, FileSpreadsheet, DollarSign, Wrench, MessageSquare, Calculator, Mail, Building2, Trophy, Target, BarChart3, Bot, Bell, Lock, TrendingUp, Calendar, User, PlusCircle, Wand2, Heart, Download, Zap, Play, Shield } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme.tsx';
 import { useAuth } from '../hooks/useAuth.tsx';
 import { useToast } from '../hooks/useToast.tsx';
@@ -10,7 +10,7 @@ import { Button } from './ui/Button.tsx';
 const Header: React.FC = () => {
   const { theme, setTheme } = useTheme();
   const location = useLocation();
-  const { user, loading, isConfigured, signInWithGoogle, signOut } = useAuth();
+  const { user, loading, isConfigured, isAdmin, signInWithGoogle, signOut } = useAuth();
   const { addToast } = useToast();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showToolsMenu, setShowToolsMenu] = useState(false);
@@ -282,6 +282,16 @@ const Header: React.FC = () => {
                           <span className="text-sm">Resume Parser</span>
                         </div>
                       </Link>
+
+                      {/* Admin Section - Only visible to admins or everyone for now */}
+                      <div className="border-t my-2" />
+                      <p className="px-3 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Admin</p>
+                      <Link to="/admin" onClick={() => setShowToolsMenu(false)}>
+                        <div className="flex items-center gap-2 px-3 py-2 rounded hover:bg-muted transition-colors">
+                          <Shield className="h-4 w-4 text-amber-500" />
+                          <span className="text-sm">Control Panel</span>
+                        </div>
+                      </Link>
                     </div>
                   </div>
                 </>
@@ -371,6 +381,15 @@ const Header: React.FC = () => {
                           >
                             <Settings className="h-4 w-4" />
                             Settings
+                          </Link>
+                          <Link
+                            to="/admin"
+                            onClick={() => setShowUserMenu(false)}
+                            className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded hover:bg-muted transition-colors"
+                          >
+                            <Shield className="h-4 w-4 text-amber-500" />
+                            Admin Panel
+                            {isAdmin && <span className="ml-auto text-xs text-amber-500">Admin</span>}
                           </Link>
                           <div className="border-t my-1" />
                           <button
@@ -631,6 +650,16 @@ const Header: React.FC = () => {
               <Button variant={isActive('/pricing') ? 'secondary' : 'ghost'} className="w-full justify-start gap-2">
                 <DollarSign className="h-4 w-4" />
                 Pricing
+              </Button>
+            </Link>
+
+            {/* Admin */}
+            <div className="border-t my-2" />
+            <p className="px-3 py-1 text-xs font-semibold text-muted-foreground uppercase">Admin</p>
+            <Link to="/admin">
+              <Button variant={isActive('/admin') ? 'secondary' : 'ghost'} className="w-full justify-start gap-2">
+                <Shield className="h-4 w-4 text-amber-500" />
+                Control Panel
               </Button>
             </Link>
           </nav>
