@@ -95,6 +95,12 @@ import BatchProcessingPage from './pages/BatchProcessingPage';   // Run skills o
 import SkillExportPage from './pages/SkillExportPage';           // Export skill prompts to CSV/TXT
 
 // ─────────────────────────────────────────────────────────────────────────────
+// WORKFLOWS
+// Multi-step automated sequences that chain skills together
+// ─────────────────────────────────────────────────────────────────────────────
+import WorkflowRunnerPage from './pages/WorkflowRunnerPage';     // Execute multi-step workflows
+
+// ─────────────────────────────────────────────────────────────────────────────
 // JOB SEARCH TOOLS
 // Utilities to support the job search process
 // ─────────────────────────────────────────────────────────────────────────────
@@ -205,6 +211,13 @@ function App() {
                     ═══════════════════════════════════════════════════════ */}
                     <Route path="/batch" element={<BatchProcessingPage />} />
                     <Route path="/export-skills" element={<SkillExportPage />} />
+
+                    {/* ═══════════════════════════════════════════════════════
+                        WORKFLOWS
+                        Multi-step automated sequences that chain skills
+                        - /workflow/:id: Run a pre-built workflow (job-application, interview-prep, post-interview)
+                    ═══════════════════════════════════════════════════════ */}
+                    <Route path="/workflow/:workflowId" element={<WorkflowRunnerPage />} />
 
                     {/* ═══════════════════════════════════════════════════════
                         JOB SEARCH TOOLS
