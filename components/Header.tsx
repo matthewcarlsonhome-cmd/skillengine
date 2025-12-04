@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Moon, Sun, Briefcase, Users, Sparkles, FolderOpen, LogIn, LogOut, Loader2, ChevronDown, LayoutDashboard, Package, Menu, X, Settings, FileSpreadsheet, DollarSign, Wrench, MessageSquare, Calculator, Mail, Building2, Trophy, Target, BarChart3, Bot, Bell, Lock, TrendingUp, Calendar, User, PlusCircle, Wand2, Heart, Download, Zap, Play, Shield } from 'lucide-react';
+import { Moon, Sun, Briefcase, Users, Sparkles, FolderOpen, LogIn, LogOut, Loader2, ChevronDown, LayoutDashboard, Package, Menu, X, Settings, FileSpreadsheet, DollarSign, Wrench, MessageSquare, Calculator, Mail, Building2, Trophy, Target, BarChart3, Bot, Bell, Lock, TrendingUp, Calendar, User, PlusCircle, Wand2, Heart, Download, Zap, Play, Shield, BookOpen } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme.tsx';
 import { useAuth } from '../hooks/useAuth.tsx';
 import { useToast } from '../hooks/useToast.tsx';
@@ -77,6 +77,16 @@ const Header: React.FC = () => {
               >
                 <Sparkles className="h-4 w-4" />
                 AI Skills
+              </Button>
+            </Link>
+            <Link to="/library">
+              <Button
+                variant={isActive('/library') ? 'secondary' : 'ghost'}
+                size="sm"
+                className="gap-2"
+              >
+                <BookOpen className="h-4 w-4" />
+                Skill Library
               </Button>
             </Link>
             <Link to="/role-templates">
@@ -464,6 +474,15 @@ const Header: React.FC = () => {
               >
                 <Sparkles className="h-4 w-4" />
                 AI Skills
+              </Button>
+            </Link>
+            <Link to="/library">
+              <Button
+                variant={isActive('/library') ? 'secondary' : 'ghost'}
+                className="w-full justify-start gap-2"
+              >
+                <BookOpen className="h-4 w-4" />
+                Skill Library
               </Button>
             </Link>
             <Link to="/role-templates">

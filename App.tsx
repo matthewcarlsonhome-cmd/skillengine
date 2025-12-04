@@ -69,6 +69,8 @@ import BrowseSkillsPage from './pages/BrowseSkillsPage';  // Grid view of all sk
 import SkillRunnerPage from './pages/SkillRunnerPage';    // Execute a specific skill
 import RoleTemplatesPage from './pages/RoleTemplatesPage'; // Pre-configured role templates
 import MySkillsPage from './pages/MySkillsPage';          // User's saved/favorite skills
+import SkillLibraryPage from './pages/SkillLibraryPage';  // Unified skill library with filtering
+import LibrarySkillRunnerPage from './pages/LibrarySkillRunnerPage'; // Run skills from library
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CUSTOM SKILL GENERATION
@@ -170,6 +172,8 @@ function App() {
                     ═══════════════════════════════════════════════════════ */}
                     <Route path="/role-templates" element={<RoleTemplatesPage />} />
                     <Route path="/my-skills" element={<MySkillsPage />} />
+                    <Route path="/library" element={<SkillLibraryPage />} />
+                    <Route path="/library-skill-runner" element={<LibrarySkillRunnerPage />} />
 
                     {/* ═══════════════════════════════════════════════════════
                         STATIC AI SKILLS (16 Built-in Skills)
