@@ -33,18 +33,9 @@ function validateWorkflowStructure(workflow: Workflow) {
   expect(workflow.steps.length).toBeGreaterThan(0);
 }
 
-// Known skills that are referenced in workflows but may not exist yet
-// These are tracked as issues to be resolved
-const PENDING_SKILLS = ['salary-negotiation', 'onboarding-accelerator', 'networking-scripts'];
-
-function validateStepSkillExists(step: WorkflowStep): { valid: boolean; missing?: string } {
+function validateStepSkillExists(step: WorkflowStep): { valid: boolean } {
   const skillExists = step.skillId in SKILLS;
   if (!skillExists) {
-    // Check if it's a known pending skill
-    if (PENDING_SKILLS.includes(step.skillId)) {
-      console.warn(`Skill "${step.skillId}" is pending implementation`);
-      return { valid: true, missing: step.skillId };
-    }
     throw new Error(`Skill "${step.skillId}" in step "${step.id}" does not exist in SKILLS registry`);
   }
   return { valid: true };
