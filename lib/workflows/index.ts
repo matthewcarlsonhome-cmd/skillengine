@@ -262,7 +262,7 @@ export const INTERVIEW_PREP_WORKFLOW: Workflow = {
     },
     {
       id: 'step-salary',
-      skillId: 'salary-negotiation',
+      skillId: 'salary-negotiation-master',
       name: 'Research Salary Range',
       description: 'Get salary insights and negotiation talking points',
       inputMappings: {
@@ -275,7 +275,7 @@ export const INTERVIEW_PREP_WORKFLOW: Workflow = {
     },
     {
       id: 'step-questions',
-      skillId: 'networking-scripts',
+      skillId: 'networking-script-generator',
       name: 'Questions to Ask',
       description: 'Generate thoughtful questions that show your interest and insight',
       inputMappings: {
@@ -399,7 +399,7 @@ export const POST_INTERVIEW_WORKFLOW: Workflow = {
     },
     {
       id: 'step-followup',
-      skillId: 'onboarding-accelerator',
+      skillId: 'onboarding-accelerator-pro',
       name: 'Follow-Up Strategy',
       description: 'Create a follow-up timeline and next steps plan',
       inputMappings: {
