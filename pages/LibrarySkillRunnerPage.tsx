@@ -3,6 +3,13 @@
  *
  * Executes skills from the unified Skill Library (role-template skills).
  * Built-in skills redirect to their dedicated SkillRunnerPage.
+ *
+ * Features:
+ * - Skill explanation sidebar with description and "What you'll get"
+ * - Add to Favorites functionality
+ * - View Skill Prompts panel
+ * - Form inputs for skill execution
+ * - Streaming output with save/copy/download
  */
 
 import React, { useState, useEffect } from 'react';
@@ -12,8 +19,9 @@ import remarkGfm from 'remark-gfm';
 import { executeDynamicSkill } from '../lib/skills/dynamic';
 import { useAppContext } from '../hooks/useAppContext';
 import { useToast } from '../hooks/useToast';
-import type { DynamicSkill, DynamicFormInput, SavedOutput, SkillExecution } from '../lib/storage/types';
+import type { DynamicSkill, DynamicFormInput, SavedOutput, SkillExecution, FavoriteSkill } from '../lib/storage/types';
 import type { LibrarySkill } from '../lib/skillLibrary/types';
+import { ROLE_DEFINITIONS } from '../lib/skillLibrary';
 import { db } from '../lib/storage/indexeddb';
 import { getApiKey } from '../lib/apiKeyStorage';
 import { Button } from '../components/ui/Button';
@@ -39,6 +47,8 @@ import {
   Save,
   Check,
   BookOpen,
+  Star,
+  CheckCircle,
 } from 'lucide-react';
 
 const LibrarySkillRunnerPage: React.FC = () => {
@@ -46,21 +56,29 @@ const LibrarySkillRunnerPage: React.FC = () => {
   const { addToast } = useToast();
   const { selectedApi, setSelectedApi } = useAppContext();
 
+  // Skill state
   const [librarySkill, setLibrarySkill] = useState<LibrarySkill | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Form state
   const [formState, setFormState] = useState<Record<string, unknown>>({});
   const [apiKey, setApiKey] = useState('');
   const [claudeModel, setClaudeModel] = useState<'haiku' | 'sonnet' | 'opus'>('haiku');
+
+  // Execution state
   const [output, setOutput] = useState('');
   const [isRunning, setIsRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
   const [startTime, setStartTime] = useState<number | null>(null);
+
+  // UI state
   const [showPrompts, setShowPrompts] = useState(false);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [saveTitle, setSaveTitle] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [outputSaved, setOutputSaved] = useState(false);
+  const [isFavorited, setIsFavorited] = useState(false);
 
   // Load skill from sessionStorage
   useEffect(() => {
@@ -96,6 +114,13 @@ const LibrarySkillRunnerPage: React.FC = () => {
     loadSkill();
   }, [navigate]);
 
+  // Check if skill is favorited
+  useEffect(() => {
+    if (librarySkill?.id) {
+      db.isSkillFavorited(librarySkill.id).then(setIsFavorited);
+    }
+  }, [librarySkill?.id]);
+
   // Load stored API key when provider changes
   useEffect(() => {
     const storedKey = getApiKey(selectedApi as 'gemini' | 'claude');
@@ -103,6 +128,11 @@ const LibrarySkillRunnerPage: React.FC = () => {
       setApiKey(storedKey);
     }
   }, [selectedApi]);
+
+  // Reset saved state when output changes
+  useEffect(() => {
+    setOutputSaved(false);
+  }, [output]);
 
   // Convert library skill to format needed for execution
   const getExecutableSkill = (): DynamicSkill | null => {
@@ -130,6 +160,39 @@ const LibrarySkillRunnerPage: React.FC = () => {
       config: librarySkill.config,
       executionCount: librarySkill.useCount,
     };
+  };
+
+  // Get role name for display
+  const getRoleName = (): string | null => {
+    if (!librarySkill?.sourceRoleId) return null;
+    const role = ROLE_DEFINITIONS.find((r) => r.id === librarySkill.sourceRoleId);
+    return role?.name || librarySkill.sourceRoleId.replace(/-/g, ' ');
+  };
+
+  // Generate "What you'll get" based on skill category and description
+  const getWhatYouGet = (): string[] => {
+    if (librarySkill?.whatYouGet && librarySkill.whatYouGet.length > 0) {
+      return librarySkill.whatYouGet;
+    }
+
+    // Generate based on category if not provided
+    const category = librarySkill?.tags.category;
+    switch (category) {
+      case 'analysis':
+        return ['Detailed analysis report', 'Key insights and findings', 'Actionable recommendations'];
+      case 'generation':
+        return ['Professional content', 'Ready-to-use output', 'Customized to your inputs'];
+      case 'automation':
+        return ['Automated workflow output', 'Time-saving templates', 'Consistent results'];
+      case 'optimization':
+        return ['Optimized content', 'Improvement suggestions', 'Best practice recommendations'];
+      case 'communication':
+        return ['Professional messaging', 'Clear communication templates', 'Context-appropriate tone'];
+      case 'research':
+        return ['Comprehensive research findings', 'Key data points', 'Summary and analysis'];
+      default:
+        return ['Professional output', 'Tailored to your needs', 'Ready to use immediately'];
+    }
   };
 
   const handleInputChange = (id: string, value: unknown) => {
@@ -208,6 +271,33 @@ const LibrarySkillRunnerPage: React.FC = () => {
     }
   };
 
+  const handleToggleFavorite = async () => {
+    if (!librarySkill) return;
+
+    try {
+      if (isFavorited) {
+        await db.removeFavoriteBySkillId(librarySkill.id);
+        setIsFavorited(false);
+        addToast('Removed from favorites', 'success');
+      } else {
+        const favorite: FavoriteSkill = {
+          id: crypto.randomUUID(),
+          skillId: librarySkill.id,
+          skillName: librarySkill.name,
+          skillDescription: librarySkill.description,
+          skillSource: 'dynamic',
+          category: librarySkill.tags.category,
+          createdAt: new Date().toISOString(),
+        };
+        await db.addFavoriteSkill(favorite);
+        setIsFavorited(true);
+        addToast('Added to favorites!', 'success');
+      }
+    } catch (error) {
+      addToast('Failed to update favorite', 'error');
+    }
+  };
+
   const copyToClipboard = () => {
     navigator.clipboard.writeText(output);
     addToast('Copied to clipboard!', 'success');
@@ -233,6 +323,7 @@ const LibrarySkillRunnerPage: React.FC = () => {
       skillName: librarySkill.name,
       skillDescription: librarySkill.description,
       category: librarySkill.tags.category,
+      role: getRoleName(),
       exportedAt: new Date().toISOString(),
       prompts: librarySkill.prompts,
       config: librarySkill.config,
@@ -284,7 +375,7 @@ const LibrarySkillRunnerPage: React.FC = () => {
       };
 
       await db.saveOutput(savedOutput);
-      addToast('Output saved successfully!', 'success');
+      addToast('Output saved to dashboard!', 'success');
       setShowSaveDialog(false);
       setSaveTitle('');
       setOutputSaved(true);
@@ -324,60 +415,191 @@ const LibrarySkillRunnerPage: React.FC = () => {
   }
 
   const inputs = librarySkill.inputs || [];
+  const roleName = getRoleName();
+  const whatYouGet = getWhatYouGet();
 
   return (
-    <div className="container mx-auto max-w-5xl px-4 py-8">
-      {/* Header */}
-      <div className="mb-8">
-        <button
-          onClick={() => navigate('/library')}
-          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Skill Library
-        </button>
-
-        <div className="flex items-start gap-4">
-          <div
-            className={`h-14 w-14 rounded-xl flex items-center justify-center ${librarySkill.theme.secondary}`}
+    <div className="container mx-auto max-w-7xl px-4 py-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* ═══════════════════════════════════════════════════════════════════
+            LEFT SIDEBAR - Skill Explanation
+        ═══════════════════════════════════════════════════════════════════ */}
+        <aside className="lg:col-span-1 lg:sticky lg:top-24 self-start">
+          {/* Back Button */}
+          <button
+            onClick={() => navigate('/library')}
+            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
           >
-            <Sparkles className={`h-7 w-7 ${librarySkill.theme.primary}`} />
-          </div>
-          <div className="flex-1">
-            <h1 className="text-2xl font-bold">{librarySkill.name}</h1>
-            <p className="text-muted-foreground mt-1">{librarySkill.description}</p>
-            <div className="flex items-center gap-3 mt-2 text-sm text-muted-foreground">
-              {librarySkill.tags.roles.length > 0 && (
-                <span className="flex items-center gap-1 px-2 py-0.5 rounded bg-primary/10 text-primary">
+            <ArrowLeft className="h-4 w-4" />
+            Back to Skill Library
+          </button>
+
+          {/* Skill Info Card */}
+          <div className="rounded-xl border bg-card text-card-foreground p-6">
+            {/* Header */}
+            <div className="flex items-center gap-3 mb-4">
+              <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${librarySkill.theme.secondary}`}>
+                <Sparkles className={`h-6 w-6 ${librarySkill.theme.primary}`} />
+              </div>
+              <h1 className="text-2xl font-bold">{librarySkill.name}</h1>
+            </div>
+
+            {/* Description */}
+            <p className="text-muted-foreground text-sm mb-4">
+              {librarySkill.longDescription || librarySkill.description}
+            </p>
+
+            {/* Tags */}
+            <div className="flex flex-wrap items-center gap-2 mb-4">
+              {roleName && (
+                <span className="flex items-center gap-1 px-2 py-0.5 rounded bg-primary/10 text-primary text-xs">
                   <Briefcase className="h-3 w-3" />
-                  {librarySkill.sourceRoleId?.replace(/-/g, ' ')}
+                  {roleName}
                 </span>
               )}
-              <span className="px-2 py-0.5 rounded bg-muted capitalize">
+              <span className="px-2 py-0.5 rounded bg-muted text-xs capitalize">
                 {librarySkill.tags.category}
               </span>
               {librarySkill.estimatedTimeSaved && (
-                <span className="flex items-center gap-1">
-                  <Clock className="h-4 w-4" />
+                <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <Clock className="h-3 w-3" />
                   {librarySkill.estimatedTimeSaved}
                 </span>
               )}
             </div>
-          </div>
-        </div>
-      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Input Form */}
-        <div className="space-y-6">
+            {/* What You'll Get */}
+            <h3 className="font-semibold mb-2">What you'll get:</h3>
+            <ul className="list-none text-sm text-muted-foreground space-y-1.5 mb-4">
+              {whatYouGet.map((item, i) => (
+                <li key={i} className="flex items-start gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+
+            {/* Add to Favorites */}
+            <div className="pt-4 border-t">
+              <Button
+                variant={isFavorited ? 'secondary' : 'outline'}
+                className="w-full"
+                onClick={handleToggleFavorite}
+              >
+                <Star className={`h-4 w-4 mr-2 ${isFavorited ? 'fill-current text-yellow-500' : ''}`} />
+                {isFavorited ? 'Favorited' : 'Add to Favorites'}
+              </Button>
+            </div>
+
+            {/* View Prompts Toggle */}
+            <div className="mt-4 pt-4 border-t">
+              <button
+                onClick={() => setShowPrompts(!showPrompts)}
+                className="flex items-center justify-between w-full text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <span className="flex items-center gap-2">
+                  <Code className="h-4 w-4" />
+                  View Skill Prompts
+                </span>
+                {showPrompts ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              </button>
+            </div>
+          </div>
+
+          {/* Prompts Panel */}
+          {showPrompts && (
+            <div className="mt-4 rounded-xl border bg-card p-4 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold flex items-center gap-2">
+                  <FileCode className="h-4 w-4" />
+                  Skill Prompts
+                </h3>
+                <Button variant="outline" size="sm" onClick={downloadPrompts}>
+                  <Download className="h-3 w-3 mr-1" />
+                  Export JSON
+                </Button>
+              </div>
+
+              {/* System Instruction */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    System Instruction
+                  </label>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => copyPromptToClipboard(librarySkill.prompts.systemInstruction, 'System instruction')}
+                    className="h-6 text-xs"
+                  >
+                    <Clipboard className="h-3 w-3 mr-1" />
+                    Copy
+                  </Button>
+                </div>
+                <div className="bg-muted/50 rounded-lg p-3 max-h-48 overflow-y-auto">
+                  <pre className="text-xs whitespace-pre-wrap font-mono text-muted-foreground">
+                    {librarySkill.prompts.systemInstruction}
+                  </pre>
+                </div>
+              </div>
+
+              {/* User Prompt Template */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    User Prompt Template
+                  </label>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => copyPromptToClipboard(librarySkill.prompts.userPromptTemplate, 'User prompt')}
+                    className="h-6 text-xs"
+                  >
+                    <Clipboard className="h-3 w-3 mr-1" />
+                    Copy
+                  </Button>
+                </div>
+                <div className="bg-muted/50 rounded-lg p-3 max-h-48 overflow-y-auto">
+                  <pre className="text-xs whitespace-pre-wrap font-mono text-muted-foreground">
+                    {librarySkill.prompts.userPromptTemplate}
+                  </pre>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Variables like {"{{input}}"} are replaced with your form inputs when the skill runs.
+                </p>
+              </div>
+
+              {/* Copy Full Prompt */}
+              <div className="pt-2 border-t">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
+                  onClick={() => {
+                    const fullPrompt = `=== SYSTEM INSTRUCTION ===\n\n${librarySkill.prompts.systemInstruction}\n\n=== USER PROMPT TEMPLATE ===\n\n${librarySkill.prompts.userPromptTemplate}`;
+                    copyPromptToClipboard(fullPrompt, 'Full prompt');
+                  }}
+                >
+                  <Clipboard className="h-4 w-4 mr-2" />
+                  Copy Full Prompt (System + User)
+                </Button>
+              </div>
+            </div>
+          )}
+        </aside>
+
+        {/* ═══════════════════════════════════════════════════════════════════
+            MAIN CONTENT - Form & Output
+        ═══════════════════════════════════════════════════════════════════ */}
+        <div className="lg:col-span-2 space-y-6">
           {/* API Configuration */}
           <div className="rounded-xl border bg-card p-6">
             <h2 className="font-semibold flex items-center gap-2 mb-4">
               <KeyRound className="h-5 w-5 text-primary" />
-              API Configuration
+              Run Configuration
             </h2>
 
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium mb-1">AI Provider</label>
                 <Select
@@ -402,13 +624,11 @@ const LibrarySkillRunnerPage: React.FC = () => {
               </div>
 
               {selectedApi === 'claude' && (
-                <div>
+                <div className="md:col-span-2">
                   <label className="block text-sm font-medium mb-1">Claude Model</label>
                   <Select
                     value={claudeModel}
-                    onChange={(e) =>
-                      setClaudeModel(e.target.value as 'haiku' | 'sonnet' | 'opus')
-                    }
+                    onChange={(e) => setClaudeModel(e.target.value as 'haiku' | 'sonnet' | 'opus')}
                   >
                     <option value="haiku">Claude Haiku (Fast)</option>
                     <option value="sonnet">Claude Sonnet (Balanced)</option>
@@ -429,9 +649,7 @@ const LibrarySkillRunnerPage: React.FC = () => {
                   <div key={input.id}>
                     <label className="block text-sm font-medium mb-1">
                       {input.label}
-                      {input.validation?.required && (
-                        <span className="text-red-500 ml-1">*</span>
-                      )}
+                      {input.validation?.required && <span className="text-red-500 ml-1">*</span>}
                     </label>
 
                     {input.type === 'textarea' ? (
@@ -478,12 +696,7 @@ const LibrarySkillRunnerPage: React.FC = () => {
           )}
 
           {/* Run Button */}
-          <Button
-            onClick={handleRun}
-            disabled={isRunning}
-            className="w-full"
-            size="lg"
-          >
+          <Button onClick={handleRun} disabled={isRunning} className="w-full" size="lg">
             {isRunning ? (
               <>
                 <Loader2 className="h-5 w-5 mr-2 animate-spin" />
@@ -501,103 +714,27 @@ const LibrarySkillRunnerPage: React.FC = () => {
           {isRunning && (
             <div className="space-y-2">
               <Progress value={progress} />
-              <p className="text-sm text-center text-muted-foreground">
-                Processing... {progress}%
-              </p>
+              <p className="text-sm text-center text-muted-foreground">Processing... {progress}%</p>
             </div>
           )}
 
-          {/* View Prompts */}
-          <div className="rounded-xl border bg-card overflow-hidden">
-            <button
-              onClick={() => setShowPrompts(!showPrompts)}
-              className="w-full px-6 py-4 flex items-center justify-between hover:bg-muted/50 transition-colors"
-            >
-              <span className="flex items-center gap-2 font-medium">
-                <Code className="h-4 w-4" />
-                View Prompts
-              </span>
-              {showPrompts ? (
-                <ChevronUp className="h-4 w-4" />
-              ) : (
-                <ChevronDown className="h-4 w-4" />
-              )}
-            </button>
-
-            {showPrompts && (
-              <div className="px-6 pb-6 space-y-4 border-t">
-                <div className="pt-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-sm font-medium">System Instruction</h3>
-                    <button
-                      onClick={() =>
-                        copyPromptToClipboard(
-                          librarySkill.prompts.systemInstruction,
-                          'System instruction'
-                        )
-                      }
-                      className="text-xs text-primary hover:text-primary/80"
-                    >
-                      Copy
-                    </button>
-                  </div>
-                  <pre className="text-xs bg-muted p-3 rounded-lg overflow-auto max-h-48 whitespace-pre-wrap">
-                    {librarySkill.prompts.systemInstruction}
-                  </pre>
-                </div>
-
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-sm font-medium">User Prompt Template</h3>
-                    <button
-                      onClick={() =>
-                        copyPromptToClipboard(
-                          librarySkill.prompts.userPromptTemplate,
-                          'User prompt'
-                        )
-                      }
-                      className="text-xs text-primary hover:text-primary/80"
-                    >
-                      Copy
-                    </button>
-                  </div>
-                  <pre className="text-xs bg-muted p-3 rounded-lg overflow-auto max-h-48 whitespace-pre-wrap">
-                    {librarySkill.prompts.userPromptTemplate}
-                  </pre>
-                </div>
-
-                <Button variant="outline" size="sm" onClick={downloadPrompts}>
-                  <FileCode className="h-4 w-4 mr-2" />
-                  Export Prompt JSON
-                </Button>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Output Panel */}
-        <div className="space-y-4">
-          <div className="rounded-xl border bg-card min-h-[600px] flex flex-col">
+          {/* Output Panel */}
+          <div className="rounded-xl border bg-card min-h-[400px] flex flex-col">
             <div className="flex items-center justify-between px-6 py-4 border-b">
               <h2 className="font-semibold">Output</h2>
               {output && (
                 <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="sm" onClick={copyToClipboard}>
+                  <Button variant="ghost" size="sm" onClick={copyToClipboard} title="Copy to clipboard">
                     <Clipboard className="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={downloadOutput}>
+                  <Button variant="ghost" size="sm" onClick={downloadOutput} title="Download as text file">
                     <Download className="h-4 w-4" />
                   </Button>
-                  {!outputSaved && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setShowSaveDialog(true)}
-                    >
+                  {!outputSaved ? (
+                    <Button variant="ghost" size="sm" onClick={() => setShowSaveDialog(true)} title="Save to dashboard">
                       <Save className="h-4 w-4" />
                     </Button>
-                  )}
-                  {outputSaved && (
+                  ) : (
                     <span className="text-xs text-green-500 flex items-center gap-1">
                       <Check className="h-3 w-3" />
                       Saved
@@ -633,6 +770,9 @@ const LibrarySkillRunnerPage: React.FC = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="bg-card rounded-xl border shadow-lg w-full max-w-md mx-4 p-6">
             <h2 className="text-xl font-semibold mb-4">Save Output</h2>
+            <p className="text-sm text-muted-foreground mb-4">
+              Save this output to your dashboard for easy access later.
+            </p>
             <Input
               value={saveTitle}
               onChange={(e) => setSaveTitle(e.target.value)}
@@ -640,23 +780,11 @@ const LibrarySkillRunnerPage: React.FC = () => {
               className="mb-4"
             />
             <div className="flex gap-3">
-              <Button
-                variant="outline"
-                className="flex-1"
-                onClick={() => setShowSaveDialog(false)}
-              >
+              <Button variant="outline" className="flex-1" onClick={() => setShowSaveDialog(false)}>
                 Cancel
               </Button>
-              <Button
-                className="flex-1"
-                onClick={handleSaveOutput}
-                disabled={!saveTitle.trim() || isSaving}
-              >
-                {isSaving ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  'Save'
-                )}
+              <Button className="flex-1" onClick={handleSaveOutput} disabled={!saveTitle.trim() || isSaving}>
+                {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save'}
               </Button>
             </div>
           </div>
