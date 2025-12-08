@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import {
   Search,
   Filter,
@@ -48,6 +48,10 @@ import {
   BookOpen,
   DollarSign,
   ArrowUpRight,
+  Download,
+  Copy,
+  Check,
+  Info,
 } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
@@ -293,11 +297,11 @@ const SkillLibraryPage: React.FC = () => {
                 Skill Library
               </h1>
               <p className="text-muted-foreground mt-1">
-                {allSkills.length} skills across {ROLE_DEFINITIONS.length} professional roles
+                {allSkills.length} production-ready AI skills across {ROLE_DEFINITIONS.length} professional roles
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <div className="relative flex-1 md:w-80">
+              <div className="relative flex-1 md:w-64">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search skills..."
@@ -308,6 +312,12 @@ const SkillLibraryPage: React.FC = () => {
                   className="pl-10"
                 />
               </div>
+              <Link to="/export-skills">
+                <Button variant="outline">
+                  <Download className="h-4 w-4 mr-2" />
+                  Export
+                </Button>
+              </Link>
               <Button
                 variant="outline"
                 onClick={() => setShowFilters(!showFilters)}
@@ -356,6 +366,28 @@ const SkillLibraryPage: React.FC = () => {
                 +{ROLE_DEFINITIONS.length - 8} more
               </button>
             )}
+          </div>
+
+          {/* Export Info Banner */}
+          <div className="mt-4 rounded-lg bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20 p-4">
+            <div className="flex items-start gap-3">
+              <div className="h-10 w-10 rounded-lg bg-green-500/20 flex items-center justify-center shrink-0">
+                <Download className="h-5 w-5 text-green-500" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-sm">Export Skills for Any LLM</h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Download skill prompts as CSV or TXT files. Use them in ChatGPT, Claude, Gemini, or any AI tool.
+                  Each export includes the full system prompt, description, and configuration.
+                </p>
+              </div>
+              <Link to="/export-skills">
+                <Button size="sm" variant="outline" className="shrink-0">
+                  Export Skills
+                  <ArrowUpRight className="ml-1 h-3 w-3" />
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </div>
@@ -543,6 +575,7 @@ interface SkillCardProps {
 }
 
 const SkillCard: React.FC<SkillCardProps> = ({ skill, onLaunch }) => {
+  const [copied, setCopied] = useState(false);
   const avgRating = skill.rating.count > 0 ? skill.rating.sum / skill.rating.count : 0;
   const CategoryIcon = CATEGORY_ICONS[skill.tags.category] || Sparkles;
 
@@ -550,6 +583,17 @@ const SkillCard: React.FC<SkillCardProps> = ({ skill, onLaunch }) => {
   const roleName = skill.tags.roles.length > 0
     ? ROLE_DEFINITIONS.find((r) => r.id === skill.tags.roles[0])?.name
     : null;
+
+  // Copy system prompt to clipboard
+  const handleCopyPrompt = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const prompt = skill.prompts.systemInstruction;
+    if (prompt) {
+      await navigator.clipboard.writeText(prompt);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
 
   return (
     <div className="group rounded-xl border bg-card p-5 hover:border-primary/50 hover:shadow-md transition-all">
@@ -560,12 +604,27 @@ const SkillCard: React.FC<SkillCardProps> = ({ skill, onLaunch }) => {
         >
           <CategoryIcon className={`h-5 w-5 ${skill.theme.primary}`} />
         </div>
-        {skill.rating.count > 0 && (
-          <div className="flex items-center gap-1 text-sm">
-            <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-            <span>{avgRating.toFixed(1)}</span>
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          {skill.rating.count > 0 && (
+            <div className="flex items-center gap-1 text-sm">
+              <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+              <span>{avgRating.toFixed(1)}</span>
+            </div>
+          )}
+          {skill.prompts.systemInstruction && (
+            <button
+              onClick={handleCopyPrompt}
+              className="p-1.5 rounded-md hover:bg-muted transition-colors"
+              title="Copy system prompt"
+            >
+              {copied ? (
+                <Check className="h-4 w-4 text-green-500" />
+              ) : (
+                <Copy className="h-4 w-4 text-muted-foreground" />
+              )}
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Content */}

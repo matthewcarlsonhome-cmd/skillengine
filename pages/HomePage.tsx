@@ -1,3 +1,17 @@
+/**
+ * HomePage.tsx - Main Landing Page
+ *
+ * Redesigned to serve two audiences:
+ * 1. Job Seekers - Resume, interview prep, job search automation
+ * 2. Working Professionals - Role-specific skills for daily work automation
+ *
+ * Key Features:
+ * - Two-path hero showing clear value for both audiences
+ * - Platform stats banner showing scope (100+ skills, 20+ roles)
+ * - Featured Skill Library section with role categories
+ * - Clear paths to custom skill creation and pre-built templates
+ * - Emphasis on exportability for use in any LLM
+ */
 
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
@@ -18,10 +32,26 @@ import {
   MessageSquare,
   Mail,
   Play,
-  Zap
+  Zap,
+  Library,
+  Download,
+  Target,
+  TrendingUp,
+  Code,
+  BarChart3,
+  Palette,
+  Users,
+  FileText,
+  Brain,
+  Rocket,
+  Settings,
+  Globe,
+  Shield,
+  Layers,
 } from 'lucide-react';
 import { getUserProfile } from './UserProfilePage';
 import { WORKFLOW_LIST } from '../lib/workflows';
+import { ROLE_DEFINITIONS } from '../lib/skillLibrary';
 
 // Icon mapping for workflows
 const WORKFLOW_ICONS: Record<string, React.FC<{ className?: string }>> = {
@@ -30,254 +60,568 @@ const WORKFLOW_ICONS: Record<string, React.FC<{ className?: string }>> = {
   Mail,
 };
 
+// Featured roles to display on homepage
+const FEATURED_ROLES = [
+  { id: 'software-engineer', name: 'Software Engineer', icon: Code, color: 'blue' },
+  { id: 'product-manager', name: 'Product Manager', icon: Package, color: 'indigo' },
+  { id: 'financial-analyst', name: 'Financial Analyst', icon: TrendingUp, color: 'green' },
+  { id: 'marketing-manager', name: 'Marketing Manager', icon: Target, color: 'pink' },
+  { id: 'data-analyst', name: 'Data Analyst', icon: BarChart3, color: 'purple' },
+  { id: 'creative-director', name: 'Creative Director', icon: Palette, color: 'orange' },
+  { id: 'hr-professional', name: 'HR Professional', icon: Users, color: 'teal' },
+  { id: 'project-manager', name: 'Project Manager', icon: Settings, color: 'amber' },
+];
+
+// Use case examples showing time savings
+const USE_CASES = [
+  {
+    role: 'Financial Analyst',
+    task: 'DCF Valuation Analysis',
+    before: '4-6 hours',
+    after: '15 minutes',
+    icon: TrendingUp,
+    color: 'green',
+  },
+  {
+    role: 'Product Manager',
+    task: 'PRD Document',
+    before: '6-8 hours',
+    after: '20 minutes',
+    icon: FileText,
+    color: 'indigo',
+  },
+  {
+    role: 'Creative Director',
+    task: 'Creative Brief',
+    before: '3-4 hours',
+    after: '10 minutes',
+    icon: Palette,
+    color: 'orange',
+  },
+];
+
 const HomePage: React.FC = () => {
   const { workspaces, deleteWorkspace, loading: workspacesLoading } = useWorkspaces();
   const [hasProfile, setHasProfile] = useState(false);
 
   useEffect(() => {
     const profile = getUserProfile();
-    // Check if user has any meaningful profile data
     const hasData = profile.fullName || profile.resumeText || profile.professionalTitle;
     setHasProfile(!!hasData);
   }, []);
 
   return (
-    <div className="container mx-auto max-w-7xl px-4 py-12 sm:py-16">
-      {/* Hero Section */}
-      <section className="text-center mb-10">
-        <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight">
-          AI-Powered Career Tools
-        </h1>
-        <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
-          Optimize your job search with AI. Build resumes, prep for interviews, and accelerate your career.
-        </p>
-      </section>
+    <div className="min-h-screen">
+      {/* ═══════════════════════════════════════════════════════════════════════════
+          HERO SECTION - Two-Path Approach
+      ═══════════════════════════════════════════════════════════════════════════ */}
+      <section className="relative overflow-hidden bg-gradient-to-b from-background via-background to-muted/30">
+        <div className="container mx-auto max-w-7xl px-4 py-16 sm:py-20">
+          {/* Main Headline */}
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
+              <Sparkles className="h-4 w-4" />
+              <span>100+ Expert-Level AI Skills</span>
+            </div>
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight mb-4">
+              AI Skills for{' '}
+              <span className="bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">
+                Professionals
+              </span>
+            </h1>
+            <p className="max-w-3xl mx-auto text-xl text-muted-foreground">
+              Automate hours of work with production-ready AI prompts. Pre-built for 20+ professions
+              or custom-generated from any job description.
+            </p>
+          </div>
 
-      {/* Profile Setup Banner - Show if no profile */}
-      {!hasProfile && (
-        <section className="mb-8">
-          <Link to="/profile">
-            <div className="rounded-xl border-2 border-dashed border-primary/30 bg-gradient-to-r from-blue-500/5 to-purple-500/5 p-6 hover:border-primary/50 transition-colors">
-              <div className="flex items-center gap-4">
-                <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                  <User className="h-7 w-7 text-primary" />
+          {/* Two-Path Cards */}
+          <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+            {/* Job Seekers Path */}
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-2xl blur-xl opacity-50 group-hover:opacity-70 transition-opacity" />
+              <div className="relative rounded-2xl border-2 border-blue-500/30 bg-card p-8 h-full hover:border-blue-500/50 transition-all">
+                <div className="h-14 w-14 rounded-xl bg-blue-500/20 flex items-center justify-center mb-6">
+                  <Target className="h-7 w-7 text-blue-400" />
                 </div>
-                <div className="flex-1">
-                  <h2 className="text-lg font-bold flex items-center gap-2">
-                    Set Up Your Profile
-                    <span className="text-xs font-normal px-2 py-0.5 rounded-full bg-primary/20 text-primary">Recommended</span>
-                  </h2>
-                  <p className="text-muted-foreground text-sm mt-1">
-                    Add your resume and background info once, then all AI skills will use it automatically for personalized results.
-                  </p>
-                </div>
-                <ArrowRight className="h-5 w-5 text-primary shrink-0" />
+                <h2 className="text-2xl font-bold mb-3">Job Seekers</h2>
+                <p className="text-muted-foreground mb-6">
+                  Land your dream job faster with AI-powered tools for every step of your search.
+                </p>
+                <ul className="space-y-3 mb-8">
+                  <li className="flex items-center gap-3 text-sm">
+                    <CheckCircle2 className="h-5 w-5 text-blue-400 shrink-0" />
+                    <span>Resume optimization & ATS scoring</span>
+                  </li>
+                  <li className="flex items-center gap-3 text-sm">
+                    <CheckCircle2 className="h-5 w-5 text-blue-400 shrink-0" />
+                    <span>Personalized cover letters</span>
+                  </li>
+                  <li className="flex items-center gap-3 text-sm">
+                    <CheckCircle2 className="h-5 w-5 text-blue-400 shrink-0" />
+                    <span>Interview prep & mock interviews</span>
+                  </li>
+                  <li className="flex items-center gap-3 text-sm">
+                    <CheckCircle2 className="h-5 w-5 text-blue-400 shrink-0" />
+                    <span>Salary negotiation scripts</span>
+                  </li>
+                </ul>
+                <Link to="/skills">
+                  <Button size="lg" className="w-full bg-blue-500 hover:bg-blue-600">
+                    Start Job Search
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </Link>
+                <p className="text-xs text-muted-foreground text-center mt-4">
+                  16 specialized job search skills
+                </p>
               </div>
             </div>
-          </Link>
+
+            {/* Working Professionals Path */}
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-2xl blur-xl opacity-50 group-hover:opacity-70 transition-opacity" />
+              <div className="relative rounded-2xl border-2 border-purple-500/30 bg-card p-8 h-full hover:border-purple-500/50 transition-all">
+                <div className="h-14 w-14 rounded-xl bg-purple-500/20 flex items-center justify-center mb-6">
+                  <Library className="h-7 w-7 text-purple-400" />
+                </div>
+                <h2 className="text-2xl font-bold mb-3">Working Professionals</h2>
+                <p className="text-muted-foreground mb-6">
+                  Automate your daily work with role-specific AI skills built by industry experts.
+                </p>
+                <ul className="space-y-3 mb-8">
+                  <li className="flex items-center gap-3 text-sm">
+                    <CheckCircle2 className="h-5 w-5 text-purple-400 shrink-0" />
+                    <span>100+ production-ready skills</span>
+                  </li>
+                  <li className="flex items-center gap-3 text-sm">
+                    <CheckCircle2 className="h-5 w-5 text-purple-400 shrink-0" />
+                    <span>20+ professional roles covered</span>
+                  </li>
+                  <li className="flex items-center gap-3 text-sm">
+                    <CheckCircle2 className="h-5 w-5 text-purple-400 shrink-0" />
+                    <span>Expert-level system prompts</span>
+                  </li>
+                  <li className="flex items-center gap-3 text-sm">
+                    <CheckCircle2 className="h-5 w-5 text-purple-400 shrink-0" />
+                    <span>Export for any LLM (ChatGPT, Claude, etc.)</span>
+                  </li>
+                </ul>
+                <Link to="/library">
+                  <Button size="lg" className="w-full bg-purple-500 hover:bg-purple-600">
+                    Browse Skill Library
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </Link>
+                <p className="text-xs text-muted-foreground text-center mt-4">
+                  Filter by role, category, or use case
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════════════════════════
+          STATS BANNER
+      ═══════════════════════════════════════════════════════════════════════════ */}
+      <section className="border-y bg-muted/30">
+        <div className="container mx-auto max-w-7xl px-4 py-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            <div>
+              <div className="text-3xl sm:text-4xl font-bold text-primary">100+</div>
+              <div className="text-sm text-muted-foreground mt-1">AI Skills</div>
+            </div>
+            <div>
+              <div className="text-3xl sm:text-4xl font-bold text-primary">20+</div>
+              <div className="text-sm text-muted-foreground mt-1">Professional Roles</div>
+            </div>
+            <div>
+              <div className="text-3xl sm:text-4xl font-bold text-primary">6</div>
+              <div className="text-sm text-muted-foreground mt-1">Skill Categories</div>
+            </div>
+            <div>
+              <div className="text-3xl sm:text-4xl font-bold text-primary">∞</div>
+              <div className="text-sm text-muted-foreground mt-1">Custom Skills</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div className="container mx-auto max-w-7xl px-4 py-12">
+        {/* ═══════════════════════════════════════════════════════════════════════════
+            PROFILE SETUP BANNER
+        ═══════════════════════════════════════════════════════════════════════════ */}
+        {!hasProfile && (
+          <section className="mb-12">
+            <Link to="/profile">
+              <div className="rounded-xl border-2 border-dashed border-primary/30 bg-gradient-to-r from-blue-500/5 to-purple-500/5 p-6 hover:border-primary/50 transition-colors">
+                <div className="flex items-center gap-4">
+                  <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                    <User className="h-7 w-7 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <h2 className="text-lg font-bold flex items-center gap-2">
+                      Set Up Your Profile
+                      <span className="text-xs font-normal px-2 py-0.5 rounded-full bg-primary/20 text-primary">
+                        Recommended
+                      </span>
+                    </h2>
+                    <p className="text-muted-foreground text-sm mt-1">
+                      Add your resume once, then all AI skills automatically personalize results to your background.
+                    </p>
+                  </div>
+                  <ArrowRight className="h-5 w-5 text-primary shrink-0" />
+                </div>
+              </div>
+            </Link>
+          </section>
+        )}
+
+        {/* ═══════════════════════════════════════════════════════════════════════════
+            TIME SAVINGS SHOWCASE
+        ═══════════════════════════════════════════════════════════════════════════ */}
+        <section className="mb-16">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl font-bold mb-3">Save Hours Every Week</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Each skill is crafted by industry experts with 15-20+ years of experience.
+              Get production-quality output in minutes instead of hours.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {USE_CASES.map((useCase, i) => {
+              const Icon = useCase.icon;
+              return (
+                <div key={i} className="rounded-xl border bg-card p-6">
+                  <div className={`h-12 w-12 rounded-lg bg-${useCase.color}-500/20 flex items-center justify-center mb-4`}>
+                    <Icon className={`h-6 w-6 text-${useCase.color}-400`} />
+                  </div>
+                  <div className="text-sm text-muted-foreground mb-1">{useCase.role}</div>
+                  <h3 className="text-lg font-bold mb-4">{useCase.task}</h3>
+                  <div className="flex items-center gap-4">
+                    <div className="flex-1">
+                      <div className="text-xs text-muted-foreground mb-1">Traditional</div>
+                      <div className="text-lg font-semibold text-red-400 line-through opacity-60">
+                        {useCase.before}
+                      </div>
+                    </div>
+                    <ArrowRight className="h-5 w-5 text-muted-foreground" />
+                    <div className="flex-1">
+                      <div className="text-xs text-muted-foreground mb-1">With AI</div>
+                      <div className="text-lg font-semibold text-green-400">{useCase.after}</div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </section>
-      )}
 
-      {/* Getting Started Steps */}
-      <section className="mb-10 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Link to="/profile" className="group">
-          <div className={`rounded-xl border p-5 h-full transition-colors ${hasProfile ? 'bg-green-500/5 border-green-500/30' : 'hover:border-primary/50'}`}>
-            <div className="flex items-center gap-3 mb-2">
-              <div className={`h-8 w-8 rounded-full flex items-center justify-center text-sm font-bold ${hasProfile ? 'bg-green-500 text-white' : 'bg-muted text-muted-foreground'}`}>
-                {hasProfile ? <CheckCircle2 className="h-5 w-5" /> : '1'}
-              </div>
-              <h3 className="font-semibold">Set Up Profile</h3>
+        {/* ═══════════════════════════════════════════════════════════════════════════
+            SKILL LIBRARY PREVIEW
+        ═══════════════════════════════════════════════════════════════════════════ */}
+        <section className="mb-16">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-3xl font-bold mb-2">Skill Library</h2>
+              <p className="text-muted-foreground">
+                Pre-built skills for every profession. Browse by role or explore all categories.
+              </p>
             </div>
-            <p className="text-sm text-muted-foreground pl-11">
-              Add your resume and background for personalized AI results
-            </p>
-          </div>
-        </Link>
-        <Link to="/skills" className="group">
-          <div className="rounded-xl border p-5 h-full hover:border-primary/50 transition-colors">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-sm font-bold text-muted-foreground">2</div>
-              <h3 className="font-semibold">Run AI Skills</h3>
-            </div>
-            <p className="text-sm text-muted-foreground pl-11">
-              Use 16+ AI tools for resumes, cover letters, and interview prep
-            </p>
-          </div>
-        </Link>
-        <Link to="/job-tracker" className="group">
-          <div className="rounded-xl border p-5 h-full hover:border-primary/50 transition-colors">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-sm font-bold text-muted-foreground">3</div>
-              <h3 className="font-semibold">Track Applications</h3>
-            </div>
-            <p className="text-sm text-muted-foreground pl-11">
-              Manage your job search with tracking, reminders, and progress reports
-            </p>
-          </div>
-        </Link>
-      </section>
-
-      {/* Main Feature Cards */}
-      <section className="mb-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* AI Skills Card */}
-        <div className="rounded-xl border bg-card p-6 hover:border-blue-500/50 transition-colors">
-          <div className="h-12 w-12 rounded-lg bg-blue-500/20 flex items-center justify-center mb-4">
-            <Sparkles className="h-6 w-6 text-blue-400" />
-          </div>
-          <h2 className="text-xl font-bold mb-2">AI Skills</h2>
-          <p className="text-muted-foreground text-sm mb-4">
-            16+ AI-powered tools for job seekers: resume optimization, cover letters, interview prep, salary negotiation.
-          </p>
-          <Link to="/skills">
-            <Button variant="outline" className="w-full">
-              Browse Skills <ChevronRight className="ml-1 h-4 w-4" />
-            </Button>
-          </Link>
-        </div>
-
-        {/* Role Templates Card */}
-        <div className="rounded-xl border bg-card p-6 hover:border-purple-500/50 transition-colors">
-          <div className="h-12 w-12 rounded-lg bg-purple-500/20 flex items-center justify-center mb-4">
-            <Package className="h-6 w-6 text-purple-400" />
-          </div>
-          <h2 className="text-xl font-bold mb-2">Role Templates</h2>
-          <p className="text-muted-foreground text-sm mb-4">
-            Pre-built skill bundles for 20 professions. Install skills designed for your career in one click.
-          </p>
-          <Link to="/role-templates">
-            <Button variant="outline" className="w-full">
-              View Templates <ChevronRight className="ml-1 h-4 w-4" />
-            </Button>
-          </Link>
-        </div>
-
-        {/* Custom Skills Card */}
-        <div className="rounded-xl border bg-card p-6 hover:border-orange-500/50 transition-colors">
-          <div className="h-12 w-12 rounded-lg bg-orange-500/20 flex items-center justify-center mb-4">
-            <Wand2 className="h-6 w-6 text-orange-400" />
-          </div>
-          <h2 className="text-xl font-bold mb-2">Custom Skills</h2>
-          <p className="text-muted-foreground text-sm mb-4">
-            Paste any job description to generate AI skills tailored to that specific role and company.
-          </p>
-          <Link to="/analyze">
-            <Button variant="outline" className="w-full">
-              Create Skills <ChevronRight className="ml-1 h-4 w-4" />
-            </Button>
-          </Link>
-        </div>
-      </section>
-
-      {/* AI Workflows Section */}
-      <section className="mb-12">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center">
-            <Zap className="h-5 w-5 text-indigo-400" />
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold">AI Workflows</h2>
-            <p className="text-muted-foreground text-sm">
-              Run multiple AI skills in sequence to complete complex job search tasks
-            </p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {WORKFLOW_LIST.map((workflow) => {
-            const WorkflowIcon = WORKFLOW_ICONS[workflow.icon] || Briefcase;
-            return (
-              <Link key={workflow.id} to={`/workflow/${workflow.id}`}>
-                <div className={`rounded-xl border bg-card p-6 h-full hover:border-${workflow.color}-500/50 transition-all hover:shadow-lg group`}>
-                  <div className={`h-12 w-12 rounded-lg bg-${workflow.color}-500/20 flex items-center justify-center mb-4`}>
-                    <WorkflowIcon className={`h-6 w-6 text-${workflow.color}-400`} />
-                  </div>
-                  <h3 className="text-lg font-bold mb-2">{workflow.name}</h3>
-                  <p className="text-muted-foreground text-sm mb-4">
-                    {workflow.description}
-                  </p>
-
-                  <div className="space-y-2 mb-4">
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <Clock className="h-3 w-3" />
-                      <span>{workflow.estimatedTime}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <CheckCircle2 className="h-3 w-3" />
-                      <span>{workflow.steps.length} automated steps</span>
-                    </div>
-                  </div>
-
-                  <div className="text-sm font-medium text-muted-foreground mb-2">You'll receive:</div>
-                  <ul className="space-y-1">
-                    {workflow.outputs.slice(0, 3).map((output, i) => (
-                      <li key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
-                        <CheckCircle2 className="h-3 w-3 text-green-500 shrink-0 mt-0.5" />
-                        <span>{output}</span>
-                      </li>
-                    ))}
-                    {workflow.outputs.length > 3 && (
-                      <li className="text-xs text-muted-foreground pl-5">
-                        +{workflow.outputs.length - 3} more...
-                      </li>
-                    )}
-                  </ul>
-
-                  <div className="mt-4 pt-4 border-t">
-                    <Button variant="outline" className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                      <Play className="h-4 w-4 mr-2" />
-                      Start Workflow
-                    </Button>
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* Workspaces Section */}
-      {!workspacesLoading && workspaces.length > 0 && (
-        <section className="mb-12">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold">Your Workspaces</h2>
-            <Link to="/analyze">
-              <Button variant="outline" size="sm">
-                <Plus className="mr-2 h-4 w-4" />
-                New Workspace
+            <Link to="/library">
+              <Button variant="outline" size="lg">
+                View All Skills
+                <ChevronRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {workspaces.slice(0, 6).map((workspace) => (
-              <div key={workspace.id} className="group relative rounded-xl border bg-card p-4 hover:border-primary/50 transition-colors">
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (confirm('Delete this workspace and all its skills?')) {
-                      deleteWorkspace(workspace.id);
-                    }
-                  }}
-                  className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-destructive/20 rounded"
-                >
-                  <Trash2 className="h-4 w-4 text-destructive" />
-                </button>
-                <Link to={`/workspace/${workspace.id}`}>
-                  <h3 className="font-semibold pr-8">{workspace.name}</h3>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {workspace.jdAnalysis.role.title} • {workspace.jdAnalysis.role.level}
-                  </p>
-                  <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
-                    <Clock className="h-3 w-3" />
-                    <span>{new Date(workspace.updatedAt).toLocaleDateString()}</span>
-                    <span>•</span>
-                    <span>{workspace.selectedSkillIds.length} skills</span>
+
+          {/* Role Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+            {FEATURED_ROLES.map((role) => {
+              const Icon = role.icon;
+              return (
+                <Link key={role.id} to={`/library?role=${role.id}`}>
+                  <div className={`rounded-xl border bg-card p-4 hover:border-${role.color}-500/50 hover:bg-${role.color}-500/5 transition-all group`}>
+                    <div className={`h-10 w-10 rounded-lg bg-${role.color}-500/20 flex items-center justify-center mb-3`}>
+                      <Icon className={`h-5 w-5 text-${role.color}-400`} />
+                    </div>
+                    <h3 className="font-semibold text-sm">{role.name}</h3>
+                    <p className="text-xs text-muted-foreground mt-1 group-hover:text-primary transition-colors">
+                      View skills →
+                    </p>
                   </div>
                 </Link>
-              </div>
-            ))}
+              );
+            })}
+          </div>
+
+          {/* View More Roles Link */}
+          <div className="text-center">
+            <Link to="/role-templates" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+              + {ROLE_DEFINITIONS.length - FEATURED_ROLES.length} more professional roles
+            </Link>
           </div>
         </section>
-      )}
+
+        {/* ═══════════════════════════════════════════════════════════════════════════
+            THREE WAYS TO GET SKILLS
+        ═══════════════════════════════════════════════════════════════════════════ */}
+        <section className="mb-16">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl font-bold mb-3">Three Ways to Get AI Skills</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Use pre-built skills, generate custom ones from job descriptions, or export prompts to use in any AI tool.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {/* Pre-Built Skills */}
+            <div className="rounded-xl border bg-card p-6 hover:border-purple-500/50 transition-colors">
+              <div className="h-12 w-12 rounded-lg bg-purple-500/20 flex items-center justify-center mb-4">
+                <Library className="h-6 w-6 text-purple-400" />
+              </div>
+              <h3 className="text-xl font-bold mb-2">Pre-Built by Role</h3>
+              <p className="text-muted-foreground text-sm mb-4">
+                Browse 100+ skills organized by profession. Each skill is crafted by domain experts
+                with production-ready prompts.
+              </p>
+              <ul className="space-y-2 mb-6 text-sm">
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                  <span>Expert-level system prompts</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                  <span>Industry frameworks built-in</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                  <span>Ready to use immediately</span>
+                </li>
+              </ul>
+              <Link to="/library">
+                <Button variant="outline" className="w-full">
+                  Browse Library
+                  <ChevronRight className="ml-1 h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+
+            {/* Custom Generation */}
+            <div className="rounded-xl border bg-card p-6 hover:border-orange-500/50 transition-colors">
+              <div className="h-12 w-12 rounded-lg bg-orange-500/20 flex items-center justify-center mb-4">
+                <Wand2 className="h-6 w-6 text-orange-400" />
+              </div>
+              <h3 className="text-xl font-bold mb-2">Custom Generation</h3>
+              <p className="text-muted-foreground text-sm mb-4">
+                Paste any job description and we'll analyze it to generate AI skills tailored
+                to that specific role and company.
+              </p>
+              <ul className="space-y-2 mb-6 text-sm">
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                  <span>Role-specific skill suggestions</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                  <span>Company context awareness</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                  <span>Customizable prompts</span>
+                </li>
+              </ul>
+              <Link to="/analyze">
+                <Button variant="outline" className="w-full">
+                  Generate Custom Skills
+                  <ChevronRight className="ml-1 h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+
+            {/* Export & Download */}
+            <div className="rounded-xl border bg-card p-6 hover:border-green-500/50 transition-colors">
+              <div className="h-12 w-12 rounded-lg bg-green-500/20 flex items-center justify-center mb-4">
+                <Download className="h-6 w-6 text-green-400" />
+              </div>
+              <h3 className="text-xl font-bold mb-2">Export for Any LLM</h3>
+              <p className="text-muted-foreground text-sm mb-4">
+                Download skill prompts as CSV or TXT files. Use them in ChatGPT, Claude, Gemini,
+                or any AI tool of your choice.
+              </p>
+              <ul className="space-y-2 mb-6 text-sm">
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                  <span>CSV & TXT export formats</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                  <span>Full system prompts included</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                  <span>Refine & customize anywhere</span>
+                </li>
+              </ul>
+              <Link to="/export-skills">
+                <Button variant="outline" className="w-full">
+                  Export Skills
+                  <ChevronRight className="ml-1 h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* ═══════════════════════════════════════════════════════════════════════════
+            AI WORKFLOWS SECTION
+        ═══════════════════════════════════════════════════════════════════════════ */}
+        <section className="mb-16">
+          <div className="flex items-center gap-3 mb-8">
+            <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center">
+              <Zap className="h-6 w-6 text-indigo-400" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold">AI Workflows</h2>
+              <p className="text-muted-foreground">
+                Run multiple skills in sequence to complete complex tasks automatically
+              </p>
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {WORKFLOW_LIST.map((workflow) => {
+              const WorkflowIcon = WORKFLOW_ICONS[workflow.icon] || Briefcase;
+              return (
+                <Link key={workflow.id} to={`/workflow/${workflow.id}`}>
+                  <div className="rounded-xl border bg-card p-6 h-full hover:border-primary/50 transition-all hover:shadow-lg group">
+                    <div className={`h-12 w-12 rounded-lg bg-${workflow.color}-500/20 flex items-center justify-center mb-4`}>
+                      <WorkflowIcon className={`h-6 w-6 text-${workflow.color}-400`} />
+                    </div>
+                    <h3 className="text-lg font-bold mb-2">{workflow.name}</h3>
+                    <p className="text-muted-foreground text-sm mb-4">{workflow.description}</p>
+
+                    <div className="space-y-2 mb-4">
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <Clock className="h-3 w-3" />
+                        <span>{workflow.estimatedTime}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <CheckCircle2 className="h-3 w-3" />
+                        <span>{workflow.steps.length} automated steps</span>
+                      </div>
+                    </div>
+
+                    <div className="text-sm font-medium text-muted-foreground mb-2">You'll receive:</div>
+                    <ul className="space-y-1">
+                      {workflow.outputs.slice(0, 3).map((output, i) => (
+                        <li key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
+                          <CheckCircle2 className="h-3 w-3 text-green-500 shrink-0 mt-0.5" />
+                          <span>{output}</span>
+                        </li>
+                      ))}
+                      {workflow.outputs.length > 3 && (
+                        <li className="text-xs text-muted-foreground pl-5">
+                          +{workflow.outputs.length - 3} more...
+                        </li>
+                      )}
+                    </ul>
+
+                    <div className="mt-4 pt-4 border-t">
+                      <Button
+                        variant="outline"
+                        className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
+                      >
+                        <Play className="h-4 w-4 mr-2" />
+                        Start Workflow
+                      </Button>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* ═══════════════════════════════════════════════════════════════════════════
+            WORKSPACES SECTION
+        ═══════════════════════════════════════════════════════════════════════════ */}
+        {!workspacesLoading && workspaces.length > 0 && (
+          <section className="mb-12">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold">Your Workspaces</h2>
+              <Link to="/analyze">
+                <Button variant="outline" size="sm">
+                  <Plus className="mr-2 h-4 w-4" />
+                  New Workspace
+                </Button>
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {workspaces.slice(0, 6).map((workspace) => (
+                <div
+                  key={workspace.id}
+                  className="group relative rounded-xl border bg-card p-4 hover:border-primary/50 transition-colors"
+                >
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (confirm('Delete this workspace and all its skills?')) {
+                        deleteWorkspace(workspace.id);
+                      }
+                    }}
+                    className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-destructive/20 rounded"
+                  >
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                  </button>
+                  <Link to={`/workspace/${workspace.id}`}>
+                    <h3 className="font-semibold pr-8">{workspace.name}</h3>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {workspace.jdAnalysis.role.title} • {workspace.jdAnalysis.role.level}
+                    </p>
+                    <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+                      <Clock className="h-3 w-3" />
+                      <span>{new Date(workspace.updatedAt).toLocaleDateString()}</span>
+                      <span>•</span>
+                      <span>{workspace.selectedSkillIds.length} skills</span>
+                    </div>
+                  </Link>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* ═══════════════════════════════════════════════════════════════════════════
+            BOTTOM CTA
+        ═══════════════════════════════════════════════════════════════════════════ */}
+        <section className="mb-8">
+          <div className="rounded-2xl bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 border p-8 text-center">
+            <h2 className="text-2xl font-bold mb-3">Ready to Automate Your Work?</h2>
+            <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
+              Start with pre-built skills for your profession, or create custom skills from any job description.
+              Export prompts to use in any AI tool.
+            </p>
+            <div className="flex flex-wrap justify-center gap-4">
+              <Link to="/library">
+                <Button size="lg" className="bg-purple-500 hover:bg-purple-600">
+                  <Library className="mr-2 h-5 w-5" />
+                  Browse Skill Library
+                </Button>
+              </Link>
+              <Link to="/analyze">
+                <Button size="lg" variant="outline">
+                  <Wand2 className="mr-2 h-5 w-5" />
+                  Create Custom Skills
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </section>
+      </div>
     </div>
   );
 };
