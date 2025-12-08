@@ -1,7 +1,7 @@
 // Role Templates Page - Browse and install pre-built skill bundles for professional roles
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { ROLE_TEMPLATES, type RoleTemplate } from '../lib/roleTemplates';
 import { SKILLS } from '../lib/skills';
 import { db } from '../lib/storage/indexeddb';
@@ -30,6 +30,8 @@ import {
   Figma,
   HandCoins,
   Briefcase,
+  FileDown,
+  ArrowUpRight,
 } from 'lucide-react';
 
 // Icon mapping
@@ -154,14 +156,22 @@ const RoleTemplatesPage: React.FC = () => {
           <div>
             <h1 className="text-3xl font-bold">Role Templates</h1>
             <p className="text-muted-foreground">
-              Pre-built skill bundles for your profession
+              {ROLE_TEMPLATES.length} professional roles with {ROLE_TEMPLATES.reduce((acc, r) => acc + r.dynamicSkills.length, 0)}+ production-ready skills
             </p>
           </div>
         </div>
-        <Button variant="outline" onClick={() => navigate('/my-skills')}>
-          <Package className="h-4 w-4 mr-2" />
-          View My Skills
-        </Button>
+        <div className="flex items-center gap-2">
+          <Link to="/export-skills">
+            <Button variant="outline">
+              <FileDown className="h-4 w-4 mr-2" />
+              Export Skills
+            </Button>
+          </Link>
+          <Button variant="outline" onClick={() => navigate('/my-skills')}>
+            <Package className="h-4 w-4 mr-2" />
+            My Skills
+          </Button>
+        </div>
       </div>
 
       {/* Search */}
@@ -176,15 +186,29 @@ const RoleTemplatesPage: React.FC = () => {
       </div>
 
       {/* Info Banner */}
-      <div className="mb-8 p-4 rounded-xl border bg-gradient-to-r from-purple-500/10 to-pink-500/10">
-        <div className="flex items-start gap-3">
-          <Sparkles className="h-5 w-5 text-purple-400 mt-0.5" />
-          <div>
-            <h3 className="font-semibold mb-1">One-Click Skill Installation</h3>
-            <p className="text-sm text-muted-foreground">
-              Each role comes with curated job-search skills plus specialized AI-powered tools for your profession.
-              Install a bundle to instantly access skills tailored to your role.
-            </p>
+      <div className="mb-8 grid md:grid-cols-2 gap-4">
+        <div className="p-4 rounded-xl border bg-gradient-to-r from-purple-500/10 to-pink-500/10">
+          <div className="flex items-start gap-3">
+            <Sparkles className="h-5 w-5 text-purple-400 mt-0.5 shrink-0" />
+            <div>
+              <h3 className="font-semibold mb-1">Expert-Level System Prompts</h3>
+              <p className="text-sm text-muted-foreground">
+                Each skill is crafted by domain experts with 15-20+ years of experience.
+                Includes industry frameworks, best practices, and production-ready templates.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="p-4 rounded-xl border bg-gradient-to-r from-green-500/10 to-emerald-500/10">
+          <div className="flex items-start gap-3">
+            <FileDown className="h-5 w-5 text-green-500 mt-0.5 shrink-0" />
+            <div>
+              <h3 className="font-semibold mb-1">Export for Any LLM</h3>
+              <p className="text-sm text-muted-foreground">
+                Download skill prompts as CSV or TXT files. Use them in ChatGPT, Claude, Gemini,
+                or refine them for your specific needs.
+              </p>
+            </div>
           </div>
         </div>
       </div>
