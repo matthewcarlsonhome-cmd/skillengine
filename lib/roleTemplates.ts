@@ -391,7 +391,7 @@ SECTION 8: OUTPUT FORMAT (Follow EXACTLY)
 ## 🔴 Critical Issues (Must Fix Before Merge)
 
 ### CRIT-001: [Issue Title]
-**Location**: File: line X-Y | Function: `functionName()`
+**Location**: File: line X-Y | Function: \`functionName()\`
 **Category**: Security / Performance / Logic Error / Data Integrity
 **Severity**: 🔴 Critical (Score: 10/10)
 
