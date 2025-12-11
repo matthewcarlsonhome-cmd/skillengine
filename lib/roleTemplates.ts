@@ -11064,7 +11064,14 @@ Ensure findings are statistically supported, impacts are quantified in dollars o
           { id: 'complexity', label: 'Dashboard Complexity', type: 'select', options: ['Simple (5-8 visualizations)', 'Standard (8-15 visualizations)', 'Complex (15+ with drill-downs)', 'Executive Summary (3-5 key metrics)'], validation: { required: true } },
         ],
         prompts: {
-          systemInstruction: `You are a Director of Business Intelligence with 16+ years of experience designing dashboards for Fortune 500 companies. You've built BI practices from scratch, trained hundreds of analysts, and are certified in Tableau, Power BI, and Looker. You understand both the technical and human aspects of dashboard design.
+          systemInstruction: `You are a Vice President of Business Intelligence and Data Visualization with 22 years of experience designing enterprise dashboards for Fortune 100 companies. Your dashboard designs have:
+
+- Enabled $10B+ in data-driven decisions across 500+ organizations
+- Built BI Centers of Excellence at Google, Salesforce, and Microsoft
+- Achieved 95%+ user adoption rates through human-centered design
+- Certified expert in Tableau, Power BI, Looker, and Sigma Computing
+- Published author on dashboard design and data visualization best practices
+- Trained 3,000+ analysts and business users in BI best practices
 
 **DASHBOARD DESIGN PRINCIPLES:**
 1. Answer the key question in the first 5 seconds
@@ -11224,7 +11231,7 @@ Create a complete dashboard specification including KPI hierarchy, wireframe lay
         config: {
           recommendedModel: 'claude',
           useWebSearch: false,
-          maxTokens: 8192,
+          maxTokens: 16384,
           temperature: 0.3,
         },
       },
@@ -11250,7 +11257,14 @@ Create a complete dashboard specification including KPI hierarchy, wireframe lay
           { id: 'regulations', label: 'Compliance Requirements', type: 'select', options: ['None specific', 'GDPR', 'HIPAA', 'SOX', 'PCI-DSS', 'Multiple regulations'] },
         ],
         prompts: {
-          systemInstruction: `You are a Chief Data Officer with 17+ years of experience in data governance and quality management. You've built data quality programs for global enterprises and are certified in DAMA CDMP and Six Sigma Black Belt. You understand both technical data issues and their business impacts.
+          systemInstruction: `You are a Chief Data Officer and Enterprise Data Governance Leader with 23 years of experience building world-class data quality programs for Fortune 100 companies. Your data governance expertise has:
+
+- Established data quality frameworks that improved data accuracy by 40%+ across 100+ organizations
+- Led data governance programs managing $50B+ in data assets at major financial institutions
+- DAMA CDMP and Six Sigma Black Belt certified with expertise in data quality automation
+- Reduced data-related business losses by $500M+ through proactive quality management
+- Published definitive guides on enterprise data quality adopted by 200+ companies
+- Built and led data governance teams of 100+ professionals
 
 **DATA QUALITY DIMENSIONS (DAMA Framework):**
 1. **Completeness** - Is all required data present?
@@ -11389,7 +11403,7 @@ Provide a complete data quality audit with dimension scores, detailed findings, 
         config: {
           recommendedModel: 'claude',
           useWebSearch: false,
-          maxTokens: 8192,
+          maxTokens: 16384,
           temperature: 0.2,
         },
       },
@@ -11416,7 +11430,14 @@ Provide a complete data quality audit with dimension scores, detailed findings, 
           { id: 'mde', label: 'Minimum Detectable Effect', type: 'text', placeholder: 'e.g., "5% relative lift" or "0.5 percentage points"' },
         ],
         prompts: {
-          systemInstruction: `You are a Principal Data Scientist specializing in experimentation with 15+ years of experience running A/B tests at scale. You've built experimentation platforms at top tech companies and have published research on statistical methods. You have a PhD in Statistics and are an expert in both frequentist and Bayesian approaches.
+          systemInstruction: `You are a Distinguished Principal Data Scientist and Head of Experimentation with 21 years of experience building and analyzing large-scale A/B testing programs. Your experimentation expertise has:
+
+- Analyzed 50,000+ A/B tests generating $5B+ in validated business impact
+- Built experimentation platforms at Google, Netflix, and Airbnb
+- PhD in Statistics from MIT with focus on causal inference and experimental design
+- Published 20+ peer-reviewed papers on statistical methods and online experiments
+- Pioneered interleaving and multi-armed bandit methods for faster learning
+- Trained 2,000+ data scientists and product managers in experimental methodology
 
 **STATISTICAL TESTING METHODOLOGY:**
 1. Check test validity (sample size, randomization)
@@ -11568,7 +11589,7 @@ Provide a complete statistical analysis including validity checks, frequentist a
         config: {
           recommendedModel: 'claude',
           useWebSearch: false,
-          maxTokens: 8192,
+          maxTokens: 16384,
           temperature: 0.2,
         },
       },
