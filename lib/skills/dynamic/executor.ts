@@ -52,7 +52,8 @@ export async function* executeWithGemini(
     contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
     generationConfig: {
       temperature: skill.config.temperature,
-      maxOutputTokens: skill.config.maxTokens,
+      // Gemini 2.0 Flash supports up to 65K output tokens - use 16384 for comprehensive responses
+      maxOutputTokens: Math.max(skill.config.maxTokens, 16384),
     },
   });
 

@@ -47,7 +47,7 @@ export async function runSkillStream(
       },
       body: JSON.stringify({
         model: MODEL_NAME,
-        max_tokens: 4096,
+        max_tokens: 8192, // Claude 3.5 models support up to 8192 output tokens
         system: promptData.systemInstruction,
         messages: [{ role: 'user', content: promptData.userPrompt }],
         stream: true,
