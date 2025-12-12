@@ -100,6 +100,7 @@ import SkillExportPage from './pages/SkillExportPage';           // Export skill
 // WORKFLOWS
 // Multi-step automated sequences that chain skills together
 // ─────────────────────────────────────────────────────────────────────────────
+import WorkflowsPage from './pages/WorkflowsPage';               // Browse all workflows by category
 import WorkflowRunnerPage from './pages/WorkflowRunnerPage';     // Execute multi-step workflows
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -220,8 +221,10 @@ function App() {
                     {/* ═══════════════════════════════════════════════════════
                         WORKFLOWS
                         Multi-step automated sequences that chain skills
+                        - /workflows: Browse all workflows by category
                         - /workflow/:id: Run a pre-built workflow (job-application, interview-prep, post-interview)
                     ═══════════════════════════════════════════════════════ */}
+                    <Route path="/workflows" element={<WorkflowsPage />} />
                     <Route path="/workflow/:workflowId" element={<WorkflowRunnerPage />} />
 
                     {/* ═══════════════════════════════════════════════════════
