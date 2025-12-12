@@ -38,6 +38,8 @@ import {
   GraduationCap,
   Search,
   Rocket,
+  TrendingUp,
+  Target,
 } from 'lucide-react';
 import { WORKFLOWS } from '../lib/workflows';
 import { SKILLS, interpolateTemplate } from '../lib/skills';
@@ -64,6 +66,8 @@ const WORKFLOW_ICONS: Record<string, React.FC<{ className?: string }>> = {
   GraduationCap,
   Search,
   Rocket,
+  TrendingUp,
+  Target,
 };
 
 // Step status type

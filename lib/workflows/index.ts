@@ -1099,6 +1099,367 @@ export const CONSULTING_ENGAGEMENT_WORKFLOW: Workflow = {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
+// WORKFLOW 8: STARTUP INVESTOR PITCH
+// Complete investor pitch preparation package for founders
+// ═══════════════════════════════════════════════════════════════════════════
+
+export const STARTUP_INVESTOR_PITCH_WORKFLOW: Workflow = {
+  id: 'startup-investor-pitch',
+  name: 'Startup Investor Pitch',
+  description: 'Complete investor pitch preparation with deck, financials, and Q&A prep',
+  longDescription: 'This workflow helps founders prepare a comprehensive investor pitch package. It creates market analysis, financial projections, pitch deck structure, due diligence Q&A preparation, and investor outreach materials - everything needed to confidently approach investors.',
+  icon: 'TrendingUp',
+  color: 'emerald',
+  estimatedTime: '25-35 minutes',
+
+  outputs: [
+    'Market analysis and competitive intelligence',
+    'Financial projections with multiple scenarios',
+    'Complete pitch deck structure and content',
+    'Investor due diligence Q&A preparation',
+    'Investor outreach email templates',
+    'Executive summary one-pager'
+  ],
+
+  globalInputs: [
+    {
+      id: 'companyName',
+      label: 'Company Name',
+      type: 'text',
+      placeholder: 'e.g., TechStartup Inc.',
+      required: true,
+    },
+    {
+      id: 'businessDescription',
+      label: 'Business Description',
+      type: 'textarea',
+      placeholder: 'What does your company do? What problem are you solving and how? Include your unique value proposition...',
+      required: true,
+      rows: 5,
+    },
+    {
+      id: 'targetMarket',
+      label: 'Target Market',
+      type: 'textarea',
+      placeholder: 'Who are your customers? Describe your TAM, SAM, SOM and target customer segments...',
+      required: true,
+      rows: 4,
+    },
+    {
+      id: 'businessModel',
+      label: 'Business Model & Revenue',
+      type: 'textarea',
+      placeholder: 'How do you make money? Pricing, revenue streams, current/projected revenue, unit economics...',
+      required: true,
+      rows: 4,
+    },
+    {
+      id: 'traction',
+      label: 'Traction & Milestones',
+      type: 'textarea',
+      placeholder: 'Key achievements, metrics (users, revenue, growth rate), major milestones reached...',
+      required: true,
+      rows: 4,
+    },
+    {
+      id: 'competitors',
+      label: 'Competitors',
+      type: 'textarea',
+      placeholder: 'List main competitors and your differentiation/competitive advantages...',
+      required: true,
+      rows: 3,
+    },
+    {
+      id: 'fundingAsk',
+      label: 'Funding Ask',
+      type: 'textarea',
+      placeholder: 'How much are you raising? What stage (pre-seed, seed, Series A)? Use of funds?',
+      required: true,
+      rows: 3,
+    },
+    {
+      id: 'teamBackground',
+      label: 'Team Background',
+      type: 'textarea',
+      placeholder: 'Founder backgrounds, key team members, relevant experience, advisors...',
+      required: true,
+      rows: 3,
+    },
+  ],
+
+  steps: [
+    {
+      id: 'step-market-analysis',
+      skillId: 'entrepreneur-founder-market-analysis-competitor-intelligence',
+      name: 'Market & Competitor Analysis',
+      description: 'Deep dive into market opportunity and competitive landscape',
+      inputMappings: {
+        businessDescription: { type: 'global', inputId: 'businessDescription' },
+        targetMarket: { type: 'global', inputId: 'targetMarket' },
+        competitors: { type: 'global', inputId: 'competitors' },
+        analysisGoals: { type: 'computed', template: 'Investor pitch preparation for {{companyName}}. Need compelling market size and competitive differentiation data.' },
+      },
+      outputKey: 'marketAnalysis',
+    },
+    {
+      id: 'step-financials',
+      skillId: 'entrepreneur-founder-financial-projections-scenario-modeler',
+      name: 'Financial Projections',
+      description: 'Create investor-ready financial projections with scenarios',
+      inputMappings: {
+        businessModel: { type: 'global', inputId: 'businessModel' },
+        currentTraction: { type: 'global', inputId: 'traction' },
+        fundingAmount: { type: 'global', inputId: 'fundingAsk' },
+        marketContext: { type: 'computed', template: 'Market analysis: {{marketAnalysis}}' },
+        projectionPeriod: { type: 'static', value: '3-5 year projections' },
+      },
+      outputKey: 'financials',
+    },
+    {
+      id: 'step-pitch-deck',
+      skillId: 'entrepreneur-founder-pitch-deck-builder',
+      name: 'Build Pitch Deck',
+      description: 'Create compelling pitch deck structure and content',
+      inputMappings: {
+        companyName: { type: 'global', inputId: 'companyName' },
+        businessDescription: { type: 'global', inputId: 'businessDescription' },
+        targetMarket: { type: 'computed', template: 'Market analysis: {{marketAnalysis}}' },
+        traction: { type: 'global', inputId: 'traction' },
+        businessModel: { type: 'computed', template: 'Business model: {{businessModel}}. Financial projections: {{financials}}' },
+        fundingAsk: { type: 'global', inputId: 'fundingAsk' },
+        team: { type: 'global', inputId: 'teamBackground' },
+      },
+      outputKey: 'pitchDeck',
+    },
+    {
+      id: 'step-due-diligence',
+      skillId: 'entrepreneur-founder-investor-due-diligence-q-a-prep',
+      name: 'Due Diligence Q&A Prep',
+      description: 'Prepare for tough investor questions and due diligence',
+      inputMappings: {
+        companyOverview: { type: 'computed', template: 'Company: {{companyName}}. {{businessDescription}}' },
+        businessModel: { type: 'global', inputId: 'businessModel' },
+        financials: { type: 'computed', template: 'Financial projections: {{financials}}' },
+        marketPosition: { type: 'computed', template: 'Market analysis: {{marketAnalysis}}' },
+        teamBackground: { type: 'global', inputId: 'teamBackground' },
+        traction: { type: 'global', inputId: 'traction' },
+        fundingDetails: { type: 'global', inputId: 'fundingAsk' },
+      },
+      outputKey: 'dueDiligencePrep',
+    },
+    {
+      id: 'step-investor-outreach',
+      skillId: 'entrepreneur-founder-investor-outreach-communication-suite',
+      name: 'Investor Outreach Materials',
+      description: 'Create personalized investor outreach templates',
+      inputMappings: {
+        companyName: { type: 'global', inputId: 'companyName' },
+        elevatorPitch: { type: 'computed', template: 'Key pitch points from deck: {{pitchDeck}}' },
+        traction: { type: 'global', inputId: 'traction' },
+        fundingAsk: { type: 'global', inputId: 'fundingAsk' },
+        targetInvestors: { type: 'static', value: 'Angel investors, Seed-stage VCs, Strategic investors' },
+        uniqueHook: { type: 'computed', template: 'Market opportunity: {{marketAnalysis}}' },
+      },
+      outputKey: 'investorOutreach',
+    },
+    {
+      id: 'step-executive-summary',
+      skillId: 'entrepreneur-founder-executive-summary-one-pager-creator',
+      name: 'Executive Summary',
+      description: 'Create one-page executive summary for investors',
+      inputMappings: {
+        companyName: { type: 'global', inputId: 'companyName' },
+        businessOverview: { type: 'global', inputId: 'businessDescription' },
+        marketOpportunity: { type: 'computed', template: 'Market analysis: {{marketAnalysis}}' },
+        financialHighlights: { type: 'computed', template: 'Key financials: {{financials}}' },
+        traction: { type: 'global', inputId: 'traction' },
+        fundingAsk: { type: 'global', inputId: 'fundingAsk' },
+        team: { type: 'global', inputId: 'teamBackground' },
+      },
+      outputKey: 'executiveSummary',
+    },
+  ],
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// WORKFLOW 9: SALES ACCOUNT PURSUIT
+// Complete account-based selling package for strategic deals
+// ═══════════════════════════════════════════════════════════════════════════
+
+export const SALES_ACCOUNT_PURSUIT_WORKFLOW: Workflow = {
+  id: 'sales-account-pursuit',
+  name: 'Sales Account Pursuit',
+  description: 'Complete strategic account pursuit package for winning big deals',
+  longDescription: 'This workflow helps sales professionals pursue strategic accounts systematically. It creates comprehensive account intelligence, discovery call preparation, objection handling playbook, ROI value proposition, and a professional proposal - everything needed to win complex B2B deals.',
+  icon: 'Target',
+  color: 'orange',
+  estimatedTime: '20-30 minutes',
+
+  outputs: [
+    'Comprehensive account intelligence brief',
+    'Discovery call question framework',
+    'Objection handling playbook',
+    'ROI and value proposition calculator',
+    'Professional sales proposal/RFP response',
+    'Follow-up sequence strategy'
+  ],
+
+  globalInputs: [
+    {
+      id: 'targetCompany',
+      label: 'Target Company Name',
+      type: 'text',
+      placeholder: 'e.g., Enterprise Corp',
+      required: true,
+    },
+    {
+      id: 'companyContext',
+      label: 'Company Background',
+      type: 'textarea',
+      placeholder: 'What do you know about this company? Industry, size, recent news, known initiatives...',
+      required: true,
+      rows: 4,
+    },
+    {
+      id: 'yourProduct',
+      label: 'Your Product/Solution',
+      type: 'textarea',
+      placeholder: 'Describe your product/service, key features, and typical value delivered...',
+      required: true,
+      rows: 4,
+    },
+    {
+      id: 'identifiedNeed',
+      label: 'Identified Need/Opportunity',
+      type: 'textarea',
+      placeholder: 'What pain points or opportunities have you identified? Why might they need your solution?',
+      required: true,
+      rows: 4,
+    },
+    {
+      id: 'stakeholders',
+      label: 'Known Stakeholders',
+      type: 'textarea',
+      placeholder: 'List known contacts, their roles, and any relationship history...',
+      required: true,
+      rows: 3,
+    },
+    {
+      id: 'dealSize',
+      label: 'Expected Deal Size',
+      type: 'select',
+      options: ['Under $25K', '$25K-$100K', '$100K-$500K', '$500K-$1M', '$1M+'],
+      required: true,
+    },
+    {
+      id: 'salesStage',
+      label: 'Current Sales Stage',
+      type: 'select',
+      options: ['Prospecting/Research', 'Initial Outreach', 'Discovery', 'Solution Presentation', 'Proposal/Negotiation', 'Closing'],
+      required: true,
+    },
+    {
+      id: 'competitors',
+      label: 'Known Competitors in Deal',
+      type: 'textarea',
+      placeholder: 'What competitors might they be evaluating? Any incumbent solutions?',
+      required: false,
+      rows: 2,
+    },
+  ],
+
+  steps: [
+    {
+      id: 'step-account-intel',
+      skillId: 'sales-representative-target-account-intelligence-research',
+      name: 'Account Intelligence',
+      description: 'Build comprehensive intelligence brief on the target account',
+      inputMappings: {
+        targetCompany: { type: 'global', inputId: 'targetCompany' },
+        knownContext: { type: 'global', inputId: 'companyContext' },
+        yourSolution: { type: 'global', inputId: 'yourProduct' },
+        keyStakeholders: { type: 'global', inputId: 'stakeholders' },
+        researchGoals: { type: 'computed', template: 'Pursuing {{dealSize}} deal. Stage: {{salesStage}}. Need: {{identifiedNeed}}' },
+      },
+      outputKey: 'accountIntel',
+    },
+    {
+      id: 'step-discovery-framework',
+      skillId: 'sales-representative-discovery-call-question-framework-builder',
+      name: 'Discovery Call Framework',
+      description: 'Create tailored discovery questions based on account intelligence',
+      inputMappings: {
+        prospect: { type: 'computed', template: 'Account: {{targetCompany}}. Intelligence: {{accountIntel}}' },
+        yourSolution: { type: 'global', inputId: 'yourProduct' },
+        identifiedPainPoints: { type: 'global', inputId: 'identifiedNeed' },
+        stakeholderRoles: { type: 'global', inputId: 'stakeholders' },
+        dealContext: { type: 'computed', template: 'Deal size: {{dealSize}}. Stage: {{salesStage}}' },
+      },
+      outputKey: 'discoveryFramework',
+    },
+    {
+      id: 'step-objection-handling',
+      skillId: 'sales-representative-sales-objection-handling-response-trainer',
+      name: 'Objection Handling Playbook',
+      description: 'Prepare responses for likely objections',
+      inputMappings: {
+        product: { type: 'global', inputId: 'yourProduct' },
+        targetAccount: { type: 'computed', template: 'Account: {{targetCompany}}. Intel: {{accountIntel}}' },
+        competitors: { type: 'global', inputId: 'competitors' },
+        dealSize: { type: 'global', inputId: 'dealSize' },
+        knownConcerns: { type: 'global', inputId: 'identifiedNeed' },
+      },
+      outputKey: 'objectionPlaybook',
+    },
+    {
+      id: 'step-roi-calculator',
+      skillId: 'sales-representative-value-proposition-roi-calculator-generator',
+      name: 'ROI Value Proposition',
+      description: 'Build quantified ROI and value proposition',
+      inputMappings: {
+        product: { type: 'global', inputId: 'yourProduct' },
+        prospect: { type: 'computed', template: 'Account: {{targetCompany}}. Business context: {{accountIntel}}' },
+        identifiedNeeds: { type: 'global', inputId: 'identifiedNeed' },
+        dealSize: { type: 'global', inputId: 'dealSize' },
+        competitiveLandscape: { type: 'global', inputId: 'competitors' },
+      },
+      outputKey: 'roiCalculator',
+    },
+    {
+      id: 'step-proposal',
+      skillId: 'sales-representative-proposal-rfp-response-writer',
+      name: 'Sales Proposal',
+      description: 'Generate professional proposal tailored to the account',
+      inputMappings: {
+        prospect: { type: 'global', inputId: 'targetCompany' },
+        prospectContext: { type: 'computed', template: 'Account intelligence: {{accountIntel}}' },
+        yourSolution: { type: 'global', inputId: 'yourProduct' },
+        identifiedNeeds: { type: 'global', inputId: 'identifiedNeed' },
+        valueProposition: { type: 'computed', template: 'ROI analysis: {{roiCalculator}}' },
+        pricingRange: { type: 'global', inputId: 'dealSize' },
+        stakeholders: { type: 'global', inputId: 'stakeholders' },
+      },
+      outputKey: 'proposal',
+    },
+    {
+      id: 'step-followup-strategy',
+      skillId: 'sales-representative-deal-strategy-next-steps-planner',
+      name: 'Follow-Up Strategy',
+      description: 'Create strategic follow-up plan to advance the deal',
+      inputMappings: {
+        account: { type: 'global', inputId: 'targetCompany' },
+        currentStage: { type: 'global', inputId: 'salesStage' },
+        stakeholders: { type: 'global', inputId: 'stakeholders' },
+        dealContext: { type: 'computed', template: 'Deal size: {{dealSize}}. Account intel: {{accountIntel}}' },
+        keyInsights: { type: 'computed', template: 'Discovery insights: {{discoveryFramework}}. Objection prep: {{objectionPlaybook}}' },
+        proposalSummary: { type: 'computed', template: 'Proposal highlights: {{proposal}}' },
+      },
+      outputKey: 'followUpStrategy',
+    },
+  ],
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
 // WORKFLOW REGISTRY
 // Export all workflows for use throughout the app
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1111,6 +1472,8 @@ export const WORKFLOWS: Record<string, Workflow> = {
   'seo-client-onboarding': SEO_CLIENT_ONBOARDING_WORKFLOW,
   'marketing-campaign': MARKETING_CAMPAIGN_WORKFLOW,
   'consulting-engagement': CONSULTING_ENGAGEMENT_WORKFLOW,
+  'startup-investor-pitch': STARTUP_INVESTOR_PITCH_WORKFLOW,
+  'sales-account-pursuit': SALES_ACCOUNT_PURSUIT_WORKFLOW,
 };
 
 export const WORKFLOW_LIST: Workflow[] = Object.values(WORKFLOWS);
