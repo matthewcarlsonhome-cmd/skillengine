@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Moon, Sun, Briefcase, Users, Sparkles, FolderOpen, LogIn, LogOut, Loader2, ChevronDown, LayoutDashboard, Package, Menu, X, Settings, FileSpreadsheet, DollarSign, Wrench, MessageSquare, Calculator, Mail, Building2, Trophy, Target, BarChart3, Bot, Bell, Lock, TrendingUp, Calendar, User, PlusCircle, Wand2, Heart, Download, Zap, Play, Shield, BookOpen } from 'lucide-react';
+import { Moon, Sun, Briefcase, Users, Sparkles, FolderOpen, LogIn, LogOut, Loader2, ChevronDown, LayoutDashboard, Package, Menu, X, Settings, FileSpreadsheet, DollarSign, Wrench, MessageSquare, Calculator, Mail, Building2, Trophy, Target, BarChart3, Bot, Bell, Lock, TrendingUp, Calendar, User, PlusCircle, Wand2, Heart, Download, Zap, Play, Shield, BookOpen, Layers } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme.tsx';
 import { useAuth } from '../hooks/useAuth.tsx';
 import { useToast } from '../hooks/useToast.tsx';
@@ -89,6 +89,16 @@ const Header: React.FC = () => {
                 Skill Library
               </Button>
             </Link>
+            <Link to="/workflows">
+              <Button
+                variant={isActive('/workflows') ? 'secondary' : 'ghost'}
+                size="sm"
+                className="gap-2"
+              >
+                <Layers className="h-4 w-4" />
+                Workflows
+              </Button>
+            </Link>
             <Link to="/role-templates">
               <Button
                 variant={isActive('/role-templates') ? 'secondary' : 'ghost'}
@@ -143,6 +153,15 @@ const Header: React.FC = () => {
                     <div className="p-2">
                       {/* Workflows Section */}
                       <p className="px-3 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">AI Workflows</p>
+                      <Link to="/workflows" onClick={() => setShowToolsMenu(false)}>
+                        <div className="flex items-center gap-2 px-3 py-2 rounded hover:bg-muted transition-colors">
+                          <Layers className="h-4 w-4 text-primary" />
+                          <div>
+                            <span className="text-sm font-medium">Browse All Workflows</span>
+                            <p className="text-xs text-muted-foreground">View complete workflow library</p>
+                          </div>
+                        </div>
+                      </Link>
                       <Link to="/workflow/job-application" onClick={() => setShowToolsMenu(false)}>
                         <div className="flex items-center gap-2 px-3 py-2 rounded hover:bg-muted transition-colors">
                           <Briefcase className="h-4 w-4 text-blue-500" />
@@ -485,6 +504,15 @@ const Header: React.FC = () => {
                 Skill Library
               </Button>
             </Link>
+            <Link to="/workflows">
+              <Button
+                variant={isActive('/workflows') ? 'secondary' : 'ghost'}
+                className="w-full justify-start gap-2"
+              >
+                <Layers className="h-4 w-4" />
+                Workflows
+              </Button>
+            </Link>
             <Link to="/role-templates">
               <Button
                 variant={isActive('/role-templates') ? 'secondary' : 'ghost'}
@@ -516,6 +544,12 @@ const Header: React.FC = () => {
             {/* AI Workflows */}
             <div className="border-t my-2" />
             <p className="px-3 py-1 text-xs font-semibold text-muted-foreground uppercase">AI Workflows</p>
+            <Link to="/workflows">
+              <Button variant={isActive('/workflows') ? 'secondary' : 'ghost'} className="w-full justify-start gap-2">
+                <Layers className="h-4 w-4 text-primary" />
+                Browse All Workflows
+              </Button>
+            </Link>
             <Link to="/workflow/job-application">
               <Button variant="ghost" className="w-full justify-start gap-2">
                 <Briefcase className="h-4 w-4 text-blue-500" />
