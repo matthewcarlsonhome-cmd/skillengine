@@ -35,10 +35,15 @@ import {
   Clock,
   KeyRound,
   HelpCircle,
+  GraduationCap,
+  Search,
+  Rocket,
 } from 'lucide-react';
 import { WORKFLOWS } from '../lib/workflows';
-import { SKILLS } from '../lib/skills';
-import type { Workflow, WorkflowStep, WorkflowGlobalInput } from '../lib/storage/types';
+import { SKILLS, interpolateTemplate } from '../lib/skills';
+import { getAllLibrarySkills } from '../lib/skillLibrary';
+import type { Workflow, WorkflowStep, WorkflowGlobalInput, DynamicSkill } from '../lib/storage/types';
+import type { LibrarySkill } from '../lib/skillLibrary/types';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Textarea } from '../components/ui/Textarea';
@@ -56,6 +61,9 @@ const WORKFLOW_ICONS: Record<string, React.FC<{ className?: string }>> = {
   Briefcase,
   MessageSquare,
   Mail,
+  GraduationCap,
+  Search,
+  Rocket,
 };
 
 // Step status type
@@ -181,66 +189,173 @@ const WorkflowRunnerPage: React.FC = () => {
     }
   };
 
-  // Execute a single step
+  // Execute a single step - supports both static skills and library skills
   const executeStep = async (
     step: WorkflowStep,
     currentOutputs: Record<string, string>
   ): Promise<string> => {
-    const skill = SKILLS[step.skillId];
-    if (!skill) {
-      throw new Error(`Skill not found: ${step.skillId}`);
-    }
+    // First try static skills
+    const staticSkill = SKILLS[step.skillId];
 
-    // Build input values for the skill
-    const inputValues: Record<string, string> = {};
-    skill.inputs.forEach((input) => {
-      inputValues[input.id] = resolveInputMapping(step, input.id, currentOutputs);
-    });
+    if (staticSkill) {
+      // Execute static skill (original logic)
+      const inputValues: Record<string, string> = {};
+      staticSkill.inputs.forEach((input) => {
+        inputValues[input.id] = resolveInputMapping(step, input.id, currentOutputs);
+      });
 
-    // Generate prompt
-    const promptData = skill.generatePrompt(inputValues);
-    let fullResponse = '';
+      const promptData = staticSkill.generatePrompt(inputValues);
+      let fullResponse = '';
 
-    if (selectedApi === 'gemini') {
-      const result = await runGeminiSkillStream(apiKey, promptData, skill.useGoogleSearch);
-      const stream = result && result.stream ? result.stream : result;
-      if (!stream || typeof stream[Symbol.asyncIterator] !== 'function') {
-        throw new Error('Invalid response from Gemini service');
-      }
-      for await (const chunk of stream) {
-        const text = typeof chunk.text === 'function' ? chunk.text() : chunk.text;
-        if (text) {
-          fullResponse += text;
+      if (selectedApi === 'gemini') {
+        const result = await runGeminiSkillStream(apiKey, promptData, staticSkill.useGoogleSearch);
+        const stream = result && result.stream ? result.stream : result;
+        if (!stream || typeof stream[Symbol.asyncIterator] !== 'function') {
+          throw new Error('Invalid response from Gemini service');
         }
-      }
-    } else if (selectedApi === 'claude') {
-      const response = await runClaudeSkillStream(apiKey, promptData, claudeModel);
-      if (!response.body) throw new Error('Response body is null');
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        const chunk = decoder.decode(value);
-        const lines = chunk.split('\n');
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const jsonStr = line.substring(6);
-            if (jsonStr.trim() === '[DONE]') break;
-            try {
-              const parsed = JSON.parse(jsonStr);
-              if (parsed.type === 'content_block_delta' && parsed.delta.type === 'text_delta') {
-                fullResponse += parsed.delta.text;
+        for await (const chunk of stream) {
+          const text = typeof chunk.text === 'function' ? chunk.text() : chunk.text;
+          if (text) {
+            fullResponse += text;
+          }
+        }
+      } else if (selectedApi === 'claude') {
+        const response = await runClaudeSkillStream(apiKey, promptData, claudeModel);
+        if (!response.body) throw new Error('Response body is null');
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          const chunk = decoder.decode(value);
+          const lines = chunk.split('\n');
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const jsonStr = line.substring(6);
+              if (jsonStr.trim() === '[DONE]') break;
+              try {
+                const parsed = JSON.parse(jsonStr);
+                if (parsed.type === 'content_block_delta' && parsed.delta.type === 'text_delta') {
+                  fullResponse += parsed.delta.text;
+                }
+              } catch {
+                // Ignore parsing errors
               }
-            } catch {
-              // Ignore parsing errors
             }
           }
         }
       }
+
+      return fullResponse;
     }
 
-    return fullResponse;
+    // Try library skill (role template skills)
+    const allLibrarySkills = getAllLibrarySkills();
+    const librarySkill = allLibrarySkills.find(s => s.id === step.skillId);
+
+    if (librarySkill && librarySkill.source === 'role-template') {
+      // Build input values from workflow mappings
+      const inputValues: Record<string, string> = {};
+
+      // Map workflow inputs to skill inputs
+      Object.keys(step.inputMappings).forEach((inputId) => {
+        inputValues[inputId] = resolveInputMapping(step, inputId, currentOutputs);
+      });
+
+      // Also include any skill inputs that might have defaults
+      librarySkill.inputs?.forEach((input) => {
+        if (!inputValues[input.id]) {
+          inputValues[input.id] = resolveInputMapping(step, input.id, currentOutputs);
+        }
+      });
+
+      // Interpolate the user prompt template
+      const systemPrompt = librarySkill.prompts.systemInstruction;
+      const userPrompt = interpolateTemplate(librarySkill.prompts.userPromptTemplate, inputValues);
+
+      let fullResponse = '';
+
+      if (selectedApi === 'gemini') {
+        const { GoogleGenerativeAI } = await import('@google/generative-ai');
+        const genAI = new GoogleGenerativeAI(apiKey);
+        const model = genAI.getGenerativeModel({
+          model: 'gemini-2.0-flash',
+          systemInstruction: systemPrompt,
+        });
+
+        const result = await model.generateContentStream({
+          contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
+          generationConfig: {
+            temperature: librarySkill.config.temperature,
+            maxOutputTokens: Math.max(librarySkill.config.maxTokens, 16384),
+          },
+        });
+
+        for await (const chunk of result.stream) {
+          const text = chunk.text();
+          if (text) {
+            fullResponse += text;
+          }
+        }
+      } else if (selectedApi === 'claude') {
+        const CLAUDE_MODELS = {
+          haiku: 'claude-3-5-haiku-latest',
+          sonnet: 'claude-3-5-sonnet-latest',
+          opus: 'claude-3-opus-latest',
+        };
+
+        const response = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': apiKey,
+            'anthropic-version': '2023-06-01',
+            'anthropic-dangerous-direct-browser-access': 'true',
+          },
+          body: JSON.stringify({
+            model: CLAUDE_MODELS[claudeModel],
+            max_tokens: librarySkill.config.maxTokens,
+            system: systemPrompt,
+            messages: [{ role: 'user', content: userPrompt }],
+            stream: true,
+          }),
+        });
+
+        if (!response.ok) {
+          const error = await response.text();
+          throw new Error(`Claude API error: ${error}`);
+        }
+
+        const reader = response.body?.getReader();
+        if (!reader) throw new Error('Response body is null');
+
+        const decoder = new TextDecoder();
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          const chunk = decoder.decode(value);
+          const lines = chunk.split('\n');
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const jsonStr = line.substring(6);
+              if (jsonStr.trim() === '[DONE]') break;
+              try {
+                const parsed = JSON.parse(jsonStr);
+                if (parsed.type === 'content_block_delta' && parsed.delta?.type === 'text_delta') {
+                  fullResponse += parsed.delta.text;
+                }
+              } catch {
+                // Ignore parsing errors
+              }
+            }
+          }
+        }
+      }
+
+      return fullResponse;
+    }
+
+    throw new Error(`Skill not found: ${step.skillId}`);
   };
 
   // Run the entire workflow
