@@ -414,6 +414,691 @@ export const POST_INTERVIEW_WORKFLOW: Workflow = {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
+// WORKFLOW 4: TRAINING WORKSHOP SETUP
+// Complete workshop preparation from needs assessment to marketing
+// ═══════════════════════════════════════════════════════════════════════════
+
+export const TRAINING_WORKSHOP_WORKFLOW: Workflow = {
+  id: 'training-workshop',
+  name: 'Training Workshop Setup',
+  description: 'Create a complete workshop package from curriculum to marketing',
+  longDescription: 'This workflow guides you through creating a professional training workshop. It starts with needs assessment, designs the curriculum, builds the presentation, creates interactive exercises, polishes all content, and generates marketing materials.',
+  icon: 'GraduationCap',
+  color: 'amber',
+  estimatedTime: '15-20 minutes',
+
+  outputs: [
+    'Training needs assessment report',
+    'Complete workshop curriculum',
+    'Presentation framework and slides outline',
+    'Interactive exercises and activities',
+    'Polished, professional content',
+    'Marketing and promotional materials'
+  ],
+
+  globalInputs: [
+    {
+      id: 'workshopTopic',
+      label: 'Workshop Topic',
+      type: 'text',
+      placeholder: 'e.g., AI Tools for Productivity, Excel Advanced Functions, Leadership Communication',
+      required: true,
+    },
+    {
+      id: 'targetAudience',
+      label: 'Target Audience',
+      type: 'textarea',
+      placeholder: 'Who are you training? (e.g., "Marketing professionals with 3-5 years experience, familiar with basic digital tools, looking to improve efficiency")',
+      required: true,
+      rows: 3,
+    },
+    {
+      id: 'duration',
+      label: 'Workshop Duration',
+      type: 'select',
+      options: ['1 hour webinar', '2 hour workshop', 'Half-day (4 hours)', 'Full-day (8 hours)', '2-day intensive'],
+      required: true,
+    },
+    {
+      id: 'deliveryFormat',
+      label: 'Delivery Format',
+      type: 'select',
+      options: ['In-person', 'Virtual/Online', 'Hybrid'],
+      required: true,
+    },
+    {
+      id: 'learningObjectives',
+      label: 'Key Learning Objectives',
+      type: 'textarea',
+      placeholder: 'What should participants be able to do after the workshop? List 3-5 specific outcomes...',
+      required: true,
+      rows: 4,
+    },
+    {
+      id: 'organizationContext',
+      label: 'Organization/Client Context (Optional)',
+      type: 'textarea',
+      placeholder: 'Any specific organizational needs, industry context, or constraints to consider...',
+      required: false,
+      rows: 3,
+    },
+  ],
+
+  steps: [
+    {
+      id: 'step-needs',
+      skillId: 'trainer-training-needs-assessment-generator',
+      name: 'Assess Training Needs',
+      description: 'Analyze the audience and learning objectives to create a comprehensive needs assessment',
+      inputMappings: {
+        trainingTopic: { type: 'global', inputId: 'workshopTopic' },
+        targetAudience: { type: 'global', inputId: 'targetAudience' },
+        organizationalContext: { type: 'computed', template: 'Duration: {{duration}}. Format: {{deliveryFormat}}. Learning Objectives: {{learningObjectives}}. Context: {{organizationContext}}' },
+        currentSkillLevel: { type: 'static', value: 'Mixed levels - assess during workshop' },
+        desiredOutcomes: { type: 'global', inputId: 'learningObjectives' },
+      },
+      outputKey: 'needsAssessment',
+    },
+    {
+      id: 'step-curriculum',
+      skillId: 'trainer-workshop-curriculum-designer',
+      name: 'Design Curriculum',
+      description: 'Create a detailed curriculum with modules, timing, and learning activities',
+      inputMappings: {
+        workshopTopic: { type: 'global', inputId: 'workshopTopic' },
+        targetAudience: { type: 'global', inputId: 'targetAudience' },
+        duration: { type: 'global', inputId: 'duration' },
+        learningObjectives: { type: 'global', inputId: 'learningObjectives' },
+        deliveryFormat: { type: 'global', inputId: 'deliveryFormat' },
+        additionalRequirements: { type: 'computed', template: 'Based on needs assessment: {{needsAssessment}}' },
+      },
+      outputKey: 'curriculum',
+    },
+    {
+      id: 'step-presentation',
+      skillId: 'trainer-training-presentation-builder',
+      name: 'Build Presentation',
+      description: 'Create the presentation framework and slide structure',
+      inputMappings: {
+        presentationTopic: { type: 'global', inputId: 'workshopTopic' },
+        targetAudience: { type: 'global', inputId: 'targetAudience' },
+        keyMessages: { type: 'global', inputId: 'learningObjectives' },
+        duration: { type: 'global', inputId: 'duration' },
+        presentationType: { type: 'static', value: 'Training Workshop' },
+        additionalContext: { type: 'computed', template: 'Follow this curriculum structure: {{curriculum}}' },
+      },
+      outputKey: 'presentation',
+    },
+    {
+      id: 'step-exercises',
+      skillId: 'trainer-interactive-exercise-activity-generator',
+      name: 'Create Interactive Exercises',
+      description: 'Design hands-on activities, discussions, and practice exercises',
+      inputMappings: {
+        trainingTopic: { type: 'global', inputId: 'workshopTopic' },
+        learningObjectives: { type: 'global', inputId: 'learningObjectives' },
+        audienceProfile: { type: 'global', inputId: 'targetAudience' },
+        sessionDuration: { type: 'global', inputId: 'duration' },
+        deliveryFormat: { type: 'global', inputId: 'deliveryFormat' },
+        additionalContext: { type: 'computed', template: 'Curriculum modules to support: {{curriculum}}' },
+      },
+      outputKey: 'exercises',
+    },
+    {
+      id: 'step-polish',
+      skillId: 'trainer-training-content-copy-editor',
+      name: 'Polish Content',
+      description: 'Review and refine all training materials for clarity and professionalism',
+      inputMappings: {
+        contentToEdit: { type: 'computed', template: '# Workshop Materials to Polish\n\n## Curriculum\n{{curriculum}}\n\n## Presentation Outline\n{{presentation}}\n\n## Exercises & Activities\n{{exercises}}' },
+        contentType: { type: 'static', value: 'Training Materials' },
+        targetAudience: { type: 'global', inputId: 'targetAudience' },
+        toneAndStyle: { type: 'static', value: 'Professional, engaging, educational' },
+        specificFocus: { type: 'static', value: 'Clarity, engagement, actionable instructions' },
+      },
+      outputKey: 'polishedContent',
+    },
+    {
+      id: 'step-marketing',
+      skillId: 'trainer-workshop-event-marketing-promotion',
+      name: 'Generate Marketing Materials',
+      description: 'Create promotional content to attract participants',
+      inputMappings: {
+        eventName: { type: 'global', inputId: 'workshopTopic' },
+        eventDescription: { type: 'computed', template: 'A {{duration}} {{deliveryFormat}} workshop on {{workshopTopic}}. Learning Objectives: {{learningObjectives}}' },
+        targetAudience: { type: 'global', inputId: 'targetAudience' },
+        keyBenefits: { type: 'global', inputId: 'learningObjectives' },
+        eventDetails: { type: 'computed', template: 'Duration: {{duration}}, Format: {{deliveryFormat}}' },
+        promotionChannels: { type: 'static', value: 'Email, LinkedIn, Website' },
+      },
+      outputKey: 'marketing',
+    },
+  ],
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// WORKFLOW 5: SEO/GEO CLIENT ONBOARDING
+// Complete SEO audit and strategy for new clients
+// ═══════════════════════════════════════════════════════════════════════════
+
+export const SEO_CLIENT_ONBOARDING_WORKFLOW: Workflow = {
+  id: 'seo-client-onboarding',
+  name: 'SEO/GEO Client Onboarding',
+  description: 'Complete SEO audit and strategy package for new clients',
+  longDescription: 'This workflow creates a comprehensive SEO onboarding package including technical audit, keyword research, AI search optimization analysis, content refresh priorities, competitive analysis, and initial content briefs.',
+  icon: 'Search',
+  color: 'green',
+  estimatedTime: '18-25 minutes',
+
+  outputs: [
+    'Technical SEO site audit with prioritized fixes',
+    'Keyword research and content strategy',
+    'AEO/GEO optimization analysis for AI search',
+    'Content refresh prioritization',
+    'Competitive SERP analysis',
+    'Initial content briefs'
+  ],
+
+  globalInputs: [
+    {
+      id: 'websiteUrl',
+      label: 'Client Website URL',
+      type: 'text',
+      placeholder: 'e.g., https://example.com',
+      required: true,
+    },
+    {
+      id: 'businessDescription',
+      label: 'Business Description',
+      type: 'textarea',
+      placeholder: 'Describe the client\'s business, products/services, and unique value proposition...',
+      required: true,
+      rows: 4,
+    },
+    {
+      id: 'targetAudience',
+      label: 'Target Audience',
+      type: 'textarea',
+      placeholder: 'Who are the ideal customers? Demographics, pain points, search behavior...',
+      required: true,
+      rows: 3,
+    },
+    {
+      id: 'competitors',
+      label: 'Main Competitors',
+      type: 'textarea',
+      placeholder: 'List 3-5 main competitors with their websites...',
+      required: true,
+      rows: 3,
+    },
+    {
+      id: 'businessGoals',
+      label: 'SEO/Business Goals',
+      type: 'textarea',
+      placeholder: 'What does the client want to achieve? (e.g., increase organic traffic 50%, rank for specific keywords, improve local visibility)',
+      required: true,
+      rows: 3,
+    },
+    {
+      id: 'currentPerformance',
+      label: 'Current Performance (Optional)',
+      type: 'textarea',
+      placeholder: 'Any known metrics: current traffic, rankings, domain authority, existing issues...',
+      required: false,
+      rows: 3,
+    },
+  ],
+
+  steps: [
+    {
+      id: 'step-technical-audit',
+      skillId: 'seo-specialist-technical-seo-site-audit',
+      name: 'Technical SEO Audit',
+      description: 'Comprehensive technical audit of site health, crawlability, and performance',
+      inputMappings: {
+        websiteUrl: { type: 'global', inputId: 'websiteUrl' },
+        crawlData: { type: 'computed', template: 'Business: {{businessDescription}}. Goals: {{businessGoals}}. Current state: {{currentPerformance}}' },
+        focusAreas: { type: 'static', value: 'Core Web Vitals, Mobile Usability, Indexation, Site Architecture, Security' },
+        priorityLevel: { type: 'static', value: 'Full Audit' },
+      },
+      outputKey: 'technicalAudit',
+    },
+    {
+      id: 'step-keyword-research',
+      skillId: 'seo-specialist-keyword-research-content-strategy',
+      name: 'Keyword Research',
+      description: 'Identify target keywords and develop content strategy',
+      inputMappings: {
+        businessDescription: { type: 'global', inputId: 'businessDescription' },
+        targetAudience: { type: 'global', inputId: 'targetAudience' },
+        competitors: { type: 'global', inputId: 'competitors' },
+        currentKeywords: { type: 'global', inputId: 'currentPerformance' },
+        goals: { type: 'global', inputId: 'businessGoals' },
+      },
+      outputKey: 'keywordResearch',
+    },
+    {
+      id: 'step-aeo-geo',
+      skillId: 'seo-specialist-aeo-geo-optimization-analyzer',
+      name: 'AEO/GEO Analysis',
+      description: 'Analyze readiness for AI search engines and generative search',
+      inputMappings: {
+        websiteUrl: { type: 'global', inputId: 'websiteUrl' },
+        businessDescription: { type: 'global', inputId: 'businessDescription' },
+        targetQueries: { type: 'computed', template: 'Based on keyword research: {{keywordResearch}}' },
+        contentSamples: { type: 'global', inputId: 'currentPerformance' },
+        competitors: { type: 'global', inputId: 'competitors' },
+      },
+      outputKey: 'aeoGeoAnalysis',
+    },
+    {
+      id: 'step-content-refresh',
+      skillId: 'seo-specialist-content-refresh-analyzer',
+      name: 'Content Refresh Analysis',
+      description: 'Identify existing content that needs updating or optimization',
+      inputMappings: {
+        websiteUrl: { type: 'global', inputId: 'websiteUrl' },
+        contentInventory: { type: 'computed', template: 'Business: {{businessDescription}}. Target keywords from research: {{keywordResearch}}' },
+        performanceData: { type: 'global', inputId: 'currentPerformance' },
+        goals: { type: 'global', inputId: 'businessGoals' },
+        competitors: { type: 'global', inputId: 'competitors' },
+      },
+      outputKey: 'contentRefresh',
+    },
+    {
+      id: 'step-competitor-serp',
+      skillId: 'seo-specialist-competitor-serp-analyzer',
+      name: 'Competitive Analysis',
+      description: 'Analyze competitor SERP presence and identify opportunities',
+      inputMappings: {
+        targetKeywords: { type: 'computed', template: 'Priority keywords from research: {{keywordResearch}}' },
+        competitors: { type: 'global', inputId: 'competitors' },
+        yourWebsite: { type: 'global', inputId: 'websiteUrl' },
+        industryContext: { type: 'global', inputId: 'businessDescription' },
+        analysisGoals: { type: 'global', inputId: 'businessGoals' },
+      },
+      outputKey: 'competitorAnalysis',
+    },
+    {
+      id: 'step-content-briefs',
+      skillId: 'seo-specialist-seo-content-brief-generator',
+      name: 'Create Content Briefs',
+      description: 'Generate initial content briefs for priority pages',
+      inputMappings: {
+        targetKeyword: { type: 'computed', template: 'Top priority keywords from: {{keywordResearch}}' },
+        searchIntent: { type: 'computed', template: 'Based on audience: {{targetAudience}} and competitor analysis: {{competitorAnalysis}}' },
+        businessContext: { type: 'global', inputId: 'businessDescription' },
+        competitorContent: { type: 'computed', template: 'Competitor insights: {{competitorAnalysis}}' },
+        contentGoals: { type: 'global', inputId: 'businessGoals' },
+      },
+      outputKey: 'contentBriefs',
+    },
+  ],
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// WORKFLOW 6: DIGITAL MARKETING CAMPAIGN LAUNCH
+// Complete multi-channel marketing campaign setup
+// ═══════════════════════════════════════════════════════════════════════════
+
+export const MARKETING_CAMPAIGN_WORKFLOW: Workflow = {
+  id: 'marketing-campaign',
+  name: 'Digital Marketing Campaign Launch',
+  description: 'Create a complete multi-channel marketing campaign',
+  longDescription: 'This workflow helps you launch a comprehensive digital marketing campaign. It creates competitive research, content strategy, content calendar, social media content, email sequences, and paid ad campaigns for Google and Meta.',
+  icon: 'Rocket',
+  color: 'pink',
+  estimatedTime: '20-30 minutes',
+
+  outputs: [
+    'Competitor and market research analysis',
+    'Content strategy brief',
+    'Content calendar (90 days)',
+    'Social media content package',
+    'Email campaign sequences',
+    'Google Ads campaign structure',
+    'Meta Ads campaign structure'
+  ],
+
+  globalInputs: [
+    {
+      id: 'productService',
+      label: 'Product/Service',
+      type: 'textarea',
+      placeholder: 'Describe your product or service, its key features, and unique value proposition...',
+      required: true,
+      rows: 4,
+    },
+    {
+      id: 'targetAudience',
+      label: 'Target Audience',
+      type: 'textarea',
+      placeholder: 'Describe your ideal customer: demographics, pain points, desires, where they spend time online...',
+      required: true,
+      rows: 4,
+    },
+    {
+      id: 'campaignGoal',
+      label: 'Campaign Goal',
+      type: 'select',
+      options: ['Brand Awareness', 'Lead Generation', 'Product Launch', 'Sales/Conversions', 'Event Promotion', 'Content Marketing'],
+      required: true,
+    },
+    {
+      id: 'budget',
+      label: 'Monthly Budget Range',
+      type: 'select',
+      options: ['Under $1,000', '$1,000-$5,000', '$5,000-$15,000', '$15,000-$50,000', '$50,000+'],
+      required: true,
+    },
+    {
+      id: 'brandVoice',
+      label: 'Brand Voice',
+      type: 'select',
+      options: ['Professional & Authoritative', 'Friendly & Conversational', 'Bold & Disruptive', 'Inspirational & Motivational', 'Educational & Informative', 'Playful & Humorous'],
+      required: true,
+    },
+    {
+      id: 'competitors',
+      label: 'Main Competitors',
+      type: 'textarea',
+      placeholder: 'List 3-5 main competitors...',
+      required: true,
+      rows: 2,
+    },
+    {
+      id: 'existingAssets',
+      label: 'Existing Assets (Optional)',
+      type: 'textarea',
+      placeholder: 'Any existing content, landing pages, email lists, social accounts to leverage...',
+      required: false,
+      rows: 2,
+    },
+  ],
+
+  steps: [
+    {
+      id: 'step-competitor-research',
+      skillId: 'marketing-specialist-competitor-analysis-market-research',
+      name: 'Competitor & Market Research',
+      description: 'Analyze competitors and market landscape',
+      inputMappings: {
+        industry: { type: 'global', inputId: 'productService' },
+        competitors: { type: 'global', inputId: 'competitors' },
+        targetMarket: { type: 'global', inputId: 'targetAudience' },
+        analysisGoals: { type: 'global', inputId: 'campaignGoal' },
+        focusAreas: { type: 'static', value: 'Messaging, Positioning, Channel Strategy, Content Themes' },
+      },
+      outputKey: 'competitorResearch',
+    },
+    {
+      id: 'step-content-strategy',
+      skillId: 'content-writer-content-strategy-brief-generator',
+      name: 'Content Strategy Brief',
+      description: 'Create comprehensive content strategy',
+      inputMappings: {
+        businessContext: { type: 'global', inputId: 'productService' },
+        targetAudience: { type: 'global', inputId: 'targetAudience' },
+        contentGoals: { type: 'global', inputId: 'campaignGoal' },
+        brandVoice: { type: 'global', inputId: 'brandVoice' },
+        competitorInsights: { type: 'computed', template: 'Competitor research findings: {{competitorResearch}}' },
+        existingContent: { type: 'global', inputId: 'existingAssets' },
+      },
+      outputKey: 'contentStrategy',
+    },
+    {
+      id: 'step-content-calendar',
+      skillId: 'marketing-specialist-content-calendar-strategy-planner',
+      name: 'Content Calendar',
+      description: 'Build 90-day content calendar',
+      inputMappings: {
+        businessGoals: { type: 'global', inputId: 'campaignGoal' },
+        targetAudience: { type: 'global', inputId: 'targetAudience' },
+        contentPillars: { type: 'computed', template: 'Based on content strategy: {{contentStrategy}}' },
+        publishingFrequency: { type: 'static', value: '3-5 posts per week across channels' },
+        channels: { type: 'static', value: 'Blog, LinkedIn, Instagram, Email, Twitter/X' },
+        campaignDuration: { type: 'static', value: '90 days' },
+      },
+      outputKey: 'contentCalendar',
+    },
+    {
+      id: 'step-social-content',
+      skillId: 'marketing-specialist-multi-platform-social-media-content-suite',
+      name: 'Social Media Content',
+      description: 'Create social media content package',
+      inputMappings: {
+        platform: { type: 'static', value: 'All Platforms (Cross-Platform Campaign)' },
+        contentGoal: { type: 'global', inputId: 'campaignGoal' },
+        topic: { type: 'computed', template: 'Product/Service: {{productService}}. Campaign theme from strategy: {{contentStrategy}}' },
+        brandVoice: { type: 'global', inputId: 'brandVoice' },
+        audience: { type: 'global', inputId: 'targetAudience' },
+        cta: { type: 'computed', template: 'Based on campaign goal: {{campaignGoal}}' },
+        hashtags: { type: 'static', value: 'true' },
+        variations: { type: 'static', value: 'true' },
+      },
+      outputKey: 'socialContent',
+    },
+    {
+      id: 'step-email-campaign',
+      skillId: 'marketing-specialist-email-campaign-automation-suite',
+      name: 'Email Campaigns',
+      description: 'Create email sequences and automation',
+      inputMappings: {
+        campaignType: { type: 'global', inputId: 'campaignGoal' },
+        audience: { type: 'global', inputId: 'targetAudience' },
+        productService: { type: 'global', inputId: 'productService' },
+        brandVoice: { type: 'global', inputId: 'brandVoice' },
+        campaignGoals: { type: 'computed', template: 'Campaign goal: {{campaignGoal}}. Strategy: {{contentStrategy}}' },
+        existingAssets: { type: 'global', inputId: 'existingAssets' },
+      },
+      outputKey: 'emailCampaign',
+    },
+    {
+      id: 'step-google-ads',
+      skillId: 'marketing-specialist-google-ads-campaign-builder',
+      name: 'Google Ads Campaign',
+      description: 'Build Google Ads campaign structure',
+      inputMappings: {
+        businessDescription: { type: 'global', inputId: 'productService' },
+        targetAudience: { type: 'global', inputId: 'targetAudience' },
+        campaignObjective: { type: 'global', inputId: 'campaignGoal' },
+        budget: { type: 'global', inputId: 'budget' },
+        competitors: { type: 'global', inputId: 'competitors' },
+        landingPage: { type: 'global', inputId: 'existingAssets' },
+      },
+      outputKey: 'googleAds',
+    },
+    {
+      id: 'step-meta-ads',
+      skillId: 'marketing-specialist-meta-ads-campaign-builder',
+      name: 'Meta Ads Campaign',
+      description: 'Build Meta (Facebook/Instagram) Ads campaign',
+      inputMappings: {
+        businessDescription: { type: 'global', inputId: 'productService' },
+        targetAudience: { type: 'global', inputId: 'targetAudience' },
+        campaignObjective: { type: 'global', inputId: 'campaignGoal' },
+        budget: { type: 'global', inputId: 'budget' },
+        creativeAssets: { type: 'computed', template: 'Social content to use: {{socialContent}}' },
+        landingPage: { type: 'global', inputId: 'existingAssets' },
+      },
+      outputKey: 'metaAds',
+    },
+  ],
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// WORKFLOW 7: CONSULTING ENGAGEMENT KICKOFF
+// Complete consulting proposal and engagement package
+// ═══════════════════════════════════════════════════════════════════════════
+
+export const CONSULTING_ENGAGEMENT_WORKFLOW: Workflow = {
+  id: 'consulting-engagement',
+  name: 'Consulting Engagement Kickoff',
+  description: 'Create a complete consulting proposal and engagement package',
+  longDescription: 'This workflow helps consultants create a comprehensive engagement package including proposal, gap analysis, process optimization recommendations, business case, workshop guide, and strategy presentation deck.',
+  icon: 'Briefcase',
+  color: 'indigo',
+  estimatedTime: '20-25 minutes',
+
+  outputs: [
+    'Professional client proposal',
+    'Gap analysis and strategic roadmap',
+    'Process optimization recommendations',
+    'Business case with ROI analysis',
+    'Workshop facilitation guide',
+    'Strategy consulting deck'
+  ],
+
+  globalInputs: [
+    {
+      id: 'clientName',
+      label: 'Client/Organization Name',
+      type: 'text',
+      placeholder: 'e.g., Acme Corporation',
+      required: true,
+    },
+    {
+      id: 'clientBackground',
+      label: 'Client Background',
+      type: 'textarea',
+      placeholder: 'Describe the client: industry, size, current situation, history...',
+      required: true,
+      rows: 4,
+    },
+    {
+      id: 'problemStatement',
+      label: 'Problem Statement / Engagement Scope',
+      type: 'textarea',
+      placeholder: 'What problem is the client trying to solve? What is the scope of the engagement?',
+      required: true,
+      rows: 4,
+    },
+    {
+      id: 'currentState',
+      label: 'Current State',
+      type: 'textarea',
+      placeholder: 'Describe the current processes, systems, capabilities, and pain points...',
+      required: true,
+      rows: 4,
+    },
+    {
+      id: 'desiredOutcome',
+      label: 'Desired Outcome / Future State',
+      type: 'textarea',
+      placeholder: 'What does success look like? What should be different after the engagement?',
+      required: true,
+      rows: 3,
+    },
+    {
+      id: 'constraints',
+      label: 'Constraints & Considerations',
+      type: 'textarea',
+      placeholder: 'Budget, timeline, resources, organizational factors, change readiness...',
+      required: false,
+      rows: 3,
+    },
+    {
+      id: 'stakeholders',
+      label: 'Key Stakeholders',
+      type: 'textarea',
+      placeholder: 'Who are the decision makers and key stakeholders involved?',
+      required: true,
+      rows: 2,
+    },
+  ],
+
+  steps: [
+    {
+      id: 'step-proposal',
+      skillId: 'consultant-client-proposal-generator',
+      name: 'Generate Proposal',
+      description: 'Create a professional consulting proposal',
+      inputMappings: {
+        clientName: { type: 'global', inputId: 'clientName' },
+        clientBackground: { type: 'global', inputId: 'clientBackground' },
+        projectScope: { type: 'global', inputId: 'problemStatement' },
+        objectives: { type: 'global', inputId: 'desiredOutcome' },
+        constraints: { type: 'global', inputId: 'constraints' },
+        stakeholders: { type: 'global', inputId: 'stakeholders' },
+      },
+      outputKey: 'proposal',
+    },
+    {
+      id: 'step-gap-analysis',
+      skillId: 'business-analyst-gap-analysis-strategic-roadmap',
+      name: 'Gap Analysis',
+      description: 'Analyze current vs. future state and create strategic roadmap',
+      inputMappings: {
+        currentState: { type: 'global', inputId: 'currentState' },
+        futureState: { type: 'global', inputId: 'desiredOutcome' },
+        constraints: { type: 'global', inputId: 'constraints' },
+        scope: { type: 'computed', template: 'Client: {{clientName}}. Engagement: {{problemStatement}}' },
+      },
+      outputKey: 'gapAnalysis',
+    },
+    {
+      id: 'step-process-analysis',
+      skillId: 'business-analyst-process-analysis-optimization-report',
+      name: 'Process Optimization',
+      description: 'Identify process improvement opportunities',
+      inputMappings: {
+        processName: { type: 'computed', template: 'Core processes at {{clientName}}' },
+        processSteps: { type: 'global', inputId: 'currentState' },
+        volumeMetrics: { type: 'global', inputId: 'clientBackground' },
+        painPoints: { type: 'global', inputId: 'problemStatement' },
+        systemsUsed: { type: 'global', inputId: 'currentState' },
+        optimizationGoal: { type: 'static', value: 'Improve Customer Satisfaction' },
+      },
+      outputKey: 'processAnalysis',
+    },
+    {
+      id: 'step-business-case',
+      skillId: 'consultant-business-case-roi-analysis',
+      name: 'Business Case & ROI',
+      description: 'Build quantified business case for recommendations',
+      inputMappings: {
+        initiative: { type: 'global', inputId: 'problemStatement' },
+        currentState: { type: 'computed', template: 'Current state: {{currentState}}. Gap analysis findings: {{gapAnalysis}}' },
+        proposedSolution: { type: 'computed', template: 'Process optimization recommendations: {{processAnalysis}}' },
+        investmentRequired: { type: 'global', inputId: 'constraints' },
+        organizationalContext: { type: 'global', inputId: 'clientBackground' },
+      },
+      outputKey: 'businessCase',
+    },
+    {
+      id: 'step-workshop-guide',
+      skillId: 'consultant-client-workshop-facilitator-guide',
+      name: 'Workshop Guide',
+      description: 'Create facilitation guide for client kickoff workshop',
+      inputMappings: {
+        workshopObjective: { type: 'computed', template: 'Kickoff engagement with {{clientName}} to address: {{problemStatement}}' },
+        participants: { type: 'global', inputId: 'stakeholders' },
+        duration: { type: 'static', value: '4 hours' },
+        clientContext: { type: 'global', inputId: 'clientBackground' },
+        desiredOutcomes: { type: 'global', inputId: 'desiredOutcome' },
+        priorAnalysis: { type: 'computed', template: 'Gap analysis: {{gapAnalysis}}. Business case: {{businessCase}}' },
+      },
+      outputKey: 'workshopGuide',
+    },
+    {
+      id: 'step-strategy-deck',
+      skillId: 'consultant-strategy-consulting-deck-builder',
+      name: 'Strategy Deck',
+      description: 'Build executive strategy presentation',
+      inputMappings: {
+        clientName: { type: 'global', inputId: 'clientName' },
+        engagementContext: { type: 'global', inputId: 'problemStatement' },
+        keyFindings: { type: 'computed', template: 'Gap Analysis: {{gapAnalysis}}\n\nProcess Analysis: {{processAnalysis}}' },
+        recommendations: { type: 'computed', template: 'Business case and recommendations: {{businessCase}}' },
+        audienceLevel: { type: 'static', value: 'C-Suite / Executive Leadership' },
+        presentationGoal: { type: 'global', inputId: 'desiredOutcome' },
+      },
+      outputKey: 'strategyDeck',
+    },
+  ],
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
 // WORKFLOW REGISTRY
 // Export all workflows for use throughout the app
 // ═══════════════════════════════════════════════════════════════════════════
@@ -422,6 +1107,10 @@ export const WORKFLOWS: Record<string, Workflow> = {
   'job-application': JOB_APPLICATION_WORKFLOW,
   'interview-prep': INTERVIEW_PREP_WORKFLOW,
   'post-interview': POST_INTERVIEW_WORKFLOW,
+  'training-workshop': TRAINING_WORKSHOP_WORKFLOW,
+  'seo-client-onboarding': SEO_CLIENT_ONBOARDING_WORKFLOW,
+  'marketing-campaign': MARKETING_CAMPAIGN_WORKFLOW,
+  'consulting-engagement': CONSULTING_ENGAGEMENT_WORKFLOW,
 };
 
 export const WORKFLOW_LIST: Workflow[] = Object.values(WORKFLOWS);
