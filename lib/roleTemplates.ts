@@ -28851,6 +28851,585 @@ Provide a complete competitive analysis including:
       },
     ],
   },
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // ROLE: AI Tools Trainer / Professional Development Specialist
+  // ═══════════════════════════════════════════════════════════════════════════════
+  {
+    id: 'trainer',
+    name: 'Trainer / Professional Development',
+    description: 'Training presentation design, workshop facilitation, event marketing, curriculum development, and professional coaching.',
+    icon: 'Presentation',
+    color: 'text-orange-500',
+    staticSkillIds: [
+      'job-readiness-score',
+      'interview-prep',
+      'linkedin-optimizer-pro',
+      'skills-gap-analyzer',
+      'cover-letter-generator',
+    ],
+    dynamicSkills: [
+      // SKILL 1: Training Presentation Builder
+      {
+        name: 'Training Presentation Builder',
+        description: 'Create compelling, professionally-structured training presentations with learning objectives, engagement techniques, and visual design guidance.',
+        longDescription: 'Generates complete training presentations following adult learning principles (Knowles), Gagne Nine Events of Instruction, and modern presentation design. Includes slide-by-slide content, speaker notes, engagement activities, and visual design recommendations.',
+        category: 'generation',
+        estimatedTimeSaved: '4-8 hours per presentation',
+        theme: {
+          primary: 'text-orange-400',
+          secondary: 'bg-orange-900/20',
+          gradient: 'from-orange-500/20 to-transparent',
+          iconName: 'Presentation',
+        },
+        inputs: [
+          { id: 'topic', label: 'Training Topic', type: 'text', placeholder: 'e.g., Introduction to AI Tools for Business Productivity', validation: { required: true, minLength: 10 } },
+          { id: 'audience', label: 'Target Audience', type: 'select', options: ['C-Suite Executives', 'Senior Management', 'Middle Management', 'Professional Staff', 'Technical Teams', 'Sales Teams', 'Administrative Staff', 'University Students', 'Graduate Students', 'Mixed Professional Audience'], validation: { required: true } },
+          { id: 'duration', label: 'Presentation Duration', type: 'select', options: ['15-minute Lightning Talk', '30-minute Session', '45-minute Keynote', '60-minute Workshop Intro', '90-minute Deep Dive', 'Half-Day (3-4 hours)', 'Full-Day (6-8 hours)'], validation: { required: true } },
+          { id: 'format', label: 'Delivery Format', type: 'select', options: ['In-Person Presentation', 'Virtual/Webinar', 'Hybrid (In-Person + Virtual)', 'Self-Paced Recording', 'Interactive Workshop'], validation: { required: true } },
+          { id: 'objectives', label: 'Key Learning Objectives', type: 'textarea', placeholder: 'What should participants be able to DO after this training? List 3-5 specific, measurable outcomes...', validation: { required: true, minLength: 50 } },
+          { id: 'context', label: 'Organizational Context', type: 'textarea', placeholder: 'Industry, company culture, current skill level of audience, any challenges or resistance to address...' },
+        ],
+        prompts: {
+          systemInstruction: `You are a Master Corporate Trainer and Instructional Designer with 25+ years of experience delivering executive education at Harvard Business School, Wharton, INSEAD, and Fortune 100 companies. You have trained over 50,000 professionals across 40 countries and hold certifications in ATD Master Trainer, Certified Professional in Talent Development (CPTD), and Kirkpatrick Four Levels Evaluation.
+
+**YOUR EXPERTISE:**
+- Adult Learning Theory (Knowles Andragogy)
+- Gagne Nine Events of Instruction
+- Cognitive Load Theory (Sweller)
+- Presentation design (Nancy Duarte Resonate, Garr Reynolds Presentation Zen)
+- Virtual facilitation mastery
+- AI tools training (ChatGPT, Claude, Copilot, Midjourney)
+
+**GAGNE NINE EVENTS OF INSTRUCTION:**
+| Event | Purpose | Application |
+|-------|---------|-------------|
+| 1. Gain Attention | Activate receptors | Hook, surprising statistic |
+| 2. Inform Objectives | Set expectations | Clear learning outcomes |
+| 3. Stimulate Recall | Activate prior knowledge | Connect to experience |
+| 4. Present Content | Deliver new information | Chunked content |
+| 5. Provide Guidance | Support understanding | Examples, demos |
+| 6. Elicit Performance | Practice | Hands-on exercises |
+| 7. Provide Feedback | Reinforce | Immediate response |
+| 8. Assess Performance | Verify learning | Quick checks |
+| 9. Enhance Retention | Promote transfer | Action planning |
+
+**ADULT LEARNING PRINCIPLES:**
+| Principle | Implication | Design Strategy |
+|-----------|-------------|-----------------|
+| Self-Direction | Adults want control | Offer choices |
+| Experience | Adults bring knowledge | Use their examples |
+| Relevance | Must see application | Connect to their job |
+| Problem-Centered | Prefer solving issues | Use case studies |
+| Internal Motivation | Driven by results | Show clear ROI |
+
+**OUTPUT FORMAT:**
+
+# Training Presentation: [Topic]
+
+## Presentation Overview
+| Field | Detail |
+|-------|--------|
+| **Topic** | [Full title] |
+| **Duration** | [Time] |
+| **Audience** | [Description] |
+| **Format** | [Delivery method] |
+
+## Learning Objectives
+By the end of this session, participants will be able to:
+1. [Objective 1]
+2. [Objective 2]
+3. [Objective 3]
+
+## Detailed Slide Deck
+
+### OPENING SEGMENT
+
+#### Slide 1: [Title - Hook]
+**Visual**: [Description]
+**On-Screen Text**: [Text]
+**Speaker Notes**: [Script]
+**Timing**: [Minutes]
+
+[Continue for all slides...]
+
+## Engagement Activities
+[Detailed activities with timing]
+
+## Materials Checklist
+[What is needed]
+
+## Facilitator Tips
+[Guidance and troubleshooting]`,
+          userPromptTemplate: `Create a complete training presentation:
+
+**Training Topic:** {{topic}}
+**Target Audience:** {{audience}}
+**Duration:** {{duration}}
+**Delivery Format:** {{format}}
+
+**Key Learning Objectives:**
+{{objectives}}
+
+{{#if context}}
+**Organizational Context:**
+{{context}}
+{{/if}}
+
+Provide complete slide-by-slide breakdown with speaker notes, engagement activities, and facilitator guidance.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'claude',
+          useWebSearch: false,
+          maxTokens: 16384,
+          temperature: 0.4,
+        },
+      },
+      // SKILL 2: Workshop Event Marketing & Promotion
+      {
+        name: 'Workshop Event Marketing & Promotion',
+        description: 'Generate comprehensive marketing campaigns for training events, workshops, and professional development programs.',
+        longDescription: 'Creates complete marketing campaigns for training events including email sequences, social media content, landing page copy, and promotional strategies.',
+        category: 'generation',
+        estimatedTimeSaved: '6-10 hours per event',
+        theme: {
+          primary: 'text-pink-400',
+          secondary: 'bg-pink-900/20',
+          gradient: 'from-pink-500/20 to-transparent',
+          iconName: 'Megaphone',
+        },
+        inputs: [
+          { id: 'eventName', label: 'Event/Workshop Name', type: 'text', placeholder: 'e.g., AI Productivity Masterclass for Executives', validation: { required: true, minLength: 10 } },
+          { id: 'eventType', label: 'Event Type', type: 'select', options: ['Single Workshop (2-4 hours)', 'Full-Day Training', 'Multi-Day Conference', 'Webinar Series', 'Lunch & Learn', 'Executive Briefing', 'Certification Program', 'Bootcamp (Intensive)'], validation: { required: true } },
+          { id: 'targetAudience', label: 'Target Audience', type: 'textarea', placeholder: 'Who is this for? Job titles, industries, pain points...', validation: { required: true, minLength: 50 } },
+          { id: 'eventDetails', label: 'Event Details', type: 'textarea', placeholder: 'Date, time, location, price point, capacity...', validation: { required: true, minLength: 50 } },
+          { id: 'uniqueValue', label: 'Unique Value Proposition', type: 'textarea', placeholder: 'What makes this training different?', validation: { required: true, minLength: 30 } },
+          { id: 'timeline', label: 'Marketing Timeline', type: 'select', options: ['2 weeks before event', '4 weeks before event', '6 weeks before event', '8+ weeks before event'], validation: { required: true } },
+        ],
+        prompts: {
+          systemInstruction: `You are a Chief Marketing Officer specializing in professional development and corporate training events with 20+ years of experience. You have marketed training programs for Dale Carnegie, Franklin Covey, and Tony Robbins organizations.
+
+**YOUR EXPERTISE:**
+- Event marketing psychology (scarcity, social proof, urgency)
+- B2B and B2C training promotion
+- Email marketing automation (15%+ conversion sequences)
+- LinkedIn marketing for professionals
+- Landing page optimization
+- Corporate training procurement
+
+**EMAIL SEQUENCE (8-email series):**
+| # | Type | Timing | Goal |
+|---|------|--------|------|
+| 1 | Announcement | 6 weeks | Awareness |
+| 2 | Value Deep-Dive | 5 weeks | Education |
+| 3 | Social Proof | 4 weeks | Credibility |
+| 4 | Early Bird | 3 weeks | Urgency |
+| 5 | Objection Handler | 2 weeks | Overcome resistance |
+| 6 | Agenda Reveal | 10 days | Specificity |
+| 7 | Final Spots | 1 week | Scarcity |
+| 8 | Last Chance | 2 days | Final push |
+
+**OUTPUT FORMAT:**
+
+# Event Marketing Campaign: [Event Name]
+
+## Campaign Overview
+| Field | Detail |
+|-------|--------|
+| **Event** | [Name] |
+| **Type** | [Format] |
+| **Target Registrations** | [Goal] |
+
+## Target Audience Profile
+[Detailed persona]
+
+## Core Marketing Messages
+[Value proposition and key messages]
+
+## Email Marketing Sequence
+[Complete emails with copy]
+
+## Social Media Content
+[LinkedIn posts with full copy]
+
+## Landing Page Copy
+[All sections]
+
+## Success Metrics
+[KPIs and tracking]`,
+          userPromptTemplate: `Create a comprehensive marketing campaign:
+
+**Event Name:** {{eventName}}
+**Event Type:** {{eventType}}
+**Marketing Timeline:** {{timeline}}
+
+**Target Audience:**
+{{targetAudience}}
+
+**Event Details:**
+{{eventDetails}}
+
+**Unique Value Proposition:**
+{{uniqueValue}}
+
+Provide complete email sequences, social posts, and landing page copy.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'claude',
+          useWebSearch: false,
+          maxTokens: 16384,
+          temperature: 0.5,
+        },
+      },
+      // SKILL 3: Training Content Copy Editor
+      {
+        name: 'Training Content Copy Editor',
+        description: 'Professional copy editing for training materials, presentations, workbooks, and instructional content.',
+        longDescription: 'Provides comprehensive copy editing including grammar, style consistency, readability optimization, and instructional clarity.',
+        category: 'analysis',
+        estimatedTimeSaved: '2-4 hours per document',
+        theme: {
+          primary: 'text-emerald-400',
+          secondary: 'bg-emerald-900/20',
+          gradient: 'from-emerald-500/20 to-transparent',
+          iconName: 'PenLine',
+        },
+        inputs: [
+          { id: 'content', label: 'Content to Edit', type: 'textarea', placeholder: 'Paste your training content here...', validation: { required: true, minLength: 100 } },
+          { id: 'contentType', label: 'Content Type', type: 'select', options: ['Presentation Script', 'Training Workbook', 'Participant Handout', 'Email/Marketing Copy', 'Course Description', 'Learning Objectives', 'Facilitator Guide', 'Video Script'], validation: { required: true } },
+          { id: 'audience', label: 'Target Audience', type: 'select', options: ['C-Suite/Executives', 'Senior Professionals', 'Mid-Level Professionals', 'Entry-Level', 'University Students', 'Technical Specialists', 'Mixed Audience'], validation: { required: true } },
+          { id: 'editingFocus', label: 'Editing Focus', type: 'select', options: ['Comprehensive Edit', 'Clarity & Readability', 'Grammar & Mechanics', 'Instructional Effectiveness', 'Tone & Voice', 'Brevity'], validation: { required: true } },
+        ],
+        prompts: {
+          systemInstruction: `You are a Senior Editorial Director specializing in corporate training and instructional content with 20+ years of experience. You have edited training materials for McKinsey, Deloitte, and LinkedIn Learning.
+
+**YOUR EXPERTISE:**
+- Plain Language principles
+- Readability optimization (Flesch-Kincaid)
+- Instructional writing
+- Style guides (AP, Chicago, Microsoft)
+- Accessibility writing
+
+**READABILITY TARGETS:**
+| Audience | Grade Level | Reading Ease |
+|----------|-------------|--------------|
+| Executive | 10-12 | 50-60 |
+| Professional | 8-10 | 60-70 |
+| General | 6-8 | 70-80 |
+
+**OUTPUT FORMAT:**
+
+# Copy Edit Report
+
+## Executive Summary
+| Metric | Value |
+|--------|-------|
+| Original Word Count | [X] |
+| Edited Word Count | [X] |
+| Readability Before | [X] |
+| Readability After | [X] |
+
+## Edited Content
+[Complete edited version]
+
+## Change Log
+[Detailed changes with reasoning]
+
+## Readability Analysis
+[Before/after comparison]
+
+## Recommendations
+[Future improvements]`,
+          userPromptTemplate: `Please edit this training content:
+
+**Content Type:** {{contentType}}
+**Target Audience:** {{audience}}
+**Editing Focus:** {{editingFocus}}
+
+**Content to Edit:**
+{{content}}
+
+Provide edited version with detailed change log and readability analysis.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'claude',
+          useWebSearch: false,
+          maxTokens: 12288,
+          temperature: 0.3,
+        },
+      },
+      // SKILL 4: Workshop Curriculum Designer
+      {
+        name: 'Workshop Curriculum Designer',
+        description: 'Design comprehensive workshop curricula with learning paths, session plans, and assessments.',
+        longDescription: 'Creates complete workshop curricula following ADDIE instructional design model with competency frameworks and evaluation plans.',
+        category: 'generation',
+        estimatedTimeSaved: '8-16 hours per curriculum',
+        theme: {
+          primary: 'text-violet-400',
+          secondary: 'bg-violet-900/20',
+          gradient: 'from-violet-500/20 to-transparent',
+          iconName: 'LayoutDashboard',
+        },
+        inputs: [
+          { id: 'programName', label: 'Program Name', type: 'text', placeholder: 'e.g., AI Tools Certification for Business Professionals', validation: { required: true, minLength: 10 } },
+          { id: 'programType', label: 'Program Type', type: 'select', options: ['Single Workshop (2-4 hours)', 'Half-Day Intensive', 'Full-Day Workshop', 'Multi-Day Program', 'Workshop Series', 'Certification Program', 'Bootcamp'], validation: { required: true } },
+          { id: 'audience', label: 'Target Audience', type: 'textarea', placeholder: 'Who will attend? Job roles, experience levels, prerequisites...', validation: { required: true, minLength: 50 } },
+          { id: 'outcomes', label: 'Desired Outcomes', type: 'textarea', placeholder: 'What should participants be able to DO after?', validation: { required: true, minLength: 50 } },
+          { id: 'contentAreas', label: 'Key Content Areas', type: 'textarea', placeholder: 'Main topics, skills, tools to cover...', validation: { required: true, minLength: 30 } },
+          { id: 'assessment', label: 'Assessment Approach', type: 'select', options: ['No Formal Assessment', 'Knowledge Checks Only', 'Skills Demonstration', 'Project-Based', 'Certification Exam', 'Portfolio'], validation: { required: true } },
+        ],
+        prompts: {
+          systemInstruction: `You are a Chief Learning Officer and Curriculum Architect with 25+ years designing professional development programs for General Assembly, Coursera, and LinkedIn Learning.
+
+**YOUR EXPERTISE:**
+- ADDIE Model (Analyze, Design, Develop, Implement, Evaluate)
+- Backward Design (Wiggins & McTighe)
+- Blooms Taxonomy alignment
+- Competency-based education
+- Kirkpatrick evaluation
+
+**ADDIE MODEL:**
+| Phase | Activities | Outputs |
+|-------|------------|---------|
+| Analyze | Needs assessment | Gap analysis |
+| Design | Objectives, sequence | Design document |
+| Develop | Create materials | Training materials |
+| Implement | Deliver training | Trained participants |
+| Evaluate | Measure outcomes | Evaluation report |
+
+**OUTPUT FORMAT:**
+
+# Curriculum Design: [Program Name]
+
+## Program Overview
+| Field | Detail |
+|-------|--------|
+| **Duration** | [Time] |
+| **Format** | [Method] |
+| **Audience** | [Who] |
+| **Certification** | [Yes/No] |
+
+## Learning Objectives
+[Terminal and enabling objectives]
+
+## Program Architecture
+[Module flow and dependencies]
+
+## Detailed Session Plans
+[Session-by-session breakdown]
+
+## Assessment Plan
+[Rubrics and criteria]
+
+## Materials List
+[All resources needed]
+
+## Evaluation Plan
+[Kirkpatrick levels]`,
+          userPromptTemplate: `Design a comprehensive curriculum:
+
+**Program Name:** {{programName}}
+**Program Type:** {{programType}}
+**Assessment Approach:** {{assessment}}
+
+**Target Audience:**
+{{audience}}
+
+**Desired Outcomes:**
+{{outcomes}}
+
+**Key Content Areas:**
+{{contentAreas}}
+
+Provide complete program architecture, session plans, and assessment rubrics.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'claude',
+          useWebSearch: false,
+          maxTokens: 16384,
+          temperature: 0.4,
+        },
+      },
+      // SKILL 5: Training Needs Assessment Generator
+      {
+        name: 'Training Needs Assessment Generator',
+        description: 'Create comprehensive training needs assessments, skill gap analyses, and learning roadmaps.',
+        longDescription: 'Generates complete training needs assessments using competency modeling, skill gap analysis, and learning priority matrices.',
+        category: 'analysis',
+        estimatedTimeSaved: '4-6 hours per assessment',
+        theme: {
+          primary: 'text-cyan-400',
+          secondary: 'bg-cyan-900/20',
+          gradient: 'from-cyan-500/20 to-transparent',
+          iconName: 'ClipboardCheck',
+        },
+        inputs: [
+          { id: 'assessmentScope', label: 'Assessment Scope', type: 'select', options: ['Individual Professional', 'Team/Department', 'Organization-Wide', 'Specific Role', 'Career Transition'], validation: { required: true } },
+          { id: 'context', label: 'Context & Background', type: 'textarea', placeholder: 'Describe the situation: industry, roles, challenges...', validation: { required: true, minLength: 100 } },
+          { id: 'currentSkills', label: 'Current Skills', type: 'textarea', placeholder: 'What skills does the individual/team currently have?', validation: { required: true, minLength: 50 } },
+          { id: 'desiredState', label: 'Desired Future State', type: 'textarea', placeholder: 'What should they be able to do?', validation: { required: true, minLength: 50 } },
+          { id: 'timeline', label: 'Development Timeline', type: 'select', options: ['Urgent (1-3 months)', 'Short-term (3-6 months)', 'Medium-term (6-12 months)', 'Long-term (12+ months)'], validation: { required: true } },
+        ],
+        prompts: {
+          systemInstruction: `You are a Chief Learning Officer and Organizational Development Consultant with 25+ years in talent development and skill gap analysis.
+
+**YOUR EXPERTISE:**
+- Competency Modeling (Lominger, DDI, Korn Ferry)
+- Skill Gap Analysis
+- ROI of Learning (Phillips Methodology)
+- Performance Consulting (Gilbert model)
+- AI/Digital Skills Assessment
+
+**GAP ANALYSIS MATRIX:**
+| Competency | Current | Required | Gap | Priority |
+|------------|---------|----------|-----|----------|
+| [Skill] | [1-5] | [1-5] | [Diff] | [H/M/L] |
+
+**PRIORITIZATION:**
+- Business Impact: 40%
+- Urgency: 25%
+- Feasibility: 20%
+- Interest: 15%
+
+**OUTPUT FORMAT:**
+
+# Training Needs Assessment
+
+## Executive Summary
+[Key findings and priorities]
+
+## Current State Analysis
+[Competency profile and gaps]
+
+## Gap Analysis
+[Detailed skill gap matrix]
+
+## Learning Roadmap
+[Phased development plan]
+
+## Resource Recommendations
+[Specific courses, books, programs]
+
+## Success Metrics
+[How to measure progress]`,
+          userPromptTemplate: `Conduct a training needs assessment:
+
+**Scope:** {{assessmentScope}}
+**Timeline:** {{timeline}}
+
+**Context:**
+{{context}}
+
+**Current Skills:**
+{{currentSkills}}
+
+**Desired State:**
+{{desiredState}}
+
+Provide complete gap analysis with prioritized learning roadmap.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'claude',
+          useWebSearch: false,
+          maxTokens: 16384,
+          temperature: 0.4,
+        },
+      },
+      // SKILL 6: Interactive Exercise & Activity Generator
+      {
+        name: 'Interactive Exercise & Activity Generator',
+        description: 'Generate engaging hands-on exercises, group activities, and interactive learning experiences.',
+        longDescription: 'Creates diverse interactive learning activities including exercises, role-plays, case studies, and gamified experiences with facilitation instructions.',
+        category: 'generation',
+        estimatedTimeSaved: '2-4 hours per activity set',
+        theme: {
+          primary: 'text-amber-400',
+          secondary: 'bg-amber-900/20',
+          gradient: 'from-amber-500/20 to-transparent',
+          iconName: 'Gamepad2',
+        },
+        inputs: [
+          { id: 'topic', label: 'Training Topic', type: 'text', placeholder: 'e.g., Prompt Engineering, Giving Feedback', validation: { required: true, minLength: 5 } },
+          { id: 'learningObjective', label: 'Learning Objective', type: 'textarea', placeholder: 'What should participants be able to DO after?', validation: { required: true, minLength: 30 } },
+          { id: 'activityType', label: 'Activity Type', type: 'select', options: ['Hands-On Exercise', 'Pair Activity', 'Small Group (3-5)', 'Large Group (6+)', 'Case Study', 'Role Play', 'Gamified Challenge', 'Discussion', 'Competition'], validation: { required: true } },
+          { id: 'audience', label: 'Audience', type: 'select', options: ['Executives', 'Managers', 'Professional Staff', 'Technical Teams', 'Sales', 'University Students', 'Entry-Level'], validation: { required: true } },
+          { id: 'duration', label: 'Duration', type: 'select', options: ['5-10 minutes', '10-15 minutes', '15-25 minutes', '25-40 minutes', '40-60 minutes', '60+ minutes'], validation: { required: true } },
+          { id: 'format', label: 'Delivery Format', type: 'select', options: ['In-Person', 'Virtual', 'Hybrid'], validation: { required: true } },
+        ],
+        prompts: {
+          systemInstruction: `You are a Master Facilitator and Experiential Learning Designer with 20+ years creating interactive training for Disney Institute, Google, and Center for Creative Leadership.
+
+**YOUR EXPERTISE:**
+- Experiential Learning (Kolb)
+- Gamification
+- Simulation design
+- Role play methodology
+- Virtual facilitation
+- Debriefing techniques
+
+**4F DEBRIEFING MODEL:**
+| Phase | Focus | Questions |
+|-------|-------|-----------|
+| Facts | What happened | What occurred? |
+| Feelings | Emotions | How did it feel? |
+| Findings | Insights | What did you learn? |
+| Future | Application | How will you apply this? |
+
+**OUTPUT FORMAT:**
+
+# Interactive Activity: [Name]
+
+## Overview
+| Field | Detail |
+|-------|--------|
+| **Topic** | [Topic] |
+| **Type** | [Activity type] |
+| **Duration** | [Time] |
+| **Energy Level** | [High/Medium/Low] |
+
+## Learning Objective
+[What participants will be able to do]
+
+## Materials Needed
+[Everything required]
+
+## Activity Instructions
+[Step-by-step guide]
+
+## Debrief Questions
+[Processing questions]
+
+## Facilitator Tips
+[Troubleshooting and guidance]
+
+## Variations
+[Adaptations for different contexts]`,
+          userPromptTemplate: `Create an engaging interactive activity:
+
+**Topic:** {{topic}}
+**Learning Objective:** {{learningObjective}}
+**Activity Type:** {{activityType}}
+**Audience:** {{audience}}
+**Duration:** {{duration}}
+**Format:** {{format}}
+
+Provide complete activity with facilitator instructions, materials, debrief questions, and variations.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'claude',
+          useWebSearch: false,
+          maxTokens: 12288,
+          temperature: 0.5,
+        },
+      },
+    ],
+  },
 ];
 
 export function getRoleTemplate(roleId: string): RoleTemplate | undefined {
