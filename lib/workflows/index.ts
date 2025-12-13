@@ -1190,7 +1190,7 @@ export const STARTUP_INVESTOR_PITCH_WORKFLOW: Workflow = {
   steps: [
     {
       id: 'step-market-analysis',
-      skillId: 'entrepreneur-founder-market-analysis-competitor-intelligence',
+      skillId: 'entrepreneur-market-analysis-competitor-intelligence',
       name: 'Market & Competitor Analysis',
       description: 'Deep dive into market opportunity and competitive landscape',
       inputMappings: {
@@ -1203,7 +1203,7 @@ export const STARTUP_INVESTOR_PITCH_WORKFLOW: Workflow = {
     },
     {
       id: 'step-financials',
-      skillId: 'entrepreneur-founder-financial-projections-scenario-modeler',
+      skillId: 'entrepreneur-financial-projections-scenario-modeler',
       name: 'Financial Projections',
       description: 'Create investor-ready financial projections with scenarios',
       inputMappings: {
@@ -1217,7 +1217,7 @@ export const STARTUP_INVESTOR_PITCH_WORKFLOW: Workflow = {
     },
     {
       id: 'step-pitch-deck',
-      skillId: 'entrepreneur-founder-pitch-deck-builder',
+      skillId: 'entrepreneur-investor-pitch-deck-builder',
       name: 'Build Pitch Deck',
       description: 'Create compelling pitch deck structure and content',
       inputMappings: {
@@ -1233,7 +1233,7 @@ export const STARTUP_INVESTOR_PITCH_WORKFLOW: Workflow = {
     },
     {
       id: 'step-due-diligence',
-      skillId: 'entrepreneur-founder-investor-due-diligence-q-a-prep',
+      skillId: 'entrepreneur-investor-due-diligence-q-a-prep',
       name: 'Due Diligence Q&A Prep',
       description: 'Prepare for tough investor questions and due diligence',
       inputMappings: {
@@ -1249,7 +1249,7 @@ export const STARTUP_INVESTOR_PITCH_WORKFLOW: Workflow = {
     },
     {
       id: 'step-investor-outreach',
-      skillId: 'entrepreneur-founder-investor-outreach-communication-suite',
+      skillId: 'entrepreneur-investor-outreach-communication-suite',
       name: 'Investor Outreach Materials',
       description: 'Create personalized investor outreach templates',
       inputMappings: {
@@ -1264,7 +1264,7 @@ export const STARTUP_INVESTOR_PITCH_WORKFLOW: Workflow = {
     },
     {
       id: 'step-executive-summary',
-      skillId: 'entrepreneur-founder-executive-summary-one-pager-creator',
+      skillId: 'entrepreneur-executive-summary-one-pager-creator',
       name: 'Executive Summary',
       description: 'Create one-page executive summary for investors',
       inputMappings: {
@@ -1385,7 +1385,7 @@ export const SALES_ACCOUNT_PURSUIT_WORKFLOW: Workflow = {
     },
     {
       id: 'step-discovery-framework',
-      skillId: 'sales-representative-discovery-call-question-framework-builder',
+      skillId: 'sales-representative-discovery-call-preparation',
       name: 'Discovery Call Framework',
       description: 'Create tailored discovery questions based on account intelligence',
       inputMappings: {
@@ -1399,7 +1399,7 @@ export const SALES_ACCOUNT_PURSUIT_WORKFLOW: Workflow = {
     },
     {
       id: 'step-objection-handling',
-      skillId: 'sales-representative-sales-objection-handling-response-trainer',
+      skillId: 'sales-representative-sales-objection-mastery-playbook',
       name: 'Objection Handling Playbook',
       description: 'Prepare responses for likely objections',
       inputMappings: {
@@ -1427,7 +1427,7 @@ export const SALES_ACCOUNT_PURSUIT_WORKFLOW: Workflow = {
     },
     {
       id: 'step-proposal',
-      skillId: 'sales-representative-proposal-rfp-response-writer',
+      skillId: 'sales-representative-enterprise-sales-proposal-generator',
       name: 'Sales Proposal',
       description: 'Generate professional proposal tailored to the account',
       inputMappings: {
@@ -1460,6 +1460,630 @@ export const SALES_ACCOUNT_PURSUIT_WORKFLOW: Workflow = {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
+// WORKFLOW 10: CUSTOMER CHURN PREVENTION
+// Proactively identify at-risk accounts and execute retention strategies
+// Estimated Annual Impact: $500K - $5M+
+// ═══════════════════════════════════════════════════════════════════════════
+
+export const CUSTOMER_CHURN_PREVENTION_WORKFLOW: Workflow = {
+  id: 'customer-churn-prevention',
+  name: 'Customer Churn Prevention',
+  description: 'Proactively identify at-risk accounts and execute retention strategies to protect revenue',
+  longDescription: 'This workflow analyzes your customer portfolio for churn risk signals, generates prioritized intervention strategies, creates escalation briefs for critical accounts, and develops win-back campaigns for at-risk customers.',
+  icon: 'ShieldAlert',
+  color: 'red',
+  estimatedTime: '15-25 minutes',
+
+  outputs: [
+    'Churn risk analysis with prioritized at-risk accounts',
+    'Executive escalation brief for critical accounts',
+    'Retention playbook with action plan',
+    'Win-back campaign for high-risk customers'
+  ],
+
+  globalInputs: [
+    {
+      id: 'portfolioData',
+      label: 'Customer Portfolio Data',
+      type: 'textarea',
+      placeholder: 'List your accounts with: name, ARR, contract end date, health score, last engagement date, NPS, support tickets, feature adoption %, executive sponsor status...',
+      helpText: 'Include all relevant customer health metrics for accurate risk assessment.',
+      required: true,
+      rows: 8,
+    },
+    {
+      id: 'behaviorChanges',
+      label: 'Recent Behavior Changes',
+      type: 'textarea',
+      placeholder: 'Describe any notable changes: login frequency drops, missed meetings, reduced communication, champion departures, budget discussions, competitive mentions...',
+      required: true,
+      rows: 5,
+    },
+    {
+      id: 'industryContext',
+      label: 'Industry/Market Context',
+      type: 'textarea',
+      placeholder: 'Industry trends, economic factors, competitive landscape, seasonal patterns affecting your customers...',
+      required: false,
+      rows: 3,
+    },
+    {
+      id: 'criticalAccount',
+      label: 'Most Critical At-Risk Account',
+      type: 'textarea',
+      placeholder: 'For the account requiring immediate escalation: name, ARR, situation details, stakeholders, actions already taken...',
+      helpText: 'This will be used to generate an executive escalation brief.',
+      required: true,
+      rows: 5,
+    },
+    {
+      id: 'productUpdates',
+      label: 'Recent Product/Service Improvements',
+      type: 'textarea',
+      placeholder: 'New features, pricing changes, service improvements since customers went at-risk - useful for win-back messaging...',
+      required: false,
+      rows: 3,
+    },
+  ],
+
+  steps: [
+    {
+      id: 'step-churn-analysis',
+      skillId: 'customer-success-manager-churn-risk-early-warning-system',
+      name: 'Analyze Churn Risk',
+      description: 'Identify at-risk accounts with predictive signals and prioritize interventions',
+      inputMappings: {
+        accountList: { type: 'global', inputId: 'portfolioData' },
+        behaviorChanges: { type: 'global', inputId: 'behaviorChanges' },
+        industryContext: { type: 'global', inputId: 'industryContext' },
+        timeframe: { type: 'static', value: 'Next 90 Days' },
+      },
+      outputKey: 'churnAnalysis',
+    },
+    {
+      id: 'step-escalation-brief',
+      skillId: 'customer-success-manager-at-risk-account-escalation-brief',
+      name: 'Create Executive Escalation Brief',
+      description: 'Generate leadership-ready brief for the most critical account',
+      inputMappings: {
+        accountDetails: { type: 'global', inputId: 'criticalAccount' },
+        riskSituation: { type: 'computed', template: 'Based on portfolio analysis: {{churnAnalysis}}' },
+        stakeholderMap: { type: 'global', inputId: 'criticalAccount' },
+        attemptedActions: { type: 'global', inputId: 'behaviorChanges' },
+        requestedSupport: { type: 'static', value: 'Multiple Resources Needed' },
+      },
+      outputKey: 'escalationBrief',
+    },
+    {
+      id: 'step-retention-playbook',
+      skillId: 'customer-success-manager-renewal-playbook-generator',
+      name: 'Generate Retention Playbook',
+      description: 'Create comprehensive retention strategy with action plan',
+      inputMappings: {
+        accountInfo: { type: 'global', inputId: 'criticalAccount' },
+        stakeholders: { type: 'computed', template: 'From escalation analysis: {{escalationBrief}}' },
+        healthStatus: { type: 'static', value: 'At Risk - Significant Issues' },
+        knownConcerns: { type: 'global', inputId: 'behaviorChanges' },
+        renewalGoal: { type: 'static', value: 'Downgrade Prevention' },
+      },
+      outputKey: 'retentionPlaybook',
+    },
+    {
+      id: 'step-winback-campaign',
+      skillId: 'customer-success-manager-win-back-campaign-generator',
+      name: 'Create Win-Back Campaign',
+      description: 'Develop personalized campaign for high-risk accounts',
+      inputMappings: {
+        customerInfo: { type: 'global', inputId: 'criticalAccount' },
+        churnReason: { type: 'global', inputId: 'behaviorChanges' },
+        productUpdates: { type: 'global', inputId: 'productUpdates' },
+        campaignGoal: { type: 'static', value: 'Full Reactivation (Original Contract)' },
+        timeSinceChurn: { type: 'static', value: 'Less than 30 days' },
+      },
+      outputKey: 'winBackCampaign',
+    },
+  ],
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// WORKFLOW 11: ENTERPRISE ACCOUNT EXPANSION
+// Identify and execute expansion opportunities within existing accounts
+// Estimated Annual Impact: $200K - $2M+
+// ═══════════════════════════════════════════════════════════════════════════
+
+export const ENTERPRISE_ACCOUNT_EXPANSION_WORKFLOW: Workflow = {
+  id: 'enterprise-account-expansion',
+  name: 'Enterprise Account Expansion',
+  description: 'Identify and prioritize expansion opportunities within your customer base',
+  longDescription: 'This workflow performs comprehensive whitespace analysis across your accounts, scores and prioritizes expansion opportunities, generates customer health assessments to validate readiness, and creates executive QBR materials to position expansion conversations.',
+  icon: 'TrendingUp',
+  color: 'emerald',
+  estimatedTime: '15-20 minutes',
+
+  outputs: [
+    'Account whitespace analysis with expansion opportunities',
+    'Prioritized expansion opportunity scorecard',
+    'Customer health assessment for expansion readiness',
+    'Executive QBR deck positioning expansion'
+  ],
+
+  globalInputs: [
+    {
+      id: 'accountProfile',
+      label: 'Target Account Profile',
+      type: 'textarea',
+      placeholder: 'Company overview: size, industry, revenue, locations, business units, org structure, strategic initiatives, growth plans, digital transformation efforts...',
+      helpText: 'The more context you provide, the better the whitespace analysis.',
+      required: true,
+      rows: 6,
+    },
+    {
+      id: 'currentFootprint',
+      label: 'Current Product Footprint',
+      type: 'textarea',
+      placeholder: 'Products owned, user count by department, features adopted, integration points, current ARR by product, contract dates...',
+      required: true,
+      rows: 5,
+    },
+    {
+      id: 'productPortfolio',
+      label: 'Your Full Product Portfolio',
+      type: 'textarea',
+      placeholder: 'All products/services available: names, key use cases, typical buyers, pricing tiers, complementary products, cross-sell synergies...',
+      required: true,
+      rows: 5,
+    },
+    {
+      id: 'expansionOpportunities',
+      label: 'Known/Suspected Opportunities',
+      type: 'textarea',
+      placeholder: 'Any expansion conversations, expressed interests, pain points mentioned, upcoming initiatives, new departments, geographic expansion, M&A activity...',
+      required: false,
+      rows: 4,
+    },
+    {
+      id: 'customerUsageData',
+      label: 'Customer Usage & Engagement Data',
+      type: 'textarea',
+      placeholder: 'Login frequency, feature adoption %, support tickets, NPS/CSAT, product usage metrics, key stakeholder engagement levels...',
+      required: true,
+      rows: 4,
+    },
+  ],
+
+  steps: [
+    {
+      id: 'step-whitespace-analysis',
+      skillId: 'customer-success-manager-account-whitespace-analyzer',
+      name: 'Analyze Account Whitespace',
+      description: 'Map current footprint against expansion potential',
+      inputMappings: {
+        accountProfile: { type: 'global', inputId: 'accountProfile' },
+        currentState: { type: 'global', inputId: 'currentFootprint' },
+        productPortfolio: { type: 'global', inputId: 'productPortfolio' },
+        knownOpportunities: { type: 'global', inputId: 'expansionOpportunities' },
+        competitorPresence: { type: 'static', value: 'Unknown - analyze based on gaps' },
+      },
+      outputKey: 'whitespaceAnalysis',
+    },
+    {
+      id: 'step-opportunity-scoring',
+      skillId: 'customer-success-manager-expansion-opportunity-scorer',
+      name: 'Score & Prioritize Opportunities',
+      description: 'Rank expansion opportunities by potential and probability',
+      inputMappings: {
+        opportunities: { type: 'computed', template: 'Whitespace opportunities identified: {{whitespaceAnalysis}}' },
+        scoringPriorities: { type: 'static', value: 'Balanced (Default)' },
+        resourceConstraints: { type: 'static', value: 'Standard sales team capacity' },
+        timeHorizon: { type: 'static', value: 'Next 2 Quarters' },
+      },
+      outputKey: 'opportunityScorecard',
+    },
+    {
+      id: 'step-health-assessment',
+      skillId: 'customer-success-manager-customer-health-score-analyzer',
+      name: 'Assess Expansion Readiness',
+      description: 'Evaluate customer health and expansion signals',
+      inputMappings: {
+        customerData: { type: 'global', inputId: 'customerUsageData' },
+        accountInfo: { type: 'global', inputId: 'currentFootprint' },
+        recentActivity: { type: 'global', inputId: 'expansionOpportunities' },
+        industryBenchmarks: { type: 'static', value: 'SaaS / Technology' },
+      },
+      outputKey: 'healthAssessment',
+    },
+    {
+      id: 'step-qbr-deck',
+      skillId: 'customer-success-manager-executive-qbr-deck-generator',
+      name: 'Create QBR Expansion Deck',
+      description: 'Generate executive materials positioning expansion',
+      inputMappings: {
+        accountInfo: { type: 'global', inputId: 'accountProfile' },
+        performanceData: { type: 'global', inputId: 'customerUsageData' },
+        healthScore: { type: 'computed', template: 'Health assessment: {{healthAssessment}}' },
+        expansionOpportunities: { type: 'computed', template: 'Top opportunities: {{opportunityScorecard}}' },
+        qbrFocus: { type: 'static', value: 'Expansion Positioning' },
+      },
+      outputKey: 'qbrDeck',
+    },
+  ],
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// WORKFLOW 12: RFP RESPONSE CENTER
+// Efficiently analyze RFPs and generate winning proposals
+// Estimated Annual Impact: $500K - $10M+
+// ═══════════════════════════════════════════════════════════════════════════
+
+export const RFP_RESPONSE_CENTER_WORKFLOW: Workflow = {
+  id: 'rfp-response-center',
+  name: 'RFP Response Center',
+  description: 'Analyze RFPs and generate winning proposals with compliance matrices and executive summaries',
+  longDescription: 'This workflow analyzes RFP requirements, generates comprehensive compliance matrices, creates compelling response sections, and produces executive summaries designed to win evaluator attention.',
+  icon: 'FileCheck',
+  color: 'indigo',
+  estimatedTime: '20-30 minutes',
+
+  outputs: [
+    'RFP requirements analysis with go/no-go recommendation',
+    'Comprehensive compliance matrix',
+    'Written proposal section with win themes',
+    'Executive summary for proposal'
+  ],
+
+  globalInputs: [
+    {
+      id: 'rfpContent',
+      label: 'RFP Document Content',
+      type: 'textarea',
+      placeholder: 'Paste the full RFP or key sections including: requirements, evaluation criteria, submission guidelines, scope of work, mandatory qualifications...',
+      helpText: 'Include as much detail as possible for accurate analysis.',
+      required: true,
+      rows: 12,
+    },
+    {
+      id: 'companyCapabilities',
+      label: 'Your Company Capabilities',
+      type: 'textarea',
+      placeholder: 'Products/services, certifications, past performance, team capabilities, geographic coverage, technology stack, differentiators...',
+      required: true,
+      rows: 6,
+    },
+    {
+      id: 'winThemes',
+      label: 'Win Themes & Differentiators',
+      type: 'textarea',
+      placeholder: 'Your 3-5 key themes that differentiate you from competitors. What makes you the best choice for this opportunity?',
+      required: true,
+      rows: 4,
+    },
+    {
+      id: 'pastPerformance',
+      label: 'Relevant Past Performance',
+      type: 'textarea',
+      placeholder: 'Similar projects completed, client references, metrics achieved, case studies, team credentials...',
+      required: true,
+      rows: 4,
+    },
+    {
+      id: 'solutionApproach',
+      label: 'Your Proposed Solution/Approach',
+      type: 'textarea',
+      placeholder: 'High-level description of how you would approach this opportunity, methodology, team structure, timeline...',
+      required: true,
+      rows: 5,
+    },
+  ],
+
+  steps: [
+    {
+      id: 'step-rfp-analysis',
+      skillId: 'business-analyst-rfp-requirements-analyzer',
+      name: 'Analyze RFP Requirements',
+      description: 'Parse requirements, assess compliance, and recommend go/no-go',
+      inputMappings: {
+        rfpContent: { type: 'global', inputId: 'rfpContent' },
+        companyCapabilities: { type: 'global', inputId: 'companyCapabilities' },
+        competitivePosition: { type: 'global', inputId: 'winThemes' },
+        resourceAvailability: { type: 'static', value: 'Full Team Available' },
+      },
+      outputKey: 'rfpAnalysis',
+    },
+    {
+      id: 'step-compliance-matrix',
+      skillId: 'business-analyst-rfp-compliance-matrix-generator',
+      name: 'Generate Compliance Matrix',
+      description: 'Map all requirements to response sections and evidence',
+      inputMappings: {
+        requirements: { type: 'computed', template: 'Requirements from analysis: {{rfpAnalysis}}' },
+        proposalOutline: { type: 'global', inputId: 'solutionApproach' },
+        capabilityEvidence: { type: 'global', inputId: 'pastPerformance' },
+        matrixFormat: { type: 'static', value: 'Detailed (Full Traceability)' },
+      },
+      outputKey: 'complianceMatrix',
+    },
+    {
+      id: 'step-response-section',
+      skillId: 'business-analyst-rfp-section-response-writer',
+      name: 'Write Technical Response',
+      description: 'Create compelling proposal section with win themes',
+      inputMappings: {
+        requirements: { type: 'global', inputId: 'rfpContent' },
+        solutionContent: { type: 'global', inputId: 'solutionApproach' },
+        winThemes: { type: 'global', inputId: 'winThemes' },
+        evidence: { type: 'global', inputId: 'pastPerformance' },
+        sectionType: { type: 'static', value: 'Technical Approach' },
+        constraints: { type: 'static', value: 'Standard federal proposal formatting' },
+      },
+      outputKey: 'technicalResponse',
+    },
+    {
+      id: 'step-executive-summary',
+      skillId: 'business-analyst-proposal-executive-summary-generator',
+      name: 'Generate Executive Summary',
+      description: 'Create compelling executive summary to win evaluators',
+      inputMappings: {
+        opportunityOverview: { type: 'computed', template: 'RFP analysis summary: {{rfpAnalysis}}' },
+        winThemes: { type: 'global', inputId: 'winThemes' },
+        solutionHighlights: { type: 'global', inputId: 'solutionApproach' },
+        proofPoints: { type: 'global', inputId: 'pastPerformance' },
+        customerKnowledge: { type: 'global', inputId: 'rfpContent' },
+        pageLimit: { type: 'static', value: '2 Pages' },
+      },
+      outputKey: 'executiveSummary',
+    },
+  ],
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// WORKFLOW 13: REVENUE OPERATIONS OPTIMIZATION
+// Analyze and optimize revenue operations for pipeline health and forecast accuracy
+// Estimated Annual Impact: $300K - $3M+
+// ═══════════════════════════════════════════════════════════════════════════
+
+export const REVOPS_OPTIMIZATION_WORKFLOW: Workflow = {
+  id: 'revops-optimization',
+  name: 'Revenue Operations Optimization',
+  description: 'Analyze pipeline health, optimize forecasts, and identify process bottlenecks',
+  longDescription: 'This workflow performs comprehensive pipeline health analysis, generates accurate sales forecasts with multiple scenarios, identifies revenue process bottlenecks, and produces win/loss analysis to improve performance.',
+  icon: 'LineChart',
+  color: 'blue',
+  estimatedTime: '20-25 minutes',
+
+  outputs: [
+    'Pipeline health analysis with metrics and recommendations',
+    'Sales forecast with scenario analysis',
+    'Win/loss analysis with actionable insights',
+    'Process bottleneck analysis with optimization roadmap'
+  ],
+
+  globalInputs: [
+    {
+      id: 'pipelineData',
+      label: 'Pipeline Data',
+      type: 'textarea',
+      placeholder: 'Deals by stage, deal values, days in stage, close dates, win rates by segment, historical trends, quota targets, sales cycle length...',
+      helpText: 'Export from your CRM or provide summary metrics.',
+      required: true,
+      rows: 8,
+    },
+    {
+      id: 'historicalPerformance',
+      label: 'Historical Performance',
+      type: 'textarea',
+      placeholder: 'Win rates by stage, average deal sizes, slip rates, seasonal patterns, quota attainment history, year-over-year trends...',
+      required: true,
+      rows: 5,
+    },
+    {
+      id: 'teamInfo',
+      label: 'Team Structure & Quotas',
+      type: 'textarea',
+      placeholder: 'Number of reps, territories, quotas per rep, capacity, workload distribution, hiring plans...',
+      required: true,
+      rows: 4,
+    },
+    {
+      id: 'winLossData',
+      label: 'Recent Win/Loss Data',
+      type: 'textarea',
+      placeholder: 'List recent deals (won/lost) with: outcome, deal size, sales cycle, competitor, industry, loss reason or win factors, stakeholders engaged...',
+      required: true,
+      rows: 6,
+    },
+    {
+      id: 'processDescription',
+      label: 'Current Revenue Processes',
+      type: 'textarea',
+      placeholder: 'Lead routing, opportunity stages, handoffs, approvals, quote-to-cash flow, tools/systems used, known pain points...',
+      required: true,
+      rows: 5,
+    },
+  ],
+
+  steps: [
+    {
+      id: 'step-pipeline-health',
+      skillId: 'financial-analyst-pipeline-health-analyzer',
+      name: 'Analyze Pipeline Health',
+      description: 'Assess pipeline metrics, identify bottlenecks and at-risk deals',
+      inputMappings: {
+        pipelineData: { type: 'global', inputId: 'pipelineData' },
+        teamStructure: { type: 'global', inputId: 'teamInfo' },
+        salesProcess: { type: 'global', inputId: 'processDescription' },
+        analysisTimeframe: { type: 'static', value: 'Current Quarter' },
+      },
+      outputKey: 'pipelineHealth',
+    },
+    {
+      id: 'step-forecast',
+      skillId: 'financial-analyst-sales-forecast-optimizer',
+      name: 'Generate Sales Forecast',
+      description: 'Create accurate forecast with multiple scenarios',
+      inputMappings: {
+        currentPipeline: { type: 'global', inputId: 'pipelineData' },
+        historicalData: { type: 'global', inputId: 'historicalPerformance' },
+        targets: { type: 'global', inputId: 'teamInfo' },
+        forecastPeriod: { type: 'static', value: 'This Quarter' },
+        forecastType: { type: 'static', value: 'Hybrid (Combined Approach)' },
+      },
+      outputKey: 'salesForecast',
+    },
+    {
+      id: 'step-winloss-analysis',
+      skillId: 'financial-analyst-win-loss-analysis-generator',
+      name: 'Analyze Win/Loss Patterns',
+      description: 'Identify winning patterns and improvement areas',
+      inputMappings: {
+        dealData: { type: 'global', inputId: 'winLossData' },
+        analysisScope: { type: 'static', value: 'Last Quarter' },
+        competitorInfo: { type: 'static', value: 'Analyze based on deal data' },
+        salesProcess: { type: 'global', inputId: 'processDescription' },
+      },
+      outputKey: 'winLossAnalysis',
+    },
+    {
+      id: 'step-bottleneck-analysis',
+      skillId: 'financial-analyst-revenue-process-bottleneck-finder',
+      name: 'Find Process Bottlenecks',
+      description: 'Identify inefficiencies and optimization opportunities',
+      inputMappings: {
+        processDescription: { type: 'global', inputId: 'processDescription' },
+        painPoints: { type: 'computed', template: 'Issues from pipeline analysis: {{pipelineHealth}}. Win/loss insights: {{winLossAnalysis}}' },
+        systems: { type: 'global', inputId: 'processDescription' },
+        teamMetrics: { type: 'global', inputId: 'historicalPerformance' },
+        priority: { type: 'static', value: 'All Areas' },
+      },
+      outputKey: 'bottleneckAnalysis',
+    },
+  ],
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// WORKFLOW 14: TECHNICAL DEBT ASSESSMENT
+// Comprehensive technical debt analysis with business case and remediation plan
+// Estimated Annual Impact: $100K - $500K
+// ═══════════════════════════════════════════════════════════════════════════
+
+export const TECH_DEBT_ASSESSMENT_WORKFLOW: Workflow = {
+  id: 'tech-debt-assessment',
+  name: 'Technical Debt Assessment',
+  description: 'Identify, prioritize, and build business cases for technical debt remediation',
+  longDescription: 'This workflow scans your codebase for technical debt, prioritizes remediation efforts based on business impact, generates executive-friendly briefs for stakeholder buy-in, and creates detailed remediation roadmaps.',
+  icon: 'Bug',
+  color: 'orange',
+  estimatedTime: '15-20 minutes',
+
+  outputs: [
+    'Technical debt inventory with severity ratings',
+    'Prioritized remediation backlog',
+    'Executive stakeholder brief with ROI',
+    'Detailed remediation roadmap'
+  ],
+
+  globalInputs: [
+    {
+      id: 'codebaseInfo',
+      label: 'Codebase Information',
+      type: 'textarea',
+      placeholder: 'Repository details: languages, frameworks, size (LOC), age, contributors, test coverage %, build frequency, CI/CD maturity, known pain points...',
+      helpText: 'Include technical details that help assess debt scope.',
+      required: true,
+      rows: 6,
+    },
+    {
+      id: 'architectureContext',
+      label: 'Architecture Context',
+      type: 'textarea',
+      placeholder: 'System architecture: monolith vs microservices, databases, integrations, deployment infrastructure, scaling requirements, cloud platform...',
+      required: true,
+      rows: 5,
+    },
+    {
+      id: 'knownIssues',
+      label: 'Known Technical Issues',
+      type: 'textarea',
+      placeholder: 'Legacy code areas, deprecated dependencies, performance bottlenecks, security concerns, hard-to-maintain modules, duplicated code, test gaps...',
+      required: true,
+      rows: 6,
+    },
+    {
+      id: 'businessContext',
+      label: 'Business Context',
+      type: 'textarea',
+      placeholder: 'Product roadmap priorities, team capacity (developers available), budget constraints, regulatory requirements, planned migrations/upgrades...',
+      required: true,
+      rows: 4,
+    },
+    {
+      id: 'stakeholderAudience',
+      label: 'Primary Stakeholder Audience',
+      type: 'select',
+      options: ['C-Suite / Board', 'VP/Director Level', 'Product Management', 'Engineering Leadership', 'Mixed Technical/Non-Technical'],
+      required: true,
+    },
+  ],
+
+  steps: [
+    {
+      id: 'step-debt-scan',
+      skillId: 'software-engineer-technical-debt-scanner',
+      name: 'Scan Technical Debt',
+      description: 'Identify and categorize all technical debt with impact analysis',
+      inputMappings: {
+        codebaseInfo: { type: 'global', inputId: 'codebaseInfo' },
+        architectureContext: { type: 'global', inputId: 'architectureContext' },
+        knownIssues: { type: 'global', inputId: 'knownIssues' },
+        businessContext: { type: 'global', inputId: 'businessContext' },
+        assessmentScope: { type: 'static', value: 'Full Codebase' },
+      },
+      outputKey: 'debtInventory',
+    },
+    {
+      id: 'step-prioritization',
+      skillId: 'software-engineer-remediation-priority-ranker',
+      name: 'Prioritize Remediation',
+      description: 'Score and rank debt items for maximum impact',
+      inputMappings: {
+        debtItems: { type: 'computed', template: 'Technical debt inventory: {{debtInventory}}' },
+        teamCapacity: { type: 'global', inputId: 'businessContext' },
+        constraints: { type: 'global', inputId: 'businessContext' },
+        priorityWeights: { type: 'static', value: 'Balanced (Default)' },
+      },
+      outputKey: 'prioritizedBacklog',
+    },
+    {
+      id: 'step-stakeholder-brief',
+      skillId: 'software-engineer-tech-debt-stakeholder-brief',
+      name: 'Create Stakeholder Brief',
+      description: 'Generate executive-friendly brief with ROI',
+      inputMappings: {
+        debtSummary: { type: 'computed', template: 'Debt assessment: {{debtInventory}}' },
+        businessImpact: { type: 'computed', template: 'Prioritization analysis: {{prioritizedBacklog}}' },
+        audience: { type: 'global', inputId: 'stakeholderAudience' },
+        requestedOutcome: { type: 'static', value: 'Budget Approval' },
+        competingPriorities: { type: 'global', inputId: 'businessContext' },
+      },
+      outputKey: 'stakeholderBrief',
+    },
+    {
+      id: 'step-code-review',
+      skillId: 'software-engineer-code-review-assistant',
+      name: 'Sample Debt Analysis',
+      description: 'Deep-dive analysis of highest-priority debt area',
+      inputMappings: {
+        code: { type: 'global', inputId: 'knownIssues' },
+        language: { type: 'static', value: 'TypeScript' },
+        codeType: { type: 'static', value: 'Production Code' },
+        context: { type: 'computed', template: 'Technical debt context: {{prioritizedBacklog}}' },
+        severity: { type: 'static', value: 'Deep Review (comprehensive)' },
+      },
+      outputKey: 'debtDeepDive',
+    },
+  ],
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
 // WORKFLOW REGISTRY
 // Export all workflows for use throughout the app
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1474,6 +2098,11 @@ export const WORKFLOWS: Record<string, Workflow> = {
   'consulting-engagement': CONSULTING_ENGAGEMENT_WORKFLOW,
   'startup-investor-pitch': STARTUP_INVESTOR_PITCH_WORKFLOW,
   'sales-account-pursuit': SALES_ACCOUNT_PURSUIT_WORKFLOW,
+  'customer-churn-prevention': CUSTOMER_CHURN_PREVENTION_WORKFLOW,
+  'enterprise-account-expansion': ENTERPRISE_ACCOUNT_EXPANSION_WORKFLOW,
+  'rfp-response-center': RFP_RESPONSE_CENTER_WORKFLOW,
+  'revops-optimization': REVOPS_OPTIMIZATION_WORKFLOW,
+  'tech-debt-assessment': TECH_DEBT_ASSESSMENT_WORKFLOW,
 };
 
 export const WORKFLOW_LIST: Workflow[] = Object.values(WORKFLOWS);
