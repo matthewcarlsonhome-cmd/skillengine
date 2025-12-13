@@ -1190,7 +1190,7 @@ export const STARTUP_INVESTOR_PITCH_WORKFLOW: Workflow = {
   steps: [
     {
       id: 'step-market-analysis',
-      skillId: 'entrepreneur-founder-market-analysis-competitor-intelligence',
+      skillId: 'entrepreneur-market-analysis-competitor-intelligence',
       name: 'Market & Competitor Analysis',
       description: 'Deep dive into market opportunity and competitive landscape',
       inputMappings: {
@@ -1203,7 +1203,7 @@ export const STARTUP_INVESTOR_PITCH_WORKFLOW: Workflow = {
     },
     {
       id: 'step-financials',
-      skillId: 'entrepreneur-founder-financial-projections-scenario-modeler',
+      skillId: 'entrepreneur-financial-projections-scenario-modeler',
       name: 'Financial Projections',
       description: 'Create investor-ready financial projections with scenarios',
       inputMappings: {
@@ -1217,7 +1217,7 @@ export const STARTUP_INVESTOR_PITCH_WORKFLOW: Workflow = {
     },
     {
       id: 'step-pitch-deck',
-      skillId: 'entrepreneur-founder-pitch-deck-builder',
+      skillId: 'entrepreneur-investor-pitch-deck-builder',
       name: 'Build Pitch Deck',
       description: 'Create compelling pitch deck structure and content',
       inputMappings: {
@@ -1233,7 +1233,7 @@ export const STARTUP_INVESTOR_PITCH_WORKFLOW: Workflow = {
     },
     {
       id: 'step-due-diligence',
-      skillId: 'entrepreneur-founder-investor-due-diligence-q-a-prep',
+      skillId: 'entrepreneur-investor-due-diligence-q-a-prep',
       name: 'Due Diligence Q&A Prep',
       description: 'Prepare for tough investor questions and due diligence',
       inputMappings: {
@@ -1249,7 +1249,7 @@ export const STARTUP_INVESTOR_PITCH_WORKFLOW: Workflow = {
     },
     {
       id: 'step-investor-outreach',
-      skillId: 'entrepreneur-founder-investor-outreach-communication-suite',
+      skillId: 'entrepreneur-investor-outreach-communication-suite',
       name: 'Investor Outreach Materials',
       description: 'Create personalized investor outreach templates',
       inputMappings: {
@@ -1264,7 +1264,7 @@ export const STARTUP_INVESTOR_PITCH_WORKFLOW: Workflow = {
     },
     {
       id: 'step-executive-summary',
-      skillId: 'entrepreneur-founder-executive-summary-one-pager-creator',
+      skillId: 'entrepreneur-executive-summary-one-pager-creator',
       name: 'Executive Summary',
       description: 'Create one-page executive summary for investors',
       inputMappings: {
@@ -1385,7 +1385,7 @@ export const SALES_ACCOUNT_PURSUIT_WORKFLOW: Workflow = {
     },
     {
       id: 'step-discovery-framework',
-      skillId: 'sales-representative-discovery-call-question-framework-builder',
+      skillId: 'sales-representative-discovery-call-preparation',
       name: 'Discovery Call Framework',
       description: 'Create tailored discovery questions based on account intelligence',
       inputMappings: {
@@ -1399,7 +1399,7 @@ export const SALES_ACCOUNT_PURSUIT_WORKFLOW: Workflow = {
     },
     {
       id: 'step-objection-handling',
-      skillId: 'sales-representative-sales-objection-handling-response-trainer',
+      skillId: 'sales-representative-sales-objection-mastery-playbook',
       name: 'Objection Handling Playbook',
       description: 'Prepare responses for likely objections',
       inputMappings: {
@@ -1427,7 +1427,7 @@ export const SALES_ACCOUNT_PURSUIT_WORKFLOW: Workflow = {
     },
     {
       id: 'step-proposal',
-      skillId: 'sales-representative-proposal-rfp-response-writer',
+      skillId: 'sales-representative-enterprise-sales-proposal-generator',
       name: 'Sales Proposal',
       description: 'Generate professional proposal tailored to the account',
       inputMappings: {

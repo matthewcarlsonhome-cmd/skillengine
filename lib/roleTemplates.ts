@@ -16177,6 +16177,156 @@ Create a thorough account intelligence dossier with company analysis, stakeholde
           temperature: 0.3,
         },
       },
+      // SKILL 6: Value Proposition & ROI Calculator Generator
+      {
+        name: 'Value Proposition & ROI Calculator Generator',
+        description: 'Create compelling value propositions and quantified ROI analyses to justify purchase decisions.',
+        longDescription: 'Generates tailored value propositions and ROI calculators that translate your solution benefits into financial terms buyers and CFOs understand. Essential for enterprise sales and procurement approval.',
+        category: 'analysis',
+        estimatedTimeSaved: '4-8 hours per deal',
+        theme: {
+          primary: 'text-green-400',
+          secondary: 'bg-green-900/20',
+          gradient: 'from-green-500/20 to-transparent',
+          iconName: 'Calculator',
+        },
+        inputs: [
+          { id: 'product', label: 'Your Product/Solution', type: 'textarea', placeholder: 'What you sell, key features, typical pricing...', validation: { required: true, minLength: 50 } },
+          { id: 'prospect', label: 'Prospect Context', type: 'textarea', placeholder: 'Company name, size, industry, current situation, known pain points...', validation: { required: true, minLength: 50 } },
+          { id: 'identifiedNeeds', label: 'Identified Needs & Pain Points', type: 'textarea', placeholder: 'What problems are they trying to solve? What are the costs of these problems?', validation: { required: true, minLength: 30 } },
+          { id: 'dealSize', label: 'Expected Deal Size', type: 'textarea', placeholder: 'Approximate annual contract value, implementation costs...', validation: { required: true, minLength: 10 } },
+          { id: 'competitiveLandscape', label: 'Competitive Landscape', type: 'textarea', placeholder: 'What alternatives are they considering? Current solutions in place?', validation: { required: false } },
+        ],
+        prompts: {
+          systemInstruction: `You are a Value Engineering Expert and ROI Specialist with 20+ years of experience helping enterprise sales teams justify seven and eight-figure deals.
+
+**YOUR CREDENTIALS:**
+- Former VP of Value Engineering at Fortune 100 tech company
+- Built ROI calculators for $5B+ in enterprise deals
+- Expert in Total Cost of Ownership (TCO) analysis
+
+**THE VALUE EQUATION:**
+Value = (Benefits - Costs) x Risk Mitigation
+
+**BENEFIT CATEGORIES:**
+| Category | Examples | How to Quantify |
+|----------|----------|-----------------|
+| Revenue Increase | New customers, upsells | % improvement x current revenue |
+| Cost Reduction | Labor, materials | Current cost x % reduction |
+| Risk Avoidance | Compliance, security | Probability x impact |
+| Time Savings | Automation, efficiency | Hours saved x labor rate |
+
+**OUTPUT FORMAT:**
+# Value Proposition & ROI Analysis
+## Executive Summary
+## Quantified Benefits
+## Total Cost of Ownership
+## ROI Calculator
+## CFO-Ready Summary`,
+          userPromptTemplate: `Create value proposition and ROI analysis:
+
+**Your Product/Solution:**
+{{product}}
+
+**Prospect Context:**
+{{prospect}}
+
+**Identified Needs & Pain Points:**
+{{identifiedNeeds}}
+
+**Expected Deal Size:**
+{{dealSize}}
+
+**Competitive Landscape:**
+{{competitiveLandscape}}
+
+Generate a comprehensive value proposition with quantified ROI that will justify the purchase decision.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'claude',
+          useWebSearch: false,
+          maxTokens: 10240,
+          temperature: 0.3,
+        },
+      },
+      // SKILL 7: Deal Strategy & Next Steps Planner
+      {
+        name: 'Deal Strategy & Next Steps Planner',
+        description: 'Create strategic deal plans with clear next steps, stakeholder actions, and closing timelines.',
+        longDescription: 'Generates comprehensive deal strategies including stakeholder engagement plans, objection mitigation, competitive positioning, timeline management, and specific next actions to advance complex B2B deals.',
+        category: 'generation',
+        estimatedTimeSaved: '2-4 hours per deal review',
+        theme: {
+          primary: 'text-purple-400',
+          secondary: 'bg-purple-900/20',
+          gradient: 'from-purple-500/20 to-transparent',
+          iconName: 'Route',
+        },
+        inputs: [
+          { id: 'account', label: 'Account & Opportunity', type: 'textarea', placeholder: 'Company name, opportunity name, deal size, current stage...', validation: { required: true, minLength: 30 } },
+          { id: 'currentStage', label: 'Current Sales Stage', type: 'select', options: ['Discovery', 'Qualification', 'Solution Development', 'Proposal', 'Negotiation', 'Closing'], validation: { required: true } },
+          { id: 'stakeholders', label: 'Key Stakeholders', type: 'textarea', placeholder: 'Who is involved in the decision? Their roles, attitudes, concerns...', validation: { required: true, minLength: 30 } },
+          { id: 'dealContext', label: 'Deal Context', type: 'textarea', placeholder: 'What has happened so far? Recent meetings, emails, demos, proposals...', validation: { required: true, minLength: 50 } },
+          { id: 'keyInsights', label: 'Key Insights & Challenges', type: 'textarea', placeholder: 'What do you know? What are the blockers? Competitive threats?', validation: { required: true, minLength: 30 } },
+          { id: 'proposalSummary', label: 'Proposal Summary (if applicable)', type: 'textarea', placeholder: 'What have you proposed? Pricing, terms, implementation plan...', validation: { required: false } },
+        ],
+        prompts: {
+          systemInstruction: `You are a Chief Revenue Officer and Enterprise Sales Strategist with 25+ years of experience closing complex B2B deals.
+
+**YOUR CREDENTIALS:**
+- Former CRO at multiple unicorn companies
+- Closed $500M+ in enterprise deals personally
+- Expert in MEDDIC, SPIN, Challenger Sale methodologies
+
+**MEDDIC QUALIFICATION:**
+| Element | Question | Why It Matters |
+|---------|----------|----------------|
+| Metrics | What outcomes do they measure? | Ties to their goals |
+| Economic Buyer | Who has budget authority? | Must have access |
+| Decision Criteria | How will they evaluate? | Shape to your strengths |
+| Decision Process | What are the steps? | Plan your timeline |
+| Identify Pain | What costs them money? | Create urgency |
+| Champion | Who fights for you internally? | Essential |
+
+**OUTPUT FORMAT:**
+# Deal Strategy: [Account Name]
+## Deal Snapshot
+## Deal Health Assessment (MEDDIC Score)
+## Stakeholder Strategy
+## Competitive Strategy
+## Path to Close
+## Next 10 Actions
+## Negotiation Strategy`,
+          userPromptTemplate: `Create comprehensive deal strategy:
+
+**Account & Opportunity:**
+{{account}}
+
+**Current Sales Stage:** {{currentStage}}
+
+**Key Stakeholders:**
+{{stakeholders}}
+
+**Deal Context:**
+{{dealContext}}
+
+**Key Insights & Challenges:**
+{{keyInsights}}
+
+**Proposal Summary:**
+{{proposalSummary}}
+
+Generate a strategic deal plan with clear next actions to advance and close this opportunity.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'claude',
+          useWebSearch: false,
+          maxTokens: 10240,
+          temperature: 0.4,
+        },
+      },
     ],
   },
 
@@ -32298,6 +32448,289 @@ Generate a thorough preparation document covering the hardest questions this inv
           recommendedModel: 'claude',
           useWebSearch: false,
           maxTokens: 16384,
+          temperature: 0.4,
+        },
+      },
+      // SKILL 7: Market Analysis & Competitor Intelligence
+      {
+        name: 'Market Analysis & Competitor Intelligence',
+        description: 'Comprehensive market sizing, competitive landscape analysis, and strategic positioning insights for investor presentations.',
+        longDescription: 'Creates investor-grade market analysis including TAM/SAM/SOM calculations, competitive mapping, market trends, and defensibility analysis. Perfect for pitch decks and due diligence preparation.',
+        category: 'research',
+        estimatedTimeSaved: '8-15 hours of research',
+        theme: {
+          primary: 'text-indigo-400',
+          secondary: 'bg-indigo-900/20',
+          gradient: 'from-indigo-500/20 to-transparent',
+          iconName: 'Search',
+        },
+        inputs: [
+          { id: 'businessDescription', label: 'Business Description', type: 'textarea', placeholder: 'What does your company do? Product/service, value proposition, target customers...', validation: { required: true, minLength: 50 } },
+          { id: 'targetMarket', label: 'Target Market', type: 'textarea', placeholder: 'Who are your customers? Industry, geography, segments, buyer personas...', validation: { required: true, minLength: 50 } },
+          { id: 'competitors', label: 'Known Competitors', type: 'textarea', placeholder: 'List direct and indirect competitors you know about...', validation: { required: true, minLength: 30 } },
+          { id: 'analysisGoals', label: 'Analysis Goals', type: 'textarea', placeholder: 'What do you need this analysis for? (e.g., pitch deck, due diligence, strategic planning)', validation: { required: true, minLength: 20 } },
+        ],
+        prompts: {
+          systemInstruction: `You are a Strategic Market Analyst and Competitive Intelligence Expert with 18+ years of experience at McKinsey, Bain, and leading VC firms.
+
+**YOUR CREDENTIALS:**
+- Former McKinsey Partner, Strategy Practice
+- Led market analysis for 50+ successful fundraises
+- Expert in bottom-up and top-down market estimation
+
+**MARKET SIZING FRAMEWORK:**
+| Method | Approach | Best For |
+|--------|----------|----------|
+| Top-Down | Industry size to your segment | Large markets |
+| Bottom-Up | Units x Price x Penetration | New categories |
+| Value Theory | Problem cost x Solution capture | B2B, ROI-driven |
+
+**OUTPUT FORMAT:**
+# Market Analysis & Competitive Intelligence
+## Executive Summary
+## Market Sizing (TAM/SAM/SOM)
+## Competitive Landscape
+## Strategic Recommendations`,
+          userPromptTemplate: `Conduct comprehensive market analysis:
+
+**Business Description:**
+{{businessDescription}}
+
+**Target Market:**
+{{targetMarket}}
+
+**Known Competitors:**
+{{competitors}}
+
+**Analysis Goals:**
+{{analysisGoals}}
+
+Provide investor-grade market analysis with TAM/SAM/SOM, competitive intelligence, and strategic insights.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'claude',
+          useWebSearch: true,
+          maxTokens: 12288,
+          temperature: 0.3,
+        },
+      },
+      // SKILL 8: Financial Projections & Scenario Modeler
+      {
+        name: 'Financial Projections & Scenario Modeler',
+        description: 'Create investor-ready financial projections with multiple scenarios and key assumptions clearly documented.',
+        longDescription: 'Generates 3-5 year financial projections including revenue forecasts, cost structures, unit economics, and scenario analysis. Perfect for investor presentations and fundraising materials.',
+        category: 'analysis',
+        estimatedTimeSaved: '10-20 hours per model',
+        theme: {
+          primary: 'text-green-400',
+          secondary: 'bg-green-900/20',
+          gradient: 'from-green-500/20 to-transparent',
+          iconName: 'Calculator',
+        },
+        inputs: [
+          { id: 'businessModel', label: 'Business Model & Revenue', type: 'textarea', placeholder: 'How do you make money? Pricing, revenue streams, current revenue if any...', validation: { required: true, minLength: 50 } },
+          { id: 'currentTraction', label: 'Current Traction', type: 'textarea', placeholder: 'Current metrics: users, revenue, growth rate, costs...', validation: { required: true, minLength: 30 } },
+          { id: 'fundingAmount', label: 'Funding Details', type: 'textarea', placeholder: 'Amount raising, use of funds, runway needed...', validation: { required: true, minLength: 20 } },
+          { id: 'marketContext', label: 'Market Context', type: 'textarea', placeholder: 'Market size, growth rate, competitive dynamics...', validation: { required: true, minLength: 30 } },
+          { id: 'projectionPeriod', label: 'Projection Period', type: 'select', options: ['3 years', '5 years', '3-5 years'], validation: { required: true } },
+        ],
+        prompts: {
+          systemInstruction: `You are a Chief Financial Officer and Financial Modeling Expert with 20+ years of experience in venture-backed startups and investment banking.
+
+**YOUR CREDENTIALS:**
+- Former CFO at 3 successful startups (2 exits)
+- Goldman Sachs Investment Banking background
+- CFA Charterholder
+
+**KEY METRICS BY STAGE:**
+| Stage | Primary Metrics |
+|-------|-----------------|
+| Pre-seed | TAM, user acquisition cost hypothesis |
+| Seed | CAC, early LTV signals, burn rate |
+| Series A | LTV/CAC ratio, payback period, gross margin |
+
+**OUTPUT FORMAT:**
+# Financial Projections & Scenario Analysis
+## Executive Summary
+## Revenue Model
+## Unit Economics
+## Scenario Analysis (Conservative, Base, Optimistic)
+## Use of Funds`,
+          userPromptTemplate: `Create investor-ready financial projections:
+
+**Business Model & Revenue:**
+{{businessModel}}
+
+**Current Traction:**
+{{currentTraction}}
+
+**Funding Details:**
+{{fundingAmount}}
+
+**Market Context:**
+{{marketContext}}
+
+**Projection Period:** {{projectionPeriod}}
+
+Generate comprehensive financial projections with multiple scenarios and clear assumptions.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'claude',
+          useWebSearch: false,
+          maxTokens: 12288,
+          temperature: 0.3,
+        },
+      },
+      // SKILL 9: Investor Outreach & Communication Suite
+      {
+        name: 'Investor Outreach & Communication Suite',
+        description: 'Create personalized investor outreach emails, follow-up sequences, and warm introduction templates.',
+        longDescription: 'Generates targeted investor communication materials including cold outreach emails, warm intro requests, follow-up sequences, and meeting preparation materials tailored to different investor types.',
+        category: 'communication',
+        estimatedTimeSaved: '5-10 hours per outreach campaign',
+        theme: {
+          primary: 'text-pink-400',
+          secondary: 'bg-pink-900/20',
+          gradient: 'from-pink-500/20 to-transparent',
+          iconName: 'Mail',
+        },
+        inputs: [
+          { id: 'companyName', label: 'Company Name', type: 'text', placeholder: 'Your company name', validation: { required: true } },
+          { id: 'elevatorPitch', label: 'Elevator Pitch', type: 'textarea', placeholder: 'Your 1-2 sentence pitch - what you do, for whom, and why it matters...', validation: { required: true, minLength: 30 } },
+          { id: 'traction', label: 'Key Traction Points', type: 'textarea', placeholder: 'Your most impressive metrics and milestones...', validation: { required: true, minLength: 30 } },
+          { id: 'fundingAsk', label: 'Funding Ask', type: 'textarea', placeholder: 'Amount raising, stage, use of funds...', validation: { required: true, minLength: 20 } },
+          { id: 'targetInvestors', label: 'Target Investor Types', type: 'textarea', placeholder: 'Types of investors you want to reach (angels, seed VCs, specific firms)...', validation: { required: true, minLength: 20 } },
+          { id: 'uniqueHook', label: 'Unique Hook', type: 'textarea', placeholder: 'What makes your story compelling? Founder background, market insight, impressive growth...', validation: { required: true, minLength: 30 } },
+        ],
+        prompts: {
+          systemInstruction: `You are a Fundraising Communications Expert and former VC who has helped 100+ founders craft outreach that gets responses.
+
+**YOUR CREDENTIALS:**
+- Former Principal at First Round Capital
+- 45% response rate on cold outreach (vs. 5% average)
+- Author of "The Warm Introduction Playbook"
+
+**WHAT GETS RESPONSES:**
+| Factor | Impact |
+|--------|--------|
+| Warm intro | 10x |
+| Specific relevance | 5x |
+| Strong traction | 4x |
+
+**OUTPUT FORMAT:**
+# Investor Outreach Suite
+## Cold Outreach Templates
+## Warm Introduction Request Templates
+## Follow-Up Sequence
+## Post-Meeting Follow-Up`,
+          userPromptTemplate: `Create investor outreach materials:
+
+**Company:** {{companyName}}
+
+**Elevator Pitch:**
+{{elevatorPitch}}
+
+**Key Traction:**
+{{traction}}
+
+**Funding Ask:**
+{{fundingAsk}}
+
+**Target Investors:**
+{{targetInvestors}}
+
+**Unique Hook:**
+{{uniqueHook}}
+
+Generate a complete investor outreach suite with multiple email templates, follow-up sequences, and introduction requests.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'claude',
+          useWebSearch: false,
+          maxTokens: 10240,
+          temperature: 0.5,
+        },
+      },
+      // SKILL 10: Executive Summary One-Pager Creator
+      {
+        name: 'Executive Summary One-Pager Creator',
+        description: 'Create a compelling one-page executive summary that captures your entire investment opportunity.',
+        longDescription: 'Generates a professional one-page executive summary perfect for investor data rooms, email attachments, and quick reference. Covers problem, solution, market, traction, team, and ask in a scannable format.',
+        category: 'generation',
+        estimatedTimeSaved: '3-5 hours per document',
+        theme: {
+          primary: 'text-cyan-400',
+          secondary: 'bg-cyan-900/20',
+          gradient: 'from-cyan-500/20 to-transparent',
+          iconName: 'FileText',
+        },
+        inputs: [
+          { id: 'companyName', label: 'Company Name', type: 'text', placeholder: 'Your company name', validation: { required: true } },
+          { id: 'businessOverview', label: 'Business Overview', type: 'textarea', placeholder: 'What you do, problem you solve, your solution...', validation: { required: true, minLength: 50 } },
+          { id: 'marketOpportunity', label: 'Market Opportunity', type: 'textarea', placeholder: 'Market size, growth, trends, why now...', validation: { required: true, minLength: 30 } },
+          { id: 'financialHighlights', label: 'Financial Highlights', type: 'textarea', placeholder: 'Key metrics, revenue, growth rate, projections...', validation: { required: true, minLength: 30 } },
+          { id: 'traction', label: 'Traction & Milestones', type: 'textarea', placeholder: 'Key achievements, customers, partnerships, metrics...', validation: { required: true, minLength: 30 } },
+          { id: 'team', label: 'Team', type: 'textarea', placeholder: 'Founders and key team members with relevant background...', validation: { required: true, minLength: 30 } },
+          { id: 'fundingAsk', label: 'Funding Ask', type: 'textarea', placeholder: 'Amount, stage, use of funds...', validation: { required: true, minLength: 20 } },
+        ],
+        prompts: {
+          systemInstruction: `You are an Expert in Investment Communications who has created executive summaries for 200+ companies that raised $3B+ combined.
+
+**YOUR CREDENTIALS:**
+- Former Head of Investor Relations at Andreessen Horowitz
+- Created deck templates used by 500+ YC companies
+- Expert in visual hierarchy and information design
+
+**MUST-HAVE SECTIONS:**
+1. Problem (2-3 sentences)
+2. Solution (2-3 sentences)
+3. Market (TAM + growth)
+4. Traction (3-5 bullet points)
+5. Business Model (1-2 sentences)
+6. Team (founder highlights)
+7. The Ask (amount + use of funds)
+
+**OUTPUT FORMAT:**
+# [COMPANY NAME]
+## THE PROBLEM
+## OUR SOLUTION
+## MARKET OPPORTUNITY
+## TRACTION
+## BUSINESS MODEL
+## TEAM
+## THE ASK`,
+          userPromptTemplate: `Create a one-page executive summary:
+
+**Company:** {{companyName}}
+
+**Business Overview:**
+{{businessOverview}}
+
+**Market Opportunity:**
+{{marketOpportunity}}
+
+**Financial Highlights:**
+{{financialHighlights}}
+
+**Traction:**
+{{traction}}
+
+**Team:**
+{{team}}
+
+**Funding Ask:**
+{{fundingAsk}}
+
+Generate a professional, scannable one-page executive summary that captures the entire investment opportunity.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'claude',
+          useWebSearch: false,
+          maxTokens: 8192,
           temperature: 0.4,
         },
       },
