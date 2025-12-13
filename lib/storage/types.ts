@@ -202,6 +202,16 @@ export type WorkflowInputSource =
   | { type: 'computed'; template: string };       // Template with {{placeholders}}
 
 /**
+ * Condition for conditional step execution
+ */
+export interface StepCondition {
+  sourceStep: string;           // Step ID whose output to check
+  field?: string;               // JSON path to extract (e.g., 'score', 'risk.level')
+  operator: 'equals' | 'notEquals' | 'contains' | 'notContains' | 'greaterThan' | 'lessThan' | 'exists' | 'notExists';
+  value?: string | number;      // Value to compare against (not needed for exists/notExists)
+}
+
+/**
  * A single step in a workflow that runs one skill
  */
 export interface WorkflowStep {
@@ -221,7 +231,43 @@ export interface WorkflowStep {
   // Optional settings
   optional?: boolean;           // Can be skipped
   reviewRequired?: boolean;     // Pause for user review before continuing
+
+  // Parallel execution settings
+  dependsOn?: string[];         // Step IDs that must complete before this step runs
+                                // If not specified, depends on the previous step in order
+
+  // Conditional execution
+  condition?: StepCondition;    // If specified, step only runs if condition is met
 }
+
+/**
+ * Profile fields that can be used for auto-prefill
+ */
+export type ProfilePrefillField =
+  | 'resume'
+  | 'jobDescription'
+  | 'fullName'
+  | 'email'
+  | 'phone'
+  | 'location'
+  | 'linkedInUrl'
+  | 'portfolioUrl'
+  | 'professionalTitle'
+  | 'yearsExperience'
+  | 'targetRoles'
+  | 'targetIndustries'
+  | 'currentCompany'
+  | 'currentTitle'
+  | 'keyAchievements'
+  | 'highestDegree'
+  | 'university'
+  | 'certifications'
+  | 'technicalSkills'
+  | 'softSkills'
+  | 'languages'
+  | 'careerGoals'
+  | 'salaryExpectations'
+  | 'workPreference';
 
 /**
  * Global input collected at workflow start
@@ -235,7 +281,7 @@ export interface WorkflowGlobalInput {
   options?: string[];           // For select type
   required: boolean;
   rows?: number;                // For textarea
-  prefillFrom?: 'resume' | 'jobDescription' | 'companyName';  // Auto-fill from context
+  prefillFrom?: ProfilePrefillField;  // Auto-fill from user profile
 }
 
 /**
@@ -274,7 +320,7 @@ export interface WorkflowExecution {
   globalInputs: Record<string, string>;
 
   // Outputs from each completed step
-  stepOutputs: Record<string, string>;  // stepId -> output
+  stepOutputs: Record<string, string>;  // outputKey -> output
 
   // Step statuses
   stepStatuses: Record<string, 'pending' | 'running' | 'completed' | 'skipped' | 'error'>;
@@ -285,6 +331,28 @@ export interface WorkflowExecution {
   // Timestamps
   startedAt: string;
   completedAt?: string;
+
+  // Searchable metadata
+  tags?: string[];
+  title?: string;  // User-provided title or auto-generated
+  isFavorite?: boolean;
+}
+
+/**
+ * User-created custom workflow (extends base Workflow)
+ */
+export interface CustomWorkflow extends Workflow {
+  // Ownership
+  userId?: string;              // Owner (for multi-user scenarios)
+  createdAt: string;
+  updatedAt: string;
+
+  // Source tracking
+  sourceWorkflowId?: string;    // If duplicated from a built-in workflow
+  isPublic?: boolean;           // Share with community
+
+  // User customization
+  notes?: string;               // User notes about this workflow
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

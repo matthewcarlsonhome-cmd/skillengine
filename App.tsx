@@ -102,6 +102,7 @@ import SkillExportPage from './pages/SkillExportPage';           // Export skill
 // ─────────────────────────────────────────────────────────────────────────────
 import WorkflowsPage from './pages/WorkflowsPage';               // Browse all workflows by category
 import WorkflowRunnerPage from './pages/WorkflowRunnerPage';     // Execute multi-step workflows
+import BatchRunnerPage from './pages/BatchRunnerPage';           // Batch workflow execution
 
 // ─────────────────────────────────────────────────────────────────────────────
 // JOB SEARCH TOOLS
@@ -223,9 +224,11 @@ function App() {
                         Multi-step automated sequences that chain skills
                         - /workflows: Browse all workflows by category
                         - /workflow/:id: Run a pre-built workflow (job-application, interview-prep, post-interview)
+                        - /workflow/:id/batch: Batch execution with multiple input sets
                     ═══════════════════════════════════════════════════════ */}
                     <Route path="/workflows" element={<WorkflowsPage />} />
                     <Route path="/workflow/:workflowId" element={<WorkflowRunnerPage />} />
+                    <Route path="/workflow/:workflowId/batch" element={<BatchRunnerPage />} />
 
                     {/* ═══════════════════════════════════════════════════════
                         JOB SEARCH TOOLS
