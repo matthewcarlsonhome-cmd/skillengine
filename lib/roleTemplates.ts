@@ -32303,6 +32303,1711 @@ Generate a thorough preparation document covering the hardest questions this inv
       },
     ],
   },
+  // ═══════════════════════════════════════════════════════════════════════════
+  // REVENUE OPERATIONS MANAGER
+  // Skills for optimizing the full revenue funnel and operations
+  // ═══════════════════════════════════════════════════════════════════════════
+  {
+    id: 'revenue-operations-manager',
+    title: 'Revenue Operations Manager',
+    description: 'Optimize the full revenue funnel from lead to cash with data-driven insights',
+    icon: 'TrendingUp',
+    color: 'blue',
+    categories: ['Revenue Operations', 'Sales Operations', 'Marketing Operations'],
+    dynamicSkills: [
+      {
+        id: 'revops-full-funnel-conversion-analysis',
+        name: 'Full-Funnel Conversion Analysis',
+        description: 'Analyze conversion rates across every stage of the revenue funnel to identify bottlenecks and optimization opportunities',
+        longDescription: 'This skill performs comprehensive analysis of your revenue funnel, examining conversion rates at each stage from lead acquisition through closed-won. It identifies drop-off points, calculates stage-by-stage velocity, benchmarks against industry standards, and provides prioritized recommendations for improving overall funnel efficiency.',
+        category: 'Revenue Operations',
+        estimatedTimeSaved: '4-6 hours',
+        theme: {
+          gradient: 'from-blue-500 to-cyan-500',
+          iconBg: 'bg-blue-100',
+          iconColor: 'text-blue-600',
+        },
+        inputs: [
+          { id: 'funnelData', label: 'Funnel Data & Metrics', type: 'textarea', placeholder: 'Paste your funnel metrics: leads generated, MQLs, SQLs, opportunities, proposals, closed-won by period...', required: true },
+          { id: 'timeframe', label: 'Analysis Timeframe', type: 'select', options: ['Last 30 days', 'Last Quarter', 'Last 6 Months', 'Last 12 Months', 'Year-over-Year'], required: true },
+          { id: 'segments', label: 'Segments to Analyze', type: 'textarea', placeholder: 'Breakdown by: channel, product line, sales rep, region, deal size...', required: false },
+          { id: 'industryBenchmarks', label: 'Industry/Company Context', type: 'textarea', placeholder: 'Your industry, company size, sales model (inside/field/hybrid), average deal size...', required: true },
+          { id: 'knownIssues', label: 'Known Problem Areas', type: 'textarea', placeholder: 'Any stages you suspect are underperforming or recent changes that may have impacted conversion...', required: false },
+        ],
+        prompts: {
+          systemInstruction: `You are an expert Revenue Operations analyst specializing in funnel optimization and conversion rate analysis. You combine deep analytical skills with practical go-to-market experience to identify actionable improvements that drive revenue growth.
+
+Your analysis framework:
+1. Stage-by-stage conversion rate calculation
+2. Velocity analysis (time in stage)
+3. Volume vs. conversion trade-offs
+4. Segment performance comparison
+5. Trend analysis and anomaly detection
+6. Industry benchmark comparison
+7. Root cause hypothesis generation
+8. Prioritized improvement recommendations
+
+Provide specific, quantified insights with clear action items.`,
+          userPromptTemplate: `Analyze this revenue funnel data and provide comprehensive conversion analysis:
+
+**Funnel Data:**
+{{funnelData}}
+
+**Timeframe:** {{timeframe}}
+
+**Segments to Analyze:** {{segments}}
+
+**Industry Context:** {{industryBenchmarks}}
+
+**Known Issues:** {{knownIssues}}
+
+Provide a detailed funnel analysis including:
+1. Executive Summary with key findings
+2. Stage-by-stage conversion rates with benchmarks
+3. Velocity analysis (average time in each stage)
+4. Top 3 bottlenecks with quantified revenue impact
+5. Segment performance comparison (if applicable)
+6. Trend analysis and concerning patterns
+7. Root cause hypotheses for underperformance
+8. Prioritized recommendations with expected impact
+9. Quick wins vs. strategic initiatives
+10. Metrics to track for improvement validation`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'claude',
+          useWebSearch: false,
+          maxTokens: 8192,
+          temperature: 0.3,
+        },
+      },
+      {
+        id: 'revops-lead-scoring-model-builder',
+        name: 'Lead Scoring Model Builder',
+        description: 'Design and optimize lead scoring models that prioritize the highest-value prospects',
+        longDescription: 'This skill helps you build or refine lead scoring models by analyzing your historical conversion data, identifying predictive attributes, and creating weighted scoring criteria. It produces a complete scoring framework with demographic, firmographic, and behavioral factors that your team can implement immediately.',
+        category: 'Revenue Operations',
+        estimatedTimeSaved: '6-10 hours',
+        theme: {
+          gradient: 'from-purple-500 to-indigo-500',
+          iconBg: 'bg-purple-100',
+          iconColor: 'text-purple-600',
+        },
+        inputs: [
+          { id: 'historicalData', label: 'Historical Win/Loss Data', type: 'textarea', placeholder: 'Describe patterns in your won deals: company size, industry, title, source, behaviors before conversion...', required: true },
+          { id: 'currentScoring', label: 'Current Scoring Model (if any)', type: 'textarea', placeholder: 'Describe your existing scoring criteria and weights, or indicate if starting fresh...', required: false },
+          { id: 'idealCustomerProfile', label: 'Ideal Customer Profile', type: 'textarea', placeholder: 'Your ICP: industry, company size, tech stack, pain points, buying triggers...', required: true },
+          { id: 'availableData', label: 'Available Data Points', type: 'textarea', placeholder: 'What data do you capture? Job title, company size, industry, page visits, email engagement, content downloads...', required: true },
+          { id: 'salesFeedback', label: 'Sales Team Feedback', type: 'textarea', placeholder: 'What do your sales reps say makes a good vs. bad lead? Common complaints about lead quality?', required: false },
+        ],
+        prompts: {
+          systemInstruction: `You are an expert in predictive lead scoring and marketing operations. You design scoring models that accurately identify high-intent, high-fit prospects while filtering out poor-fit leads that waste sales time.
+
+Your lead scoring framework includes:
+1. Fit scoring (demographic/firmographic alignment with ICP)
+2. Intent scoring (behavioral signals indicating buying readiness)
+3. Engagement scoring (interaction depth and recency)
+4. Negative scoring (disqualifying attributes)
+5. Score decay and recency weighting
+6. Threshold setting for MQL/SQL handoff
+7. Continuous optimization recommendations
+
+Create practical, implementable scoring models with clear logic.`,
+          userPromptTemplate: `Design a comprehensive lead scoring model based on this information:
+
+**Historical Win/Loss Patterns:**
+{{historicalData}}
+
+**Current Scoring Model:**
+{{currentScoring}}
+
+**Ideal Customer Profile:**
+{{idealCustomerProfile}}
+
+**Available Data Points:**
+{{availableData}}
+
+**Sales Team Feedback:**
+{{salesFeedback}}
+
+Create a complete lead scoring model including:
+1. Executive Summary of scoring approach
+2. Fit Score criteria (demographic/firmographic) with point values
+3. Intent Score criteria (behavioral signals) with point values
+4. Engagement Score criteria with point values
+5. Negative scoring factors (deductions)
+6. Score decay rules for aging leads
+7. MQL threshold recommendation with rationale
+8. SQL threshold recommendation with rationale
+9. Score interpretation guide for sales team
+10. Implementation checklist for your CRM/MAP
+11. Metrics to track model effectiveness
+12. Quarterly review process for optimization`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'claude',
+          useWebSearch: false,
+          maxTokens: 8192,
+          temperature: 0.3,
+        },
+      },
+      {
+        id: 'revops-marketing-sales-sla-generator',
+        name: 'Marketing-Sales SLA Generator',
+        description: 'Create clear service level agreements between marketing and sales for lead handoff and follow-up',
+        longDescription: 'This skill generates comprehensive SLAs between marketing and sales teams, defining lead qualification criteria, response time requirements, follow-up cadences, feedback loops, and escalation procedures. It creates accountability frameworks that improve conversion and reduce lead waste.',
+        category: 'Revenue Operations',
+        estimatedTimeSaved: '3-5 hours',
+        theme: {
+          gradient: 'from-green-500 to-teal-500',
+          iconBg: 'bg-green-100',
+          iconColor: 'text-green-600',
+        },
+        inputs: [
+          { id: 'currentProcess', label: 'Current Lead Handoff Process', type: 'textarea', placeholder: 'How do leads currently flow from marketing to sales? What works and what doesn\'t?', required: true },
+          { id: 'leadDefinitions', label: 'Lead Stage Definitions', type: 'textarea', placeholder: 'How do you define MQL, SQL, SAL? What criteria qualify a lead for each stage?', required: true },
+          { id: 'volumeMetrics', label: 'Lead Volume & Capacity', type: 'textarea', placeholder: 'Monthly lead volume, number of sales reps, current conversion rates, capacity constraints...', required: true },
+          { id: 'painPoints', label: 'Current Pain Points', type: 'textarea', placeholder: 'Where does the process break down? Lead response time issues, quality complaints, attribution disputes...', required: true },
+          { id: 'techStack', label: 'Technology Stack', type: 'textarea', placeholder: 'CRM, marketing automation, routing tools, reporting systems you use...', required: false },
+        ],
+        prompts: {
+          systemInstruction: `You are an expert in Revenue Operations and sales-marketing alignment. You design SLAs that create clear accountability, improve lead conversion, and eliminate friction between teams.
+
+Your SLA framework covers:
+1. Lead qualification and scoring criteria
+2. Handoff triggers and routing rules
+3. Response time requirements with escalation
+4. Follow-up cadence standards
+5. Lead recycling and nurture criteria
+6. Feedback and disposition requirements
+7. Reporting and accountability metrics
+8. Exception handling procedures
+9. Quarterly review and adjustment process
+
+Create practical, enforceable SLAs that both teams can commit to.`,
+          userPromptTemplate: `Create a comprehensive Marketing-Sales SLA based on:
+
+**Current Process:**
+{{currentProcess}}
+
+**Lead Stage Definitions:**
+{{leadDefinitions}}
+
+**Volume & Capacity:**
+{{volumeMetrics}}
+
+**Pain Points:**
+{{painPoints}}
+
+**Technology Stack:**
+{{techStack}}
+
+Generate a complete SLA document including:
+1. Executive Summary and Purpose
+2. Lead Definitions and Qualification Criteria
+   - MQL definition and criteria
+   - SQL definition and criteria
+   - SAL definition and criteria
+3. Marketing Commitments
+   - Lead quality standards
+   - Volume targets
+   - Data completeness requirements
+4. Sales Commitments
+   - Response time SLAs (by lead type/score)
+   - Follow-up cadence requirements
+   - Disposition and feedback timelines
+5. Lead Routing Rules
+6. Escalation Procedures
+7. Lead Recycling Criteria
+8. Reporting Requirements
+9. Performance Metrics & Dashboards
+10. Exception Handling
+11. Quarterly Review Process
+12. Signature and Commitment Section`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'claude',
+          useWebSearch: false,
+          maxTokens: 8192,
+          temperature: 0.3,
+        },
+      },
+      {
+        id: 'revops-tech-stack-audit',
+        name: 'RevOps Tech Stack Audit & Recommendations',
+        description: 'Evaluate your revenue technology stack for gaps, redundancies, and optimization opportunities',
+        longDescription: 'This skill conducts a comprehensive audit of your revenue technology stack, identifying integration gaps, data flow issues, underutilized tools, and opportunities for consolidation or enhancement. It provides a prioritized roadmap for optimizing your tech investments.',
+        category: 'Revenue Operations',
+        estimatedTimeSaved: '8-12 hours',
+        theme: {
+          gradient: 'from-orange-500 to-red-500',
+          iconBg: 'bg-orange-100',
+          iconColor: 'text-orange-600',
+        },
+        inputs: [
+          { id: 'currentStack', label: 'Current Technology Stack', type: 'textarea', placeholder: 'List all revenue tools: CRM, MAP, sales engagement, CPQ, billing, analytics, data tools...', required: true },
+          { id: 'integrations', label: 'Current Integrations', type: 'textarea', placeholder: 'How are your tools connected? Native integrations, iPaaS, custom APIs, manual processes?', required: true },
+          { id: 'painPoints', label: 'Technology Pain Points', type: 'textarea', placeholder: 'Data silos, manual workarounds, missing capabilities, adoption issues, reporting gaps...', required: true },
+          { id: 'teamStructure', label: 'Team Structure & Processes', type: 'textarea', placeholder: 'Marketing, SDR, AE, CS team sizes and key processes they execute...', required: true },
+          { id: 'budget', label: 'Budget Context', type: 'select', options: ['Cost reduction focus', 'Maintain current spend', 'Modest growth budget', 'Significant investment available'], required: true },
+        ],
+        prompts: {
+          systemInstruction: `You are a Revenue Operations technology expert who has implemented and optimized tech stacks for companies ranging from startups to enterprises. You understand the trade-offs between best-of-breed and platform approaches.
+
+Your audit framework evaluates:
+1. Tool coverage across the revenue cycle
+2. Integration health and data flow
+3. Feature utilization rates
+4. Redundancy and overlap
+5. Gap analysis against best practices
+6. Total cost of ownership
+7. Team adoption and enablement
+8. Scalability for growth
+9. Vendor risk assessment
+
+Provide practical, prioritized recommendations with clear ROI justification.`,
+          userPromptTemplate: `Conduct a comprehensive RevOps tech stack audit:
+
+**Current Technology Stack:**
+{{currentStack}}
+
+**Integrations:**
+{{integrations}}
+
+**Pain Points:**
+{{painPoints}}
+
+**Team Structure:**
+{{teamStructure}}
+
+**Budget Context:** {{budget}}
+
+Provide a complete audit report including:
+1. Executive Summary
+2. Current State Assessment
+   - Stack inventory with purpose and cost
+   - Integration architecture diagram (text-based)
+   - Data flow analysis
+3. Strengths and Working Well
+4. Gap Analysis
+   - Missing capabilities
+   - Broken or weak integrations
+   - Manual process workarounds
+5. Redundancy Analysis
+   - Overlapping tools
+   - Consolidation opportunities
+6. Utilization Assessment
+   - Underused tools and features
+   - Training/enablement gaps
+7. Prioritized Recommendations
+   - Quick wins (0-30 days)
+   - Medium-term improvements (1-3 months)
+   - Strategic initiatives (3-6+ months)
+8. Tool Recommendations (if gaps exist)
+9. Integration Roadmap
+10. Expected ROI and Business Impact
+11. Implementation Considerations`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'claude',
+          useWebSearch: true,
+          maxTokens: 10000,
+          temperature: 0.3,
+        },
+      },
+    ],
+  },
+  // ═══════════════════════════════════════════════════════════════════════════
+  // CUSTOMER SUCCESS DIRECTOR
+  // Skills for customer retention and churn prevention
+  // ═══════════════════════════════════════════════════════════════════════════
+  {
+    id: 'customer-success-director',
+    title: 'Customer Success Director',
+    description: 'Maximize customer lifetime value through proactive retention and expansion strategies',
+    icon: 'Heart',
+    color: 'rose',
+    categories: ['Customer Success', 'Retention', 'Account Management'],
+    dynamicSkills: [
+      {
+        id: 'cs-churn-risk-predictor',
+        name: 'Churn Risk Predictor & Segmentation',
+        description: 'Analyze customer health signals to predict and segment churn risk across your portfolio',
+        longDescription: 'This skill analyzes customer health indicators, usage patterns, engagement metrics, and support interactions to predict churn probability and segment your customer base by risk level. It provides early warning signals and prioritized intervention recommendations.',
+        category: 'Customer Success',
+        estimatedTimeSaved: '5-8 hours',
+        theme: {
+          gradient: 'from-rose-500 to-pink-500',
+          iconBg: 'bg-rose-100',
+          iconColor: 'text-rose-600',
+        },
+        inputs: [
+          { id: 'customerData', label: 'Customer Health Data', type: 'textarea', placeholder: 'Customer list with: name, ARR, tenure, product usage metrics, support tickets, NPS scores, engagement levels...', required: true },
+          { id: 'historicalChurn', label: 'Historical Churn Patterns', type: 'textarea', placeholder: 'What patterns have you seen in churned customers? Common warning signs, timing, segments most at risk...', required: true },
+          { id: 'healthMetrics', label: 'Available Health Metrics', type: 'textarea', placeholder: 'What metrics do you track? Login frequency, feature adoption, support sentiment, stakeholder engagement...', required: true },
+          { id: 'renewalTimeline', label: 'Renewal Timeline', type: 'textarea', placeholder: 'Upcoming renewals in next 30/60/90 days with contract values...', required: false },
+          { id: 'resourceConstraints', label: 'CSM Capacity', type: 'textarea', placeholder: 'Number of CSMs, accounts per CSM, available intervention bandwidth...', required: false },
+        ],
+        prompts: {
+          systemInstruction: `You are an expert in customer success analytics and churn prediction. You help CS leaders identify at-risk accounts early and prioritize interventions that maximize retention and revenue protection.
+
+Your churn analysis framework:
+1. Multi-factor risk scoring model
+2. Leading vs. lagging indicator analysis
+3. Segment-based risk profiling
+4. Time-to-churn prediction
+5. Revenue-weighted prioritization
+6. Intervention ROI calculation
+7. Escalation trigger identification
+8. Portfolio health dashboarding
+
+Provide actionable, prioritized recommendations with clear intervention playbooks.`,
+          userPromptTemplate: `Analyze churn risk across this customer portfolio:
+
+**Customer Health Data:**
+{{customerData}}
+
+**Historical Churn Patterns:**
+{{historicalChurn}}
+
+**Available Health Metrics:**
+{{healthMetrics}}
+
+**Renewal Timeline:**
+{{renewalTimeline}}
+
+**CSM Capacity:**
+{{resourceConstraints}}
+
+Provide comprehensive churn risk analysis:
+1. Executive Summary - Portfolio Health Overview
+2. Risk Scoring Methodology
+3. Customer Segmentation by Risk Level
+   - Critical Risk (Immediate Action Required)
+   - High Risk (Proactive Intervention Needed)
+   - Medium Risk (Increased Monitoring)
+   - Healthy (Standard Engagement)
+4. Top 10 At-Risk Accounts with:
+   - Risk score and factors
+   - ARR at risk
+   - Recommended intervention
+   - Owner assignment
+5. Early Warning Signals Detected
+6. Segment-Level Insights
+7. Intervention Priority Matrix (Impact vs. Effort)
+8. Recommended Intervention Playbooks by Risk Type
+9. Resource Allocation Recommendations
+10. Metrics to Track for Risk Reduction
+11. 30/60/90 Day Action Plan`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'claude',
+          useWebSearch: false,
+          maxTokens: 10000,
+          temperature: 0.3,
+        },
+      },
+      {
+        id: 'cs-churn-root-cause-analyzer',
+        name: 'Customer Churn Root Cause Analyzer',
+        description: 'Deep-dive analysis of churned customers to identify systemic issues and prevention strategies',
+        longDescription: 'This skill performs comprehensive post-mortem analysis on churned customers to identify root causes, common patterns, and systemic issues. It generates insights that inform product improvements, process changes, and preventive measures.',
+        category: 'Customer Success',
+        estimatedTimeSaved: '4-6 hours',
+        theme: {
+          gradient: 'from-red-500 to-orange-500',
+          iconBg: 'bg-red-100',
+          iconColor: 'text-red-600',
+        },
+        inputs: [
+          { id: 'churnedAccounts', label: 'Churned Account Details', type: 'textarea', placeholder: 'List churned accounts with: name, ARR, tenure, stated reason, timeline, last touchpoints, usage patterns before churn...', required: true },
+          { id: 'exitFeedback', label: 'Exit Interview/Survey Data', type: 'textarea', placeholder: 'Direct feedback from churned customers, cancellation survey responses, exit call notes...', required: true },
+          { id: 'journeyData', label: 'Customer Journey Data', type: 'textarea', placeholder: 'Key milestones, onboarding completion, feature adoption, support history, stakeholder changes...', required: false },
+          { id: 'competitorInfo', label: 'Competitive Intelligence', type: 'textarea', placeholder: 'Where did customers go? Competitor mentions, alternative solutions chosen...', required: false },
+          { id: 'timeframe', label: 'Analysis Timeframe', type: 'select', options: ['Last Quarter', 'Last 6 Months', 'Last 12 Months', 'All Time'], required: true },
+        ],
+        prompts: {
+          systemInstruction: `You are a customer success strategist specializing in churn analysis and prevention. You identify patterns in customer departures that reveal systemic issues and opportunities for improving retention.
+
+Your root cause analysis framework:
+1. Quantitative pattern analysis
+2. Qualitative feedback synthesis
+3. Journey stage failure identification
+4. Segment-specific vulnerability analysis
+5. Competitive loss patterns
+6. Product/service gap identification
+7. Process failure analysis
+8. Prevention strategy development
+
+Provide insights that drive organizational change and measurable retention improvement.`,
+          userPromptTemplate: `Perform root cause analysis on customer churn:
+
+**Churned Account Details:**
+{{churnedAccounts}}
+
+**Exit Feedback:**
+{{exitFeedback}}
+
+**Customer Journey Data:**
+{{journeyData}}
+
+**Competitive Intelligence:**
+{{competitorInfo}}
+
+**Analysis Timeframe:** {{timeframe}}
+
+Deliver comprehensive root cause analysis:
+1. Executive Summary - Key Findings
+2. Churn Overview
+   - Total accounts and ARR lost
+   - Churn rate trends
+   - Segment distribution
+3. Root Cause Categories (ranked by frequency/impact)
+   - Product-related causes
+   - Service-related causes
+   - Value realization failures
+   - Competitive losses
+   - External factors (budget, M&A, etc.)
+4. Journey Stage Analysis
+   - Where in the lifecycle did churn signals appear?
+   - Critical failure points
+5. Segment Vulnerability Analysis
+6. Competitive Loss Patterns
+7. Systemic Issues Identified
+8. Prevention Recommendations
+   - Product improvements needed
+   - Process changes required
+   - Early intervention triggers
+   - Segment-specific strategies
+9. Quick Wins for Immediate Impact
+10. Long-term Strategic Initiatives
+11. Success Metrics for Prevention Efforts`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'claude',
+          useWebSearch: false,
+          maxTokens: 8192,
+          temperature: 0.3,
+        },
+      },
+      {
+        id: 'cs-save-offer-calculator',
+        name: 'Customer Save Offer Calculator',
+        description: 'Calculate optimal save offers and retention packages for at-risk customers',
+        longDescription: 'This skill analyzes customer value, risk factors, and competitive dynamics to recommend optimal save offers. It calculates the financial trade-offs of various retention strategies and provides negotiation frameworks for saving at-risk accounts.',
+        category: 'Customer Success',
+        estimatedTimeSaved: '2-4 hours',
+        theme: {
+          gradient: 'from-amber-500 to-yellow-500',
+          iconBg: 'bg-amber-100',
+          iconColor: 'text-amber-600',
+        },
+        inputs: [
+          { id: 'customerProfile', label: 'Customer Profile', type: 'textarea', placeholder: 'Customer name, current ARR, contract terms, tenure, expansion potential, strategic value...', required: true },
+          { id: 'churnReason', label: 'Stated Churn Reason', type: 'textarea', placeholder: 'Why are they considering leaving? Price, features, service issues, competitive offer...', required: true },
+          { id: 'competitorOffer', label: 'Competitive Offer (if known)', type: 'textarea', placeholder: 'Details of competitor pricing/terms they\'re considering...', required: false },
+          { id: 'relationshipHistory', label: 'Relationship History', type: 'textarea', placeholder: 'Health score, NPS, support history, executive relationships, past concessions...', required: true },
+          { id: 'companyGuidelines', label: 'Save Offer Guidelines', type: 'textarea', placeholder: 'Your company\'s approved discount levels, term options, service add-ons, approval thresholds...', required: true },
+        ],
+        prompts: {
+          systemInstruction: `You are an expert in customer retention and negotiation strategy. You help CS leaders structure save offers that maximize retention probability while protecting margins and setting healthy precedents.
+
+Your save offer framework considers:
+1. Customer lifetime value calculation
+2. Cost of churn vs. cost of save offer
+3. Competitive positioning analysis
+4. Precedent implications
+5. Multi-lever negotiation strategy
+6. Escalation and approval requirements
+7. Success probability assessment
+8. Alternative scenario planning
+
+Provide specific, financially-grounded recommendations with clear negotiation tactics.`,
+          userPromptTemplate: `Calculate optimal save offer strategy:
+
+**Customer Profile:**
+{{customerProfile}}
+
+**Stated Churn Reason:**
+{{churnReason}}
+
+**Competitive Offer:**
+{{competitorOffer}}
+
+**Relationship History:**
+{{relationshipHistory}}
+
+**Company Guidelines:**
+{{companyGuidelines}}
+
+Provide comprehensive save offer recommendation:
+1. Executive Summary
+2. Customer Value Analysis
+   - Current ARR and CLV
+   - Expansion potential
+   - Strategic/reference value
+   - Cost of churn (direct + indirect)
+3. Churn Driver Analysis
+   - Primary issues to address
+   - Likelihood of save by issue type
+4. Save Offer Options (Good/Better/Best)
+   - Option 1: Conservative offer
+   - Option 2: Moderate offer
+   - Option 3: Maximum retention offer
+   - Each with: terms, discount, add-ons, NPV impact
+5. Financial Analysis
+   - Break-even calculations
+   - ROI of each offer option
+   - Margin implications
+6. Negotiation Strategy
+   - Opening position
+   - Concession sequence
+   - Walk-away point
+   - Key talking points
+7. Non-Monetary Value Adds
+8. Approval Requirements
+9. Success Probability Assessment
+10. If Save Fails: Graceful Exit Strategy
+11. Precedent Considerations`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'claude',
+          useWebSearch: false,
+          maxTokens: 8192,
+          temperature: 0.4,
+        },
+      },
+    ],
+  },
+  // ═══════════════════════════════════════════════════════════════════════════
+  // ENTERPRISE ACCOUNT EXECUTIVE
+  // Skills for expanding strategic enterprise accounts
+  // ═══════════════════════════════════════════════════════════════════════════
+  {
+    id: 'enterprise-account-executive',
+    title: 'Enterprise Account Executive',
+    description: 'Drive expansion revenue through strategic account development and executive engagement',
+    icon: 'Building2',
+    color: 'indigo',
+    categories: ['Enterprise Sales', 'Account Management', 'Strategic Selling'],
+    dynamicSkills: [
+      {
+        id: 'eae-whitespace-expansion-mapper',
+        name: 'Account Whitespace & Expansion Mapper',
+        description: 'Identify untapped expansion opportunities within existing enterprise accounts',
+        longDescription: 'This skill analyzes your enterprise accounts to identify whitespace opportunities including new departments, use cases, products, and geographic expansion. It maps the total addressable opportunity within each account and prioritizes expansion plays.',
+        category: 'Enterprise Sales',
+        estimatedTimeSaved: '4-6 hours',
+        theme: {
+          gradient: 'from-indigo-500 to-purple-500',
+          iconBg: 'bg-indigo-100',
+          iconColor: 'text-indigo-600',
+        },
+        inputs: [
+          { id: 'accountProfile', label: 'Account Profile', type: 'textarea', placeholder: 'Company name, size, industry, current ARR, products owned, departments using your solution...', required: true },
+          { id: 'orgStructure', label: 'Organizational Structure', type: 'textarea', placeholder: 'Known divisions, business units, geographic presence, subsidiary companies...', required: true },
+          { id: 'currentFootprint', label: 'Current Footprint', type: 'textarea', placeholder: 'Users, licenses, features adopted, use cases deployed, departments penetrated...', required: true },
+          { id: 'productPortfolio', label: 'Your Product Portfolio', type: 'textarea', placeholder: 'All products/services you offer that could be sold into this account...', required: true },
+          { id: 'competitorPresence', label: 'Competitor Presence', type: 'textarea', placeholder: 'What competitors are present in other parts of the organization?', required: false },
+        ],
+        prompts: {
+          systemInstruction: `You are a strategic enterprise account manager specializing in account expansion and whitespace analysis. You help sales teams maximize the value of their existing customer relationships.
+
+Your whitespace analysis framework:
+1. Organizational mapping and coverage gaps
+2. Product/solution fit by department
+3. Use case expansion opportunities
+4. Geographic expansion potential
+5. User/seat expansion analysis
+6. Upsell and cross-sell identification
+7. Competitive displacement opportunities
+8. Expansion prioritization matrix
+
+Provide specific, actionable expansion opportunities with clear next steps.`,
+          userPromptTemplate: `Map whitespace and expansion opportunities:
+
+**Account Profile:**
+{{accountProfile}}
+
+**Organizational Structure:**
+{{orgStructure}}
+
+**Current Footprint:**
+{{currentFootprint}}
+
+**Product Portfolio:**
+{{productPortfolio}}
+
+**Competitor Presence:**
+{{competitorPresence}}
+
+Provide comprehensive whitespace analysis:
+1. Executive Summary - Total Addressable Account Opportunity
+2. Current State Assessment
+   - Penetration metrics
+   - Products adopted vs. available
+   - Coverage by department/geography
+3. Whitespace Opportunity Map
+   - By department/business unit
+   - By product/solution
+   - By geography/region
+   - By use case
+4. Expansion Opportunities (Ranked)
+   - Opportunity description
+   - Estimated deal size
+   - Complexity/timeline
+   - Key stakeholders to engage
+   - Entry strategy
+5. Competitive Displacement Opportunities
+6. Land-and-Expand Plays
+7. Executive Engagement Strategy
+8. 90-Day Expansion Action Plan
+9. Required Resources/Support
+10. Risk Factors and Mitigation`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'claude',
+          useWebSearch: true,
+          maxTokens: 8192,
+          temperature: 0.4,
+        },
+      },
+      {
+        id: 'eae-stakeholder-power-mapper',
+        name: 'Enterprise Stakeholder Power Mapper',
+        description: 'Map organizational influence and build strategies for navigating complex buying committees',
+        longDescription: 'This skill helps you map stakeholder influence, identify decision-makers, and develop engagement strategies for navigating complex enterprise buying committees. It provides power mapping analysis and relationship building recommendations.',
+        category: 'Enterprise Sales',
+        estimatedTimeSaved: '3-5 hours',
+        theme: {
+          gradient: 'from-violet-500 to-purple-500',
+          iconBg: 'bg-violet-100',
+          iconColor: 'text-violet-600',
+        },
+        inputs: [
+          { id: 'stakeholders', label: 'Known Stakeholders', type: 'textarea', placeholder: 'List stakeholders: name, title, department, known priorities, relationship status, influence level...', required: true },
+          { id: 'dealContext', label: 'Deal/Initiative Context', type: 'textarea', placeholder: 'What are you selling? Deal size, timeline, current stage, competitive situation...', required: true },
+          { id: 'organizationalDynamics', label: 'Organizational Dynamics', type: 'textarea', placeholder: 'Known political dynamics, recent re-orgs, budget ownership, procurement process...', required: false },
+          { id: 'yourChampion', label: 'Your Champion', type: 'textarea', placeholder: 'Who is your primary champion? Their influence level, motivation, limitations...', required: true },
+          { id: 'blockers', label: 'Known Blockers/Skeptics', type: 'textarea', placeholder: 'Anyone opposed or skeptical? Their concerns, influence, relationships...', required: false },
+        ],
+        prompts: {
+          systemInstruction: `You are an expert in enterprise sales strategy and organizational navigation. You help account executives map complex buying committees and develop winning stakeholder strategies.
+
+Your stakeholder analysis framework:
+1. Decision-maker identification
+2. Influence mapping (formal vs. informal)
+3. MEDDIC/MEDDPICC alignment
+4. Champion development strategy
+5. Blocker neutralization tactics
+6. Coalition building approach
+7. Executive engagement planning
+8. Political navigation guidance
+
+Provide actionable strategies for winning complex deals.`,
+          userPromptTemplate: `Create stakeholder power map and engagement strategy:
+
+**Known Stakeholders:**
+{{stakeholders}}
+
+**Deal Context:**
+{{dealContext}}
+
+**Organizational Dynamics:**
+{{organizationalDynamics}}
+
+**Your Champion:**
+{{yourChampion}}
+
+**Known Blockers:**
+{{blockers}}
+
+Provide comprehensive stakeholder analysis:
+1. Executive Summary - Buying Committee Assessment
+2. Stakeholder Power Map
+   - Decision Makers (final authority)
+   - Economic Buyers (budget control)
+   - Technical Evaluators
+   - User Buyers
+   - Champions
+   - Coaches
+   - Blockers/Skeptics
+3. Influence Analysis
+   - Formal influence (title/role)
+   - Informal influence (relationships/expertise)
+   - Influence flow diagram (text-based)
+4. Champion Assessment
+   - Strength of champion
+   - Champion development needs
+   - Backup champion candidates
+5. Blocker Strategy
+   - Blocker motivations
+   - Neutralization approach
+   - Go-around options
+6. Relationship Gaps to Fill
+7. Engagement Strategy by Stakeholder
+8. Coalition Building Plan
+9. Executive Sponsor Engagement
+10. Meeting/Presentation Strategy
+11. Risk Assessment and Mitigation`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'claude',
+          useWebSearch: false,
+          maxTokens: 8192,
+          temperature: 0.4,
+        },
+      },
+      {
+        id: 'eae-champion-enablement-kit',
+        name: 'Internal Champion Enablement Kit',
+        description: 'Create materials that empower your internal champion to sell on your behalf',
+        longDescription: 'This skill creates comprehensive enablement materials for your internal champion including executive summaries, ROI justifications, objection responses, and presentation decks they can use to advocate for your solution within their organization.',
+        category: 'Enterprise Sales',
+        estimatedTimeSaved: '4-6 hours',
+        theme: {
+          gradient: 'from-emerald-500 to-teal-500',
+          iconBg: 'bg-emerald-100',
+          iconColor: 'text-emerald-600',
+        },
+        inputs: [
+          { id: 'championProfile', label: 'Champion Profile', type: 'textarea', placeholder: 'Champion name, role, department, influence level, personal motivations, presentation style...', required: true },
+          { id: 'solution', label: 'Your Solution', type: 'textarea', placeholder: 'Product/solution being proposed, key features, unique differentiators, implementation approach...', required: true },
+          { id: 'businessCase', label: 'Business Case Elements', type: 'textarea', placeholder: 'ROI metrics, cost savings, efficiency gains, risk reduction, strategic benefits...', required: true },
+          { id: 'targetAudience', label: 'Internal Audience', type: 'textarea', placeholder: 'Who will the champion need to convince? CFO, CIO, procurement, other departments...', required: true },
+          { id: 'objections', label: 'Expected Objections', type: 'textarea', placeholder: 'What pushback will the champion face internally? Budget, timing, competition, risk concerns...', required: true },
+        ],
+        prompts: {
+          systemInstruction: `You are an expert in enterprise sales enablement and champion development. You create materials that transform internal advocates into effective sellers of your solution.
+
+Your champion enablement framework:
+1. Executive-ready summaries
+2. ROI and value documentation
+3. Objection handling guides
+4. Competitive positioning
+5. Risk mitigation narratives
+6. Internal presentation templates
+7. Email templates for internal advocacy
+8. Decision milestone mapping
+
+Create materials your champion can use verbatim to advance the deal.`,
+          userPromptTemplate: `Create champion enablement kit:
+
+**Champion Profile:**
+{{championProfile}}
+
+**Solution:**
+{{solution}}
+
+**Business Case:**
+{{businessCase}}
+
+**Target Audience:**
+{{targetAudience}}
+
+**Expected Objections:**
+{{objections}}
+
+Generate comprehensive champion enablement materials:
+1. Executive Summary (1-pager champion can share)
+2. Elevator Pitch (30-second version)
+3. Key Talking Points (5-7 bullets)
+4. ROI Summary
+   - Quantified benefits
+   - Payback period
+   - Risk-adjusted returns
+5. Objection Response Guide
+   - Each objection with response
+   - Supporting data points
+   - Pivot phrases
+6. Competitive Positioning
+   - Why us vs. alternatives
+   - Unique differentiators
+7. Risk Mitigation Narrative
+8. Internal Email Templates
+   - Request for meeting
+   - Follow-up after discussion
+   - Escalation to executive
+9. Presentation Outline (for internal meetings)
+10. FAQ Document
+11. Success Stories/References to Share
+12. Next Steps and Ask`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'claude',
+          useWebSearch: false,
+          maxTokens: 10000,
+          temperature: 0.4,
+        },
+      },
+    ],
+  },
+  // ═══════════════════════════════════════════════════════════════════════════
+  // RFP RESPONSE MANAGER
+  // Skills for winning competitive RFP processes
+  // ═══════════════════════════════════════════════════════════════════════════
+  {
+    id: 'rfp-response-manager',
+    title: 'RFP Response Manager',
+    description: 'Win more RFPs with systematic analysis, strategic positioning, and compelling responses',
+    icon: 'FileCheck',
+    color: 'sky',
+    categories: ['RFP Management', 'Proposal Writing', 'Competitive Strategy'],
+    dynamicSkills: [
+      {
+        id: 'rfp-requirements-analyzer',
+        name: 'RFP Requirements Analyzer & Scorer',
+        description: 'Parse RFP requirements, assess fit, and score your competitive position',
+        longDescription: 'This skill analyzes RFP documents to extract and categorize requirements, assess your solution fit, identify gaps, and score your competitive position. It provides a go/no-go recommendation with supporting analysis.',
+        category: 'RFP Management',
+        estimatedTimeSaved: '6-10 hours',
+        theme: {
+          gradient: 'from-sky-500 to-blue-500',
+          iconBg: 'bg-sky-100',
+          iconColor: 'text-sky-600',
+        },
+        inputs: [
+          { id: 'rfpContent', label: 'RFP Content', type: 'textarea', placeholder: 'Paste the RFP requirements, evaluation criteria, scope of work, mandatory requirements...', required: true },
+          { id: 'yourCapabilities', label: 'Your Solution Capabilities', type: 'textarea', placeholder: 'Your product features, services, certifications, past performance, differentiators...', required: true },
+          { id: 'companyProfile', label: 'Company Profile', type: 'textarea', placeholder: 'Your company size, industry experience, relevant references, compliance certifications...', required: true },
+          { id: 'competitorIntel', label: 'Competitor Intelligence', type: 'textarea', placeholder: 'Known competitors likely to bid, their strengths/weaknesses, incumbent information...', required: false },
+          { id: 'relationship', label: 'Customer Relationship', type: 'textarea', placeholder: 'Existing relationship with the buyer? Previous work, contacts, intelligence gathered...', required: false },
+        ],
+        prompts: {
+          systemInstruction: `You are an expert RFP analyst who helps companies make strategic bid decisions and maximize win probability. You systematically analyze requirements against capabilities to provide objective assessments.
+
+Your RFP analysis framework:
+1. Requirement extraction and categorization
+2. Mandatory vs. desirable classification
+3. Capability gap analysis
+4. Competitive position assessment
+5. Win probability scoring
+6. Risk factor identification
+7. Resource requirement estimation
+8. Go/no-go recommendation
+
+Provide rigorous, objective analysis that supports sound bid decisions.`,
+          userPromptTemplate: `Analyze this RFP and assess competitive position:
+
+**RFP Content:**
+{{rfpContent}}
+
+**Your Capabilities:**
+{{yourCapabilities}}
+
+**Company Profile:**
+{{companyProfile}}
+
+**Competitor Intelligence:**
+{{competitorIntel}}
+
+**Customer Relationship:**
+{{relationship}}
+
+Provide comprehensive RFP analysis:
+1. Executive Summary with Go/No-Go Recommendation
+2. RFP Overview
+   - Issuing organization
+   - Scope and objectives
+   - Key dates and timeline
+   - Estimated contract value
+3. Requirements Analysis
+   - Mandatory requirements (with compliance status)
+   - Technical requirements (scored)
+   - Experience requirements (scored)
+   - Compliance/certification requirements
+4. Gap Analysis
+   - Critical gaps (must address)
+   - Minor gaps (can mitigate)
+   - Strengths to emphasize
+5. Competitive Assessment
+   - Your position vs. likely competitors
+   - Incumbent advantage/disadvantage
+   - Differentiator opportunities
+6. Win Probability Score (1-100)
+7. Risk Factors
+8. Resource Requirements to Bid
+9. Strategic Recommendations
+10. If Proceeding: Key Win Themes
+11. If Not Proceeding: Graceful Decline Approach`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'claude',
+          useWebSearch: false,
+          maxTokens: 10000,
+          temperature: 0.3,
+        },
+      },
+      {
+        id: 'rfp-bid-decision-framework',
+        name: 'RFP Bid Decision Framework',
+        description: 'Structured go/no-go decision framework for RFP opportunities',
+        longDescription: 'This skill provides a comprehensive bid decision framework that evaluates strategic fit, win probability, resource requirements, and opportunity cost. It facilitates objective go/no-go decisions with clear documentation.',
+        category: 'RFP Management',
+        estimatedTimeSaved: '2-4 hours',
+        theme: {
+          gradient: 'from-green-500 to-emerald-500',
+          iconBg: 'bg-green-100',
+          iconColor: 'text-green-600',
+        },
+        inputs: [
+          { id: 'opportunityOverview', label: 'Opportunity Overview', type: 'textarea', placeholder: 'RFP title, issuer, contract value, duration, scope summary...', required: true },
+          { id: 'strategicAlignment', label: 'Strategic Alignment', type: 'textarea', placeholder: 'How does this align with company strategy? Target market, capability building, reference value...', required: true },
+          { id: 'winFactors', label: 'Win Factors', type: 'textarea', placeholder: 'Relationship with buyer, technical fit, past performance, incumbency, differentiators...', required: true },
+          { id: 'riskFactors', label: 'Risk Factors', type: 'textarea', placeholder: 'Capability gaps, competitor strength, pricing pressure, delivery risks, terms concerns...', required: true },
+          { id: 'resourceRequirements', label: 'Resource Requirements', type: 'textarea', placeholder: 'Estimated bid cost, team hours, subject matter experts needed, opportunity cost...', required: true },
+        ],
+        prompts: {
+          systemInstruction: `You are a bid management expert who helps companies make strategic, data-driven decisions about RFP pursuits. You apply rigorous frameworks to ensure resources are invested in winnable, valuable opportunities.
+
+Your bid decision framework:
+1. Strategic value assessment
+2. Win probability analysis
+3. Competitive position evaluation
+4. Resource-to-reward ratio
+5. Risk-adjusted return calculation
+6. Portfolio fit analysis
+7. Opportunity cost consideration
+8. Clear go/no-go criteria
+
+Provide structured analysis that enables confident decisions.`,
+          userPromptTemplate: `Apply bid decision framework:
+
+**Opportunity Overview:**
+{{opportunityOverview}}
+
+**Strategic Alignment:**
+{{strategicAlignment}}
+
+**Win Factors:**
+{{winFactors}}
+
+**Risk Factors:**
+{{riskFactors}}
+
+**Resource Requirements:**
+{{resourceRequirements}}
+
+Generate structured bid decision analysis:
+1. Opportunity Scorecard
+2. Strategic Value Assessment (Score: 1-10)
+   - Market alignment
+   - Capability development
+   - Reference/portfolio value
+   - Revenue significance
+3. Win Probability Assessment (Score: 1-10)
+   - Solution fit
+   - Relationship strength
+   - Competitive position
+   - Past performance relevance
+4. Risk Assessment (Score: 1-10)
+   - Delivery risk
+   - Commercial risk
+   - Competitive risk
+   - Resource risk
+5. Resource Analysis
+   - Bid investment required
+   - Opportunity cost
+   - ROI if won
+6. Decision Matrix
+   - Weighted scoring
+   - Threshold comparison
+7. GO Recommendation Conditions
+8. NO-GO Recommendation Conditions
+9. Final Recommendation with Rationale
+10. If GO: Critical Success Factors
+11. If NO-GO: Alternative Actions`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'claude',
+          useWebSearch: false,
+          maxTokens: 6000,
+          temperature: 0.3,
+        },
+      },
+      {
+        id: 'rfp-compliance-matrix-generator',
+        name: 'RFP Compliance Matrix Generator',
+        description: 'Generate comprehensive compliance matrices mapping requirements to your capabilities',
+        longDescription: 'This skill creates detailed compliance matrices that map every RFP requirement to your specific capabilities, evidence, and response approach. It ensures complete coverage and identifies gaps requiring mitigation strategies.',
+        category: 'RFP Management',
+        estimatedTimeSaved: '8-12 hours',
+        theme: {
+          gradient: 'from-blue-500 to-indigo-500',
+          iconBg: 'bg-blue-100',
+          iconColor: 'text-blue-600',
+        },
+        inputs: [
+          { id: 'rfpRequirements', label: 'RFP Requirements', type: 'textarea', placeholder: 'Paste all requirements from the RFP, numbered or bulleted...', required: true },
+          { id: 'evaluationCriteria', label: 'Evaluation Criteria', type: 'textarea', placeholder: 'How will responses be scored? Point values, weightings, evaluation methodology...', required: true },
+          { id: 'yourCapabilities', label: 'Your Capabilities', type: 'textarea', placeholder: 'Product features, services, methodologies, certifications, evidence available...', required: true },
+          { id: 'pastPerformance', label: 'Past Performance/Evidence', type: 'textarea', placeholder: 'Relevant projects, case studies, references, certifications, awards...', required: true },
+          { id: 'gapMitigation', label: 'Gap Mitigation Options', type: 'textarea', placeholder: 'Partners, planned capabilities, alternative approaches for any gaps...', required: false },
+        ],
+        prompts: {
+          systemInstruction: `You are an expert proposal manager who creates comprehensive compliance matrices that demonstrate complete requirement coverage. You ensure no requirement is missed and every response is backed by evidence.
+
+Your compliance matrix approach:
+1. Requirement extraction and numbering
+2. Compliance status classification
+3. Capability mapping
+4. Evidence identification
+5. Gap identification with mitigation
+6. Response approach guidance
+7. Cross-reference validation
+8. Scoring optimization
+
+Create matrices that proposal writers can use to ensure winning, compliant responses.`,
+          userPromptTemplate: `Generate compliance matrix:
+
+**RFP Requirements:**
+{{rfpRequirements}}
+
+**Evaluation Criteria:**
+{{evaluationCriteria}}
+
+**Your Capabilities:**
+{{yourCapabilities}}
+
+**Past Performance/Evidence:**
+{{pastPerformance}}
+
+**Gap Mitigation Options:**
+{{gapMitigation}}
+
+Create comprehensive compliance matrix:
+1. Executive Compliance Summary
+   - Total requirements count
+   - Full compliance count
+   - Partial compliance count
+   - Non-compliance count (with mitigation plan)
+2. Detailed Compliance Matrix (Table Format)
+   | Req # | Requirement | Category | Compliance Status | Your Capability | Evidence/Proof Point | Response Approach | Risk Level |
+3. Mandatory Requirements Section
+   - Each requirement with detailed compliance mapping
+4. Technical Requirements Section
+5. Experience Requirements Section
+6. Compliance/Certification Requirements
+7. Gap Analysis Summary
+   - Each gap with mitigation strategy
+8. Evidence Library
+   - Cross-reference to case studies, references, certs
+9. Response Writing Guidance by Section
+10. Scoring Strategy Notes
+11. Review Checklist`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'claude',
+          useWebSearch: false,
+          maxTokens: 16384,
+          temperature: 0.2,
+        },
+      },
+      {
+        id: 'rfp-competitive-pricing-strategist',
+        name: 'Competitive RFP Pricing Strategist',
+        description: 'Develop winning pricing strategies that balance competitiveness with profitability',
+        longDescription: 'This skill helps you develop RFP pricing strategies that maximize win probability while protecting margins. It analyzes competitive dynamics, customer priorities, and value drivers to recommend optimal pricing approaches.',
+        category: 'RFP Management',
+        estimatedTimeSaved: '4-6 hours',
+        theme: {
+          gradient: 'from-yellow-500 to-orange-500',
+          iconBg: 'bg-yellow-100',
+          iconColor: 'text-yellow-600',
+        },
+        inputs: [
+          { id: 'opportunityDetails', label: 'Opportunity Details', type: 'textarea', placeholder: 'Contract scope, duration, estimated value, pricing format required (fixed, T&M, etc.)...', required: true },
+          { id: 'costStructure', label: 'Your Cost Structure', type: 'textarea', placeholder: 'Direct costs, labor rates, overhead, target margins, volume discounts available...', required: true },
+          { id: 'competitorPricing', label: 'Competitor Pricing Intelligence', type: 'textarea', placeholder: 'Known competitor pricing on similar deals, market rates, incumbent pricing (if known)...', required: false },
+          { id: 'customerPriorities', label: 'Customer Priorities', type: 'textarea', placeholder: 'Is price weighted heavily? Best value evaluation? Known budget constraints?', required: true },
+          { id: 'differentiators', label: 'Your Value Differentiators', type: 'textarea', placeholder: 'What justifies premium pricing? Risk reduction, faster delivery, better outcomes...', required: true },
+        ],
+        prompts: {
+          systemInstruction: `You are a pricing strategist specializing in competitive bid situations. You help companies develop pricing that wins deals while maintaining healthy margins.
+
+Your pricing strategy framework:
+1. Market rate benchmarking
+2. Competitive position analysis
+3. Value-based pricing justification
+4. Price-to-win estimation
+5. Margin optimization
+6. Risk-adjusted pricing
+7. Alternative pricing structures
+8. Negotiation positioning
+
+Provide specific pricing recommendations with clear strategic rationale.`,
+          userPromptTemplate: `Develop RFP pricing strategy:
+
+**Opportunity Details:**
+{{opportunityDetails}}
+
+**Your Cost Structure:**
+{{costStructure}}
+
+**Competitor Pricing Intelligence:**
+{{competitorPricing}}
+
+**Customer Priorities:**
+{{customerPriorities}}
+
+**Your Value Differentiators:**
+{{differentiators}}
+
+Generate comprehensive pricing strategy:
+1. Executive Summary - Pricing Recommendation
+2. Market Analysis
+   - Benchmark pricing ranges
+   - Competitor pricing positions
+   - Market trends
+3. Price-to-Win Analysis
+   - Estimated competitive range
+   - Sweet spot identification
+4. Value Proposition Pricing
+   - Premium justification factors
+   - Quantified value adds
+5. Pricing Options
+   - Aggressive (maximize win probability)
+   - Balanced (optimize win + margin)
+   - Premium (margin protection)
+   - Each with: price point, margin, win probability estimate
+6. Pricing Structure Recommendations
+   - Fixed vs. variable components
+   - Risk allocation
+   - Payment terms
+7. Discount/Incentive Strategy
+8. Negotiation Positioning
+   - Opening position
+   - Walk-away floor
+   - Concession strategy
+9. Risk Factors and Mitigation
+10. Final Pricing Recommendation
+11. Supporting Rationale for Bid Review`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'claude',
+          useWebSearch: false,
+          maxTokens: 8192,
+          temperature: 0.4,
+        },
+      },
+    ],
+  },
+  // ═══════════════════════════════════════════════════════════════════════════
+  // PARTNER CHANNEL MANAGER
+  // Skills for building and enabling partner ecosystems
+  // ═══════════════════════════════════════════════════════════════════════════
+  {
+    id: 'partner-channel-manager',
+    title: 'Partner Channel Manager',
+    description: 'Build and scale high-performing partner channels that drive indirect revenue',
+    icon: 'Users',
+    color: 'violet',
+    categories: ['Channel Sales', 'Partner Management', 'Ecosystem Development'],
+    dynamicSkills: [
+      {
+        id: 'partner-program-framework',
+        name: 'Channel Partner Program Framework',
+        description: 'Design comprehensive partner program structures with tiers, benefits, and requirements',
+        longDescription: 'This skill helps you design or optimize channel partner programs including tier structures, qualification criteria, benefits packages, MDF/co-op programs, and partner success metrics. It creates programs that attract and motivate the right partners.',
+        category: 'Channel Sales',
+        estimatedTimeSaved: '10-15 hours',
+        theme: {
+          gradient: 'from-violet-500 to-purple-500',
+          iconBg: 'bg-violet-100',
+          iconColor: 'text-violet-600',
+        },
+        inputs: [
+          { id: 'businessModel', label: 'Business Model', type: 'textarea', placeholder: 'Your products/services, target market, sales motion, current channel mix, ASP...', required: true },
+          { id: 'partnerTypes', label: 'Target Partner Types', type: 'textarea', placeholder: 'Resellers, SIs, consultants, ISVs, MSPs, technology partners...', required: true },
+          { id: 'currentProgram', label: 'Current Program (if exists)', type: 'textarea', placeholder: 'Existing tier structure, benefits, pain points, partner feedback...', required: false },
+          { id: 'competitorPrograms', label: 'Competitor Programs', type: 'textarea', placeholder: 'How do competitors structure their programs? What attracts partners to them?', required: false },
+          { id: 'objectives', label: 'Program Objectives', type: 'textarea', placeholder: 'Revenue targets, partner count goals, geographic expansion, strategic priorities...', required: true },
+        ],
+        prompts: {
+          systemInstruction: `You are a channel strategy expert who has designed partner programs for companies ranging from startups to enterprises. You create programs that align partner incentives with company objectives.
+
+Your program design framework:
+1. Partner segmentation and tiering
+2. Qualification and certification requirements
+3. Benefits structure (margins, MDF, leads, support)
+4. Performance metrics and scorecards
+5. Investment and resource requirements
+6. Governance and compliance
+7. Technology and portal requirements
+8. Partner lifecycle management
+
+Design programs that are competitive, sustainable, and scalable.`,
+          userPromptTemplate: `Design channel partner program framework:
+
+**Business Model:**
+{{businessModel}}
+
+**Target Partner Types:**
+{{partnerTypes}}
+
+**Current Program:**
+{{currentProgram}}
+
+**Competitor Programs:**
+{{competitorPrograms}}
+
+**Program Objectives:**
+{{objectives}}
+
+Create comprehensive partner program design:
+1. Executive Summary
+2. Program Vision and Objectives
+3. Partner Segmentation
+   - Partner types and profiles
+   - Ideal partner characteristics
+4. Tier Structure
+   - Tier names and positioning
+   - Qualification criteria per tier
+   - Movement between tiers
+5. Benefits Package by Tier
+   - Margins/discounts
+   - MDF/co-op funding
+   - Lead sharing
+   - Support levels
+   - Training/certification
+   - Marketing resources
+   - Technical support
+6. Requirements by Tier
+   - Revenue commitments
+   - Certification requirements
+   - Business planning
+   - Reporting obligations
+7. Partner Scorecard Metrics
+8. Deal Registration Rules
+9. Conflict Resolution Policy
+10. Investment Requirements (Your Side)
+11. Technology/Portal Requirements
+12. Implementation Roadmap
+13. Success Metrics and KPIs`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'claude',
+          useWebSearch: true,
+          maxTokens: 12000,
+          temperature: 0.4,
+        },
+      },
+      {
+        id: 'partner-sales-playbook-generator',
+        name: 'Partner Sales Playbook Generator',
+        description: 'Create comprehensive sales playbooks that enable partners to effectively sell your solutions',
+        longDescription: 'This skill generates detailed sales playbooks for channel partners including positioning, discovery questions, objection handling, competitive differentiation, demo scripts, and proposal templates. It enables partners to sell as effectively as your direct team.',
+        category: 'Channel Sales',
+        estimatedTimeSaved: '8-12 hours',
+        theme: {
+          gradient: 'from-blue-500 to-cyan-500',
+          iconBg: 'bg-blue-100',
+          iconColor: 'text-blue-600',
+        },
+        inputs: [
+          { id: 'solution', label: 'Solution Overview', type: 'textarea', placeholder: 'Product/service description, key features, target buyers, use cases, pricing model...', required: true },
+          { id: 'idealCustomer', label: 'Ideal Customer Profile', type: 'textarea', placeholder: 'Target company size, industry, pain points, buying triggers, decision makers...', required: true },
+          { id: 'valueProposition', label: 'Value Proposition', type: 'textarea', placeholder: 'Key benefits, ROI metrics, differentiation, customer success stories...', required: true },
+          { id: 'competitors', label: 'Competitive Landscape', type: 'textarea', placeholder: 'Main competitors, their positioning, your advantages, battlecard points...', required: true },
+          { id: 'partnerContext', label: 'Partner Context', type: 'textarea', placeholder: 'Partner types using this playbook, their existing capabilities, attach opportunities...', required: true },
+        ],
+        prompts: {
+          systemInstruction: `You are a sales enablement expert who creates playbooks that accelerate partner sales performance. You translate complex value propositions into practical selling tools.
+
+Your playbook framework:
+1. Solution positioning and messaging
+2. Buyer persona targeting
+3. Discovery methodology
+4. Value articulation
+5. Objection handling
+6. Competitive positioning
+7. Demo/presentation guidance
+8. Proposal templates
+9. Pricing and quoting guidance
+10. Success metrics
+
+Create playbooks that partners can use immediately to drive pipeline.`,
+          userPromptTemplate: `Generate partner sales playbook:
+
+**Solution Overview:**
+{{solution}}
+
+**Ideal Customer Profile:**
+{{idealCustomer}}
+
+**Value Proposition:**
+{{valueProposition}}
+
+**Competitive Landscape:**
+{{competitors}}
+
+**Partner Context:**
+{{partnerContext}}
+
+Create comprehensive sales playbook:
+1. Executive Summary - Solution Overview
+2. Market Opportunity
+   - Target segments
+   - Market trends driving demand
+3. Ideal Customer Profile
+   - Firmographic criteria
+   - Buying triggers
+   - Pain points addressed
+4. Buyer Personas
+   - Economic buyer
+   - Technical buyer
+   - User buyer
+   - For each: priorities, concerns, messaging
+5. Positioning and Messaging
+   - Elevator pitch
+   - Key messages by persona
+   - Proof points
+6. Discovery Framework
+   - Qualification questions
+   - Pain discovery questions
+   - Impact questions
+   - Decision process questions
+7. Value Articulation
+   - ROI framework
+   - Business case elements
+   - Customer success examples
+8. Competitive Positioning
+   - Key competitors
+   - Differentiation points
+   - Objection responses
+9. Demo/Presentation Guide
+   - Key flows to show
+   - Talking points
+   - Questions to ask
+10. Objection Handling Guide
+11. Proposal Template Outline
+12. Pricing/Quoting Guidance
+13. Implementation Overview
+14. Attach/Upsell Opportunities
+15. Resources and Support`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'claude',
+          useWebSearch: false,
+          maxTokens: 12000,
+          temperature: 0.4,
+        },
+      },
+      {
+        id: 'partner-deal-registration-process',
+        name: 'Partner Deal Registration Process',
+        description: 'Design deal registration systems that protect partner investments while driving healthy competition',
+        longDescription: 'This skill helps you design or optimize deal registration processes including eligibility criteria, approval workflows, protection policies, expiration rules, and conflict resolution procedures. It balances partner protection with healthy competition.',
+        category: 'Channel Sales',
+        estimatedTimeSaved: '4-6 hours',
+        theme: {
+          gradient: 'from-green-500 to-emerald-500',
+          iconBg: 'bg-green-100',
+          iconColor: 'text-green-600',
+        },
+        inputs: [
+          { id: 'currentProcess', label: 'Current Process', type: 'textarea', placeholder: 'Existing deal reg process, pain points, partner complaints, conflict frequency...', required: false },
+          { id: 'channelStructure', label: 'Channel Structure', type: 'textarea', placeholder: 'Partner tiers, partner types, direct sales overlap, geographic coverage...', required: true },
+          { id: 'salesCycle', label: 'Typical Sales Cycle', type: 'textarea', placeholder: 'Average deal cycle length, key milestones, complexity factors...', required: true },
+          { id: 'conflictScenarios', label: 'Common Conflict Scenarios', type: 'textarea', placeholder: 'Partner vs. partner, partner vs. direct, territory disputes, refresh/renewal conflicts...', required: true },
+          { id: 'objectives', label: 'Program Objectives', type: 'textarea', placeholder: 'Partner motivation goals, conflict reduction targets, process efficiency...', required: true },
+        ],
+        prompts: {
+          systemInstruction: `You are a channel operations expert specializing in deal registration and conflict management. You design systems that motivate partners to invest in opportunities while maintaining fair competition.
+
+Your deal registration framework:
+1. Registration eligibility criteria
+2. Required information and validation
+3. Approval workflow and SLAs
+4. Protection levels and duration
+5. Status tracking and communication
+6. Expiration and renewal rules
+7. Conflict resolution procedures
+8. Exception handling
+9. Technology requirements
+10. Metrics and reporting
+
+Create processes that are fair, transparent, and enforceable.`,
+          userPromptTemplate: `Design deal registration process:
+
+**Current Process:**
+{{currentProcess}}
+
+**Channel Structure:**
+{{channelStructure}}
+
+**Typical Sales Cycle:**
+{{salesCycle}}
+
+**Common Conflict Scenarios:**
+{{conflictScenarios}}
+
+**Program Objectives:**
+{{objectives}}
+
+Create comprehensive deal registration design:
+1. Executive Summary
+2. Program Principles and Philosophy
+3. Eligibility Criteria
+   - Who can register deals
+   - Deal qualification requirements
+   - Excluded opportunity types
+4. Registration Requirements
+   - Required fields/information
+   - Customer validation
+   - Opportunity qualification
+5. Approval Process
+   - Workflow steps
+   - Approval SLAs
+   - Rejection criteria and communication
+6. Protection Levels
+   - Protection by tier
+   - Discount/margin protection
+   - Activity requirements for protection
+7. Registration Duration
+   - Initial protection period
+   - Extension criteria
+   - Expiration rules
+8. Status Management
+   - Status definitions
+   - Update requirements
+   - Milestone tracking
+9. Conflict Resolution
+   - First-to-register rules
+   - Multi-partner scenarios
+   - Direct vs. partner conflicts
+   - Escalation process
+10. Exception Process
+11. Technology Requirements
+12. Metrics and Reporting
+13. Partner Communication Templates
+14. Implementation Timeline`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'claude',
+          useWebSearch: false,
+          maxTokens: 10000,
+          temperature: 0.3,
+        },
+      },
+    ],
+  },
+  // ═══════════════════════════════════════════════════════════════════════════
+  // ENGINEERING MANAGER
+  // Skills for technical debt assessment and engineering economics
+  // ═══════════════════════════════════════════════════════════════════════════
+  {
+    id: 'engineering-manager',
+    title: 'Engineering Manager',
+    description: 'Balance technical excellence with business outcomes through data-driven engineering decisions',
+    icon: 'Code2',
+    color: 'slate',
+    categories: ['Engineering Management', 'Technical Strategy', 'Software Development'],
+    dynamicSkills: [
+      {
+        id: 'eng-tech-debt-inventory',
+        name: 'Technical Debt Inventory & Classification',
+        description: 'Systematically catalog and classify technical debt across your codebase and systems',
+        longDescription: 'This skill helps you create a comprehensive inventory of technical debt, classifying it by type, severity, and impact. It provides a structured framework for documenting, prioritizing, and communicating technical debt to both technical and business stakeholders.',
+        category: 'Engineering Management',
+        estimatedTimeSaved: '6-10 hours',
+        theme: {
+          gradient: 'from-slate-500 to-gray-600',
+          iconBg: 'bg-slate-100',
+          iconColor: 'text-slate-600',
+        },
+        inputs: [
+          { id: 'systemsOverview', label: 'Systems Overview', type: 'textarea', placeholder: 'Describe your systems, architecture, tech stack, team structure, development practices...', required: true },
+          { id: 'knownIssues', label: 'Known Technical Issues', type: 'textarea', placeholder: 'List known tech debt items: legacy code, outdated dependencies, architectural issues, test gaps, documentation gaps...', required: true },
+          { id: 'symptoms', label: 'Observable Symptoms', type: 'textarea', placeholder: 'Slow deployments, frequent bugs, scaling issues, onboarding difficulties, incident patterns...', required: true },
+          { id: 'recentChanges', label: 'Recent Technical Decisions', type: 'textarea', placeholder: 'Shortcuts taken, deferred refactoring, quick fixes, scope cuts that created debt...', required: false },
+          { id: 'teamFeedback', label: 'Team Feedback', type: 'textarea', placeholder: 'What do engineers complain about? Friction points, areas they avoid, wishlist items...', required: false },
+        ],
+        prompts: {
+          systemInstruction: `You are a technical leader specializing in software architecture and engineering excellence. You help organizations understand, quantify, and manage technical debt strategically.
+
+Your tech debt classification framework:
+1. Debt type categorization (code, architecture, infrastructure, process, documentation)
+2. Severity assessment
+3. Impact analysis (velocity, quality, security, scalability)
+4. Root cause identification
+5. Interest rate calculation (cost of carrying)
+6. Remediation complexity estimation
+7. Dependency mapping
+8. Prioritization framework
+
+Create inventories that enable data-driven technical investment decisions.`,
+          userPromptTemplate: `Create technical debt inventory:
+
+**Systems Overview:**
+{{systemsOverview}}
+
+**Known Technical Issues:**
+{{knownIssues}}
+
+**Observable Symptoms:**
+{{symptoms}}
+
+**Recent Technical Decisions:**
+{{recentChanges}}
+
+**Team Feedback:**
+{{teamFeedback}}
+
+Generate comprehensive technical debt inventory:
+1. Executive Summary
+   - Total debt items identified
+   - Critical items requiring immediate attention
+   - Estimated total remediation effort
+2. Debt Classification Categories
+   - Code debt (complexity, duplication, standards)
+   - Architectural debt (coupling, patterns, boundaries)
+   - Infrastructure debt (tooling, CI/CD, environments)
+   - Test debt (coverage, reliability, speed)
+   - Documentation debt (missing, outdated)
+   - Dependency debt (outdated, vulnerable, unsupported)
+3. Detailed Debt Inventory (Table Format)
+   | ID | Category | Description | Severity | Impact Areas | Interest Rate | Est. Remediation Effort | Dependencies |
+4. Critical Debt Items (Deep Dive)
+   - For each critical item: full analysis
+5. Debt by System/Component
+6. Debt Heat Map (Text-Based)
+7. Root Cause Analysis
+   - Process gaps creating debt
+   - Resource constraints
+   - Technical decisions
+8. Debt Trend Indicators
+9. Quick Wins (High Impact, Low Effort)
+10. Strategic Debt (Acceptable for Now)
+11. Prioritized Remediation Backlog
+12. Tracking Metrics and Dashboard Requirements`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'claude',
+          useWebSearch: false,
+          maxTokens: 12000,
+          temperature: 0.3,
+        },
+      },
+      {
+        id: 'eng-tech-debt-business-impact',
+        name: 'Tech Debt Business Impact Calculator',
+        description: 'Quantify the business impact of technical debt to justify remediation investments',
+        longDescription: 'This skill translates technical debt into business metrics including velocity impact, defect costs, opportunity costs, and risk exposure. It creates business cases that help secure investment in technical health.',
+        category: 'Engineering Management',
+        estimatedTimeSaved: '4-6 hours',
+        theme: {
+          gradient: 'from-red-500 to-orange-500',
+          iconBg: 'bg-red-100',
+          iconColor: 'text-red-600',
+        },
+        inputs: [
+          { id: 'debtItems', label: 'Technical Debt Items', type: 'textarea', placeholder: 'List debt items with descriptions, affected areas, and severity...', required: true },
+          { id: 'teamMetrics', label: 'Team/Productivity Metrics', type: 'textarea', placeholder: 'Team size, velocity trends, time spent on maintenance vs. new features, deployment frequency...', required: true },
+          { id: 'incidentData', label: 'Incident/Defect Data', type: 'textarea', placeholder: 'Bug rates, incident frequency, MTTR, customer-facing issues, on-call burden...', required: true },
+          { id: 'businessContext', label: 'Business Context', type: 'textarea', placeholder: 'Engineering cost rates, revenue per engineer, opportunity cost of delayed features, customer impact of incidents...', required: true },
+          { id: 'remediationCosts', label: 'Remediation Estimates', type: 'textarea', placeholder: 'Estimated effort to fix each major debt item (weeks/months of engineering time)...', required: true },
+        ],
+        prompts: {
+          systemInstruction: `You are an engineering economics expert who helps translate technical debt into business impact. You create compelling business cases that help engineering leaders secure investment in technical health.
+
+Your impact quantification framework:
+1. Velocity drag calculation
+2. Defect cost attribution
+3. Incident cost analysis
+4. Opportunity cost modeling
+5. Risk exposure quantification
+6. Engineer satisfaction/retention impact
+7. Scalability constraint costs
+8. Security vulnerability exposure
+9. ROI of remediation
+10. Break-even analysis
+
+Create analyses that resonate with business stakeholders and finance.`,
+          userPromptTemplate: `Calculate business impact of technical debt:
+
+**Technical Debt Items:**
+{{debtItems}}
+
+**Team/Productivity Metrics:**
+{{teamMetrics}}
+
+**Incident/Defect Data:**
+{{incidentData}}
+
+**Business Context:**
+{{businessContext}}
+
+**Remediation Estimates:**
+{{remediationCosts}}
+
+Generate business impact analysis:
+1. Executive Summary
+   - Total annual cost of technical debt
+   - Top 3 most expensive debt items
+   - Recommended investment level
+2. Velocity Impact Analysis
+   - Current velocity vs. potential velocity
+   - Percentage of time spent on debt-related work
+   - New feature delay quantification
+   - Cost: Lost productivity in $ terms
+3. Quality Cost Analysis
+   - Bug rate attribution to tech debt
+   - Time spent on debugging/rework
+   - Customer impact incidents
+   - Cost: Quality overhead in $ terms
+4. Incident Cost Analysis
+   - Debt-related incident frequency
+   - MTTR impact
+   - On-call burden
+   - Customer/revenue impact
+   - Cost: Incident overhead in $ terms
+5. Opportunity Cost Analysis
+   - Delayed features/capabilities
+   - Market opportunity impact
+   - Competitive disadvantage
+   - Cost: Lost opportunity in $ terms
+6. Risk Exposure Analysis
+   - Security vulnerabilities
+   - Compliance risks
+   - Scalability ceilings
+   - Cost: Risk exposure in $ terms
+7. Total Cost of Technical Debt (Annual)
+8. Remediation ROI Analysis
+   - Investment required
+   - Expected savings
+   - Payback period
+   - 3-year ROI
+9. Prioritized Investment Recommendations
+10. Business Case Summary for Leadership`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'claude',
+          useWebSearch: false,
+          maxTokens: 10000,
+          temperature: 0.3,
+        },
+      },
+    ],
+  },
 ];
 
 export function getRoleTemplate(roleId: string): RoleTemplate | undefined {

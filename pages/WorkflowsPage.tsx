@@ -28,6 +28,12 @@ import {
   ArrowRight,
   Layers,
   X,
+  Shield,
+  FileCheck,
+  BarChart3,
+  Code2,
+  Building2,
+  Heart,
 } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
@@ -62,7 +68,31 @@ const WORKFLOW_CATEGORIES: WorkflowCategory[] = [
     description: 'Strategic sales and account pursuit workflows',
     icon: Target,
     color: 'text-orange-500',
-    workflowIds: ['sales-account-pursuit', 'consulting-engagement'],
+    workflowIds: ['sales-account-pursuit', 'consulting-engagement', 'rfp-response-center'],
+  },
+  {
+    id: 'enterprise-accounts',
+    name: 'Enterprise Account Management',
+    description: 'Expand and retain strategic enterprise accounts',
+    icon: Building2,
+    color: 'text-indigo-500',
+    workflowIds: ['enterprise-account-expansion', 'customer-churn-prevention'],
+  },
+  {
+    id: 'revenue-operations',
+    name: 'Revenue Operations',
+    description: 'Optimize your revenue engine from lead to cash',
+    icon: BarChart3,
+    color: 'text-cyan-500',
+    workflowIds: ['revenue-operations-optimization'],
+  },
+  {
+    id: 'channel-partners',
+    name: 'Channel & Partners',
+    description: 'Build and enable high-performing partner channels',
+    icon: Users,
+    color: 'text-violet-500',
+    workflowIds: ['partner-channel-enablement'],
   },
   {
     id: 'marketing',
@@ -88,6 +118,14 @@ const WORKFLOW_CATEGORIES: WorkflowCategory[] = [
     color: 'text-emerald-500',
     workflowIds: ['startup-investor-pitch'],
   },
+  {
+    id: 'engineering',
+    name: 'Engineering & Technology',
+    description: 'Technical leadership and engineering economics',
+    icon: Code2,
+    color: 'text-slate-500',
+    workflowIds: ['technical-debt-assessment'],
+  },
 ];
 
 // Icon mapping for workflows
@@ -100,6 +138,13 @@ const WORKFLOW_ICONS: Record<string, React.ElementType> = {
   Rocket,
   TrendingUp,
   Target,
+  Shield,
+  FileCheck,
+  BarChart3,
+  Code2,
+  Users,
+  Building2,
+  Heart,
 };
 
 // Color mapping for workflows
@@ -112,6 +157,11 @@ const WORKFLOW_COLORS: Record<string, string> = {
   indigo: 'text-indigo-500 bg-indigo-500/10 border-indigo-500/20',
   emerald: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20',
   orange: 'text-orange-500 bg-orange-500/10 border-orange-500/20',
+  rose: 'text-rose-500 bg-rose-500/10 border-rose-500/20',
+  sky: 'text-sky-500 bg-sky-500/10 border-sky-500/20',
+  slate: 'text-slate-500 bg-slate-500/10 border-slate-500/20',
+  violet: 'text-violet-500 bg-violet-500/10 border-violet-500/20',
+  cyan: 'text-cyan-500 bg-cyan-500/10 border-cyan-500/20',
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
