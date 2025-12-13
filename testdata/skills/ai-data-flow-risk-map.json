@@ -1,0 +1,73 @@
+{
+  "skillId": "ai-data-flow-risk-map",
+  "skillName": "AI Data Flow Risk Mapper",
+  "generatedAt": "2025-12-13T00:00:00.000Z",
+  "tests": [
+    {
+      "id": "ai-dataflow-happy-1",
+      "type": "happy-path",
+      "description": "SaaS company mapping AI data flows for SOC2 audit",
+      "inputPayload": {
+        "keySystemsInventory": "Core Systems: Salesforce CRM (customer contacts, opportunities, activities), PostgreSQL on AWS RDS (application database - user data, transactions), AWS S3 (document storage, backups), Snowflake (analytics data warehouse), Zendesk (support tickets, customer communications), HubSpot (marketing automation, email campaigns), GitHub (source code repositories), Slack (internal communications).",
+        "dataTypesProcessed": "Customer PII: names, emails, phone numbers, company names, job titles. Usage data: feature usage, login history, API calls. Financial: subscription data, payment history (no raw card data - Stripe handles). Support content: ticket descriptions which may contain screenshots, error logs. Marketing: email engagement, website behavior.",
+        "aiIntegrations": "Salesforce Einstein: lead scoring, opportunity insights (accesses CRM data). Zendesk AI: ticket categorization, suggested responses (accesses ticket content). ChatGPT via Zapier: generates meeting summaries from Slack (accesses conversation text). GitHub Copilot: code suggestions (accesses private repos). Custom RAG chatbot: internal documentation search (accesses Confluence). Planned: AI-powered analytics insights on customer usage.",
+        "dataResidencyRequirements": "EU customer data must be processed in EU regions (GDPR). SOC2 requires data inventory and flow documentation. Some enterprise clients require US-only data handling.",
+        "currentSecurityControls": "SSO via Okta with MFA. Role-based access controls. Encryption at rest (AWS KMS) and in transit (TLS 1.3). DLP on email (Microsoft Defender). Quarterly access reviews. Pen testing annually. No AI-specific controls yet.",
+        "plannedAIExpansions": "Q1: AI-powered customer health scoring. Q2: Automated support ticket responses. Q3: Predictive churn analysis. Q4: AI assistant for sales team."
+      },
+      "rubric": {
+        "criteria": [
+          {"id": "flow-mapping", "description": "Clear description of data flows through AI systems", "weight": 25},
+          {"id": "risk-identification", "description": "Identifies specific risk points at AI touchpoints", "weight": 25},
+          {"id": "control-gaps", "description": "Highlights missing security controls", "weight": 20},
+          {"id": "mitigations", "description": "Provides concrete mitigation recommendations", "weight": 20},
+          {"id": "compliance-mapping", "description": "Addresses SOC2/GDPR requirements specifically", "weight": 10}
+        ]
+      }
+    },
+    {
+      "id": "ai-dataflow-edge-1",
+      "type": "edge-case",
+      "description": "Complex multi-cloud environment with many AI integrations",
+      "inputPayload": {
+        "keySystemsInventory": "AWS: EC2 fleet, RDS (PostgreSQL, MySQL), S3, Lambda, SageMaker. GCP: BigQuery, Cloud Run, Vertex AI. Azure: Azure SQL, Blob Storage, Azure OpenAI. On-premise: Legacy Oracle DB (HR system), File servers. SaaS: Salesforce, ServiceNow, Workday, SAP SuccessFactors, Jira, Confluence, Slack, Teams, Zoom.",
+        "dataTypesProcessed": "Everything: Customer PII, Employee PII including SSN, Healthcare data (PHI) for employee benefits, Financial transactions, Intellectual property (patents, trade secrets), Legal documents, M&A sensitive data, Board materials, Customer usage telemetry, Source code, Infrastructure configurations.",
+        "aiIntegrations": "Too many to list exhaustively: Salesforce Einstein, ServiceNow Virtual Agent, Azure OpenAI (GPT-4) for multiple applications, AWS Bedrock experiments, GCP Vertex AI for ML ops, GitHub Copilot (5000 developers), ChatGPT Enterprise (20K seats), Custom models trained on internal data, Third-party AI features in 15+ SaaS tools (some unknown).",
+        "dataResidencyRequirements": "EU data in EU only. China data stays in China. Financial data subject to various retention requirements. Healthcare data under HIPAA. Some government contract data has specific handling requirements.",
+        "currentSecurityControls": "Comprehensive but fragmented: Multiple IAM systems, Various encryption standards, CASB for some cloud apps, DLP partially deployed, SIEM with incomplete coverage, No unified AI monitoring.",
+        "plannedAIExpansions": "Enterprise-wide Copilot rollout, AI-powered ERP, Automated compliance monitoring, Customer-facing AI products."
+      },
+      "rubric": {
+        "criteria": [
+          {"id": "flow-mapping", "description": "Handles complexity without becoming overwhelming", "weight": 20},
+          {"id": "risk-identification", "description": "Prioritizes highest-risk AI touchpoints effectively", "weight": 25},
+          {"id": "control-gaps", "description": "Identifies gaps across complex environment", "weight": 20},
+          {"id": "mitigations", "description": "Realistic recommendations for enterprise scale", "weight": 20},
+          {"id": "compliance-mapping", "description": "Addresses multiple regulatory frameworks", "weight": 15}
+        ]
+      }
+    },
+    {
+      "id": "ai-dataflow-variant-1",
+      "type": "variant",
+      "description": "Healthcare startup with PHI concerns",
+      "inputPayload": {
+        "keySystemsInventory": "Core Platform: AWS HIPAA-eligible environment (EC2, RDS, S3 with encryption). Epic EHR integration (read-only). Patient portal (React app). Provider dashboard. Analytics database (de-identified only).",
+        "dataTypesProcessed": "Protected Health Information (PHI): patient names, DOB, medical record numbers, diagnoses, treatment plans, lab results, imaging. Provider data. Insurance information. De-identified aggregate data for analytics.",
+        "aiIntegrations": "Clinical Decision Support: AI model for risk stratification (uses PHI in HIPAA environment). Administrative: ChatGPT Enterprise for documentation drafts (no PHI allowed). Planned: AI-powered medical coding, Patient communication AI.",
+        "dataResidencyRequirements": "HIPAA requires BAA with all vendors touching PHI. PHI cannot be sent to AI systems without explicit patient consent and appropriate safeguards. De-identified data has fewer restrictions.",
+        "currentSecurityControls": "HIPAA Security Rule compliant: encryption, access controls, audit logging. BAAs with all vendors. No PHI to external AI tools policy. HITRUST certification in progress.",
+        "plannedAIExpansions": "AI medical coding assistant, Patient communication chatbot, Predictive readmission models, Clinical note summarization."
+      },
+      "rubric": {
+        "criteria": [
+          {"id": "flow-mapping", "description": "Clearly distinguishes PHI vs non-PHI data flows", "weight": 25},
+          {"id": "risk-identification", "description": "Emphasizes HIPAA-specific risks appropriately", "weight": 25},
+          {"id": "control-gaps", "description": "Identifies gaps against HIPAA requirements", "weight": 20},
+          {"id": "mitigations", "description": "Healthcare-appropriate mitigations (BAAs, de-identification)", "weight": 20},
+          {"id": "compliance-mapping", "description": "Thorough HIPAA compliance focus", "weight": 10}
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,79 @@
+{
+  "skillId": "change-request-doc-builder",
+  "skillName": "Change Request Documentation Builder",
+  "generatedAt": "2025-12-13T00:00:00.000Z",
+  "tests": [
+    {
+      "id": "change-req-happy-1",
+      "type": "happy-path",
+      "description": "Production deployment of new authentication service",
+      "inputPayload": {
+        "changeSummary": "Deploy new OAuth 2.0 authentication microservice to production, replacing legacy session-based auth. This change enables SSO integration with enterprise identity providers, improves security with token-based auth, and reduces login latency by 40%. The new service has been in staging for 4 weeks with positive results.",
+        "changeType": "Normal (requires CAB approval)",
+        "systemsAffected": "Primary: auth-service (being replaced), user-database (schema migration). Secondary: api-gateway (routing changes), web-portal (auth flow changes), mobile-apps (iOS, Android - new SDK), admin-dashboard (new auth). Integrations: Okta (new), Azure AD (new), Google Workspace (new). Dependencies: Redis (session cache - being deprecated), PostgreSQL (user table changes).",
+        "implementationSteps": "1. Pre-deployment (Friday 6pm): Run final integration tests, verify rollback scripts, notify on-call team [30 min]\n2. Database migration: Apply user table schema changes (backward compatible) [15 min]\n3. Deploy canary: Deploy new auth service to 5% of traffic [30 min]\n4. Monitor canary: Watch error rates, latency, auth success rate [30 min]\n5. Gradual rollout: 5% -> 25% -> 50% -> 100% over 2 hours [2 hr]\n6. Legacy deprecation: Route all traffic to new service [15 min]\n7. Verification: Run smoke tests, verify SSO flows [30 min]\n8. Post-deployment: Monitor for 2 hours, update status page [2 hr]\nTotal estimated time: 6 hours",
+        "testingEvidence": "Unit tests: 94% coverage, all passing. Integration tests: 187/187 passing. Load test results: handled 3x production peak (15,000 auth/min). Security review: completed by AppSec team, no critical findings, 2 low-severity items addressed. SSO integration testing: verified with Okta, Azure AD, Google test tenants. Staging deployment: running 4 weeks with 100K+ successful authentications. UAT: Product and QA sign-off received. Penetration test: OAuth implementation reviewed, no findings.",
+        "rollbackPlan": "Rollback triggers: Error rate >5%, latency p99 >2s, auth success rate <95%\nRollback steps:\n1. Switch api-gateway routing back to legacy auth [5 min]\n2. Verify legacy auth handling requests [5 min]\n3. If DB migration issues: restore from pre-migration snapshot [15 min]\n4. Notify stakeholders of rollback [immediate]\n5. Post-rollback verification [15 min]\nTotal rollback time: 25-45 minutes depending on scenario.\nNote: Database migration is backward compatible - legacy auth can work with new schema.",
+        "scheduledWindow": "Saturday 10:00 PM - Sunday 4:00 AM EST (lowest traffic period, 6-hour window for 6-hour estimated implementation)",
+        "riskAssessment": "Overall risk: MEDIUM\nRisk factors:\n- High impact: affects all user authentication (100% of users)\n- Mitigated by: canary deployment, gradual rollout, quick rollback\n- Dependency risk: new external IdP integrations\n- Mitigated by: fallback to password auth if SSO fails\n- Data risk: user table migration\n- Mitigated by: backward compatible schema, tested migration scripts"
+      },
+      "rubric": {
+        "criteria": [
+          {"id": "cab-readiness", "description": "Contains all information CAB needs to approve", "weight": 25},
+          {"id": "risk-assessment", "description": "Thorough risk analysis with mitigations", "weight": 20},
+          {"id": "implementation-clarity", "description": "Step-by-step plan is clear and complete", "weight": 20},
+          {"id": "rollback-plan", "description": "Rollback triggers and steps are specific", "weight": 20},
+          {"id": "communication", "description": "Includes stakeholder notification plan", "weight": 15}
+        ]
+      }
+    },
+    {
+      "id": "change-req-edge-1",
+      "type": "edge-case",
+      "description": "Emergency change for critical security patch",
+      "inputPayload": {
+        "changeSummary": "Emergency deployment of security patch for CVE-2025-1234 (critical severity, CVSS 9.8). Vulnerability allows remote code execution via crafted API request. Exploit code is publicly available. Must be patched within 24 hours per our security policy.",
+        "changeType": "Emergency (expedited approval needed)",
+        "systemsAffected": "All API servers (12 instances across 3 regions). Patch applies to: api-gateway, order-service, user-service, payment-service. No database changes. No client-facing changes.",
+        "implementationSteps": "1. Deploy patched containers to staging [15 min]\n2. Run automated regression suite [30 min]\n3. Rolling deployment to production (one region at a time):\n   - US-East: Deploy 4 instances [20 min]\n   - US-West: Deploy 4 instances [20 min]\n   - EU: Deploy 4 instances [20 min]\n4. Verify patch applied via version endpoint [5 min]\n5. Security team confirms vulnerability mitigated [15 min]\nTotal time: ~2 hours",
+        "testingEvidence": "Vendor patch tested in isolated environment. Regression tests: all 450 tests passing. Security team verified patch addresses CVE. No functionality changes - security fix only. Staging deployment: 1 hour with no issues observed.",
+        "rollbackPlan": "If issues observed:\n1. Stop rolling deployment immediately\n2. Rollback affected region to previous version [10 min per region]\n3. Implement temporary WAF rule to block exploit pattern [5 min]\n4. WAF rule provides protection while investigating patch issues\nNote: Vulnerability is actively exploited - rollback only if patch causes greater damage than exposure risk.",
+        "scheduledWindow": "ASAP - Emergency change. Requesting immediate approval for implementation within next 2 hours. Current time: Monday 2:30 PM EST.",
+        "riskAssessment": "Deployment risk: LOW (security patch only, no feature changes)\nNon-deployment risk: CRITICAL (active exploitation in the wild)\nDecision: Risk of not deploying significantly exceeds deployment risk. Recommend immediate approval."
+      },
+      "rubric": {
+        "criteria": [
+          {"id": "cab-readiness", "description": "Justifies emergency status appropriately", "weight": 25},
+          {"id": "risk-assessment", "description": "Compares deployment vs non-deployment risk", "weight": 25},
+          {"id": "implementation-clarity", "description": "Expedited but still thorough plan", "weight": 20},
+          {"id": "rollback-plan", "description": "Includes alternative mitigation (WAF rule)", "weight": 20},
+          {"id": "communication", "description": "Appropriate urgency in communication", "weight": 10}
+        ]
+      }
+    },
+    {
+      "id": "change-req-variant-1",
+      "type": "variant",
+      "description": "Standard change - routine infrastructure update",
+      "inputPayload": {
+        "changeSummary": "Monthly OS patching for production Linux servers. Standard security updates for Ubuntu 22.04 LTS. This is a recurring standard change that follows our approved patching procedure.",
+        "changeType": "Standard (pre-approved, low risk)",
+        "systemsAffected": "Production Linux servers: 24 application servers, 6 database servers (replica patching only - primary handled separately), 4 monitoring servers. Patching in rolling fashion - no service impact expected.",
+        "implementationSteps": "Following Standard Change Procedure SCP-012:\n1. Verify patch list from Ubuntu security advisories [15 min]\n2. Remove server from load balancer [2 min]\n3. Apply patches: apt update && apt upgrade -y [10 min]\n4. Reboot if kernel update [5 min]\n5. Verify services healthy [5 min]\n6. Return to load balancer [2 min]\n7. Repeat for next server\n8. Database replicas: coordinate with DBA team\nTotal time per server: ~25 min. Total window: 6 hours for all servers.",
+        "testingEvidence": "Patches tested on staging servers last week with no issues. Same patch set applied to dev environment. Documented in SCP-012 that Ubuntu LTS patches are pre-approved for standard change. No application changes involved.",
+        "rollbackPlan": "Individual server rollback: Boot from previous kernel if kernel issues. Package rollback via apt if specific package causes issues. Server can be removed from rotation while troubleshooting. Staging environment available as reference for expected state.",
+        "scheduledWindow": "Sunday 2:00 AM - 8:00 AM EST (standard monthly maintenance window per SCP-012)",
+        "riskAssessment": "Risk: LOW\nThis is a standard change following pre-approved procedure SCP-012. Rolling deployment ensures no service impact. Same process completed successfully for 18 consecutive months."
+      },
+      "rubric": {
+        "criteria": [
+          {"id": "cab-readiness", "description": "References pre-approved standard change procedure", "weight": 20},
+          {"id": "risk-assessment", "description": "Appropriate for low-risk standard change", "weight": 20},
+          {"id": "implementation-clarity", "description": "Follows documented standard procedure", "weight": 25},
+          {"id": "rollback-plan", "description": "Simple rollback appropriate for scope", "weight": 15},
+          {"id": "communication", "description": "Minimal communication appropriate for routine change", "weight": 20}
+        ]
+      }
+    }
+  ]
+}

@@ -40,11 +40,21 @@ import {
   Rocket,
   TrendingUp,
   Target,
+  History,
+  Star,
+  Trash2,
+  Import,
+  X,
+  Copy,
+  Layers,
 } from 'lucide-react';
 import { WORKFLOWS } from '../lib/workflows';
 import { SKILLS, interpolateTemplate } from '../lib/skills';
 import { getAllLibrarySkills } from '../lib/skillLibrary';
-import type { Workflow, WorkflowStep, WorkflowGlobalInput, DynamicSkill } from '../lib/storage/types';
+import { db } from '../lib/storage/indexeddb';
+import { buildExecutionGroups, hasParallelSteps } from '../lib/workflows/parallelExecutor';
+import { evaluateCondition, describeCondition } from '../lib/workflows/conditions';
+import type { Workflow, WorkflowStep, WorkflowGlobalInput, DynamicSkill, WorkflowExecution } from '../lib/storage/types';
 import type { LibrarySkill } from '../lib/skillLibrary/types';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
@@ -71,13 +81,13 @@ const WORKFLOW_ICONS: Record<string, React.FC<{ className?: string }>> = {
 };
 
 // Step status type
-type StepStatus = 'pending' | 'running' | 'completed' | 'error';
+type StepStatus = 'pending' | 'running' | 'completed' | 'error' | 'skipped';
 
 const WorkflowRunnerPage: React.FC = () => {
   const { workflowId } = useParams<{ workflowId: string }>();
   const navigate = useNavigate();
   const { addToast } = useToast();
-  const { selectedApi, setSelectedApi, resumeText, jobDescriptionText, refreshProfileFromStorage } = useAppContext();
+  const { selectedApi, setSelectedApi, resumeText, jobDescriptionText, refreshProfileFromStorage, userProfile } = useAppContext();
 
   // Get the workflow definition
   const workflow: Workflow | undefined = useMemo(() => {
@@ -101,20 +111,67 @@ const WorkflowRunnerPage: React.FC = () => {
   const [expandedSteps, setExpandedSteps] = useState<Set<string>>(new Set());
   const [showInputsSummary, setShowInputsSummary] = useState(false);
 
+  // History state
+  const [showHistory, setShowHistory] = useState(false);
+  const [executionHistory, setExecutionHistory] = useState<WorkflowExecution[]>([]);
+  const [currentExecutionId, setCurrentExecutionId] = useState<string | null>(null);
+
+  // Load execution history for this workflow
+  useEffect(() => {
+    if (workflowId) {
+      db.getWorkflowExecutionsByWorkflow(workflowId).then(setExecutionHistory);
+    }
+  }, [workflowId]);
+
   // Refresh profile data on mount
   useEffect(() => {
     refreshProfileFromStorage();
   }, [refreshProfileFromStorage]);
 
-  // Initialize form state with prefill values
+  // Initialize form state with prefill values from user profile
   useEffect(() => {
     if (workflow) {
       const initialState: Record<string, string> = {};
       workflow.globalInputs.forEach((input) => {
-        if (input.prefillFrom === 'resume' && resumeText) {
-          initialState[input.id] = resumeText;
-        } else if (input.prefillFrom === 'jobDescription' && jobDescriptionText) {
-          initialState[input.id] = jobDescriptionText;
+        if (input.prefillFrom) {
+          // Handle special cases first
+          if (input.prefillFrom === 'resume' && resumeText) {
+            initialState[input.id] = resumeText;
+          } else if (input.prefillFrom === 'jobDescription' && jobDescriptionText) {
+            initialState[input.id] = jobDescriptionText;
+          } else {
+            // Map prefillFrom to userProfile fields
+            const profileFieldMap: Record<string, keyof typeof userProfile> = {
+              fullName: 'fullName',
+              email: 'email',
+              phone: 'phone',
+              location: 'location',
+              linkedInUrl: 'linkedInUrl',
+              portfolioUrl: 'portfolioUrl',
+              professionalTitle: 'professionalTitle',
+              yearsExperience: 'yearsExperience',
+              targetRoles: 'targetRoles',
+              targetIndustries: 'targetIndustries',
+              currentCompany: 'currentCompany',
+              currentTitle: 'currentTitle',
+              keyAchievements: 'keyAchievements',
+              highestDegree: 'highestDegree',
+              university: 'university',
+              certifications: 'certifications',
+              technicalSkills: 'technicalSkills',
+              softSkills: 'softSkills',
+              languages: 'languages',
+              careerGoals: 'careerGoals',
+              salaryExpectations: 'salaryExpectations',
+              workPreference: 'workPreference',
+            };
+            const profileField = profileFieldMap[input.prefillFrom];
+            if (profileField && userProfile[profileField]) {
+              initialState[input.id] = userProfile[profileField];
+            } else {
+              initialState[input.id] = '';
+            }
+          }
         } else {
           initialState[input.id] = '';
         }
@@ -128,7 +185,7 @@ const WorkflowRunnerPage: React.FC = () => {
       });
       setStepStatuses(statuses);
     }
-  }, [workflow, resumeText, jobDescriptionText]);
+  }, [workflow, resumeText, jobDescriptionText, userProfile]);
 
   // Load stored API key
   useEffect(() => {
@@ -366,6 +423,10 @@ const WorkflowRunnerPage: React.FC = () => {
   const handleRunWorkflow = async () => {
     if (!validateForm() || !workflow) return;
 
+    const executionId = crypto.randomUUID();
+    const startedAt = new Date().toISOString();
+    setCurrentExecutionId(executionId);
+
     setIsRunning(true);
     setCurrentStepIndex(0);
     setStepOutputs({});
@@ -380,40 +441,158 @@ const WorkflowRunnerPage: React.FC = () => {
     setStepStatuses(newStatuses);
 
     const outputs: Record<string, string> = {};
+    const finalStatuses: Record<string, 'pending' | 'running' | 'completed' | 'skipped' | 'error'> = { ...newStatuses };
     const totalSteps = workflow.steps.length;
+    let hasError = false;
+    let completedCount = 0;
 
-    for (let i = 0; i < workflow.steps.length; i++) {
-      const step = workflow.steps[i];
-      setCurrentStepIndex(i);
-      setStepStatuses((prev) => ({ ...prev, [step.id]: 'running' }));
-      setOverallProgress(((i) / totalSteps) * 100);
+    // Build execution groups for parallel execution
+    const executionGroups = buildExecutionGroups(workflow.steps);
+    const stepMap = new Map<string, WorkflowStep>();
+    workflow.steps.forEach((step) => stepMap.set(step.id, step));
 
-      try {
-        const output = await executeStep(step, outputs);
-        outputs[step.outputKey] = output;
-        setStepOutputs((prev) => ({ ...prev, [step.outputKey]: output }));
-        setStepStatuses((prev) => ({ ...prev, [step.id]: 'completed' }));
+    // Execute each group
+    for (const group of executionGroups) {
+      if (hasError) break;
 
-        // Auto-expand completed step
-        setExpandedSteps((prev) => new Set([...prev, step.id]));
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        setStepErrors((prev) => ({ ...prev, [step.id]: errorMessage }));
-        setStepStatuses((prev) => ({ ...prev, [step.id]: 'error' }));
-        addToast(`Step "${step.name}" failed: ${errorMessage}`, 'error');
-        break;
+      const groupSteps = group.stepIds.map((id) => stepMap.get(id)!).filter(Boolean);
+
+      // Mark all steps in group as running
+      groupSteps.forEach((step) => {
+        setStepStatuses((prev) => ({ ...prev, [step.id]: 'running' }));
+      });
+
+      // Execute steps in parallel (with condition checking)
+      const results = await Promise.allSettled(
+        groupSteps.map(async (step) => {
+          // Check condition if present
+          if (step.condition) {
+            const conditionMet = evaluateCondition(step.condition, outputs, workflow.steps);
+            if (!conditionMet) {
+              return { step, skipped: true, reason: describeCondition(step.condition) };
+            }
+          }
+
+          try {
+            const output = await executeStep(step, outputs);
+            return { step, output, success: true };
+          } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            return { step, error: errorMessage, success: false };
+          }
+        })
+      );
+
+      // Process results
+      for (const result of results) {
+        if (result.status === 'fulfilled') {
+          const { step, output, success, error, skipped, reason } = result.value as {
+            step: WorkflowStep;
+            output?: string;
+            success?: boolean;
+            error?: string;
+            skipped?: boolean;
+            reason?: string;
+          };
+
+          if (skipped) {
+            // Step was skipped due to condition
+            setStepStatuses((prev) => ({ ...prev, [step.id]: 'skipped' }));
+            finalStatuses[step.id] = 'skipped';
+            completedCount++;
+            addToast(`Skipped "${step.name}": ${reason}`, 'info');
+          } else if (success && output) {
+            outputs[step.outputKey] = output;
+            setStepOutputs((prev) => ({ ...prev, [step.outputKey]: output }));
+            setStepStatuses((prev) => ({ ...prev, [step.id]: 'completed' }));
+            finalStatuses[step.id] = 'completed';
+            setExpandedSteps((prev) => new Set([...prev, step.id]));
+            completedCount++;
+          } else {
+            setStepErrors((prev) => ({ ...prev, [step.id]: error || 'Unknown error' }));
+            setStepStatuses((prev) => ({ ...prev, [step.id]: 'error' }));
+            finalStatuses[step.id] = 'error';
+            hasError = true;
+            addToast(`Step "${step.name}" failed: ${error}`, 'error');
+          }
+        } else {
+          // Rejected promise
+          const step = groupSteps.find((s) =>
+            results.indexOf(result) === groupSteps.indexOf(s)
+          );
+          if (step) {
+            setStepErrors((prev) => ({ ...prev, [step.id]: 'Execution failed' }));
+            setStepStatuses((prev) => ({ ...prev, [step.id]: 'error' }));
+            finalStatuses[step.id] = 'error';
+            hasError = true;
+          }
+        }
       }
 
-      // Small delay between steps
-      if (i < workflow.steps.length - 1) {
-        await new Promise((resolve) => setTimeout(resolve, 500));
+      // Update progress after each group
+      setOverallProgress((completedCount / totalSteps) * 100);
+
+      // Small delay between groups
+      if (!hasError && group.groupIndex < executionGroups.length - 1) {
+        await new Promise((resolve) => setTimeout(resolve, 300));
       }
     }
 
     setOverallProgress(100);
     setIsRunning(false);
     setCurrentStepIndex(-1);
-    addToast('Workflow completed!', 'success');
+
+    // Save execution to history
+    const execution: WorkflowExecution = {
+      id: executionId,
+      workflowId: workflow.id,
+      workflowName: workflow.name,
+      status: hasError ? 'error' : 'completed',
+      currentStepIndex: workflow.steps.length - 1,
+      globalInputs,
+      stepOutputs: outputs,
+      stepStatuses: finalStatuses,
+      startedAt,
+      completedAt: new Date().toISOString(),
+      title: `${workflow.name} - ${new Date().toLocaleDateString()}`,
+    };
+
+    await db.saveWorkflowExecution(execution);
+    setExecutionHistory((prev) => [execution, ...prev]);
+
+    addToast(hasError ? 'Workflow completed with errors' : 'Workflow completed!', hasError ? 'warning' : 'success');
+  };
+
+  // Import execution from history
+  const importExecution = (execution: WorkflowExecution) => {
+    setGlobalInputs(execution.globalInputs);
+    setStepOutputs(execution.stepOutputs);
+    setStepStatuses(execution.stepStatuses);
+    setCurrentExecutionId(execution.id);
+    // Expand all completed steps
+    const completedSteps = Object.entries(execution.stepStatuses)
+      .filter(([, status]) => status === 'completed')
+      .map(([stepId]) => stepId);
+    setExpandedSteps(new Set(completedSteps));
+    setShowHistory(false);
+    setOverallProgress(100);
+    addToast('Previous run imported!', 'success');
+  };
+
+  // Delete execution from history
+  const deleteExecution = async (executionId: string) => {
+    await db.deleteWorkflowExecution(executionId);
+    setExecutionHistory((prev) => prev.filter((e) => e.id !== executionId));
+    addToast('Run deleted from history', 'success');
+  };
+
+  // Toggle favorite on execution
+  const toggleFavorite = async (execution: WorkflowExecution) => {
+    const updated = { ...execution, isFavorite: !execution.isFavorite };
+    await db.updateWorkflowExecution(execution.id, { isFavorite: updated.isFavorite });
+    setExecutionHistory((prev) =>
+      prev.map((e) => (e.id === execution.id ? updated : e))
+    );
   };
 
   // Toggle step expansion
@@ -529,6 +708,8 @@ const WorkflowRunnerPage: React.FC = () => {
         return <Loader2 className="h-5 w-5 text-blue-500 animate-spin" />;
       case 'error':
         return <AlertTriangle className="h-5 w-5 text-red-500" />;
+      case 'skipped':
+        return <Circle className="h-5 w-5 text-yellow-500" />;
       default:
         return <Circle className="h-5 w-5 text-muted-foreground" />;
     }
@@ -560,16 +741,123 @@ const WorkflowRunnerPage: React.FC = () => {
           <ArrowLeft className="h-4 w-4" />
           Back to Home
         </Link>
-        <div className="flex items-center gap-4">
-          <div className={`h-14 w-14 rounded-xl flex items-center justify-center bg-${workflow.color}-500/20`}>
-            <WorkflowIcon className={`h-7 w-7 text-${workflow.color}-400`} />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className={`h-14 w-14 rounded-xl flex items-center justify-center bg-${workflow.color}-500/20`}>
+              <WorkflowIcon className={`h-7 w-7 text-${workflow.color}-400`} />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold">{workflow.name}</h1>
+              <p className="text-muted-foreground">{workflow.description}</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-3xl font-bold">{workflow.name}</h1>
-            <p className="text-muted-foreground">{workflow.description}</p>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={async () => {
+                if (!workflow) return;
+                const newName = `${workflow.name} (Copy)`;
+                try {
+                  await db.duplicateWorkflow(workflow, newName);
+                  addToast(`Created custom workflow: ${newName}`, 'success');
+                } catch {
+                  addToast('Failed to duplicate workflow', 'error');
+                }
+              }}
+            >
+              <Copy className="h-4 w-4 mr-2" />
+              Duplicate
+            </Button>
+            <Link to={`/workflow/${workflowId}/batch`}>
+              <Button variant="outline">
+                <Layers className="h-4 w-4 mr-2" />
+                Batch Run
+              </Button>
+            </Link>
+            {executionHistory.length > 0 && (
+              <Button variant="outline" onClick={() => setShowHistory(true)}>
+                <History className="h-4 w-4 mr-2" />
+                History ({executionHistory.length})
+              </Button>
+            )}
           </div>
         </div>
       </div>
+
+      {/* History Modal */}
+      {showHistory && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-card rounded-xl border shadow-xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
+            <div className="flex items-center justify-between p-4 border-b">
+              <h2 className="text-lg font-semibold">Previous Runs</h2>
+              <Button variant="ghost" size="sm" onClick={() => setShowHistory(false)}>
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="overflow-y-auto max-h-[60vh] p-4 space-y-3">
+              {executionHistory.map((exec) => (
+                <div
+                  key={exec.id}
+                  className="rounded-lg border bg-muted/30 p-4 hover:bg-muted/50 transition-colors"
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <div>
+                      <p className="font-medium">{exec.title || exec.workflowName}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(exec.startedAt).toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => toggleFavorite(exec)}
+                        className={exec.isFavorite ? 'text-yellow-500' : ''}
+                      >
+                        <Star className={`h-4 w-4 ${exec.isFavorite ? 'fill-current' : ''}`} />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => deleteExecution(exec.id)}
+                        className="text-red-500 hover:text-red-600"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${
+                      exec.status === 'completed' ? 'bg-green-500/20 text-green-400' :
+                      exec.status === 'error' ? 'bg-red-500/20 text-red-400' :
+                      'bg-blue-500/20 text-blue-400'
+                    }`}>
+                      {exec.status}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {Object.values(exec.stepStatuses).filter(s => s === 'completed').length} / {Object.keys(exec.stepStatuses).length} steps
+                    </span>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => importExecution(exec)}
+                  >
+                    <Import className="h-4 w-4 mr-2" />
+                    Load This Run
+                  </Button>
+                </div>
+              ))}
+              {executionHistory.length === 0 && (
+                <p className="text-center text-muted-foreground py-8">
+                  No previous runs yet
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left Column: Workflow Info & Inputs */}

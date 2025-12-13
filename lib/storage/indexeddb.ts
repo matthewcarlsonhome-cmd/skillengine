@@ -58,7 +58,9 @@ import type {
   SkillExecution,
   UserPreferences,
   SavedOutput,
-  FavoriteSkill
+  FavoriteSkill,
+  WorkflowExecution,
+  CustomWorkflow
 } from './types';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -72,7 +74,7 @@ const DB_NAME = 'skillengine';
  * Database version - increment this when schema changes
  * IndexedDB will trigger onupgradeneeded when version increases
  */
-const DB_VERSION = 2;
+const DB_VERSION = 4;
 
 /**
  * Object store names - constants to prevent typos and enable refactoring
@@ -84,7 +86,9 @@ export const STORES = {
   SKILL_EXECUTIONS: 'skillExecutions', // History of skill runs
   USER_PREFERENCES: 'userPreferences', // User settings
   SAVED_OUTPUTS: 'savedOutputs',       // Saved AI responses
-  FAVORITE_SKILLS: 'favoriteSkills'    // Bookmarked skills
+  FAVORITE_SKILLS: 'favoriteSkills',   // Bookmarked skills
+  WORKFLOW_EXECUTIONS: 'workflowExecutions', // Workflow run history
+  CUSTOM_WORKFLOWS: 'customWorkflows'  // User-created custom workflows
 } as const;
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -214,6 +218,29 @@ class SkillEngineDB {
           const favStore = db.createObjectStore(STORES.FAVORITE_SKILLS, { keyPath: 'id' });
           favStore.createIndex('skillId', 'skillId');           // Lookup by skill ID
           favStore.createIndex('createdAt', 'createdAt');       // Sort by date added
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // WORKFLOW EXECUTIONS STORE (Added in v3)
+        // Stores completed workflow runs for history and reuse
+        // ─────────────────────────────────────────────────────────────────────
+        if (!db.objectStoreNames.contains(STORES.WORKFLOW_EXECUTIONS)) {
+          const wfExecStore = db.createObjectStore(STORES.WORKFLOW_EXECUTIONS, { keyPath: 'id' });
+          wfExecStore.createIndex('workflowId', 'workflowId');   // Get executions by workflow
+          wfExecStore.createIndex('startedAt', 'startedAt');     // Sort by start time
+          wfExecStore.createIndex('status', 'status');           // Filter by status
+          wfExecStore.createIndex('isFavorite', 'isFavorite');   // Filter favorites
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // CUSTOM WORKFLOWS STORE (Added in v4)
+        // User-created custom workflows
+        // ─────────────────────────────────────────────────────────────────────
+        if (!db.objectStoreNames.contains(STORES.CUSTOM_WORKFLOWS)) {
+          const cwStore = db.createObjectStore(STORES.CUSTOM_WORKFLOWS, { keyPath: 'id' });
+          cwStore.createIndex('createdAt', 'createdAt');         // Sort by creation time
+          cwStore.createIndex('updatedAt', 'updatedAt');         // Sort by update time
+          cwStore.createIndex('sourceWorkflowId', 'sourceWorkflowId'); // Find duplicates
         }
       };
     });
@@ -609,6 +636,190 @@ class SkillEngineDB {
     if (favorite) {
       await this.delete(STORES.FAVORITE_SKILLS, favorite.id);
     }
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // WORKFLOW EXECUTIONS
+  // Stores completed workflow runs for history and reuse
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  /**
+   * Save a workflow execution
+   * @param execution - The workflow execution to save
+   */
+  async saveWorkflowExecution(execution: WorkflowExecution): Promise<void> {
+    return this.put(STORES.WORKFLOW_EXECUTIONS, execution);
+  }
+
+  /**
+   * Get a workflow execution by ID
+   * @param id - The execution ID
+   * @returns The execution or undefined if not found
+   */
+  async getWorkflowExecution(id: string): Promise<WorkflowExecution | undefined> {
+    return this.get(STORES.WORKFLOW_EXECUTIONS, id);
+  }
+
+  /**
+   * Get all workflow executions, sorted by start time (newest first)
+   * @param limit - Maximum number of executions to return
+   * @returns Array of workflow executions
+   */
+  async getAllWorkflowExecutions(limit?: number): Promise<WorkflowExecution[]> {
+    const executions = await this.getAll<WorkflowExecution>(STORES.WORKFLOW_EXECUTIONS);
+    const sorted = executions.sort((a, b) =>
+      new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime()
+    );
+    return limit ? sorted.slice(0, limit) : sorted;
+  }
+
+  /**
+   * Get workflow executions for a specific workflow
+   * @param workflowId - The workflow ID
+   * @returns Array of executions for that workflow
+   */
+  async getWorkflowExecutionsByWorkflow(workflowId: string): Promise<WorkflowExecution[]> {
+    const executions = await this.getAllByIndex<WorkflowExecution>(
+      STORES.WORKFLOW_EXECUTIONS,
+      'workflowId',
+      workflowId
+    );
+    return executions.sort((a, b) =>
+      new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime()
+    );
+  }
+
+  /**
+   * Get favorite workflow executions
+   * @returns Array of favorited executions
+   */
+  async getFavoriteWorkflowExecutions(): Promise<WorkflowExecution[]> {
+    const all = await this.getAll<WorkflowExecution>(STORES.WORKFLOW_EXECUTIONS);
+    return all
+      .filter(e => e.isFavorite)
+      .sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime());
+  }
+
+  /**
+   * Update a workflow execution
+   * @param id - The execution ID
+   * @param updates - Fields to update
+   */
+  async updateWorkflowExecution(id: string, updates: Partial<WorkflowExecution>): Promise<void> {
+    const execution = await this.getWorkflowExecution(id);
+    if (execution) {
+      await this.put(STORES.WORKFLOW_EXECUTIONS, { ...execution, ...updates });
+    }
+  }
+
+  /**
+   * Delete a workflow execution
+   * @param id - The execution ID to delete
+   */
+  async deleteWorkflowExecution(id: string): Promise<void> {
+    return this.delete(STORES.WORKFLOW_EXECUTIONS, id);
+  }
+
+  /**
+   * Search workflow executions by title or tags
+   * @param query - Search query
+   * @returns Array of matching executions
+   */
+  async searchWorkflowExecutions(query: string): Promise<WorkflowExecution[]> {
+    const all = await this.getAll<WorkflowExecution>(STORES.WORKFLOW_EXECUTIONS);
+    const lowerQuery = query.toLowerCase();
+    return all
+      .filter(e =>
+        e.title?.toLowerCase().includes(lowerQuery) ||
+        e.workflowName.toLowerCase().includes(lowerQuery) ||
+        e.tags?.some(tag => tag.toLowerCase().includes(lowerQuery))
+      )
+      .sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime());
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // CUSTOM WORKFLOWS
+  // User-created custom workflows
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  /**
+   * Save a custom workflow
+   * @param workflow - The custom workflow to save
+   */
+  async saveCustomWorkflow(workflow: CustomWorkflow): Promise<void> {
+    return this.put(STORES.CUSTOM_WORKFLOWS, workflow);
+  }
+
+  /**
+   * Get a custom workflow by ID
+   * @param id - The workflow ID
+   * @returns The workflow or undefined if not found
+   */
+  async getCustomWorkflow(id: string): Promise<CustomWorkflow | undefined> {
+    return this.get(STORES.CUSTOM_WORKFLOWS, id);
+  }
+
+  /**
+   * Get all custom workflows, sorted by update time (newest first)
+   * @returns Array of custom workflows
+   */
+  async getAllCustomWorkflows(): Promise<CustomWorkflow[]> {
+    const workflows = await this.getAll<CustomWorkflow>(STORES.CUSTOM_WORKFLOWS);
+    return workflows.sort((a, b) =>
+      new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+    );
+  }
+
+  /**
+   * Update a custom workflow
+   * @param id - The workflow ID
+   * @param updates - Fields to update
+   */
+  async updateCustomWorkflow(id: string, updates: Partial<CustomWorkflow>): Promise<void> {
+    const workflow = await this.getCustomWorkflow(id);
+    if (workflow) {
+      await this.put(STORES.CUSTOM_WORKFLOWS, {
+        ...workflow,
+        ...updates,
+        updatedAt: new Date().toISOString(),
+      });
+    }
+  }
+
+  /**
+   * Delete a custom workflow
+   * @param id - The workflow ID to delete
+   */
+  async deleteCustomWorkflow(id: string): Promise<void> {
+    return this.delete(STORES.CUSTOM_WORKFLOWS, id);
+  }
+
+  /**
+   * Duplicate a workflow (built-in or custom) as a new custom workflow
+   * @param sourceWorkflow - The workflow to duplicate
+   * @param newName - Name for the new workflow
+   * @returns The new custom workflow
+   */
+  async duplicateWorkflow(sourceWorkflow: CustomWorkflow | { id: string; name: string; description: string; longDescription?: string; icon: string; color: string; estimatedTime: string; outputs: string[]; globalInputs: any[]; steps: any[] }, newName: string): Promise<CustomWorkflow> {
+    const now = new Date().toISOString();
+    const newWorkflow: CustomWorkflow = {
+      id: `custom-${crypto.randomUUID()}`,
+      name: newName,
+      description: sourceWorkflow.description,
+      longDescription: sourceWorkflow.longDescription,
+      icon: sourceWorkflow.icon,
+      color: sourceWorkflow.color,
+      estimatedTime: sourceWorkflow.estimatedTime,
+      outputs: [...sourceWorkflow.outputs],
+      globalInputs: JSON.parse(JSON.stringify(sourceWorkflow.globalInputs)),
+      steps: JSON.parse(JSON.stringify(sourceWorkflow.steps)),
+      createdAt: now,
+      updatedAt: now,
+      sourceWorkflowId: sourceWorkflow.id,
+    };
+
+    await this.saveCustomWorkflow(newWorkflow);
+    return newWorkflow;
   }
 
   // ═══════════════════════════════════════════════════════════════════════════

@@ -102,6 +102,7 @@ import SkillExportPage from './pages/SkillExportPage';           // Export skill
 // ─────────────────────────────────────────────────────────────────────────────
 import WorkflowsPage from './pages/WorkflowsPage';               // Browse all workflows by category
 import WorkflowRunnerPage from './pages/WorkflowRunnerPage';     // Execute multi-step workflows
+import BatchRunnerPage from './pages/BatchRunnerPage';           // Batch workflow execution
 
 // ─────────────────────────────────────────────────────────────────────────────
 // JOB SEARCH TOOLS
@@ -130,6 +131,7 @@ import ApiKeyInstructionsPage from './pages/ApiKeyInstructionsPage'; // API key 
 import SettingsPage from './pages/SettingsPage';                     // App settings
 import PricingPage from './pages/PricingPage';                       // Pricing information
 import AdminPage from './pages/AdminPage';                           // Admin control panel
+import DevPlaygroundPage from './pages/DevPlaygroundPage';           // Developer test playground
 
 /**
  * Main App Component
@@ -223,9 +225,11 @@ function App() {
                         Multi-step automated sequences that chain skills
                         - /workflows: Browse all workflows by category
                         - /workflow/:id: Run a pre-built workflow (job-application, interview-prep, post-interview)
+                        - /workflow/:id/batch: Batch execution with multiple input sets
                     ═══════════════════════════════════════════════════════ */}
                     <Route path="/workflows" element={<WorkflowsPage />} />
                     <Route path="/workflow/:workflowId" element={<WorkflowRunnerPage />} />
+                    <Route path="/workflow/:workflowId/batch" element={<BatchRunnerPage />} />
 
                     {/* ═══════════════════════════════════════════════════════
                         JOB SEARCH TOOLS
@@ -254,6 +258,7 @@ function App() {
                     <Route path="/settings" element={<SettingsPage />} />
                     <Route path="/pricing" element={<PricingPage />} />
                     <Route path="/admin" element={<AdminPage />} />
+                    <Route path="/dev/playground" element={<DevPlaygroundPage />} />
                   </Routes>
                 </main>
 

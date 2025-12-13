@@ -2088,6 +2088,11 @@ export const TECH_DEBT_ASSESSMENT_WORKFLOW: Workflow = {
 // Export all workflows for use throughout the app
 // ═══════════════════════════════════════════════════════════════════════════
 
+// Import enterprise workflows
+import { ENTERPRISE_WORKFLOWS } from './enterprise';
+// Import governance & operations workflows
+import { GOVERNANCE_OPS_WORKFLOWS } from './governanceOps';
+
 export const WORKFLOWS: Record<string, Workflow> = {
   'job-application': JOB_APPLICATION_WORKFLOW,
   'interview-prep': INTERVIEW_PREP_WORKFLOW,
@@ -2103,6 +2108,10 @@ export const WORKFLOWS: Record<string, Workflow> = {
   'rfp-response-center': RFP_RESPONSE_CENTER_WORKFLOW,
   'revops-optimization': REVOPS_OPTIMIZATION_WORKFLOW,
   'tech-debt-assessment': TECH_DEBT_ASSESSMENT_WORKFLOW,
+  // Enterprise workflows (new)
+  ...ENTERPRISE_WORKFLOWS,
+  // Governance & operations workflows (new)
+  ...GOVERNANCE_OPS_WORKFLOWS,
 };
 
 export const WORKFLOW_LIST: Workflow[] = Object.values(WORKFLOWS);

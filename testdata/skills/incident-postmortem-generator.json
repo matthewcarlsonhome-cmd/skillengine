@@ -1,0 +1,79 @@
+{
+  "skillId": "incident-postmortem-generator",
+  "skillName": "Incident Postmortem Generator",
+  "generatedAt": "2025-12-13T00:00:00.000Z",
+  "tests": [
+    {
+      "id": "postmortem-happy-1",
+      "type": "happy-path",
+      "description": "Production database outage affecting order processing",
+      "inputPayload": {
+        "incidentTitle": "Production Database Outage - Order Processing System",
+        "severity": "SEV1 - Critical (major outage, data loss)",
+        "incidentTimeline": "2025-01-15 14:32 UTC - Monitoring alert: Database connection errors exceeding threshold\n14:35 - On-call engineer (Sarah) paged via PagerDuty\n14:38 - Sarah acknowledges, begins investigation\n14:42 - Identified: PostgreSQL connection pool exhausted, max_connections reached\n14:45 - Incident commander (Mike) joins, declares SEV1\n14:48 - Customer support notified, status page updated to 'Investigating'\n14:52 - Root cause identified: Marketing campaign drove 10x normal traffic\n14:58 - Attempted fix: Increased max_connections from 100 to 300\n15:02 - Database restarted with new config\n15:05 - Connections recovering, orders starting to process\n15:10 - Status page updated to 'Monitoring'\n15:25 - All queued orders processed, full recovery confirmed\n15:30 - Incident closed, status page updated to 'Resolved'",
+        "impactDescription": "Duration: 58 minutes of degraded service, 38 minutes of complete outage. Business impact: Order processing completely unavailable during outage. 847 orders queued and delayed. Estimated revenue impact: $127,000 in delayed orders (all eventually processed). 3 enterprise customers triggered SLA breach (99.9% monthly uptime). 156 support tickets opened. Social media mentions: 23 negative tweets.",
+        "rootCauseAnalysis": "Primary cause: Connection pool sizing inadequate for traffic spike. The database was configured with max_connections=100, which was set 2 years ago when traffic was 10% of current levels. Marketing launched email campaign to 500K subscribers at 14:30 without notifying engineering. Traffic spiked to 10x normal within 5 minutes. Connection pool exhaustion caused cascading failures in order service. Why wasn't pool sized correctly? No capacity review process exists. Why no alert earlier? Monitoring threshold was 90%, should have been 70%. Why no autoscaling? Database connections can't autoscale like compute - requires restart.",
+        "responseActions": "Immediate: Increased max_connections to 300, restarted database. Short-term: Added monitoring for connection utilization at 70% threshold. Implemented connection pooling with PgBouncer to reduce direct connections. Created runbook for this scenario. Communicated to affected enterprise customers.",
+        "contributingFactors": "Marketing campaign launched without engineering notification. No traffic spike alerting for marketing campaigns. Database configuration not reviewed in capacity planning. Monitoring threshold too high to provide early warning. On-call engineer initially looked at application logs instead of database metrics.",
+        "lessonsLearned": "Marketing/engineering communication gap for campaigns. Need proactive capacity planning process. Monitoring thresholds should provide earlier warning. PgBouncer should have been implemented long ago. Runbook was helpful once we had it - need more runbooks."
+      },
+      "rubric": {
+        "criteria": [
+          {"id": "executive-summary", "description": "Clear non-technical summary for leadership", "weight": 15},
+          {"id": "timeline-clarity", "description": "Timeline is well-structured and easy to follow", "weight": 15},
+          {"id": "root-cause-depth", "description": "5 Whys analysis goes deep enough to find systemic issues", "weight": 25},
+          {"id": "action-items", "description": "Action items are specific, owned, and time-bound", "weight": 25},
+          {"id": "blameless-tone", "description": "Maintains blameless, learning-focused tone throughout", "weight": 20}
+        ]
+      }
+    },
+    {
+      "id": "postmortem-edge-1",
+      "type": "edge-case",
+      "description": "Security incident with data exposure - sensitive postmortem",
+      "inputPayload": {
+        "incidentTitle": "Unauthorized Access to Customer Data - API Key Exposure",
+        "severity": "SEV1 - Critical (major outage, data loss)",
+        "incidentTimeline": "2025-01-20 09:15 UTC - Security alert: Unusual API access patterns detected\n09:18 - Security team begins investigation\n09:25 - Identified: API requests from unknown IP addresses using valid API key\n09:30 - Key identified as belonging to Customer ABC, but requests not from their IP ranges\n09:35 - Incident commander declares SEV1, initiates security incident protocol\n09:40 - Affected API key revoked\n09:45 - Analysis shows key was exposed in public GitHub repository\n09:50 - Customer ABC notified\n10:00 - Full audit of accessed data initiated\n10:30 - Confirmed: 15,000 records accessed over 72 hours before detection\n11:00 - Legal and compliance teams engaged\n14:00 - Customer notification drafted\n16:00 - Regulatory notification prepared",
+        "impactDescription": "Data exposure: 15,000 customer records potentially accessed including names, emails, and account identifiers (no financial data or passwords). Duration of exposure: API key was in public repo for 72 hours before exploitation began. Exploitation lasted 48 hours before detection. Affected parties: 15,000 end users of Customer ABC. Regulatory impact: GDPR notification required (72 hours), state breach notification laws triggered for 3 states.",
+        "rootCauseAnalysis": "Customer ABC developer accidentally committed API key to public GitHub repository while testing integration. Our API key scanning (GitHub secret scanning) did not catch this key format. Attacker discovered key via GitHub search and began systematic data extraction. Why did developer commit key? Testing locally, forgot to use .env file. Why wasn't it caught in code review? Customer's internal process, outside our control. Why didn't we detect for 72 hours? Anomaly detection thresholds were based on volume, not access patterns.",
+        "responseActions": "Immediate: Revoked compromised API key, issued new credentials to customer. Customer data access logged for legal/compliance review. Enhanced monitoring implemented for all API keys. GitHub secret scanning updated for our key format. Investigating IP addresses involved. Customer provided incident report.",
+        "contributingFactors": "API key format not in GitHub's secret scanning patterns. Our anomaly detection focused on volume, not patterns. Customer not following secure credential management. No automated expiration on API keys. Rate limiting existed but was generous.",
+        "lessonsLearned": "Need to register our key format with GitHub secret scanning. Should implement pattern-based anomaly detection. Consider mandatory key rotation. Need customer security guidance documentation. Could implement IP allowlisting for API keys."
+      },
+      "rubric": {
+        "criteria": [
+          {"id": "executive-summary", "description": "Appropriate for security incident briefing", "weight": 15},
+          {"id": "timeline-clarity", "description": "Clear detection and response timeline", "weight": 15},
+          {"id": "root-cause-depth", "description": "Identifies both internal and external contributing factors", "weight": 20},
+          {"id": "action-items", "description": "Security-focused improvements with appropriate urgency", "weight": 25},
+          {"id": "blameless-tone", "description": "Handles customer attribution appropriately", "weight": 25}
+        ]
+      }
+    },
+    {
+      "id": "postmortem-variant-1",
+      "type": "variant",
+      "description": "Minor performance degradation with cascading impact",
+      "inputPayload": {
+        "incidentTitle": "Gradual Performance Degradation - Search Service",
+        "severity": "SEV3 - Minor (limited impact, workaround available)",
+        "incidentTimeline": "2025-01-18 - Over several days, search response times gradually increased\nJan 15: p99 latency 200ms (baseline)\nJan 16: p99 latency 350ms\nJan 17: p99 latency 800ms (first customer complaint)\nJan 18 10:00: p99 latency 2.5s, multiple customer complaints\n10:30 - Engineering investigates after 5th support ticket\n11:00 - Identified: Elasticsearch index fragmentation\n11:30 - Initiated index optimization/force merge\n13:00 - Optimization complete, latency back to baseline\n13:30 - Monitoring ticket to track index health",
+        "impactDescription": "Gradual degradation over 3 days. Search functionality remained available but slow. 12 customer support tickets about slow search. No SLA breaches (SLA measures availability, not performance). Some users likely gave up on searches without reporting. Estimated user impact: ~5000 searches per day affected.",
+        "rootCauseAnalysis": "Elasticsearch indexes became fragmented over time due to high update volume. Index optimization was not scheduled or automated. Monitoring only tracked availability, not latency trends. Why did fragmentation occur? Normal Elasticsearch behavior under write-heavy load. Why wasn't it caught earlier? No latency trend monitoring or alerting. Why was customer complaint the first alert? Ops dashboard showed averages which masked p99 degradation.",
+        "responseActions": "Fixed index fragmentation via force merge. Added latency percentile monitoring (p50, p95, p99). Created weekly index optimization job. Added customer-facing performance SLO to monitoring.",
+        "contributingFactors": "No scheduled maintenance for Elasticsearch. Monitoring gaps for latency percentiles. Team unfamiliar with Elasticsearch maintenance needs. No proactive performance testing.",
+        "lessonsLearned": "Need database/search maintenance schedules. Percentile monitoring crucial for user experience. Average metrics can hide real issues. Should have performance SLOs not just availability SLAs."
+      },
+      "rubric": {
+        "criteria": [
+          {"id": "executive-summary", "description": "Appropriate severity framing for SEV3", "weight": 15},
+          {"id": "timeline-clarity", "description": "Shows gradual degradation pattern clearly", "weight": 20},
+          {"id": "root-cause-depth", "description": "Identifies monitoring and maintenance gaps", "weight": 25},
+          {"id": "action-items", "description": "Proportionate improvements for severity level", "weight": 25},
+          {"id": "blameless-tone", "description": "Treats as learning opportunity not crisis", "weight": 15}
+        ]
+      }
+    }
+  ]
+}
