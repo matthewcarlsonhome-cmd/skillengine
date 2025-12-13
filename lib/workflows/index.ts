@@ -2090,6 +2090,8 @@ export const TECH_DEBT_ASSESSMENT_WORKFLOW: Workflow = {
 
 // Import enterprise workflows
 import { ENTERPRISE_WORKFLOWS } from './enterprise';
+// Import governance & operations workflows
+import { GOVERNANCE_OPS_WORKFLOWS } from './governanceOps';
 
 export const WORKFLOWS: Record<string, Workflow> = {
   'job-application': JOB_APPLICATION_WORKFLOW,
@@ -2108,6 +2110,8 @@ export const WORKFLOWS: Record<string, Workflow> = {
   'tech-debt-assessment': TECH_DEBT_ASSESSMENT_WORKFLOW,
   // Enterprise workflows (new)
   ...ENTERPRISE_WORKFLOWS,
+  // Governance & operations workflows (new)
+  ...GOVERNANCE_OPS_WORKFLOWS,
 };
 
 export const WORKFLOW_LIST: Workflow[] = Object.values(WORKFLOWS);

@@ -4,6 +4,87 @@ This document tracks fixes, improvements, and changes made to skills and workflo
 
 ---
 
+## 2025-12-13 (Update 3)
+
+### AI Governance & Operations Suite Added
+
+Added 8 new enterprise-focused skills and 4 new workflows targeting AI governance, compliance, and IT operations use cases. This expansion addresses high-ROI niches identified in the strategic niche analysis.
+
+#### New AI Governance Skills (4)
+
+Located in `lib/skills/governance.ts`:
+
+| Skill ID | Name | Target Audience |
+|----------|------|-----------------|
+| `ai-governance-readiness-assessment` | AI Governance Readiness Assessment | Security/Compliance leaders, executives |
+| `secure-ai-usage-playbook` | Secure AI Usage Playbook Builder | HR, Legal, IT teams |
+| `ai-data-flow-risk-map` | AI Data Flow Risk Mapper | Security architects, DPOs |
+| `ai-governance-client-brief` | AI Governance Client Brief Generator | Sales engineers, consultants |
+
+#### New Compliance & IT Operations Skills (4)
+
+Located in `lib/skills/operations.ts`:
+
+| Skill ID | Name | Target Audience |
+|----------|------|-----------------|
+| `compliance-audit-prep-assistant` | Compliance Audit Preparation Assistant | Compliance officers, auditors |
+| `policy-document-generator` | Policy Document Generator | Compliance, legal, CISO |
+| `incident-postmortem-generator` | Incident Postmortem Generator | SRE, IT operations, DevOps |
+| `change-request-doc-builder` | Change Request Documentation Builder | IT operations, change managers |
+
+#### New Governance & Operations Workflows (4)
+
+Located in `lib/workflows/governanceOps.ts`:
+
+1. **AI Governance Implementation Pack** (`ai-governance-implementation`)
+   - Assessment → Playbook → Client Brief
+   - Target: Organizations starting AI governance programs
+   - Estimated time: 25-35 minutes
+
+2. **AI Data Protection Assessment** (`ai-data-protection-assessment`)
+   - Risk mapping → Data-specific usage guidelines
+   - Target: Security architects, DPOs preparing for audits
+   - Estimated time: 20-30 minutes
+
+3. **Compliance Program Builder** (`compliance-program-builder`)
+   - Audit prep → Policy generation
+   - Target: Teams preparing for SOC2, ISO 27001, HIPAA audits
+   - Estimated time: 25-35 minutes
+
+4. **Incident to Improvement Workflow** (`incident-to-improvement`)
+   - Postmortem → Change request for remediation
+   - Target: SRE/DevOps teams turning incidents into improvements
+   - Estimated time: 20-30 minutes
+
+#### Test Data Added
+
+Created test data files in `testdata/skills/` for all 8 new skills:
+- Each skill has 3 test cases (happy-path, edge-case, variant)
+- All test cases include rubrics with weighted evaluation criteria
+- Covers realistic enterprise scenarios
+
+#### Strategic Analysis Documentation
+
+Created planning documents in `docs/`:
+- `niche-analysis.md` - Strategic positioning and gap analysis
+- `niche-opportunities.md` - Evaluated 15 niches, selected 7 for development
+- `niche-workflow-proposals.md` - Detailed specs for 16 skills, 8 selected for first wave
+
+#### Infrastructure Updates
+
+- Updated `lib/testing/registrySnapshot.ts` to include governance and operations skills
+- Updated `lib/workflows/index.ts` to import and export governance workflows
+- All tests passing (91 tests)
+
+#### Updated Totals
+
+| Category | Previous | New | Total |
+|----------|----------|-----|-------|
+| Static/Enterprise Skills | 27 | 8 | 35 |
+| Workflows | 19 | 4 | 23 |
+
+---
+
 ## 2025-12-13 (Update 2)
 
 ### Enterprise Skills and Workflows Added

@@ -1,0 +1,73 @@
+{
+  "skillId": "secure-ai-usage-playbook",
+  "skillName": "Secure AI Usage Playbook Builder",
+  "generatedAt": "2025-12-13T00:00:00.000Z",
+  "tests": [
+    {
+      "id": "ai-playbook-happy-1",
+      "type": "happy-path",
+      "description": "Professional services firm creating guidelines for all employees",
+      "inputPayload": {
+        "approvedAITools": "ChatGPT Enterprise (all employees via SSO), Microsoft Copilot for M365 (integrated with Office suite), GitHub Copilot (engineering team only - 30 people), Grammarly Business (all employees), DALL-E (marketing team via ChatGPT Enterprise)",
+        "commonUseCases": "Our employees commonly use AI for: drafting client communications and proposals, summarizing meeting notes and creating action items, code assistance and documentation, creating presentation content, editing and improving written content, translating documents for international clients, analyzing data and creating charts, brainstorming ideas and strategies.",
+        "prohibitedActivities": "Employees must NEVER: input client confidential information into AI (client names, financials, strategies), generate final legal or financial advice (AI is for drafts only), use AI to make hiring decisions or performance evaluations, upload proprietary methodologies or frameworks, process any data subject to NDA without explicit approval, claim AI-generated content as solely human-created for deliverables, use non-approved AI tools for work purposes.",
+        "dataHandlingRules": "Data rules: Never include client names or identifying information in prompts. Financial figures should be anonymized (use percentages, X company). No upload of client documents directly. Internal templates and frameworks are confidential. Code from client projects cannot be used for training. Personal data (employee or client) requires explicit approval process.",
+        "regulatoryContext": "Professional services firm with some financial advisory work. Subject to client confidentiality obligations. Some clients require SOC2 compliance. Working with healthcare clients occasionally requires HIPAA awareness.",
+        "audienceLevel": "All Employees"
+      },
+      "rubric": {
+        "criteria": [
+          {"id": "clarity", "description": "Guidelines are clear and understandable for non-technical employees", "weight": 25},
+          {"id": "completeness", "description": "Covers all approved tools with specific rules for each", "weight": 20},
+          {"id": "practicality", "description": "Provides real-world examples and decision guidance", "weight": 25},
+          {"id": "enforceability", "description": "Rules are specific enough to audit and enforce", "weight": 15},
+          {"id": "training-ready", "description": "Includes training outline and acknowledgment form", "weight": 15}
+        ]
+      }
+    },
+    {
+      "id": "ai-playbook-edge-1",
+      "type": "edge-case",
+      "description": "Minimal approved tools with strict restrictions",
+      "inputPayload": {
+        "approvedAITools": "Internal chatbot only (custom-built, no external data egress). No external AI tools approved yet.",
+        "commonUseCases": "Currently limited use cases: HR policy questions via internal chatbot, IT troubleshooting assistance, Basic document formatting suggestions.",
+        "prohibitedActivities": "EVERYTHING not explicitly listed as approved is prohibited. Specifically banned: ChatGPT, Claude, Gemini, Copilot, any public AI tool. Using personal AI accounts for work. Installing AI browser extensions. Using AI features in other software without approval.",
+        "dataHandlingRules": "Only internal chatbot is approved. It is air-gapped from external networks. No company data should ever reach external AI systems. This includes copy-pasting to personal devices that might have AI assistants.",
+        "regulatoryContext": "Government contractor with ITAR and security clearance requirements. Extremely sensitive about data exposure.",
+        "audienceLevel": "All Employees"
+      },
+      "rubric": {
+        "criteria": [
+          {"id": "clarity", "description": "Clear about strict limitations without being confusing", "weight": 25},
+          {"id": "completeness", "description": "Comprehensive list of prohibited activities", "weight": 20},
+          {"id": "practicality", "description": "Helps employees understand why restrictions exist", "weight": 20},
+          {"id": "enforceability", "description": "Clear consequences and reporting mechanisms", "weight": 20},
+          {"id": "training-ready", "description": "Emphasizes security awareness appropriately", "weight": 15}
+        ]
+      }
+    },
+    {
+      "id": "ai-playbook-variant-1",
+      "type": "variant",
+      "description": "Tech company with permissive AI culture for technical staff",
+      "inputPayload": {
+        "approvedAITools": "ChatGPT Plus/Enterprise (all), Claude (all), GitHub Copilot (all developers), Cursor IDE (approved for use), Midjourney/DALL-E (marketing, product), Whisper/transcription tools (all), Custom internal RAG system (all), Perplexity Pro (research teams). Policy: if in doubt, expense it and use it.",
+        "commonUseCases": "We embrace AI everywhere: code generation and review, documentation writing, customer support automation, design ideation, data analysis, meeting summarization, email drafting, translation, debugging, learning new technologies, creating presentations, writing job descriptions, competitive research.",
+        "prohibitedActivities": "Even with our permissive culture, these are never okay: uploading customer data to non-enterprise AI tools, using AI for employee performance reviews, generating misleading information about competitors, circumventing security controls, using AI to violate other company policies, sharing API keys or credentials.",
+        "dataHandlingRules": "Use enterprise versions when handling: customer data (ChatGPT Enterprise, Claude Enterprise), source code from production systems, financial projections, employee personal information. Free tiers okay for: public information research, learning, personal productivity, non-sensitive content.",
+        "regulatoryContext": "Technology company, SOC2 certified. Some healthcare customers require HIPAA-compliant handling. GDPR applies for EU operations.",
+        "audienceLevel": "Technical Staff Only"
+      },
+      "rubric": {
+        "criteria": [
+          {"id": "clarity", "description": "Balances permissiveness with clear boundaries", "weight": 25},
+          {"id": "completeness", "description": "Addresses the many approved tools appropriately", "weight": 15},
+          {"id": "practicality", "description": "Practical guidance for data classification decisions", "weight": 25},
+          {"id": "enforceability", "description": "Clear red lines despite permissive culture", "weight": 20},
+          {"id": "training-ready", "description": "Appropriate for technical audience sophistication", "weight": 15}
+        ]
+      }
+    }
+  ]
+}

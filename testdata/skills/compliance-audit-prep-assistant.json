@@ -1,0 +1,76 @@
+{
+  "skillId": "compliance-audit-prep-assistant",
+  "skillName": "Compliance Audit Preparation Assistant",
+  "generatedAt": "2025-12-13T00:00:00.000Z",
+  "tests": [
+    {
+      "id": "audit-prep-happy-1",
+      "type": "happy-path",
+      "description": "SaaS company preparing for SOC2 Type II audit",
+      "inputPayload": {
+        "auditType": "SOC2 Type II",
+        "auditScope": "The audit scope includes: Cloud infrastructure (AWS - EC2, RDS, S3, Lambda), Application security controls, Access management (Okta SSO, RBAC), Change management processes, Incident response procedures, Vendor management, Data backup and recovery, Monitoring and logging, Employee security training.",
+        "auditTimeline": "Audit fieldwork begins April 15, 2025 - approximately 12 weeks away",
+        "controlFramework": "SOC2 Trust Services Criteria: CC1 (Control Environment), CC2 (Communication), CC3 (Risk Assessment), CC4 (Monitoring), CC5 (Control Activities), CC6 (Logical Access), CC7 (System Operations), CC8 (Change Management), CC9 (Risk Mitigation). Also covering Availability and Confidentiality criteria.",
+        "availableEvidence": "Available documentation includes: AWS CloudTrail logs (12 months), Okta access review reports (quarterly), Jira tickets for all changes, Confluence policies and procedures, PagerDuty incident records, Security awareness training completion records in our LMS, Penetration test report (6 months old), Vulnerability scan reports (monthly), Backup verification logs, Vendor assessment spreadsheet.",
+        "knownGaps": "Known issues: Q3 access reviews were completed late (by 2 weeks). BCP/DR testing documentation from last year is incomplete - we did the test but documentation was rushed. One vendor (marketing tool) hasn't completed their security questionnaire yet. New employee security training has a 3-week backlog.",
+        "previousFindings": "Last year's audit resulted in: 1 finding on access review timeliness (access reviews not completed within 30 days of quarter end), 2 observations on vendor management (incomplete vendor inventory, missing annual reviews for 3 vendors), 1 observation on change management (some emergency changes lacked post-implementation review)."
+      },
+      "rubric": {
+        "criteria": [
+          {"id": "readiness-assessment", "description": "Provides clear readiness percentage by control area", "weight": 20},
+          {"id": "evidence-mapping", "description": "Maps controls to specific evidence with gaps highlighted", "weight": 25},
+          {"id": "remediation-plan", "description": "Prioritizes remediation actions by risk and timeline", "weight": 25},
+          {"id": "interview-prep", "description": "Includes likely auditor questions and key personnel", "weight": 15},
+          {"id": "previous-findings", "description": "Addresses previous findings with specific evidence of remediation", "weight": 15}
+        ]
+      }
+    },
+    {
+      "id": "audit-prep-edge-1",
+      "type": "edge-case",
+      "description": "First-time ISO 27001 certification with minimal documentation",
+      "inputPayload": {
+        "auditType": "ISO 27001",
+        "auditScope": "Full ISMS scope - entire organization. Information security management across: IT operations, HR processes, Physical security, Third-party management, Business continuity, All departments handling sensitive data.",
+        "auditTimeline": "Stage 1 audit in 8 weeks, Stage 2 four weeks later",
+        "controlFramework": "ISO 27001:2022 Annex A controls - all 93 controls potentially in scope. Statement of Applicability being finalized. Risk assessment methodology being documented.",
+        "availableEvidence": "We're starting from scratch mostly: Basic IT policies exist but not ISO-formatted. Asset inventory is in a spreadsheet (incomplete). Access controls exist but not documented. No formal risk assessment yet. Some security awareness done informally. Backups exist but testing not documented.",
+        "knownGaps": "Many gaps: No formal ISMS documentation, Risk assessment not completed, Statement of Applicability draft only, Incident management process informal, BCP exists but not tested, Internal audit program not established, Management review not conducted, Many policies need to be created or updated.",
+        "previousFindings": ""
+      },
+      "rubric": {
+        "criteria": [
+          {"id": "readiness-assessment", "description": "Honest about low readiness without being discouraging", "weight": 15},
+          {"id": "evidence-mapping", "description": "Identifies what needs to be created vs gathered", "weight": 25},
+          {"id": "remediation-plan", "description": "Realistic 8-week plan with clear priorities", "weight": 30},
+          {"id": "interview-prep", "description": "Prepares team for Stage 1 documentation review", "weight": 15},
+          {"id": "previous-findings", "description": "N/A for first audit - focuses on common first-timer issues", "weight": 15}
+        ]
+      }
+    },
+    {
+      "id": "audit-prep-variant-1",
+      "type": "variant",
+      "description": "Healthcare organization preparing for HIPAA audit",
+      "inputPayload": {
+        "auditType": "Custom Framework",
+        "auditScope": "HIPAA Security Rule compliance assessment covering: Administrative safeguards (security management, workforce security, information access), Physical safeguards (facility access, workstation security, device controls), Technical safeguards (access control, audit controls, integrity, transmission security). Assessment includes EHR system, patient portal, and all systems handling PHI.",
+        "auditTimeline": "OCR audit notification received - assessment begins in 6 weeks",
+        "controlFramework": "HIPAA Security Rule requirements: 164.308 Administrative Safeguards, 164.310 Physical Safeguards, 164.312 Technical Safeguards, 164.314 Organizational Requirements, 164.316 Policies and Procedures. Using NIST Cybersecurity Framework mapping.",
+        "availableEvidence": "Available: Risk analysis (18 months old), Security policies (various dates), Workforce training records, Access authorization forms, Audit logs from EHR, BAAs with vendors (most current), Encryption documentation, Incident response plan, Contingency plan (not tested recently).",
+        "knownGaps": "Concerns: Risk analysis needs update per annual requirement. Some workforce members overdue on training. Physical security documentation incomplete for satellite office. Contingency plan not tested in 18 months. Some workstations lacking encryption verification. Audit log review process informal.",
+        "previousFindings": "No previous OCR audit. Internal assessment last year found: gaps in termination procedures, inconsistent minimum necessary determinations, and incomplete BAA tracking."
+      },
+      "rubric": {
+        "criteria": [
+          {"id": "readiness-assessment", "description": "HIPAA-specific readiness across all safeguard categories", "weight": 20},
+          {"id": "evidence-mapping", "description": "Maps to specific HIPAA requirements (164.xxx)", "weight": 25},
+          {"id": "remediation-plan", "description": "Prioritizes by OCR enforcement priorities", "weight": 25},
+          {"id": "interview-prep", "description": "Prepares for OCR investigator questions", "weight": 15},
+          {"id": "previous-findings", "description": "Addresses internal findings before OCR discovers them", "weight": 15}
+        ]
+      }
+    }
+  ]
+}

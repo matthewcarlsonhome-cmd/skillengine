@@ -1,0 +1,76 @@
+{
+  "skillId": "ai-governance-readiness-assessment",
+  "skillName": "AI Governance Readiness Assessment",
+  "generatedAt": "2025-12-13T00:00:00.000Z",
+  "tests": [
+    {
+      "id": "ai-gov-assessment-happy-1",
+      "type": "happy-path",
+      "description": "Mid-size technology company starting AI governance journey",
+      "inputPayload": {
+        "organizationSize": "501-2000 employees",
+        "industry": "Technology",
+        "currentAIUsage": "We are using ChatGPT Enterprise for customer support drafting, GitHub Copilot for our engineering team (50 developers), and exploring an AI-powered analytics dashboard. Marketing uses Midjourney for campaign visuals. Some teams have been using personal ChatGPT accounts before we got Enterprise.",
+        "dataClassifications": "We have four data levels: Public, Internal, Confidential, and Restricted. We handle customer PII including names, emails, company info, and usage data. Some enterprise clients share financial data for integrations. We store some employee HR data internally.",
+        "existingPolicies": "We have an IT Security Policy (updated 2023), Acceptable Use Policy (covers general IT), Data Privacy Policy (GDPR focused), and Employee Handbook with confidentiality section. No AI-specific policies exist yet.",
+        "keyConcerns": "Our main concerns are: 1) Data leakage through AI tools (employees putting customer data into prompts), 2) Compliance with GDPR and SOC2 requirements, 3) Intellectual property exposure (source code, product designs), 4) Inconsistent AI usage across teams, 5) Lack of visibility into what data flows through AI systems.",
+        "regulatoryRequirements": "SOC2 Type II certified, GDPR compliant (EU customers), some clients require HIPAA compliance which we're working toward. We sell to government agencies occasionally so FedRAMP may be needed."
+      },
+      "rubric": {
+        "criteria": [
+          {"id": "maturity-assessment", "description": "Provides clear 1-5 maturity scores across governance dimensions", "weight": 20},
+          {"id": "gap-identification", "description": "Identifies specific gaps vs. best practices for their industry/size", "weight": 20},
+          {"id": "risk-prioritization", "description": "Prioritizes risks by likelihood and impact appropriately", "weight": 20},
+          {"id": "actionable-roadmap", "description": "Provides concrete, phased recommendations (quick wins to long-term)", "weight": 25},
+          {"id": "stakeholder-guidance", "description": "Identifies who should own what aspects of AI governance", "weight": 15}
+        ]
+      }
+    },
+    {
+      "id": "ai-gov-assessment-edge-1",
+      "type": "edge-case",
+      "description": "Small startup with minimal existing policies and aggressive AI adoption",
+      "inputPayload": {
+        "organizationSize": "1-100 employees",
+        "industry": "Technology",
+        "currentAIUsage": "Everyone uses whatever AI tools they want. We have subscriptions to ChatGPT, Claude, Gemini. Developers use Copilot, Cursor, and various coding assistants. Our entire product is AI-powered - we use customer data to train custom models. No restrictions currently.",
+        "dataClassifications": "We don't really have formal classifications. Everything is kind of treated the same. We handle customer data including their uploaded documents and conversation histories which may contain sensitive info.",
+        "existingPolicies": "",
+        "keyConcerns": "We've been moving fast and breaking things but now enterprise customers are asking about our AI governance and we have nothing. We need to look credible quickly. Also worried we might have already done things that create liability.",
+        "regulatoryRequirements": "None currently but enterprise sales require SOC2. Some healthcare prospects mentioned HIPAA."
+      },
+      "rubric": {
+        "criteria": [
+          {"id": "maturity-assessment", "description": "Accurately assesses low maturity state without being condescending", "weight": 15},
+          {"id": "gap-identification", "description": "Identifies critical gaps that could block enterprise sales", "weight": 25},
+          {"id": "risk-prioritization", "description": "Highlights immediate risks from current practices", "weight": 20},
+          {"id": "actionable-roadmap", "description": "Provides fast-track plan to achieve basic governance quickly", "weight": 25},
+          {"id": "stakeholder-guidance", "description": "Appropriate for startup size (may be same people wearing multiple hats)", "weight": 15}
+        ]
+      }
+    },
+    {
+      "id": "ai-gov-assessment-variant-1",
+      "type": "variant",
+      "description": "Large financial services firm with strict regulatory requirements",
+      "inputPayload": {
+        "organizationSize": "10000+ employees",
+        "industry": "Financial Services",
+        "currentAIUsage": "AI usage is heavily restricted. Only approved internal tools are permitted. We have an internal chatbot for HR questions (no customer data). Exploring AI for fraud detection but in sandboxed environment only. No external AI tools like ChatGPT are allowed currently.",
+        "dataClassifications": "Highly structured: Public, Internal, Confidential, Highly Confidential, Regulated. Customer financial data is Regulated. Trade secrets are Highly Confidential. PII handling follows specific retention and encryption requirements.",
+        "existingPolicies": "Comprehensive policy framework: Information Security Policy, Data Classification Policy, Third Party Risk Management Policy, Model Risk Management Policy (for ML/AI models), Acceptable Use Policy, Privacy Policy, Vendor Management Policy. We follow the NIST framework.",
+        "keyConcerns": "Regulators are asking about our AI strategy and governance. Board wants to adopt AI for competitive reasons but risk committee is cautious. Need to balance innovation with compliance. Concerned about model risk, explainability requirements, and fair lending implications of AI.",
+        "regulatoryRequirements": "SOC1 and SOC2 certified, PCI-DSS compliant, Gramm-Leach-Bliley Act requirements, SEC/FINRA regulations, OCC guidance on model risk management (SR 11-7), potential EU AI Act implications for EU operations, state privacy laws."
+      },
+      "rubric": {
+        "criteria": [
+          {"id": "maturity-assessment", "description": "Recognizes existing governance maturity while identifying AI-specific gaps", "weight": 20},
+          {"id": "gap-identification", "description": "Focuses on AI-specific additions to existing framework", "weight": 20},
+          {"id": "risk-prioritization", "description": "Emphasizes regulatory and model risk concerns appropriately", "weight": 20},
+          {"id": "actionable-roadmap", "description": "Integrates with existing governance structure rather than replacing", "weight": 25},
+          {"id": "stakeholder-guidance", "description": "Addresses board, risk committee, and regulatory stakeholders", "weight": 15}
+        ]
+      }
+    }
+  ]
+}

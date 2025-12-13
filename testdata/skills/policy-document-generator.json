@@ -1,0 +1,76 @@
+{
+  "skillId": "policy-document-generator",
+  "skillName": "Policy Document Generator",
+  "generatedAt": "2025-12-13T00:00:00.000Z",
+  "tests": [
+    {
+      "id": "policy-gen-happy-1",
+      "type": "happy-path",
+      "description": "Information Security Policy for technology company",
+      "inputPayload": {
+        "policyType": "Information Security Policy",
+        "organizationContext": "We are a 300-person B2B SaaS company providing analytics software. Fully remote workforce across US, Canada, and EU. Handle customer data including usage analytics and some PII. AWS-based infrastructure. Engineering-heavy culture (40% of company). Series B funded, growing rapidly.",
+        "regulatoryRequirements": "SOC2 Type II certified (must maintain), GDPR compliant for EU customers, CCPA applies for California residents, Some healthcare customers require HIPAA awareness (no BAA currently).",
+        "existingPractices": "Current security practices: Okta SSO with MFA required for all systems, Google Workspace for email/docs, AWS with infrastructure as code (Terraform), GitHub with required code reviews, 90-day password rotation (but considering passwordless), Quarterly access reviews, Annual security awareness training, Bug bounty program, Weekly vulnerability scanning, Penetration testing annually.",
+        "approvalAuthority": "CISO (reports to CEO) with Legal review for compliance sections",
+        "reviewCycle": "Annual",
+        "audienceScope": "All Employees"
+      },
+      "rubric": {
+        "criteria": [
+          {"id": "completeness", "description": "Covers all standard InfoSec policy sections", "weight": 25},
+          {"id": "specificity", "description": "Specific to company context, not generic boilerplate", "weight": 20},
+          {"id": "compliance-alignment", "description": "Addresses SOC2, GDPR, CCPA requirements", "weight": 20},
+          {"id": "enforceability", "description": "Clear enough to enforce and audit", "weight": 20},
+          {"id": "implementation-ready", "description": "Includes checklist and training requirements", "weight": 15}
+        ]
+      }
+    },
+    {
+      "id": "policy-gen-edge-1",
+      "type": "edge-case",
+      "description": "AI/ML Usage Policy - new policy type with limited precedent",
+      "inputPayload": {
+        "policyType": "AI/ML Usage Policy",
+        "organizationContext": "Large professional services firm (5000 employees). Mix of consulting, audit, and advisory services. Client confidentiality is paramount. Employees across multiple countries with varying AI regulations.",
+        "regulatoryRequirements": "EU AI Act applies to European operations. Client confidentiality obligations. Professional conduct rules (accounting, legal services). GDPR for personal data. Some government clients have specific AI restrictions.",
+        "existingPractices": "Current state: ChatGPT Enterprise rolled out to 1000 users as pilot. Microsoft Copilot evaluation underway. Some teams using AI informally. No formal policy exists. IT has blocked some AI tools at network level. Training being developed.",
+        "approvalAuthority": "Chief Risk Officer with General Counsel approval",
+        "reviewCycle": "Semi-annual",
+        "audienceScope": "All Employees"
+      },
+      "rubric": {
+        "criteria": [
+          {"id": "completeness", "description": "Covers AI-specific concerns (data handling, accuracy, disclosure)", "weight": 25},
+          {"id": "specificity", "description": "Addresses professional services context and client confidentiality", "weight": 25},
+          {"id": "compliance-alignment", "description": "Addresses EU AI Act and professional conduct", "weight": 20},
+          {"id": "enforceability", "description": "Clear tool-by-tool guidance", "weight": 15},
+          {"id": "implementation-ready", "description": "Practical for diverse workforce", "weight": 15}
+        ]
+      }
+    },
+    {
+      "id": "policy-gen-variant-1",
+      "type": "variant",
+      "description": "Incident Response Policy for financial services firm",
+      "inputPayload": {
+        "policyType": "Incident Response Policy",
+        "organizationContext": "Regional bank with 2000 employees. Mix of retail branches, corporate banking, and wealth management. Critical systems include core banking, online banking, ATM network, payment processing. Regulated by OCC, FDIC, state banking regulators.",
+        "regulatoryRequirements": "FFIEC guidelines on incident response. OCC Heightened Standards. GLBA safeguards rule. PCI-DSS for card processing. State data breach notification laws. 36-hour notification requirement for significant incidents.",
+        "existingPractices": "Current practices: 24/7 security operations center (outsourced), Incident classification (P1-P4), On-call rotation for IT and security, Quarterly tabletop exercises, Relationship with FBI cyber division, Cyber insurance policy, Board reporting on major incidents.",
+        "approvalAuthority": "Chief Information Security Officer with Board Risk Committee oversight",
+        "reviewCycle": "Annual",
+        "audienceScope": "All Employees"
+      },
+      "rubric": {
+        "criteria": [
+          {"id": "completeness", "description": "Covers detection, response, recovery, notification phases", "weight": 20},
+          {"id": "specificity", "description": "Banking-specific scenarios and escalation paths", "weight": 20},
+          {"id": "compliance-alignment", "description": "Addresses FFIEC, OCC, and notification requirements", "weight": 25},
+          {"id": "enforceability", "description": "Clear roles, timelines, and decision criteria", "weight": 20},
+          {"id": "implementation-ready", "description": "Contact lists, checklists, communication templates", "weight": 15}
+        ]
+      }
+    }
+  ]
+}
