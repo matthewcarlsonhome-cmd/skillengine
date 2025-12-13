@@ -4,6 +4,76 @@ This document tracks fixes, improvements, and changes made to skills and workflo
 
 ---
 
+## 2025-12-13 (Update 2)
+
+### Enterprise Skills and Workflows Added
+
+Added 11 new enterprise-focused skills and 5 new workflows for large organization use cases.
+
+#### New Enterprise Skills (5)
+
+Located in `lib/skills/enterprise.ts`:
+
+| Skill ID | Name | Category |
+|----------|------|----------|
+| `contract-review-accelerator` | Contract Review Accelerator | enterprise-legal |
+| `budget-variance-narrator` | Budget Variance Narrator | enterprise-finance |
+| `steering-committee-pack` | Steering Committee Pack Generator | enterprise-governance |
+| `executive-communication-pack` | Executive Communication Pack | enterprise-hr |
+| `automation-opportunity-assessment` | Automation Opportunity Assessment | enterprise-operations |
+
+#### New Excel Skills (6)
+
+Located in `lib/skills/excel.ts`:
+
+| Skill ID | Name | Use Case |
+|----------|------|----------|
+| `excel-data-analyzer` | Excel Data Analyzer | Data analysis with insights |
+| `excel-formula-builder` | Excel Formula Builder | Complex formula generation |
+| `excel-chart-designer` | Excel Chart Designer | Visualization design |
+| `excel-pivot-architect` | Excel Pivot Table Architect | Pivot table design |
+| `excel-marketing-dashboard` | Excel Marketing Dashboard Builder | Marketing KPI dashboards |
+| `excel-data-cleaner` | Excel Data Cleaner | Data quality and cleaning |
+
+#### New Enterprise Workflows (5)
+
+Located in `lib/workflows/enterprise.ts`:
+
+1. **Financial Analysis Pack** (`financial-analysis-pack`)
+   - Data analysis → Budget variance → Executive communication
+   - Target: FP&A teams during close cycles
+
+2. **Marketing Analytics Dashboard** (`marketing-analytics-dashboard`)
+   - Data cleaning → Analysis → Dashboard design → Chart specifications
+   - Target: Marketing teams building performance dashboards
+
+3. **Program Governance Pack** (`program-governance-pack`)
+   - Steering committee pack → Executive communications
+   - Target: PMO teams managing enterprise programs
+
+4. **Contract Review Workflow** (`contract-review-workflow`)
+   - Contract analysis → Approval communication
+   - Target: Legal and procurement teams
+
+5. **Automation Discovery Workflow** (`automation-discovery-workflow`)
+   - Metrics analysis → Automation assessment → Business case
+   - Target: Digital transformation teams
+
+#### Infrastructure Updates
+
+- Added `SkillDefinition` type to `lib/storage/types.ts`
+- Updated `lib/testing/registrySnapshot.ts` to include enterprise and Excel skills
+- Updated `lib/workflows/index.ts` to export enterprise workflows
+
+#### Updated Totals
+
+| Category | Previous | New | Total |
+|----------|----------|-----|-------|
+| Static Skills | 16 | 11 | 27 |
+| Workflows | 14 | 5 | 19 |
+
+---
+
 ## 2025-12-13
 
 ### Test Fix: Dynamic Workflow Count

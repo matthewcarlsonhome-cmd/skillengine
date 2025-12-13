@@ -8,6 +8,8 @@
 import { SKILLS } from '../skills/static';
 import { WORKFLOWS, WORKFLOW_LIST } from '../workflows';
 import { ROLE_TEMPLATES } from '../roleTemplates';
+import { ENTERPRISE_SKILLS } from '../skills/enterprise';
+import { EXCEL_SKILLS } from '../skills/excel';
 import type { Workflow, SkillDefinition } from '../storage/types';
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -88,7 +90,7 @@ function extractSkillInputs(skill: SkillDefinition): InputFieldSchema[] {
 }
 
 /**
- * Extract schema for a static skill
+ * Extract schema for a static skill (legacy Skill type from static.ts)
  */
 function extractStaticSkillSchema(skill: SkillDefinition): SkillSchema {
   return {
@@ -98,6 +100,29 @@ function extractStaticSkillSchema(skill: SkillDefinition): SkillSchema {
     category: skill.category || 'general',
     source: 'static',
     inputs: extractSkillInputs(skill),
+  };
+}
+
+/**
+ * Extract schema for enterprise/excel skills (SkillDefinition type)
+ */
+function extractEnterpriseSkillSchema(skill: SkillDefinition, category: string): SkillSchema {
+  return {
+    id: skill.id,
+    name: skill.name,
+    description: skill.description,
+    category: skill.category || category,
+    source: 'static',
+    inputs: skill.inputs.map((input) => ({
+      id: input.id,
+      label: input.label,
+      type: input.type as InputFieldSchema['type'],
+      required: input.required ?? false,
+      placeholder: input.placeholder,
+      options: input.options,
+      rows: input.rows,
+      minLength: input.minLength,
+    })),
   };
 }
 
@@ -178,18 +203,22 @@ function extractWorkflowSchema(workflow: Workflow): WorkflowSchema {
  */
 export function generateRegistrySnapshot(): RegistrySnapshot {
   const staticSkills = Object.values(SKILLS).map(extractStaticSkillSchema);
+  const enterpriseSkills = Object.values(ENTERPRISE_SKILLS).map((s) => extractEnterpriseSkillSchema(s, 'enterprise'));
+  const excelSkills = Object.values(EXCEL_SKILLS).map((s) => extractEnterpriseSkillSchema(s, 'excel'));
   const roleBasedSkills = extractRoleBasedSkillSchemas();
   const workflows = WORKFLOW_LIST.map(extractWorkflowSchema);
+
+  const allStaticSkills = [...staticSkills, ...enterpriseSkills, ...excelSkills];
 
   return {
     generatedAt: new Date().toISOString(),
     summary: {
-      totalStaticSkills: staticSkills.length,
+      totalStaticSkills: allStaticSkills.length,
       totalRoleBasedSkills: roleBasedSkills.length,
       totalWorkflows: workflows.length,
       totalRoleTemplates: ROLE_TEMPLATES.length,
     },
-    skills: [...staticSkills, ...roleBasedSkills],
+    skills: [...allStaticSkills, ...roleBasedSkills],
     workflows,
     roleTemplates: ROLE_TEMPLATES.map((role) => ({
       id: role.id,
@@ -200,12 +229,14 @@ export function generateRegistrySnapshot(): RegistrySnapshot {
 }
 
 /**
- * Get all skill schemas (static + role-based)
+ * Get all skill schemas (static + enterprise + excel + role-based)
  */
 export function getAllSkillSchemas(): SkillSchema[] {
   const staticSkills = Object.values(SKILLS).map(extractStaticSkillSchema);
+  const enterpriseSkills = Object.values(ENTERPRISE_SKILLS).map((s) => extractEnterpriseSkillSchema(s, 'enterprise'));
+  const excelSkills = Object.values(EXCEL_SKILLS).map((s) => extractEnterpriseSkillSchema(s, 'excel'));
   const roleBasedSkills = extractRoleBasedSkillSchemas();
-  return [...staticSkills, ...roleBasedSkills];
+  return [...staticSkills, ...enterpriseSkills, ...excelSkills, ...roleBasedSkills];
 }
 
 /**

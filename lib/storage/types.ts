@@ -500,6 +500,47 @@ export interface AdminAuditLog {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// SKILL DEFINITION TYPE
+// For defining skills in enterprise.ts, excel.ts, and other skill modules
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Input field configuration for a skill
+ */
+export interface SkillInput {
+  id: string;
+  label: string;
+  type: 'text' | 'textarea' | 'select' | 'checkbox';
+  required?: boolean;
+  placeholder?: string;
+  options?: string[];
+  rows?: number;
+  minLength?: number;
+  helpText?: string;
+}
+
+/**
+ * Defines a skill for enterprise, excel, and testing purposes
+ * More structured than the legacy Skill type for better maintainability
+ */
+export interface SkillDefinition {
+  id: string;
+  name: string;
+  description: string;
+  longDescription: string;
+  category: string;
+  icon: string;
+  color: string;
+  estimatedTime: string;
+  tags: string[];
+  inputs: SkillInput[];
+  generatePrompt: (inputs: Record<string, string>) => {
+    systemInstruction: string;
+    userPrompt: string;
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // DEFAULT ROLE CONFIGURATIONS
 // ═══════════════════════════════════════════════════════════════════════════
 
