@@ -92,7 +92,10 @@ describe('Workflow Registry', () => {
   it('exports WORKFLOW_LIST array', () => {
     expect(WORKFLOW_LIST).toBeDefined();
     expect(Array.isArray(WORKFLOW_LIST)).toBe(true);
-    expect(WORKFLOW_LIST.length).toBe(3);
+    // WORKFLOW_LIST is derived from WORKFLOWS object
+    expect(WORKFLOW_LIST.length).toBe(Object.keys(WORKFLOWS).length);
+    // Ensure we have at least the 3 core workflows
+    expect(WORKFLOW_LIST.length).toBeGreaterThanOrEqual(3);
   });
 
   it('WORKFLOW_LIST contains same workflows as WORKFLOWS object', () => {
