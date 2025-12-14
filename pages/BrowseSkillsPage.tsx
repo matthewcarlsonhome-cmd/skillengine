@@ -364,7 +364,7 @@ const BrowseSkillsPage: React.FC = () => {
           {filteredSkills.map((skill) => (
             <Link
               key={skill.id}
-              to={skill.source === 'builtin' ? `/skills/${skill.id}` : `/library/skill/${skill.id}`}
+              to={skill.source === 'builtin' ? `/skill/${skill.id}` : `/library/skill/${skill.id}`}
               className="group rounded-xl border bg-card p-6 hover:border-primary/50 transition-all hover:shadow-lg"
             >
               <div className="flex items-start justify-between mb-3">
