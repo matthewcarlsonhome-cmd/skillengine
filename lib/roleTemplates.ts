@@ -35835,6 +35835,1077 @@ Generate a professional, scannable one-page executive summary that captures the 
       },
     ],
   },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // 21. REVENUE OPERATIONS MANAGER
+  // ═══════════════════════════════════════════════════════════════════════════
+  {
+    id: 'revenue-operations-manager',
+    name: 'Revenue Operations Manager',
+    description: 'Pipeline hygiene, GTM tooling, forecasting, and sales/marketing ops for B2B SaaS organizations.',
+    icon: 'TrendingUp',
+    color: 'text-emerald-500',
+    staticSkillIds: [
+      'job-readiness-score',
+      'skills-gap-analyzer',
+      'interview-prep',
+      'salary-negotiation-master',
+      'role-ai-automation-analyzer',
+    ],
+    dynamicSkills: [
+      {
+        name: 'RevOps Pipeline Hygiene Kit',
+        description: 'Audit and clean your sales pipeline with deduplication, stage-aging analysis, and forecast accuracy checks.',
+        longDescription: 'Comprehensive pipeline hygiene toolkit that identifies duplicate opportunities, flags stale deals stuck in stages, analyzes conversion rates by stage, and generates forecast variance explanations. Built on Salesforce/HubSpot best practices.',
+        category: 'analysis',
+        estimatedTimeSaved: '4-6 hours per pipeline review',
+        theme: {
+          primary: 'text-emerald-400',
+          secondary: 'bg-emerald-900/20',
+          gradient: 'from-emerald-500/20 to-transparent',
+          iconName: 'Filter',
+        },
+        inputs: [
+          { id: 'crmPlatform', label: 'CRM Platform', type: 'select', options: ['Salesforce', 'HubSpot', 'Microsoft Dynamics', 'Pipedrive', 'Other'], validation: { required: true } },
+          { id: 'pipelineData', label: 'Pipeline Data', type: 'textarea', placeholder: 'Paste your pipeline data (Opp Name, Stage, Amount, Close Date, Days in Stage, Last Activity)...', validation: { required: true, minLength: 100 } },
+          { id: 'salesProcess', label: 'Sales Process/Methodology', type: 'select', options: ['MEDDPICC', 'BANT', 'SPIN', 'Challenger Sale', 'Solution Selling', 'Custom'], validation: { required: true } },
+          { id: 'stageDefinitions', label: 'Stage Definitions & Exit Criteria', type: 'textarea', placeholder: 'Define each stage and what qualifies a deal to move forward...', validation: { required: true, minLength: 50 } },
+          { id: 'avgCycleLength', label: 'Average Sales Cycle (days)', type: 'text', placeholder: 'e.g., 45 days', validation: { required: true } },
+          { id: 'forecastAccuracyTarget', label: 'Forecast Accuracy Target', type: 'text', placeholder: 'e.g., +/-8%', validation: { required: true } },
+        ],
+        prompts: {
+          systemInstruction: `You are a RevOps Expert and former VP of Revenue Operations at a $500M ARR B2B SaaS company. You have implemented pipeline hygiene programs across 50+ organizations and trained 1,000+ sales reps on CRM discipline.
+
+**YOUR EXPERTISE:**
+- Pipeline management across Salesforce, HubSpot, Dynamics
+- Sales methodology implementation (MEDDPICC, BANT, Challenger)
+- Forecast accuracy improvement (average 40% improvement)
+- Sales operations automation and tooling
+
+**PIPELINE HYGIENE FRAMEWORK:**
+| Issue Type | Impact | Priority |
+|------------|--------|----------|
+| Duplicates | Inflated pipeline | Critical |
+| Stale Deals (>2x avg cycle) | False confidence | High |
+| Missing Fields | Forecast risk | High |
+| Stage Violations | Process breakdown | Medium |
+
+**OUTPUT SECTIONS:**
+1. Pipeline Health Score (0-100)
+2. Duplicate Detection Report
+3. Stage Aging Analysis
+4. Conversion Rate Analysis by Stage
+5. Forecast Risk Assessment
+6. Recommended Actions with Priority`,
+          userPromptTemplate: `Analyze this sales pipeline for hygiene issues:
+
+**CRM Platform:** {{crmPlatform}}
+**Sales Methodology:** {{salesProcess}}
+**Average Cycle Length:** {{avgCycleLength}}
+**Forecast Accuracy Target:** {{forecastAccuracyTarget}}
+
+**Stage Definitions:**
+{{stageDefinitions}}
+
+**Pipeline Data:**
+{{pipelineData}}
+
+Generate a comprehensive pipeline hygiene report with actionable recommendations.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'claude',
+          useWebSearch: false,
+          maxTokens: 8192,
+          temperature: 0.3,
+        },
+      },
+      {
+        name: 'Forecast Variance Explainer',
+        description: 'Generate executive-ready explanations for forecast variances with root causes and mitigation plans.',
+        longDescription: 'Analyzes gaps between forecasted and actual revenue, identifies root causes (slipped deals, lost opportunities, unexpected wins), and generates narratives suitable for board meetings and leadership reviews.',
+        category: 'generation',
+        estimatedTimeSaved: '2-3 hours per forecast review',
+        theme: {
+          primary: 'text-blue-400',
+          secondary: 'bg-blue-900/20',
+          gradient: 'from-blue-500/20 to-transparent',
+          iconName: 'BarChart3',
+        },
+        inputs: [
+          { id: 'forecastPeriod', label: 'Forecast Period', type: 'text', placeholder: 'e.g., Q4 2024', validation: { required: true } },
+          { id: 'forecastedRevenue', label: 'Forecasted Revenue', type: 'text', placeholder: 'e.g., $2.5M', validation: { required: true } },
+          { id: 'actualRevenue', label: 'Actual Revenue', type: 'text', placeholder: 'e.g., $2.1M', validation: { required: true } },
+          { id: 'dealChanges', label: 'Deal Movement Details', type: 'textarea', placeholder: 'List slipped deals, lost opportunities, unexpected wins with amounts and reasons...', validation: { required: true, minLength: 50 } },
+          { id: 'marketFactors', label: 'Market/External Factors', type: 'textarea', placeholder: 'Economic conditions, competitive moves, customer budget freezes...', validation: { required: false } },
+          { id: 'audienceLevel', label: 'Report Audience', type: 'select', options: ['Board of Directors', 'Executive Team', 'Sales Leadership', 'Full Revenue Team'], validation: { required: true } },
+        ],
+        prompts: {
+          systemInstruction: `You are a Revenue Operations Leader who has presented forecast reviews to boards at 20+ SaaS companies. You excel at translating raw data into executive narratives that drive action.
+
+**YOUR APPROACH:**
+1. Lead with the headline (beat/miss and by how much)
+2. Categorize variance drivers (slips, losses, unexpected wins, timing)
+3. Quantify each driver's contribution
+4. Provide forward-looking mitigation
+
+**OUTPUT FORMAT:**
+# Forecast Variance Report: [Period]
+## Executive Summary
+## Variance Breakdown
+## Key Drivers Analysis
+## Mitigation Actions
+## Updated Outlook`,
+          userPromptTemplate: `Generate a forecast variance report:
+
+**Period:** {{forecastPeriod}}
+**Forecasted:** {{forecastedRevenue}}
+**Actual:** {{actualRevenue}}
+**Audience:** {{audienceLevel}}
+
+**Deal Movement:**
+{{dealChanges}}
+
+**Market Factors:**
+{{marketFactors}}
+
+Create an executive-ready variance explanation with actionable insights.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'claude',
+          useWebSearch: false,
+          maxTokens: 6144,
+          temperature: 0.3,
+        },
+      },
+    ],
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // 22. AI SOLUTIONS ARCHITECT
+  // ═══════════════════════════════════════════════════════════════════════════
+  {
+    id: 'ai-solutions-architect',
+    name: 'AI Solutions Architect',
+    description: 'Design secure AI workflows, governance guardrails, and vendor integrations for enterprise buyers.',
+    icon: 'Brain',
+    color: 'text-violet-500',
+    staticSkillIds: [
+      'job-readiness-score',
+      'skills-gap-analyzer',
+      'interview-prep',
+      'role-ai-automation-analyzer',
+    ],
+    dynamicSkills: [
+      {
+        name: 'Governed Prompt Packager',
+        description: 'Harden AI prompts with PII checks, citation requirements, and allowed-actions lists for IT review.',
+        longDescription: 'Creates enterprise-ready prompt packages that include data handling guardrails, output constraints, citation requirements, and approval checklists for IT/Security teams. Ensures AI deployments meet compliance requirements.',
+        category: 'generation',
+        estimatedTimeSaved: '3-5 hours per prompt package',
+        theme: {
+          primary: 'text-violet-400',
+          secondary: 'bg-violet-900/20',
+          gradient: 'from-violet-500/20 to-transparent',
+          iconName: 'Shield',
+        },
+        inputs: [
+          { id: 'promptPurpose', label: 'Prompt Purpose', type: 'textarea', placeholder: 'What will this AI prompt do? What business process does it support?', validation: { required: true, minLength: 30 } },
+          { id: 'basePrompt', label: 'Base Prompt to Harden', type: 'textarea', placeholder: 'Paste your existing prompt that needs governance guardrails...', validation: { required: true, minLength: 50 } },
+          { id: 'dataClassification', label: 'Data Classification', type: 'select', options: ['Public', 'Internal', 'Confidential', 'Restricted/PII', 'Regulated (HIPAA/PCI/SOX)'], validation: { required: true } },
+          { id: 'outputConstraints', label: 'Output Constraints', type: 'textarea', placeholder: 'What should the AI never output? What format requirements exist?', validation: { required: true, minLength: 20 } },
+          { id: 'complianceFrameworks', label: 'Compliance Requirements', type: 'textarea', placeholder: 'SOC2, HIPAA, GDPR, PCI-DSS, internal policies...', validation: { required: true, minLength: 10 } },
+          { id: 'approvers', label: 'Approval Chain', type: 'textarea', placeholder: 'Who needs to approve this prompt? (IT Security, Legal, Data Privacy...)', validation: { required: true, minLength: 10 } },
+        ],
+        prompts: {
+          systemInstruction: `You are an Enterprise AI Governance Specialist with 15+ years in IT security and 5 years specializing in AI/ML deployment governance. You've created prompt governance frameworks adopted by Fortune 500 companies.
+
+**YOUR GOVERNANCE FRAMEWORK:**
+| Layer | Controls |
+|-------|----------|
+| Input | PII detection, data classification, injection prevention |
+| Processing | Allowed actions, scope limits, model constraints |
+| Output | Format validation, citation requirements, redaction |
+| Audit | Logging, versioning, approval tracking |
+
+**OUTPUT SECTIONS:**
+1. Governance Summary Card
+2. Hardened Prompt with Guardrails
+3. PII Handling Instructions
+4. Allowed/Prohibited Actions List
+5. Output Validation Rules
+6. IT/Security Approval Checklist
+7. Deployment Prerequisites`,
+          userPromptTemplate: `Create a governed prompt package:
+
+**Purpose:** {{promptPurpose}}
+**Data Classification:** {{dataClassification}}
+**Compliance Requirements:** {{complianceFrameworks}}
+**Approval Chain:** {{approvers}}
+
+**Output Constraints:**
+{{outputConstraints}}
+
+**Base Prompt:**
+{{basePrompt}}
+
+Generate a complete governed prompt package ready for enterprise deployment.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'claude',
+          useWebSearch: false,
+          maxTokens: 8192,
+          temperature: 0.2,
+        },
+      },
+      {
+        name: 'AI Vendor Evaluation Matrix',
+        description: 'Create comprehensive evaluation matrices for AI/ML vendor selection with security and compliance criteria.',
+        longDescription: 'Generates structured vendor evaluation frameworks covering capability assessment, security review, compliance verification, integration requirements, and TCO analysis for AI platform procurement.',
+        category: 'analysis',
+        estimatedTimeSaved: '8-12 hours per vendor evaluation',
+        theme: {
+          primary: 'text-cyan-400',
+          secondary: 'bg-cyan-900/20',
+          gradient: 'from-cyan-500/20 to-transparent',
+          iconName: 'Scale',
+        },
+        inputs: [
+          { id: 'useCase', label: 'AI Use Case', type: 'textarea', placeholder: 'What will you use the AI platform for? What problems does it solve?', validation: { required: true, minLength: 50 } },
+          { id: 'vendors', label: 'Vendors to Evaluate', type: 'textarea', placeholder: 'List vendors being considered (e.g., OpenAI, Anthropic, AWS Bedrock, Azure OpenAI, Google Vertex)...', validation: { required: true, minLength: 20 } },
+          { id: 'requirements', label: 'Technical Requirements', type: 'textarea', placeholder: 'Model capabilities, latency requirements, volume, integration needs...', validation: { required: true, minLength: 50 } },
+          { id: 'securityRequirements', label: 'Security Requirements', type: 'textarea', placeholder: 'Data residency, encryption, access controls, audit logging...', validation: { required: true, minLength: 30 } },
+          { id: 'complianceNeeds', label: 'Compliance Needs', type: 'textarea', placeholder: 'SOC2, HIPAA, GDPR, FedRAMP, industry-specific requirements...', validation: { required: true, minLength: 20 } },
+          { id: 'budgetRange', label: 'Budget Range', type: 'text', placeholder: 'e.g., $50K-100K annually', validation: { required: true } },
+        ],
+        prompts: {
+          systemInstruction: `You are an AI Platform Architect and former Gartner analyst specializing in AI/ML vendor evaluation. You've conducted 200+ vendor assessments for enterprise buyers.
+
+**EVALUATION FRAMEWORK:**
+| Category | Weight | Key Criteria |
+|----------|--------|--------------|
+| Capability | 30% | Model quality, features, roadmap |
+| Security | 25% | Data protection, access control, audit |
+| Compliance | 20% | Certifications, data residency, contracts |
+| Integration | 15% | APIs, SDKs, existing stack fit |
+| Economics | 10% | Pricing, TCO, scaling costs |
+
+**OUTPUT SECTIONS:**
+1. Executive Summary with Recommendation
+2. Detailed Evaluation Matrix (Scored)
+3. Security Assessment per Vendor
+4. Compliance Gap Analysis
+5. TCO Comparison
+6. Implementation Considerations
+7. Risk Assessment`,
+          userPromptTemplate: `Create an AI vendor evaluation:
+
+**Use Case:** {{useCase}}
+**Budget:** {{budgetRange}}
+
+**Vendors:**
+{{vendors}}
+
+**Technical Requirements:**
+{{requirements}}
+
+**Security Requirements:**
+{{securityRequirements}}
+
+**Compliance Needs:**
+{{complianceNeeds}}
+
+Generate a comprehensive vendor evaluation matrix with scoring and recommendations.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'claude',
+          useWebSearch: true,
+          maxTokens: 10240,
+          temperature: 0.3,
+        },
+      },
+    ],
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // 23. CUSTOMER SUCCESS LEADER
+  // ═══════════════════════════════════════════════════════════════════════════
+  {
+    id: 'customer-success-leader',
+    name: 'Customer Success Leader',
+    description: 'Drive renewals, expansion, QBR preparation, and voice-of-customer synthesis for enterprise accounts.',
+    icon: 'Heart',
+    color: 'text-rose-500',
+    staticSkillIds: [
+      'job-readiness-score',
+      'skills-gap-analyzer',
+      'interview-prep',
+      'salary-negotiation-master',
+      'networking-script-generator',
+    ],
+    dynamicSkills: [
+      {
+        name: 'QBR Prep Synthesizer',
+        description: 'Aggregate account data into executive-ready QBR decks with health scores and action registers.',
+        longDescription: 'Transforms scattered account information (usage data, support tickets, NPS scores, stakeholder notes) into structured QBR presentations with health indicators, success metrics, risk flags, and strategic recommendations.',
+        category: 'generation',
+        estimatedTimeSaved: '4-6 hours per QBR',
+        theme: {
+          primary: 'text-rose-400',
+          secondary: 'bg-rose-900/20',
+          gradient: 'from-rose-500/20 to-transparent',
+          iconName: 'Presentation',
+        },
+        inputs: [
+          { id: 'customerName', label: 'Customer Name', type: 'text', placeholder: 'e.g., Acme Corporation', validation: { required: true } },
+          { id: 'accountTier', label: 'Account Tier', type: 'select', options: ['Strategic', 'Enterprise', 'Mid-Market', 'SMB'], validation: { required: true } },
+          { id: 'contractValue', label: 'ARR / Contract Value', type: 'text', placeholder: 'e.g., $250,000', validation: { required: true } },
+          { id: 'renewalDate', label: 'Renewal Date', type: 'text', placeholder: 'e.g., March 2025', validation: { required: true } },
+          { id: 'usageData', label: 'Usage/Adoption Data', type: 'textarea', placeholder: 'Key metrics: DAUs, feature adoption, login frequency, etc.', validation: { required: true, minLength: 30 } },
+          { id: 'supportHistory', label: 'Support Ticket Summary', type: 'textarea', placeholder: 'Recent tickets, escalations, CSAT scores...', validation: { required: true, minLength: 30 } },
+          { id: 'stakeholderNotes', label: 'Stakeholder Relationship Notes', type: 'textarea', placeholder: 'Key contacts, champions, detractors, org changes...', validation: { required: true, minLength: 30 } },
+          { id: 'businessObjectives', label: 'Customer Business Objectives', type: 'textarea', placeholder: 'What is the customer trying to achieve? Their success metrics?', validation: { required: true, minLength: 30 } },
+          { id: 'expansionOpportunities', label: 'Expansion Opportunities', type: 'textarea', placeholder: 'Cross-sell, upsell, new use cases identified...', validation: { required: false } },
+        ],
+        prompts: {
+          systemInstruction: `You are a VP of Customer Success who has managed $500M+ in ARR and conducted 1,000+ executive QBRs. You've built CS organizations at three unicorn companies.
+
+**QBR FRAMEWORK:**
+| Section | Time | Purpose |
+|---------|------|---------|
+| Value Delivered | 10 min | Prove ROI, celebrate wins |
+| Health Metrics | 5 min | Show adoption, engagement |
+| Challenges & Support | 5 min | Address concerns proactively |
+| Strategic Roadmap | 10 min | Align on future, expand |
+| Action Items | 5 min | Clear next steps |
+
+**OUTPUT SECTIONS:**
+1. QBR Executive Summary (1-page)
+2. Account Health Score Card
+3. Value Delivered Dashboard
+4. Risk Assessment
+5. Strategic Recommendations
+6. Expansion Proposal
+7. Action Register with Owners/Dates`,
+          userPromptTemplate: `Create a QBR package for:
+
+**Customer:** {{customerName}}
+**Tier:** {{accountTier}}
+**ARR:** {{contractValue}}
+**Renewal:** {{renewalDate}}
+
+**Usage Data:**
+{{usageData}}
+
+**Support History:**
+{{supportHistory}}
+
+**Stakeholder Notes:**
+{{stakeholderNotes}}
+
+**Business Objectives:**
+{{businessObjectives}}
+
+**Expansion Opportunities:**
+{{expansionOpportunities}}
+
+Generate a complete QBR deck with health scores, insights, and recommendations.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'claude',
+          useWebSearch: false,
+          maxTokens: 10240,
+          temperature: 0.3,
+        },
+      },
+      {
+        name: 'Renewal Risk Mitigator',
+        description: 'Identify at-risk renewals and generate targeted save plays with stakeholder-specific messaging.',
+        longDescription: 'Analyzes churn signals (declining usage, support escalations, champion departure, competitive evaluation) and creates personalized intervention plans with messaging for each stakeholder type.',
+        category: 'generation',
+        estimatedTimeSaved: '3-4 hours per at-risk account',
+        theme: {
+          primary: 'text-amber-400',
+          secondary: 'bg-amber-900/20',
+          gradient: 'from-amber-500/20 to-transparent',
+          iconName: 'AlertTriangle',
+        },
+        inputs: [
+          { id: 'customerName', label: 'Customer Name', type: 'text', placeholder: 'e.g., Acme Corporation', validation: { required: true } },
+          { id: 'arrAtRisk', label: 'ARR at Risk', type: 'text', placeholder: 'e.g., $150,000', validation: { required: true } },
+          { id: 'renewalDate', label: 'Renewal Date', type: 'text', placeholder: 'e.g., 60 days out', validation: { required: true } },
+          { id: 'riskSignals', label: 'Risk Signals Observed', type: 'textarea', placeholder: 'Declining usage, escalations, competitor mentions, budget concerns...', validation: { required: true, minLength: 50 } },
+          { id: 'stakeholders', label: 'Key Stakeholders', type: 'textarea', placeholder: 'List contacts with roles and current sentiment (champion, neutral, detractor)...', validation: { required: true, minLength: 30 } },
+          { id: 'competitorThreats', label: 'Competitive Threats', type: 'textarea', placeholder: 'Any competitors being evaluated? What are they offering?', validation: { required: false } },
+          { id: 'valueDelivered', label: 'Value Delivered to Date', type: 'textarea', placeholder: 'Key wins, ROI metrics, success stories...', validation: { required: true, minLength: 30 } },
+        ],
+        prompts: {
+          systemInstruction: `You are a Customer Success Executive specializing in renewal saves with a 85% save rate on at-risk accounts. You've recovered $50M+ in churning ARR over your career.
+
+**SAVE PLAY FRAMEWORK:**
+| Risk Level | Actions |
+|------------|---------|
+| Critical (30 days) | Executive escalation, commercial concession |
+| High (60 days) | Success plan reset, value reinforcement |
+| Medium (90 days) | Proactive engagement, roadmap alignment |
+
+**OUTPUT SECTIONS:**
+1. Risk Assessment Summary
+2. Root Cause Analysis
+3. Stakeholder-Specific Save Plays
+4. Value Reinforcement Messaging
+5. Concession Strategy (if needed)
+6. 30-60-90 Day Action Plan
+7. Executive Sponsor Talking Points`,
+          userPromptTemplate: `Create a renewal save plan for:
+
+**Customer:** {{customerName}}
+**ARR at Risk:** {{arrAtRisk}}
+**Renewal Date:** {{renewalDate}}
+
+**Risk Signals:**
+{{riskSignals}}
+
+**Stakeholders:**
+{{stakeholders}}
+
+**Competitive Threats:**
+{{competitorThreats}}
+
+**Value Delivered:**
+{{valueDelivered}}
+
+Generate a comprehensive save play with stakeholder-specific messaging and action plan.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'claude',
+          useWebSearch: false,
+          maxTokens: 8192,
+          temperature: 0.4,
+        },
+      },
+    ],
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // 24. SECURITY & COMPLIANCE ANALYST
+  // ═══════════════════════════════════════════════════════════════════════════
+  {
+    id: 'security-compliance-analyst',
+    name: 'Security & Compliance Analyst',
+    description: 'Handle policy mapping, incident communications, vendor risk reviews, and audit evidence for SOC2/ISO/PCI.',
+    icon: 'Shield',
+    color: 'text-red-500',
+    staticSkillIds: [
+      'job-readiness-score',
+      'skills-gap-analyzer',
+      'interview-prep',
+      'role-ai-automation-analyzer',
+    ],
+    dynamicSkills: [
+      {
+        name: 'Policy to Control Mapper',
+        description: 'Map internal controls to SOC2/ISO27001/PCI-DSS evidence requests for audit preparation.',
+        longDescription: 'Analyzes your security policies and procedures, maps them to compliance framework control requirements, identifies gaps, and generates evidence collection checklists for auditors.',
+        category: 'analysis',
+        estimatedTimeSaved: '8-12 hours per audit prep',
+        theme: {
+          primary: 'text-red-400',
+          secondary: 'bg-red-900/20',
+          gradient: 'from-red-500/20 to-transparent',
+          iconName: 'FileCheck',
+        },
+        inputs: [
+          { id: 'framework', label: 'Compliance Framework', type: 'select', options: ['SOC2 Type I', 'SOC2 Type II', 'ISO 27001', 'PCI-DSS', 'HIPAA', 'GDPR', 'FedRAMP', 'Multiple Frameworks'], validation: { required: true } },
+          { id: 'controlDomain', label: 'Control Domain', type: 'select', options: ['Access Control', 'Change Management', 'Incident Response', 'Data Protection', 'Vendor Management', 'Business Continuity', 'All Domains'], validation: { required: true } },
+          { id: 'currentPolicies', label: 'Current Policies', type: 'textarea', placeholder: 'Paste your relevant policy documents or describe your current controls...', validation: { required: true, minLength: 100 } },
+          { id: 'existingEvidence', label: 'Existing Evidence', type: 'textarea', placeholder: 'What evidence do you already have? Logs, screenshots, attestations...', validation: { required: true, minLength: 30 } },
+          { id: 'knownGaps', label: 'Known Gaps', type: 'textarea', placeholder: 'Any areas you know are missing or need improvement?', validation: { required: false } },
+          { id: 'auditTimeline', label: 'Audit Timeline', type: 'text', placeholder: 'e.g., Audit starts in 6 weeks', validation: { required: true } },
+        ],
+        prompts: {
+          systemInstruction: `You are a Compliance Expert and former Big 4 auditor with 15+ years specializing in SOC2, ISO 27001, and PCI-DSS audits. You've conducted 300+ compliance assessments.
+
+**MAPPING FRAMEWORK:**
+| Framework | Key Focus | Common Gaps |
+|-----------|-----------|-------------|
+| SOC2 | Trust Services Criteria | Evidence retention, testing |
+| ISO 27001 | Annex A Controls | Risk assessment, mgmt review |
+| PCI-DSS | Cardholder data | Network segmentation, logging |
+
+**OUTPUT SECTIONS:**
+1. Control Mapping Matrix
+2. Gap Analysis Summary
+3. Evidence Collection Checklist
+4. Remediation Priorities
+5. Audit Preparation Timeline
+6. Suggested Policy Updates`,
+          userPromptTemplate: `Create compliance mapping for:
+
+**Framework:** {{framework}}
+**Domain:** {{controlDomain}}
+**Audit Timeline:** {{auditTimeline}}
+
+**Current Policies:**
+{{currentPolicies}}
+
+**Existing Evidence:**
+{{existingEvidence}}
+
+**Known Gaps:**
+{{knownGaps}}
+
+Generate a control mapping with gap analysis and evidence requirements.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'claude',
+          useWebSearch: false,
+          maxTokens: 10240,
+          temperature: 0.2,
+        },
+      },
+      {
+        name: 'Security Incident Communicator',
+        description: 'Generate severity-appropriate incident communications for stakeholders, customers, and regulators.',
+        longDescription: 'Creates professional incident communications including internal alerts, customer notifications, regulatory filings, and post-incident reports calibrated to the severity and audience.',
+        category: 'generation',
+        estimatedTimeSaved: '2-4 hours per incident',
+        theme: {
+          primary: 'text-orange-400',
+          secondary: 'bg-orange-900/20',
+          gradient: 'from-orange-500/20 to-transparent',
+          iconName: 'AlertOctagon',
+        },
+        inputs: [
+          { id: 'incidentType', label: 'Incident Type', type: 'select', options: ['Data Breach', 'Service Outage', 'Security Vulnerability', 'Unauthorized Access', 'Malware/Ransomware', 'Phishing Compromise', 'Third-Party Breach'], validation: { required: true } },
+          { id: 'severity', label: 'Severity Level', type: 'select', options: ['Critical (P1)', 'High (P2)', 'Medium (P3)', 'Low (P4)'], validation: { required: true } },
+          { id: 'incidentDetails', label: 'Incident Details', type: 'textarea', placeholder: 'What happened? When was it discovered? What systems/data affected?', validation: { required: true, minLength: 100 } },
+          { id: 'impactAssessment', label: 'Impact Assessment', type: 'textarea', placeholder: 'Number of users affected, data types exposed, business impact...', validation: { required: true, minLength: 50 } },
+          { id: 'mitigationStatus', label: 'Mitigation Actions Taken', type: 'textarea', placeholder: 'What has been done to contain and remediate?', validation: { required: true, minLength: 30 } },
+          { id: 'audiences', label: 'Audiences to Notify', type: 'textarea', placeholder: 'Internal teams, customers, regulators, board...', validation: { required: true, minLength: 20 } },
+          { id: 'regulatoryRequirements', label: 'Regulatory Requirements', type: 'textarea', placeholder: 'GDPR 72-hour rule, state breach laws, contractual SLAs...', validation: { required: false } },
+        ],
+        prompts: {
+          systemInstruction: `You are a Crisis Communications Expert and former CISO with extensive experience managing security incidents at Fortune 500 companies. You've led response to 50+ significant security events.
+
+**COMMUNICATION FRAMEWORK:**
+| Audience | Tone | Focus |
+|----------|------|-------|
+| Internal | Direct | Actions needed, timeline |
+| Executive | Measured | Business impact, risk |
+| Customers | Empathetic | What we know, what we're doing |
+| Regulators | Factual | Required disclosures, remediation |
+
+**OUTPUT SECTIONS:**
+1. Incident Summary (for all audiences)
+2. Internal Alert (team-focused)
+3. Executive Brief (leadership-focused)
+4. Customer Notification (if applicable)
+5. Regulatory Filing Template (if applicable)
+6. FAQ for Customer-Facing Teams
+7. Post-Incident Report Template`,
+          userPromptTemplate: `Generate incident communications for:
+
+**Incident Type:** {{incidentType}}
+**Severity:** {{severity}}
+
+**Incident Details:**
+{{incidentDetails}}
+
+**Impact Assessment:**
+{{impactAssessment}}
+
+**Mitigation Status:**
+{{mitigationStatus}}
+
+**Audiences:**
+{{audiences}}
+
+**Regulatory Requirements:**
+{{regulatoryRequirements}}
+
+Create appropriate communications for each audience.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'claude',
+          useWebSearch: false,
+          maxTokens: 10240,
+          temperature: 0.3,
+        },
+      },
+    ],
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // 25. MARKETING OPERATIONS SPECIALIST
+  // ═══════════════════════════════════════════════════════════════════════════
+  {
+    id: 'marketing-operations-specialist',
+    name: 'Marketing Operations Specialist',
+    description: 'Orchestrate multi-channel campaigns, data enrichment, attribution QA, and marketing automation.',
+    icon: 'Megaphone',
+    color: 'text-pink-500',
+    staticSkillIds: [
+      'job-readiness-score',
+      'skills-gap-analyzer',
+      'interview-prep',
+      'role-ai-automation-analyzer',
+      'linkedin-optimizer-pro',
+    ],
+    dynamicSkills: [
+      {
+        name: 'Campaign QA & Attribution Audit',
+        description: 'Pre-flight checklist and attribution alignment audit to prevent broken reporting and lost leads.',
+        longDescription: 'Comprehensive campaign QA that validates UTM parameters, CRM field mappings, lead routing rules, and attribution settings before launch. Prevents common issues that break reporting.',
+        category: 'analysis',
+        estimatedTimeSaved: '2-3 hours per campaign',
+        theme: {
+          primary: 'text-pink-400',
+          secondary: 'bg-pink-900/20',
+          gradient: 'from-pink-500/20 to-transparent',
+          iconName: 'CheckSquare',
+        },
+        inputs: [
+          { id: 'campaignName', label: 'Campaign Name', type: 'text', placeholder: 'e.g., ABM Q1 Manufacturing Surge', validation: { required: true } },
+          { id: 'channels', label: 'Marketing Channels', type: 'textarea', placeholder: 'Email, LinkedIn Ads, Google Ads, Direct Mail, Events...', validation: { required: true, minLength: 20 } },
+          { id: 'utmStructure', label: 'UTM Parameter Structure', type: 'textarea', placeholder: 'Your UTM naming convention and parameters...', validation: { required: true, minLength: 30 } },
+          { id: 'crmMappings', label: 'CRM Field Mappings', type: 'textarea', placeholder: 'Lead Source, Campaign Source, Lifecycle Stage mappings...', validation: { required: true, minLength: 30 } },
+          { id: 'leadRouting', label: 'Lead Routing Rules', type: 'textarea', placeholder: 'How leads should be routed by segment/geography/score...', validation: { required: true, minLength: 30 } },
+          { id: 'attributionModel', label: 'Attribution Model', type: 'select', options: ['First Touch', 'Last Touch', 'Linear', 'W-Shaped', 'Custom/Multi-Touch'], validation: { required: true } },
+          { id: 'knownIssues', label: 'Known Issues/Concerns', type: 'textarea', placeholder: 'Past problems, areas of concern, systems quirks...', validation: { required: false } },
+        ],
+        prompts: {
+          systemInstruction: `You are a Marketing Operations Expert who has managed campaigns across $100M+ in marketing spend. You've built MarTech stacks at high-growth SaaS companies and prevented millions in wasted spend through proper QA.
+
+**QA FRAMEWORK:**
+| Category | Critical Checks |
+|----------|-----------------|
+| UTMs | Consistency, completeness, special chars |
+| CRM | Field mapping, required fields, picklists |
+| Routing | Assignment rules, SLAs, notifications |
+| Attribution | Model alignment, touchpoint capture |
+
+**OUTPUT SECTIONS:**
+1. Campaign QA Scorecard
+2. UTM Validation Report
+3. CRM Integration Checklist
+4. Lead Routing Verification
+5. Attribution Setup Audit
+6. Pre-Launch Checklist
+7. Common Issue Prevention Guide`,
+          userPromptTemplate: `Run campaign QA for:
+
+**Campaign:** {{campaignName}}
+**Attribution Model:** {{attributionModel}}
+
+**Channels:**
+{{channels}}
+
+**UTM Structure:**
+{{utmStructure}}
+
+**CRM Mappings:**
+{{crmMappings}}
+
+**Lead Routing:**
+{{leadRouting}}
+
+**Known Issues:**
+{{knownIssues}}
+
+Generate a comprehensive QA audit with checklist.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'claude',
+          useWebSearch: false,
+          maxTokens: 8192,
+          temperature: 0.2,
+        },
+      },
+      {
+        name: 'Marketing Automation Flow Builder',
+        description: 'Design multi-channel nurture flows with trigger logic, wait steps, and branch conditions.',
+        longDescription: 'Creates detailed marketing automation flow specifications including trigger events, enrollment criteria, branching logic, wait steps, and exit conditions. Ready to implement in Marketo, HubSpot, or Pardot.',
+        category: 'generation',
+        estimatedTimeSaved: '4-6 hours per automation',
+        theme: {
+          primary: 'text-purple-400',
+          secondary: 'bg-purple-900/20',
+          gradient: 'from-purple-500/20 to-transparent',
+          iconName: 'GitBranch',
+        },
+        inputs: [
+          { id: 'automationGoal', label: 'Automation Goal', type: 'select', options: ['Lead Nurture', 'Onboarding', 'Re-engagement', 'Upsell/Cross-sell', 'Event Follow-up', 'Trial Conversion'], validation: { required: true } },
+          { id: 'targetAudience', label: 'Target Audience', type: 'textarea', placeholder: 'Who should enter this flow? Segment criteria...', validation: { required: true, minLength: 30 } },
+          { id: 'triggerEvents', label: 'Trigger Events', type: 'textarea', placeholder: 'Form fill, page visit, score threshold, status change...', validation: { required: true, minLength: 30 } },
+          { id: 'channels', label: 'Available Channels', type: 'textarea', placeholder: 'Email, SMS, In-App, LinkedIn, Direct Mail...', validation: { required: true, minLength: 20 } },
+          { id: 'contentAssets', label: 'Content Assets Available', type: 'textarea', placeholder: 'Ebooks, case studies, product tours, videos...', validation: { required: true, minLength: 30 } },
+          { id: 'mapPlatform', label: 'MAP Platform', type: 'select', options: ['Marketo', 'HubSpot', 'Pardot', 'Eloqua', 'ActiveCampaign', 'Other'], validation: { required: true } },
+          { id: 'flowLength', label: 'Desired Flow Length', type: 'select', options: ['Short (1-2 weeks)', 'Medium (3-4 weeks)', 'Long (6+ weeks)', 'Evergreen'], validation: { required: true } },
+        ],
+        prompts: {
+          systemInstruction: `You are a Marketing Automation Architect who has built 500+ automation flows generating $200M+ in attributed pipeline. You're certified in Marketo, HubSpot, and Pardot.
+
+**FLOW DESIGN PRINCIPLES:**
+| Principle | Application |
+|-----------|-------------|
+| Progressive Profiling | Don't ask for everything upfront |
+| Behavioral Branching | Respond to engagement signals |
+| Velocity Control | Don't overwhelm, respect cadence |
+| Exit Conditions | Clear completion/disqualification |
+
+**OUTPUT SECTIONS:**
+1. Flow Overview & Goals
+2. Enrollment Criteria
+3. Visual Flow Diagram (text representation)
+4. Detailed Step Specifications
+5. Branch Logic & Conditions
+6. Email/Content Briefs
+7. Reporting & Success Metrics
+8. Platform Implementation Notes`,
+          userPromptTemplate: `Design a marketing automation flow:
+
+**Goal:** {{automationGoal}}
+**Platform:** {{mapPlatform}}
+**Flow Length:** {{flowLength}}
+
+**Target Audience:**
+{{targetAudience}}
+
+**Triggers:**
+{{triggerEvents}}
+
+**Channels:**
+{{channels}}
+
+**Content Assets:**
+{{contentAssets}}
+
+Generate a complete automation flow specification.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'claude',
+          useWebSearch: false,
+          maxTokens: 10240,
+          temperature: 0.4,
+        },
+      },
+    ],
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // 26. PRODUCT DISCOVERY LEAD
+  // ═══════════════════════════════════════════════════════════════════════════
+  {
+    id: 'product-discovery-lead',
+    name: 'Product Discovery Lead',
+    description: 'Run continuous discovery, insight synthesis, and opportunity-solution mapping for product teams.',
+    icon: 'Search',
+    color: 'text-indigo-500',
+    staticSkillIds: [
+      'job-readiness-score',
+      'skills-gap-analyzer',
+      'interview-prep',
+      'company-research',
+      'role-ai-automation-analyzer',
+    ],
+    dynamicSkills: [
+      {
+        name: 'Discovery Sprint Coach',
+        description: 'Generate interview guides, note tagging frameworks, and opportunity-solution trees from research goals.',
+        longDescription: 'Creates comprehensive discovery sprint materials including stakeholder interview scripts, discussion guides, observation frameworks, note tagging taxonomies, and opportunity-solution tree templates based on Teresa Torres methodology.',
+        category: 'generation',
+        estimatedTimeSaved: '6-8 hours per sprint',
+        theme: {
+          primary: 'text-indigo-400',
+          secondary: 'bg-indigo-900/20',
+          gradient: 'from-indigo-500/20 to-transparent',
+          iconName: 'MessageSquarePlus',
+        },
+        inputs: [
+          { id: 'productArea', label: 'Product Area', type: 'text', placeholder: 'e.g., Checkout Experience, Admin Dashboard', validation: { required: true } },
+          { id: 'desiredOutcome', label: 'Desired Business Outcome', type: 'textarea', placeholder: 'What business metric are you trying to move?', validation: { required: true, minLength: 30 } },
+          { id: 'targetPersona', label: 'Target Persona', type: 'textarea', placeholder: 'Who are you researching? Role, context, goals...', validation: { required: true, minLength: 30 } },
+          { id: 'hypotheses', label: 'Starting Hypotheses', type: 'textarea', placeholder: 'What do you believe might be true? Problems to validate...', validation: { required: true, minLength: 50 } },
+          { id: 'existingData', label: 'Existing Data/Insights', type: 'textarea', placeholder: 'What do you already know? Analytics, past research, support tickets...', validation: { required: true, minLength: 30 } },
+          { id: 'interviewDuration', label: 'Interview Duration', type: 'select', options: ['30 minutes', '45 minutes', '60 minutes'], validation: { required: true } },
+          { id: 'dataHandling', label: 'Data Handling Requirements', type: 'textarea', placeholder: 'Privacy considerations, PII handling, storage requirements...', validation: { required: false } },
+        ],
+        prompts: {
+          systemInstruction: `You are a Product Discovery Expert trained in Teresa Torres' Continuous Discovery methodology and Jobs-to-be-Done framework. You've led discovery programs at Spotify, Airbnb, and several high-growth startups.
+
+**DISCOVERY FRAMEWORK:**
+| Phase | Outputs |
+|-------|---------|
+| Frame | Outcome, assumptions, persona |
+| Recruit | Screener, recruitment criteria |
+| Interview | Discussion guide, note template |
+| Synthesize | Opportunity tree, insight cards |
+| Ideate | Solution experiments |
+
+**OUTPUT SECTIONS:**
+1. Discovery Sprint Brief
+2. Participant Screener
+3. Interview Discussion Guide
+4. Observation/Note Template
+5. Tagging Taxonomy
+6. Opportunity-Solution Tree Template
+7. Synthesis Workshop Agenda
+8. Data Handling Guidelines`,
+          userPromptTemplate: `Create discovery sprint materials for:
+
+**Product Area:** {{productArea}}
+**Interview Duration:** {{interviewDuration}}
+
+**Desired Outcome:**
+{{desiredOutcome}}
+
+**Target Persona:**
+{{targetPersona}}
+
+**Starting Hypotheses:**
+{{hypotheses}}
+
+**Existing Data:**
+{{existingData}}
+
+**Data Handling:**
+{{dataHandling}}
+
+Generate complete discovery sprint materials including interview guide and synthesis tools.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'claude',
+          useWebSearch: false,
+          maxTokens: 10240,
+          temperature: 0.4,
+        },
+      },
+      {
+        name: 'Research Insight Synthesizer',
+        description: 'Transform raw research notes into structured insights, themes, and actionable recommendations.',
+        longDescription: 'Analyzes qualitative research data (interview transcripts, observation notes, survey verbatims) to extract themes, patterns, and insights. Creates insight cards, affinity maps, and recommendation frameworks.',
+        category: 'analysis',
+        estimatedTimeSaved: '4-6 hours per synthesis',
+        theme: {
+          primary: 'text-teal-400',
+          secondary: 'bg-teal-900/20',
+          gradient: 'from-teal-500/20 to-transparent',
+          iconName: 'Lightbulb',
+        },
+        inputs: [
+          { id: 'researchObjective', label: 'Research Objective', type: 'textarea', placeholder: 'What question were you trying to answer?', validation: { required: true, minLength: 30 } },
+          { id: 'researchNotes', label: 'Research Notes/Data', type: 'textarea', placeholder: 'Paste your interview notes, observation data, or verbatim quotes...', validation: { required: true, minLength: 200 } },
+          { id: 'participantContext', label: 'Participant Context', type: 'textarea', placeholder: 'How many participants? What segments? Any notable variations?', validation: { required: true, minLength: 30 } },
+          { id: 'stakeholders', label: 'Key Stakeholders', type: 'textarea', placeholder: 'Who will consume these insights? What decisions will they make?', validation: { required: true, minLength: 20 } },
+          { id: 'outputFormat', label: 'Preferred Output Format', type: 'select', options: ['Insight Cards', 'Thematic Analysis', 'Jobs-to-be-Done', 'Opportunity Areas', 'All Formats'], validation: { required: true } },
+        ],
+        prompts: {
+          systemInstruction: `You are a UX Research Lead with 12+ years of experience synthesizing qualitative data at leading product companies. You've developed insight frameworks used by 100+ product teams.
+
+**SYNTHESIS FRAMEWORK:**
+| Level | Description |
+|-------|-------------|
+| Observation | What we saw/heard |
+| Pattern | Recurring themes |
+| Insight | Why it matters |
+| Opportunity | How we might act |
+
+**OUTPUT SECTIONS:**
+1. Research Summary
+2. Key Themes (with evidence)
+3. Insight Cards (Observation → Insight → Implication)
+4. Opportunity Areas
+5. Recommendations by Stakeholder
+6. Open Questions for Future Research
+7. Methodology Notes`,
+          userPromptTemplate: `Synthesize this research data:
+
+**Objective:** {{researchObjective}}
+**Output Format:** {{outputFormat}}
+
+**Participant Context:**
+{{participantContext}}
+
+**Stakeholders:**
+{{stakeholders}}
+
+**Research Notes:**
+{{researchNotes}}
+
+Generate structured insights and recommendations.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'claude',
+          useWebSearch: false,
+          maxTokens: 10240,
+          temperature: 0.3,
+        },
+      },
+    ],
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // 27. DATA ANALYST / ANALYTICS ENGINEER
+  // ═══════════════════════════════════════════════════════════════════════════
+  {
+    id: 'data-analyst',
+    name: 'Data Analyst / Analytics Engineer',
+    description: 'Produce insight packs, validate dashboards, enforce data quality SLAs, and build self-serve analytics.',
+    icon: 'BarChart2',
+    color: 'text-cyan-500',
+    staticSkillIds: [
+      'job-readiness-score',
+      'skills-gap-analyzer',
+      'interview-prep',
+      'salary-negotiation-master',
+      'role-ai-automation-analyzer',
+    ],
+    dynamicSkills: [
+      {
+        name: 'Insight Pack Generator',
+        description: 'Transform raw data into hypothesis-driven analysis with visualizations and executive narratives.',
+        longDescription: 'Analyzes datasets to identify patterns, generate hypotheses, recommend visualizations, and create executive-ready insight narratives. Includes methodology notes and confidence assessments.',
+        category: 'analysis',
+        estimatedTimeSaved: '4-8 hours per analysis',
+        theme: {
+          primary: 'text-cyan-400',
+          secondary: 'bg-cyan-900/20',
+          gradient: 'from-cyan-500/20 to-transparent',
+          iconName: 'PieChart',
+        },
+        inputs: [
+          { id: 'analysisGoal', label: 'Analysis Goal', type: 'textarea', placeholder: 'What question are you trying to answer? What decision will this inform?', validation: { required: true, minLength: 30 } },
+          { id: 'dataSample', label: 'Data Sample', type: 'textarea', placeholder: 'Paste a sample of your data (headers + 10-20 rows)...', validation: { required: true, minLength: 100 } },
+          { id: 'dataDescription', label: 'Data Description', type: 'textarea', placeholder: 'What does this data represent? Source, time period, definitions...', validation: { required: true, minLength: 30 } },
+          { id: 'audience', label: 'Target Audience', type: 'select', options: ['Executive Leadership', 'Department Heads', 'Technical Team', 'Cross-functional Stakeholders', 'External Partners'], validation: { required: true } },
+          { id: 'visualPreferences', label: 'Visualization Preferences', type: 'select', options: ['Standard Charts', 'Advanced Visualizations', 'Dashboard Specs', 'Minimal/Text-Heavy'], validation: { required: true } },
+          { id: 'guardrails', label: 'Data Governance Notes', type: 'textarea', placeholder: 'PII handling, data classification, methodology requirements...', validation: { required: false } },
+        ],
+        prompts: {
+          systemInstruction: `You are a Senior Data Analyst with 15+ years of experience turning data into actionable insights at top tech companies. You've built analytics programs that drove $100M+ in business impact.
+
+**ANALYSIS FRAMEWORK:**
+| Stage | Output |
+|-------|--------|
+| Explore | Data quality assessment, distributions |
+| Hypothesize | Pattern identification, statistical tests |
+| Visualize | Chart recommendations, dashboard specs |
+| Narrate | Executive summary, key takeaways |
+
+**OUTPUT SECTIONS:**
+1. Executive Summary (TL;DR)
+2. Data Quality Assessment
+3. Key Findings with Visualizations
+4. Statistical Analysis (if applicable)
+5. Hypothesis Validation
+6. Recommended Actions
+7. Methodology & Confidence Notes
+8. Next Steps / Future Analysis`,
+          userPromptTemplate: `Generate an insight pack for:
+
+**Analysis Goal:** {{analysisGoal}}
+**Audience:** {{audience}}
+**Visualizations:** {{visualPreferences}}
+
+**Data Description:**
+{{dataDescription}}
+
+**Governance Notes:**
+{{guardrails}}
+
+**Data Sample:**
+{{dataSample}}
+
+Create a comprehensive insight pack with findings and recommendations.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'claude',
+          useWebSearch: false,
+          maxTokens: 10240,
+          temperature: 0.3,
+        },
+      },
+      {
+        name: 'Data Quality SLA Monitor',
+        description: 'Define and monitor data quality rules, generate anomaly alerts, and create quality scorecards.',
+        longDescription: 'Creates comprehensive data quality frameworks including rule definitions, thresholds, anomaly detection logic, and automated alert templates. Generates quality scorecards for data governance reporting.',
+        category: 'analysis',
+        estimatedTimeSaved: '3-5 hours per data source',
+        theme: {
+          primary: 'text-green-400',
+          secondary: 'bg-green-900/20',
+          gradient: 'from-green-500/20 to-transparent',
+          iconName: 'ShieldCheck',
+        },
+        inputs: [
+          { id: 'dataSource', label: 'Data Source Name', type: 'text', placeholder: 'e.g., Salesforce Opportunities, Marketing Events', validation: { required: true } },
+          { id: 'dataSchema', label: 'Data Schema', type: 'textarea', placeholder: 'List key fields with data types and business definitions...', validation: { required: true, minLength: 50 } },
+          { id: 'businessCriticality', label: 'Business Criticality', type: 'select', options: ['Critical (Revenue/Compliance)', 'High (Key Decisions)', 'Medium (Operational)', 'Low (Informational)'], validation: { required: true } },
+          { id: 'knownIssues', label: 'Known Data Issues', type: 'textarea', placeholder: 'Historical problems, common errors, upstream dependencies...', validation: { required: true, minLength: 30 } },
+          { id: 'stakeholders', label: 'Data Consumers', type: 'textarea', placeholder: 'Who uses this data? What do they use it for?', validation: { required: true, minLength: 20 } },
+          { id: 'refreshFrequency', label: 'Data Refresh Frequency', type: 'select', options: ['Real-time', 'Hourly', 'Daily', 'Weekly', 'Monthly'], validation: { required: true } },
+        ],
+        prompts: {
+          systemInstruction: `You are a Data Quality Engineer who has built enterprise data governance programs at Fortune 100 companies. You've prevented millions in business impact from data quality issues.
+
+**QUALITY DIMENSIONS:**
+| Dimension | Definition | Typical Threshold |
+|-----------|------------|-------------------|
+| Completeness | Required fields populated | >98% |
+| Accuracy | Values within expected range | >99% |
+| Timeliness | Data freshness | Within SLA |
+| Consistency | Cross-source agreement | >95% |
+| Uniqueness | No duplicates on keys | >99.9% |
+
+**OUTPUT SECTIONS:**
+1. Data Source Profile
+2. Quality Rule Definitions
+3. Threshold Recommendations
+4. Anomaly Detection Logic
+5. Alert Template (with escalation)
+6. Quality Scorecard Template
+7. Monitoring Dashboard Spec
+8. Remediation Playbook`,
+          userPromptTemplate: `Create data quality framework for:
+
+**Data Source:** {{dataSource}}
+**Criticality:** {{businessCriticality}}
+**Refresh:** {{refreshFrequency}}
+
+**Schema:**
+{{dataSchema}}
+
+**Known Issues:**
+{{knownIssues}}
+
+**Data Consumers:**
+{{stakeholders}}
+
+Generate a comprehensive data quality monitoring framework.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'claude',
+          useWebSearch: false,
+          maxTokens: 8192,
+          temperature: 0.2,
+        },
+      },
+    ],
+  },
 ];
 
 export function getRoleTemplate(roleId: string): RoleTemplate | undefined {
