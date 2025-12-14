@@ -765,6 +765,145 @@ Goals:
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
+// GOVERNANCE SKILLS - DEFAULT TEST DATA
+// ═══════════════════════════════════════════════════════════════════════════
+
+export const GOVERNANCE_DEFAULT_TEST_DATA: Record<string, SkillDefaultTestData> = {
+  'ai-governance-readiness-assessment': {
+    skillId: 'ai-governance-readiness-assessment',
+    defaultTestCaseId: 'ai-gov-readiness-default-1',
+    description: 'Assessing AI governance readiness for mid-size tech company',
+    inputPayload: {
+      organizationSize: '501-2000 employees',
+      industry: 'Technology / SaaS',
+      currentAIUsage: 'ChatGPT Enterprise for customer support, GitHub Copilot for engineering team, Jasper for marketing content, internal ML models for fraud detection. Some employees using personal AI accounts for work tasks.',
+      dataClassifications: 'Public marketing content, Internal business documents, Confidential customer data (PII), Restricted financial data and trade secrets. We process healthcare data for some enterprise clients (HIPAA relevant).',
+      existingPolicies: 'IT Security Policy (updated 2023), Acceptable Use Policy, Data Privacy Policy, Employee Handbook with confidentiality section. No AI-specific policies yet.',
+      keyConcerns: 'Data leakage through AI prompts, employees sharing confidential info with AI tools, compliance with SOC2 and GDPR, intellectual property protection, vendor lock-in with AI providers.',
+      regulatoryRequirements: 'SOC2 Type II (current), GDPR (EU customers), working toward HIPAA certification for healthcare vertical.',
+    },
+  },
+
+  'secure-ai-usage-playbook': {
+    skillId: 'secure-ai-usage-playbook',
+    defaultTestCaseId: 'secure-ai-playbook-default-1',
+    description: 'Creating AI usage playbook for enterprise organization',
+    inputPayload: {
+      approvedAITools: 'ChatGPT Enterprise (primary), GitHub Copilot (engineering only), Grammarly Business, Claude (via API for internal tools), Midjourney (marketing with approval).',
+      commonUseCases: 'Customer support response drafting, code generation and review, marketing copy creation, document summarization, email drafting, data analysis assistance, meeting notes generation.',
+      prohibitedActivities: 'Sharing customer PII, uploading source code to non-approved tools, using AI for employment decisions, generating legal advice, processing payment card data.',
+      dataHandlingRules: 'Never input: customer names with account details, SSNs/government IDs, passwords/API keys, proprietary algorithms, unreleased product details. Always allowed: public documentation, anonymized data, general questions.',
+      regulatoryContext: 'SOC2 Type II certified, GDPR compliant, processing healthcare data (HIPAA). Financial services clients require additional data protection.',
+      audienceLevel: 'All Employees',
+    },
+  },
+
+  'ai-data-flow-risk-map': {
+    skillId: 'ai-data-flow-risk-map',
+    defaultTestCaseId: 'ai-data-flow-default-1',
+    description: 'Mapping AI data flows for SaaS platform',
+    inputPayload: {
+      keySystemsInventory: 'Salesforce CRM, Snowflake Data Warehouse, PostgreSQL (production), AWS S3 (file storage), Zendesk (support), HubSpot (marketing), Workday (HR), NetSuite (finance), GitHub (code), Confluence (docs).',
+      dataTypesProcessed: 'Customer PII (name, email, phone, address), Financial data (invoices, payments), Employee HR data, Product usage analytics, Support tickets with customer details, Marketing engagement data.',
+      aiIntegrations: 'ChatGPT Enterprise connected to Zendesk for support drafts, Copilot for code, Internal LLM for data analysis queries against Snowflake, Marketing AI for content generation.',
+      dataResidencyRequirements: 'EU customer data must stay in EU (Frankfurt AWS region). US healthcare data requires HIPAA-compliant storage. Some government contracts require US-only processing.',
+      currentSecurityControls: 'SSO with Okta, MFA required, DLP on email, encryption at rest and transit, VPN for production access, quarterly access reviews.',
+      plannedAIExpansions: 'AI-powered customer success predictions, automated document processing, AI chatbot for customer self-service, code review automation.',
+    },
+  },
+
+  'ai-governance-client-brief': {
+    skillId: 'ai-governance-client-brief',
+    defaultTestCaseId: 'ai-gov-client-brief-default-1',
+    description: 'Creating client brief for AI governance consulting engagement',
+    inputPayload: {
+      clientIndustry: 'Financial Services / Insurance',
+      clientRiskPosture: 'Conservative - highly regulated industry with strict compliance requirements',
+      mainObjections: 'Concerns about AI hallucinations affecting customer advice, regulatory uncertainty around AI in financial decisions, data privacy with third-party AI vendors, explainability requirements for underwriting decisions.',
+      yourAICapabilities: 'Enterprise AI governance framework, AI risk assessment methodology, policy development, training programs, compliance monitoring tools, incident response for AI issues.',
+      dataHandlingPractices: 'All data encrypted, SOC2 Type II certified, GDPR compliant, no data used for AI model training, EU data center options available, data deletion upon contract end.',
+      complianceCertifications: 'SOC2 Type II, ISO 27001, GDPR Article 28 compliant processor, CCPA compliant, pending FedRAMP authorization.',
+    },
+  },
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// OPERATIONS SKILLS - DEFAULT TEST DATA
+// ═══════════════════════════════════════════════════════════════════════════
+
+export const OPERATIONS_DEFAULT_TEST_DATA: Record<string, SkillDefaultTestData> = {
+  'compliance-audit-prep-assistant': {
+    skillId: 'compliance-audit-prep-assistant',
+    defaultTestCaseId: 'compliance-audit-prep-default-1',
+    description: 'Preparing for SOC2 Type II audit',
+    inputPayload: {
+      auditType: 'SOC2 Type II',
+      auditScope: 'All production systems hosting customer data, security controls, availability monitoring, change management processes, incident response, vendor management.',
+      auditTimeline: 'Audit fieldwork begins in 8 weeks. Final report needed by end of Q1 for customer contracts.',
+      controlFramework: 'Trust Services Criteria - Security, Availability, Confidentiality. 89 controls total.',
+      availableEvidence: 'Access logs from Okta and AWS, change management tickets in Jira, incident reports in PagerDuty, security training completion in LMS, vulnerability scans from Qualys.',
+      knownGaps: 'Vendor risk assessment process not fully documented, some access reviews overdue, incident response policy needs update, DR testing not completed this year.',
+      previousFindings: 'Last year: 2 findings - incomplete access reviews, missing encryption on one backup system. Both remediated.',
+    },
+  },
+
+  'policy-document-generator': {
+    skillId: 'policy-document-generator',
+    defaultTestCaseId: 'policy-doc-default-1',
+    description: 'Generating incident response policy document',
+    inputPayload: {
+      policyType: 'Incident Response Policy',
+      organizationContext: 'B2B SaaS company, 200 employees, processing customer business data. 24/7 operations with on-call engineering rotation.',
+      regulatoryRequirements: 'SOC2 Type II (Security & Availability), GDPR (72-hour breach notification), some customers require specific incident SLAs.',
+      existingPractices: 'PagerDuty for alerting, Slack war rooms for incidents, Jira for tracking, monthly incident reviews. No formal documented policy.',
+      approvalAuthority: 'CISO for policy approval, VP Engineering for process changes, Legal for breach notifications.',
+      reviewCycle: 'Annual review required, or after major incidents.',
+      audienceScope: 'All engineering and operations staff, security team, customer success for communication.',
+    },
+  },
+
+  'incident-postmortem-generator': {
+    skillId: 'incident-postmortem-generator',
+    defaultTestCaseId: 'incident-postmortem-default-1',
+    description: 'Generating postmortem for database outage',
+    inputPayload: {
+      incidentTitle: 'Primary Database Failover Failure',
+      severity: 'SEV1 - Critical (major outage, data loss)',
+      incidentTimeline: `09:15 UTC - Primary DB CPU spike detected
+09:18 UTC - Automated failover triggered
+09:19 UTC - Failover failed - replica 3 hours behind
+09:22 UTC - On-call DBA paged
+09:30 UTC - Identified replication lag issue
+09:45 UTC - Manual failover to secondary replica initiated
+10:05 UTC - Service restored with 2 hours data rollback
+10:30 UTC - Full data recovery from backup completed
+11:00 UTC - Incident resolved, monitoring confirmed`,
+      impactDescription: '50 minutes of service degradation, 35 minutes complete outage. Approximately 2 hours of transaction data required recovery from backup. 200+ customers affected. 3 customers reported data discrepancies.',
+      rootCauseAnalysis: 'Replication lag accumulated due to large batch job running during peak hours. Monitoring alert threshold set too high (30 min lag vs actual 3 hours). Automated failover checked replication status but threshold was misconfigured.',
+      responseActions: 'Manual failover to healthy replica, point-in-time recovery from backup, customer communication via status page and direct outreach to affected accounts.',
+      contributingFactors: 'Batch job scheduled during business hours, replication monitoring threshold too permissive, failover automation did not validate data currency.',
+      lessonsLearned: 'Need better monitoring for replication lag, batch jobs should run off-peak, failover automation needs stricter data validation.',
+    },
+  },
+
+  'change-request-doc-builder': {
+    skillId: 'change-request-doc-builder',
+    defaultTestCaseId: 'change-request-default-1',
+    description: 'Building change request for infrastructure upgrade',
+    inputPayload: {
+      changeSummary: 'Upgrade Kubernetes cluster from v1.27 to v1.29 across all production environments to address security vulnerabilities and enable new features.',
+      changeType: 'Standard Change (Pre-Approved)',
+      systemsAffected: 'Production Kubernetes clusters (3), staging cluster, all deployed microservices (45), monitoring and logging infrastructure, CI/CD pipelines.',
+      implementationSteps: '1. Update staging cluster and validate\n2. Run full test suite on staging\n3. Update prod-east cluster (canary)\n4. Monitor for 2 hours\n5. Update prod-west cluster\n6. Update prod-eu cluster\n7. Update CI/CD configurations\n8. Validate monitoring and alerting',
+      testingEvidence: 'Staging upgrade completed successfully. All 847 integration tests passing. Load test showed no performance regression. Security scan clean.',
+      rollbackPlan: 'Kubernetes supports in-place downgrade. If issues occur: 1) Cordon affected nodes, 2) Drain workloads, 3) Downgrade node version, 4) Uncordon and verify. Estimated rollback time: 30 minutes per cluster.',
+      scheduledWindow: 'Saturday 2:00 AM - 8:00 AM PST (low traffic window)',
+      riskAssessment: 'Medium risk - proven upgrade path, but involves all production infrastructure. Mitigation: rolling upgrade with validation gates between clusters.',
+    },
+  },
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
 // WORKFLOW DEFAULT TEST DATA
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -867,6 +1006,356 @@ export const WORKFLOW_DEFAULT_TEST_DATA: Record<string, WorkflowDefaultTestData>
       scheduledWindow: 'Next maintenance window - Saturday 2:00 AM PST',
     },
   },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // TRAINING & WORKSHOP WORKFLOWS
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  'training-workshop': {
+    workflowId: 'training-workshop',
+    defaultTestCaseId: 'training-workshop-default-1',
+    description: 'Complete training workshop setup for AI productivity tools',
+    inputPayload: {
+      workshopTopic: 'AI Tools for Business Productivity: ChatGPT, Claude, and Copilot',
+      targetAudience: 'Marketing and sales professionals with 3-5 years experience. Basic familiarity with AI assistants but limited hands-on usage. Looking to improve daily efficiency and content creation speed.',
+      duration: 'Half-day (4 hours)',
+      deliveryFormat: 'Hybrid',
+      learningObjectives: '1. Craft effective prompts for business writing tasks\n2. Use AI tools to create marketing content 3x faster\n3. Implement quality checks for AI-generated content\n4. Build personal AI workflows for common tasks\n5. Understand data privacy best practices when using AI',
+      organizationContext: 'Mid-size B2B software company. Recently deployed ChatGPT Enterprise. Need to drive adoption and ensure proper usage.',
+    },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // SEO & MARKETING WORKFLOWS
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  'seo-client-onboarding': {
+    workflowId: 'seo-client-onboarding',
+    defaultTestCaseId: 'seo-onboarding-default-1',
+    description: 'SEO client onboarding for e-commerce platform',
+    inputPayload: {
+      websiteUrl: 'https://urbanpetco.com',
+      businessDescription: 'Premium pet supplies and organic pet food e-commerce store. Focus on eco-friendly, sustainable products for dogs and cats. Direct-to-consumer model with subscription options for recurring purchases.',
+      targetAudience: 'Millennial and Gen-Z pet owners (25-40), urban/suburban, household income $75K+. Value sustainability and pet health. Research-heavy purchase behavior, active on Instagram and TikTok.',
+      competitors: 'Chewy.com (market leader), Petco.com, BarkBox, The Farmer\'s Dog, Wild One. Key differentiator: sustainability focus and curated premium selection.',
+      businessGoals: 'Increase organic traffic 100% in 12 months. Rank top 3 for "organic dog food", "sustainable pet products", "eco-friendly cat supplies". Build content hub for pet wellness.',
+      currentPerformance: 'Domain Authority: 28. Monthly organic traffic: ~15,000 visits. Currently ranking page 2-3 for main keywords. Site speed needs improvement (LCP 4.2s).',
+    },
+  },
+
+  'marketing-campaign': {
+    workflowId: 'marketing-campaign',
+    defaultTestCaseId: 'marketing-campaign-default-1',
+    description: 'Product launch marketing campaign for SaaS tool',
+    inputPayload: {
+      productService: 'TeamSync AI - An AI-powered project management tool that automatically generates project updates, identifies blockers, and suggests task prioritization. Integrates with Slack, Jira, and Asana. $29/user/month.',
+      targetAudience: 'Project managers and team leads at tech companies (50-500 employees). Pain points: too many status meetings, manual reporting, unclear priorities. Active on LinkedIn, read productivity blogs.',
+      campaignGoal: 'Product Launch',
+      budget: '$5,000-$15,000',
+      brandVoice: 'Professional & Authoritative',
+      competitors: 'Monday.com, Asana, ClickUp, Linear. Our differentiation: AI-native, reduces meeting time by 50%, automatic stakeholder updates.',
+      existingAssets: 'Product demo video, 3 customer testimonials, landing page (needs refresh), email list of 2,500 from beta waitlist.',
+    },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // CONSULTING & PROFESSIONAL SERVICES WORKFLOWS
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  'consulting-engagement': {
+    workflowId: 'consulting-engagement',
+    defaultTestCaseId: 'consulting-engagement-default-1',
+    description: 'Consulting engagement for digital transformation initiative',
+    inputPayload: {
+      clientName: 'Midwest Regional Healthcare System',
+      clientBackground: 'Network of 12 hospitals and 45 clinics across 3 states. 15,000 employees, $2.8B annual revenue. Currently using mix of legacy and modern systems. Recent merger added 3 hospitals with different tech stacks.',
+      problemStatement: 'Patient experience fragmented across facilities. Scheduling, records, and billing systems not integrated. Digital engagement (portal, mobile app) lagging competitors. Need unified patient experience strategy and implementation roadmap.',
+      currentState: 'Epic EHR at 9 hospitals, Cerner at 3. Multiple scheduling systems. Patient portal adoption at 23%. Mobile app outdated. Average patient satisfaction score: 3.2/5. IT department understaffed.',
+      desiredOutcome: 'Unified patient experience across all facilities. Single patient portal with 60%+ adoption. Modern mobile app. Integrated scheduling. Patient satisfaction 4.2+/5 within 2 years.',
+      constraints: 'Budget: $15M over 3 years. Cannot disrupt clinical operations. Union considerations for staff changes. Must maintain HIPAA compliance throughout.',
+      stakeholders: 'CEO (sponsor), CIO, CMO, VP of Patient Experience, IT Director, Chief Nursing Officer, CFO (budget approval).',
+    },
+  },
+
+  'startup-investor-pitch': {
+    workflowId: 'startup-investor-pitch',
+    defaultTestCaseId: 'startup-pitch-default-1',
+    description: 'Seed round pitch preparation for fintech startup',
+    inputPayload: {
+      companyName: 'PayrollPilot',
+      businessDescription: 'AI-powered payroll automation for SMBs. Our platform eliminates 95% of manual payroll tasks, automatically handles compliance across all 50 states, and integrates with existing accounting software. One-click payroll processing.',
+      targetMarket: 'TAM: $12B US payroll software market. SAM: $4B SMB segment (10-200 employees). SOM: $400M (tech-forward SMBs). Target customer: Growing companies frustrated with ADP/Paychex complexity and cost.',
+      businessModel: 'SaaS subscription: $6/employee/month (vs. $8-15 industry average). Average contract: $200-500/month. Current MRR: $45K. Net revenue retention: 115%.',
+      traction: '180 paying customers, growing 18% MoM. $45K MRR. Zero churn last 3 months. 4.9/5 G2 rating. Partnership signed with QuickBooks. Featured in TechCrunch.',
+      competitors: 'Gusto (main), Rippling, Justworks, ADP, Paychex. Our edge: True AI automation (not just software), 50% cheaper, 5-minute setup vs. 2-week onboarding.',
+      fundingAsk: 'Raising $3M seed round. Use of funds: 50% engineering (AI accuracy improvements), 30% sales/marketing, 20% operations. 18-month runway to Series A metrics.',
+      teamBackground: 'CEO: 10 years at ADP, led $50M product line. CTO: Ex-Google, ML/AI specialist, 15 patents. COO: Former Gusto ops lead. Team of 8, all payroll or ML experience.',
+    },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // SALES & REVENUE WORKFLOWS
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  'sales-account-pursuit': {
+    workflowId: 'sales-account-pursuit',
+    defaultTestCaseId: 'sales-pursuit-default-1',
+    description: 'Strategic account pursuit for enterprise software deal',
+    inputPayload: {
+      targetCompany: 'GlobalTech Manufacturing Inc.',
+      companyContext: 'Fortune 500 manufacturer, $8B revenue, 25,000 employees globally. Digital transformation initiative announced in last earnings call. New CIO hired 6 months ago from AWS. Currently using SAP for ERP, Salesforce for CRM.',
+      yourProduct: 'CloudOps Platform - Enterprise cloud management and optimization. Reduces cloud spend 30%, automates infrastructure provisioning, provides unified visibility across AWS/Azure/GCP. Typical deal size $200K-$1M ARR.',
+      identifiedNeed: 'Overheard at conference they\'re struggling with multi-cloud complexity after Azure acquisition. Cloud costs up 40% YoY. Infrastructure team overwhelmed. Looking to modernize manufacturing operations.',
+      stakeholders: 'CIO (Sarah Chen) - decision maker, likely champion. VP Infrastructure (Tom Williams) - technical evaluator. CFO (Robert Kim) - budget authority. Manufacturing VP - business case driver.',
+      dealSize: '$500K-$1M',
+      salesStage: 'Discovery',
+      competitors: 'VMware (incumbent), HashiCorp, Pulumi. They demoed VMware last month. Budget cycle starts Q1.',
+    },
+  },
+
+  'customer-churn-prevention': {
+    workflowId: 'customer-churn-prevention',
+    defaultTestCaseId: 'churn-prevention-default-1',
+    description: 'Churn prevention for at-risk SaaS customers',
+    inputPayload: {
+      portfolioData: `Account | ARR | Health | Contract End | NPS | Login (30d)
+TechCorp | $120K | Red | 60 days | 3 | 12 logins
+DataFlow Inc | $85K | Yellow | 90 days | 6 | 45 logins
+CloudFirst | $200K | Red | 45 days | 2 | 3 logins
+MediaPro | $65K | Yellow | 120 days | 5 | 28 logins
+BuildRight | $150K | Red | 30 days | 4 | 8 logins`,
+      behaviorChanges: 'TechCorp: Champion left company, new stakeholder unresponsive. CloudFirst: Executive sponsor promoted, no replacement identified, missed last 2 QBRs. BuildRight: Mentioned budget cuts in last call, competitor demo scheduled.',
+      industryContext: 'Tech spending down 15% industry-wide. Competitors offering aggressive discounts. Our recent price increase (8%) poorly received.',
+      criticalAccount: 'CloudFirst - $200K ARR, enterprise customer for 3 years. Usage dropped 70% after executive sponsor Maria promoted. New contact (James) hasn\'t engaged. Renewal in 45 days. They implemented our competitor for a side project last month.',
+      productUpdates: 'New enterprise dashboard launched. AI features added (they specifically asked for this last year). Dedicated CSM program now available. Flexible billing options.',
+    },
+  },
+
+  'enterprise-account-expansion': {
+    workflowId: 'enterprise-account-expansion',
+    defaultTestCaseId: 'account-expansion-default-1',
+    description: 'Enterprise account expansion opportunity analysis',
+    inputPayload: {
+      accountProfile: 'GlobalRetail Corp - $15B revenue, 500 stores, 45,000 employees. HQ in Chicago, operations in US and Canada. Major e-commerce push. Recently acquired online-only competitor. Known for innovation, early tech adopter.',
+      currentFootprint: 'Using our Analytics Platform for e-commerce (started 2 years ago). 50 users, $75K ARR. Deployed in digital marketing team only. Features adopted: web analytics, A/B testing. Not using: customer journey, predictive insights.',
+      productPortfolio: 'Analytics Platform ($75K-$500K), Customer Data Platform ($150K-$400K), Marketing Automation ($100K-$300K), AI Personalization ($200K-$600K). Cross-sell synergies between all products.',
+      expansionOpportunities: 'Retail operations expressed interest in store analytics. Acquired company needs to migrate to enterprise platform. New CMO wants unified marketing stack. E-commerce team loves us, willing to advocate.',
+      customerUsageData: 'NPS: 9/10. Login frequency: 200/day. Feature adoption: 75% of purchased. Support tickets: Low (2/month). Executive sponsor engaged. 3 case studies published.',
+    },
+  },
+
+  'rfp-response-center': {
+    workflowId: 'rfp-response-center',
+    defaultTestCaseId: 'rfp-response-default-1',
+    description: 'RFP response for government IT services contract',
+    inputPayload: {
+      rfpContent: `RFP #2024-IT-5892: Cloud Infrastructure Modernization Services
+Agency: Department of Commerce
+Value: $15M over 5 years
+Requirements:
+1. FedRAMP High authorization required
+2. Migration of 150+ applications to cloud
+3. 24/7 NOC support with 15-minute response SLA
+4. Experience with legacy mainframe migration
+5. Cleared personnel (Secret clearance minimum)
+6. Small business subcontracting plan (23% goal)
+Evaluation: Technical (50%), Past Performance (30%), Price (20%)
+Due: 45 days`,
+      companyCapabilities: 'FedRAMP High authorized. 15 years federal IT experience. 500+ cloud migrations completed. 24/7 NOC with 8-minute average response. Mainframe modernization practice. 200+ cleared engineers.',
+      winThemes: '1. Proven FedRAMP experience (10+ agency deployments). 2. Mainframe-to-cloud expertise (saved DOL $20M). 3. Lowest risk - incumbent-like knowledge without incumbent relationship. 4. Innovation: AI-powered migration assessment. 5. Strong small business partnerships.',
+      pastPerformance: 'DOL Cloud Migration - $8M, completed ahead of schedule. IRS Tax System Modernization - $12M, exceeded all SLAs. Treasury Data Center - $6M, zero security incidents.',
+      solutionApproach: 'Phased approach: 1) Assessment (60 days), 2) Quick wins migration (6 months), 3) Complex apps (18 months), 4) Mainframe (12 months), 5) Optimization (ongoing). Agile methodology, bi-weekly demos.',
+    },
+  },
+
+  'revops-optimization': {
+    workflowId: 'revops-optimization',
+    defaultTestCaseId: 'revops-default-1',
+    description: 'Revenue operations analysis for SaaS company',
+    inputPayload: {
+      pipelineData: `Stage | Deals | Value | Avg Days | Win Rate
+Qualification | 45 | $2.1M | 12 | 35%
+Discovery | 32 | $1.8M | 18 | 45%
+Solution | 24 | $1.4M | 25 | 55%
+Proposal | 18 | $1.1M | 15 | 65%
+Negotiation | 12 | $850K | 20 | 75%
+Closed Won | 8 | $480K | - | 100%
+Quota this quarter: $1.2M. Current forecast: $850K.`,
+      historicalPerformance: 'Last 4 quarters win rate: 22%, 25%, 21%, 24%. Average deal size trending up ($45K to $60K). Sales cycle increasing (65 days to 82 days). Enterprise deals taking longer. Q4 historically 30% of annual revenue.',
+      teamInfo: '8 AEs ($150K quota each = $1.2M/quarter). 4 SDRs. 2 SEs. No dedicated deal desk. AE tenure: 2 new (<6 months), 4 ramped, 2 senior. Territory: 4 enterprise, 4 mid-market.',
+      winLossData: `Won: DataCorp $85K (fast cycle, strong champion), TechFlow $120K (competitive win vs Salesforce)
+Lost: GlobalBank $200K (security requirements), StartupCo $45K (price), MegaCorp $300K (no decision)
+Pattern: Losing deals with >5 stakeholders and >90 day cycles`,
+      processDescription: 'Lead routing: round-robin. Stages: manual progression. Discounting: manager approval >15%. Quote-to-cash: 5-day average. Tools: Salesforce, Gong, Outreach. Pain points: inconsistent discovery, slow legal review.',
+    },
+  },
+
+  'tech-debt-assessment': {
+    workflowId: 'tech-debt-assessment',
+    defaultTestCaseId: 'tech-debt-default-1',
+    description: 'Technical debt assessment for legacy codebase',
+    inputPayload: {
+      codebaseInfo: 'E-commerce platform, 8 years old. 450K lines of code. Python/Django backend, React frontend. Monolith with some microservices (payment, notifications). 65% test coverage. Last major refactor: 3 years ago.',
+      architectureContext: 'Monolith handling 80% of traffic. PostgreSQL (reaching capacity), Redis cache, Elasticsearch. AWS deployment, manual scaling. CI/CD exists but 45-minute build times. Feature flags via config files.',
+      knownIssues: 'Payment module: spaghetti code, 12% of bugs. User auth: outdated library (security risk). Search: slow queries, N+1 problems. Mobile API: inconsistent, causing app crashes. Database: missing indexes, schema drift.',
+      businessContext: 'Black Friday traffic 10x normal - system struggles. New features taking 3x longer than 2 years ago. Developer satisfaction declining. Planning international expansion requiring multi-currency, multi-language.',
+      stakeholderAudience: 'Executive Leadership (C-Suite)',
+    },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // ENTERPRISE WORKFLOWS
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  'financial-analysis-pack': {
+    workflowId: 'financial-analysis-pack',
+    defaultTestCaseId: 'financial-analysis-default-1',
+    description: 'Q4 budget variance analysis for department review',
+    inputPayload: {
+      reportingPeriod: 'Q4 2024',
+      budgetData: `Category | Budget
+Personnel | $2,400,000
+Technology | $800,000
+Marketing | $600,000
+Travel | $200,000
+Professional Services | $300,000
+Facilities | $400,000
+Total | $4,700,000`,
+      actualData: `Category | Actual
+Personnel | $2,350,000
+Technology | $920,000
+Marketing | $480,000
+Travel | $85,000
+Professional Services | $450,000
+Facilities | $395,000
+Total | $4,680,000`,
+      audienceLevel: 'Executive Leadership (C-Suite)',
+      knownFactors: 'Technology overage: unplanned security upgrade after audit finding. Travel underspend: continued remote work. Marketing underspend: delayed campaign to Q1. Professional services overage: legal fees for acquisition.',
+    },
+  },
+
+  'marketing-analytics-dashboard': {
+    workflowId: 'marketing-analytics-dashboard',
+    defaultTestCaseId: 'marketing-analytics-default-1',
+    description: 'Marketing performance dashboard for multi-channel campaign',
+    inputPayload: {
+      marketingChannels: 'Paid Search (Google), Paid Social (LinkedIn, Meta), Organic Search, Email Marketing, Content Marketing, Events/Webinars',
+      rawData: `Channel | Spend | Impressions | Clicks | Conversions | Revenue
+Google Ads | $45,000 | 890,000 | 23,400 | 234 | $187,200
+LinkedIn | $28,000 | 340,000 | 4,200 | 84 | $168,000
+Meta Ads | $15,000 | 620,000 | 8,900 | 67 | $33,500
+Email | $2,000 | 125,000 | 18,750 | 188 | $94,000
+Organic | $0 | 450,000 | 31,500 | 315 | $157,500
+Webinars | $8,000 | 2,400 | 890 | 156 | $234,000`,
+      reportingFrequency: 'Monthly',
+      primaryGoals: 'Lead Generation',
+      targetAudience: 'CMO/Executive',
+      dataIssues: 'LinkedIn attribution may be incomplete due to cookie restrictions. Email data missing mobile opens.',
+    },
+  },
+
+  'program-governance-pack': {
+    workflowId: 'program-governance-pack',
+    defaultTestCaseId: 'program-governance-default-1',
+    description: 'Quarterly steering committee pack for digital transformation',
+    inputPayload: {
+      programName: 'Enterprise Digital Transformation 2024',
+      reportingPeriod: 'Q4 2024',
+      statusSummary: 'Overall: AMBER. Phase 2 (Core Platform) on track. Phase 3 (Integration) facing delays. 67% of Q4 milestones completed. Strong executive engagement. Team capacity concerns.',
+      milestoneStatus: `Completed: Core platform deployment (Oct), User migration Phase 1 (Nov), Security audit passed
+In Progress: API integration (2 weeks delayed), Mobile app development (on track)
+Upcoming: User migration Phase 2 (Jan), Go-live preparation (Feb)`,
+      budgetStatus: 'Approved: $12M. Spent YTD: $8.2M (68%). Q4 Spend: $2.8M vs $3.0M planned. Forecast: $11.5M (-$500K under budget due to delayed contractor onboarding).',
+      risks: `HIGH: Integration vendor capacity constraints - mitigation: backup vendor identified
+MEDIUM: Change management adoption slower than planned - mitigation: additional training
+MEDIUM: Q1 budget approval delay possible - mitigation: early submission`,
+      decisions: '1. Approve $200K contingency for integration acceleration. 2. Confirm February go-live date or delay to March. 3. Approve additional change management resources.',
+      audienceLevel: 'Executive Steering Committee',
+    },
+  },
+
+  'contract-review-workflow': {
+    workflowId: 'contract-review-workflow',
+    defaultTestCaseId: 'contract-review-default-1',
+    description: 'SaaS vendor contract review and negotiation',
+    inputPayload: {
+      contractText: `MASTER SERVICE AGREEMENT
+Term: 3 years with auto-renewal (60-day notice to terminate)
+Fees: $150,000/year, 5% annual increase
+Payment: Net 45
+SLA: 99.5% uptime, credits max 10% monthly fee
+Liability: Capped at 12 months fees paid
+Indemnification: Mutual, IP and data breach only
+Data: Vendor may use anonymized data for product improvement
+Security: SOC2 Type II, annual audits
+Termination: For convenience with 90-day notice (penalty: remaining fees)
+Governing Law: State of Delaware`,
+      contractType: 'SaaS/Software Agreement',
+      organizationStandards: 'Require: 99.9% SLA, uncapped liability for data breach, data deletion upon termination, right to audit, 30-day termination notice, no auto-renewal.',
+      riskTolerance: 'Moderate (standard business terms)',
+      counterparty: 'CloudVendor Inc.',
+      dealValue: '$450K over 3 years',
+    },
+  },
+
+  'automation-discovery-workflow': {
+    workflowId: 'automation-discovery-workflow',
+    defaultTestCaseId: 'automation-discovery-default-1',
+    description: 'Automation assessment for invoice processing',
+    inputPayload: {
+      processName: 'Accounts Payable Invoice Processing',
+      processDescription: `1. Receive invoice via email or mail (300/week)
+2. Manual data entry into ERP (invoice #, vendor, amount, GL codes)
+3. Three-way match: PO, receipt, invoice
+4. Route for approval based on amount (VP for >$10K)
+5. Resolve exceptions (20% of invoices)
+6. Schedule payment based on terms
+7. Update vendor records and reporting`,
+      currentMetrics: 'Volume: 1,200 invoices/month. Processing time: 8 days average. Error rate: 4.5%. Cost per invoice: $15. FTEs: 3.5 (AP Clerks). Exception rate: 20%.',
+      painPoints: 'Manual data entry errors causing payment delays. Slow approval routing. Duplicate invoice detection is manual. Month-end close bottleneck. Auditors flagging control gaps.',
+      systemsInvolved: 'Email (Outlook), Scanning (Xerox), ERP (NetSuite), Excel (tracking), SharePoint (document storage), DocuSign (approvals for some).',
+      constraints: 'Budget: $100K implementation + $30K/year. Must integrate with NetSuite. Cannot change approval thresholds without CFO sign-off. Union employees - cannot reduce headcount.',
+      businessUnit: 'Finance / Accounts Payable',
+    },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // AI GOVERNANCE WORKFLOWS
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  'ai-data-protection-assessment': {
+    workflowId: 'ai-data-protection-assessment',
+    defaultTestCaseId: 'ai-data-protection-default-1',
+    description: 'AI data protection assessment for enterprise SaaS company',
+    inputPayload: {
+      keySystemsInventory: `Production Systems:
+- PostgreSQL (customer data) - AWS RDS
+- MongoDB (product analytics) - Atlas
+- Snowflake (data warehouse) - all data flows here
+- S3 (file storage) - customer uploads
+
+Business Systems:
+- Salesforce (CRM) - customer PII
+- HubSpot (marketing) - prospect data
+- Zendesk (support) - tickets with PII
+- Workday (HR) - employee data`,
+      dataTypesProcessed: 'Customer PII (names, emails, addresses for 50K customers), Financial data (payment info via Stripe, not stored), Healthcare data (some customers in healthcare vertical - PHI), Employee HR data, Business analytics and usage data.',
+      aiIntegrations: `Current:
+- ChatGPT Enterprise (customer support drafting)
+- GitHub Copilot (engineering - code completion)
+- Grammarly Business (company-wide)
+- Internal LLM (product recommendations, hosted on AWS)
+
+Planned:
+- AI chatbot for customer self-service
+- Document processing automation
+- Predictive churn analysis`,
+      approvedAITools: 'ChatGPT Enterprise (approved via security review), GitHub Copilot (engineering only), Grammarly Business (no customer data). All others require security team approval.',
+      dataResidencyRequirements: 'EU customers: data must stay in EU (Frankfurt region). Healthcare customers: HIPAA BAA required. Government customers: FedRAMP in progress. No customer data to China or Russia.',
+      currentSecurityControls: 'SSO (Okta), MFA enforced, DLP on email (Proofpoint), encryption at rest (AES-256), encryption in transit (TLS 1.3), quarterly access reviews, annual penetration testing.',
+      plannedAIExpansions: 'Q1: Customer service AI chatbot (will need access to knowledge base). Q2: Document OCR and processing. Q3: Predictive analytics on customer data. Q4: AI-powered search across all content.',
+    },
+  },
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -880,6 +1369,8 @@ export const ALL_SKILL_DEFAULT_TEST_DATA: Record<string, SkillDefaultTestData> =
   ...JOB_SEEKER_DEFAULT_TEST_DATA,
   ...ENTERPRISE_DEFAULT_TEST_DATA,
   ...EXCEL_DEFAULT_TEST_DATA,
+  ...GOVERNANCE_DEFAULT_TEST_DATA,
+  ...OPERATIONS_DEFAULT_TEST_DATA,
 };
 
 /**
