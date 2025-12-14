@@ -201,51 +201,79 @@ const WorkflowsPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Quick category selector chips */}
-          <div className="mt-4 flex flex-wrap gap-2">
-            <button
-              onClick={() => setSelectedCategory(null)}
-              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                !selectedCategory
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              All Workflows
-            </button>
-            {WORKFLOW_CATEGORIES.map((category) => {
-              const Icon = category.icon;
-              const isSelected = selectedCategory === category.id;
-              return (
-                <button
-                  key={category.id}
-                  onClick={() => setSelectedCategory(isSelected ? null : category.id)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                    isSelected
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  <Icon className="h-3.5 w-3.5" />
-                  {category.name}
-                </button>
-              );
-            })}
+          {/* Quick category selector chips with descriptions */}
+          <div className="mt-4">
+            <div className="flex flex-wrap gap-2 mb-3">
+              <button
+                onClick={() => setSelectedCategory(null)}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                  !selectedCategory
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                All Workflows
+              </button>
+              {WORKFLOW_CATEGORIES.map((category) => {
+                const Icon = category.icon;
+                const isSelected = selectedCategory === category.id;
+                return (
+                  <button
+                    key={category.id}
+                    onClick={() => setSelectedCategory(isSelected ? null : category.id)}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                      isSelected
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                    {category.name}
+                  </button>
+                );
+              })}
+            </div>
+            {/* Show selected category description */}
+            {selectedCategory && (
+              <p className="text-sm text-muted-foreground pl-1">
+                {WORKFLOW_CATEGORIES.find((c) => c.id === selectedCategory)?.description}
+              </p>
+            )}
           </div>
 
-          {/* Info Banner */}
-          <div className="mt-4 rounded-lg bg-gradient-to-r from-primary/10 to-purple-500/10 border border-primary/20 p-4">
-            <div className="flex items-start gap-3">
-              <div className="h-10 w-10 rounded-lg bg-primary/20 flex items-center justify-center shrink-0">
-                <Zap className="h-5 w-5 text-primary" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-sm">Multi-Step AI Automation</h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Each workflow chains multiple AI skills together into a complete solution.
-                  Enter your information once and get comprehensive, production-ready deliverables.
-                </p>
-              </div>
+          {/* Quick Start - Top 3 workflows for repeat access */}
+          <div className="mt-4 p-4 rounded-lg bg-muted/50 border">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-semibold flex items-center gap-2">
+                <Zap className="h-4 w-4 text-primary" />
+                Quick Start
+              </h3>
+              <span className="text-xs text-muted-foreground">Most popular workflows</span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {WORKFLOW_LIST.slice(0, 3).map((workflow) => {
+                const Icon = WORKFLOW_ICONS[workflow.icon] || Layers;
+                return (
+                  <button
+                    key={workflow.id}
+                    onClick={() => navigate(`/workflow/${workflow.id}`)}
+                    className="flex items-center gap-3 p-3 rounded-lg bg-card border hover:border-primary/50 hover:bg-card/80 transition-all text-left group"
+                  >
+                    <div className={`h-9 w-9 rounded-lg flex items-center justify-center shrink-0 ${WORKFLOW_COLORS[workflow.color] || WORKFLOW_COLORS.blue}`}>
+                      <Icon className="h-4 w-4" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-sm truncate group-hover:text-primary transition-colors">{workflow.name}</div>
+                      <div className="text-xs text-muted-foreground flex items-center gap-2">
+                        <span>{workflow.steps.length} steps</span>
+                        <span>•</span>
+                        <span>{workflow.estimatedTime}</span>
+                      </div>
+                    </div>
+                    <Play className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>

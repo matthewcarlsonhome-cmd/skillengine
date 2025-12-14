@@ -29,8 +29,6 @@ import {
   Wand2,
   ArrowRight,
   CheckCircle2,
-  MessageSquare,
-  Mail,
   Play,
   Zap,
   Library,
@@ -42,23 +40,11 @@ import {
   Palette,
   Users,
   FileText,
-  Brain,
-  Rocket,
   Settings,
-  Globe,
-  Shield,
   Layers,
 } from 'lucide-react';
 import { getUserProfile } from './UserProfilePage';
-import { WORKFLOW_LIST } from '../lib/workflows';
 import { ROLE_DEFINITIONS } from '../lib/skillLibrary';
-
-// Icon mapping for workflows
-const WORKFLOW_ICONS: Record<string, React.FC<{ className?: string }>> = {
-  Briefcase,
-  MessageSquare,
-  Mail,
-};
 
 // Featured roles to display on homepage
 const FEATURED_ROLES = [
@@ -477,72 +463,84 @@ const HomePage: React.FC = () => {
         </section>
 
         {/* ═══════════════════════════════════════════════════════════════════════════
-            AI WORKFLOWS SECTION
+            AI WORKFLOWS CTA
         ═══════════════════════════════════════════════════════════════════════════ */}
         <section className="mb-16">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center">
-              <Zap className="h-6 w-6 text-indigo-400" />
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold">AI Workflows</h2>
-              <p className="text-muted-foreground">
-                Run multiple skills in sequence to complete complex tasks automatically
-              </p>
-            </div>
-          </div>
+          <div className="rounded-2xl border bg-gradient-to-br from-indigo-500/5 via-purple-500/5 to-pink-500/5 p-8">
+            <div className="flex flex-col md:flex-row md:items-center gap-6">
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center">
+                    <Layers className="h-6 w-6 text-indigo-400" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">AI Workflows</h2>
+                    <p className="text-muted-foreground text-sm">
+                      Chain multiple skills together for complete automation
+                    </p>
+                  </div>
+                </div>
+                <p className="text-muted-foreground mb-4">
+                  Run multi-step workflows that combine AI skills into production-ready deliverables.
+                  Enter your information once and get comprehensive results in minutes.
+                </p>
+                <div className="flex flex-wrap gap-3 text-sm text-muted-foreground mb-6">
+                  <div className="flex items-center gap-1.5">
+                    <CheckCircle2 className="h-4 w-4 text-green-500" />
+                    <span>9+ workflows</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <CheckCircle2 className="h-4 w-4 text-green-500" />
+                    <span>5 categories</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <CheckCircle2 className="h-4 w-4 text-green-500" />
+                    <span>30+ total steps</span>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  <Link to="/workflows">
+                    <Button size="lg" className="bg-indigo-500 hover:bg-indigo-600">
+                      <Layers className="mr-2 h-5 w-5" />
+                      View All Workflows
+                    </Button>
+                  </Link>
+                  <Link to="/workflow/job-application">
+                    <Button size="lg" variant="outline">
+                      <Play className="mr-2 h-5 w-5" />
+                      Try Job Application
+                    </Button>
+                  </Link>
+                </div>
+              </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
-            {WORKFLOW_LIST.map((workflow) => {
-              const WorkflowIcon = WORKFLOW_ICONS[workflow.icon] || Briefcase;
-              return (
-                <Link key={workflow.id} to={`/workflow/${workflow.id}`}>
-                  <div className="rounded-xl border bg-card p-6 h-full hover:border-primary/50 transition-all hover:shadow-lg group">
-                    <div className={`h-12 w-12 rounded-lg bg-${workflow.color}-500/20 flex items-center justify-center mb-4`}>
-                      <WorkflowIcon className={`h-6 w-6 text-${workflow.color}-400`} />
+              {/* Featured Workflow Preview */}
+              <div className="md:w-80 shrink-0">
+                <Link to="/workflow/job-application">
+                  <div className="rounded-xl border bg-card p-5 hover:border-primary/50 transition-all hover:shadow-md group">
+                    <div className="flex items-center gap-2 text-xs text-indigo-400 font-medium mb-2">
+                      <Zap className="h-3 w-3" />
+                      FEATURED WORKFLOW
                     </div>
-                    <h3 className="text-lg font-bold mb-2">{workflow.name}</h3>
-                    <p className="text-muted-foreground text-sm mb-4">{workflow.description}</p>
-
-                    <div className="space-y-2 mb-4">
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <div className="h-10 w-10 rounded-lg bg-blue-500/20 flex items-center justify-center mb-3">
+                      <Briefcase className="h-5 w-5 text-blue-400" />
+                    </div>
+                    <h3 className="font-bold mb-1 group-hover:text-primary transition-colors">Job Application Package</h3>
+                    <p className="text-sm text-muted-foreground mb-3">Complete application materials in one workflow</p>
+                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1">
                         <Clock className="h-3 w-3" />
-                        <span>{workflow.estimatedTime}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        15-20 min
+                      </span>
+                      <span className="flex items-center gap-1">
                         <CheckCircle2 className="h-3 w-3" />
-                        <span>{workflow.steps.length} automated steps</span>
-                      </div>
-                    </div>
-
-                    <div className="text-sm font-medium text-muted-foreground mb-2">You'll receive:</div>
-                    <ul className="space-y-1">
-                      {workflow.outputs.slice(0, 3).map((output, i) => (
-                        <li key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
-                          <CheckCircle2 className="h-3 w-3 text-green-500 shrink-0 mt-0.5" />
-                          <span>{output}</span>
-                        </li>
-                      ))}
-                      {workflow.outputs.length > 3 && (
-                        <li className="text-xs text-muted-foreground pl-5">
-                          +{workflow.outputs.length - 3} more...
-                        </li>
-                      )}
-                    </ul>
-
-                    <div className="mt-4 pt-4 border-t">
-                      <Button
-                        variant="outline"
-                        className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
-                      >
-                        <Play className="h-4 w-4 mr-2" />
-                        Start Workflow
-                      </Button>
+                        4 steps
+                      </span>
                     </div>
                   </div>
                 </Link>
-              );
-            })}
+              </div>
+            </div>
           </div>
         </section>
 
