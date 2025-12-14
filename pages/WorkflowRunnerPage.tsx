@@ -67,6 +67,7 @@ import { runSkillStream as runGeminiSkillStream } from '../lib/gemini';
 import { runSkillStream as runClaudeSkillStream } from '../lib/claude';
 import { getApiKey } from '../lib/apiKeyStorage';
 import type { ApiProviderType } from '../types';
+import { TestDataBanner } from '../components/TestOutputButton';
 
 // Icon mapping for workflows
 const WORKFLOW_ICONS: Record<string, React.FC<{ className?: string }>> = {
@@ -198,6 +199,15 @@ const WorkflowRunnerPage: React.FC = () => {
   // Handle input changes
   const handleInputChange = (id: string, value: string) => {
     setGlobalInputs((prev) => ({ ...prev, [id]: value }));
+  };
+
+  // Load test data into form
+  const handleLoadTestData = (inputPayload: Record<string, string>) => {
+    setGlobalInputs((prev) => ({
+      ...prev,
+      ...inputPayload,
+    }));
+    addToast('Test data loaded into form fields', 'success');
   };
 
   // Validate form before running
@@ -971,6 +981,12 @@ const WorkflowRunnerPage: React.FC = () => {
               )}
             </div>
           </div>
+
+          {/* Test Data Banner */}
+          <TestDataBanner
+            workflowId={workflowId}
+            onLoadTestData={handleLoadTestData}
+          />
 
           {/* Global Inputs Form */}
           <div className="rounded-xl border bg-card p-6">

@@ -30,6 +30,10 @@ import {
   parseGradingResponse,
   createEvalRecord,
   validateOutputStructure,
+  hasSkillDefaultTestData,
+  hasWorkflowDefaultTestData,
+  getSkillDefaultTestData,
+  getWorkflowDefaultTestData,
   type SkillSchema,
   type WorkflowSchema,
   type TestCase,
@@ -61,6 +65,8 @@ import {
   TrendingUp,
   TrendingDown,
   Minus,
+  FlaskConical,
+  BadgeCheck,
 } from 'lucide-react';
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -114,6 +120,37 @@ const DevPlaygroundPage: React.FC = () => {
   const [showHistory, setShowHistory] = useState(false);
   const [evalHistory, setEvalHistory] = useState<EvalRecord[]>([]);
   const [evalStats, setEvalStats] = useState<SkillEvalStats | null>(null);
+
+  // Check if current selection has curated default test data
+  const hasDefaultTestData = useMemo(() => {
+    if (!selectedId) return false;
+    return selectionType === 'skill'
+      ? hasSkillDefaultTestData(selectedId)
+      : hasWorkflowDefaultTestData(selectedId);
+  }, [selectedId, selectionType]);
+
+  // Load default test data directly
+  const handleLoadDefaultTestData = useCallback(() => {
+    if (!selectedId) return;
+
+    const defaultData =
+      selectionType === 'skill'
+        ? getSkillDefaultTestData(selectedId)
+        : getWorkflowDefaultTestData(selectedId);
+
+    if (defaultData) {
+      setInputValues(defaultData.inputPayload);
+      // Find and select the matching happy-path test case
+      const matchingTestCase = testCases.find(
+        (tc) => tc.id === defaultData.defaultTestCaseId || tc.type === 'happy-path'
+      );
+      if (matchingTestCase) {
+        setSelectedTestCase(matchingTestCase);
+      }
+      setExecutionResult(null);
+      setGradingResult(null);
+    }
+  }, [selectedId, selectionType, testCases]);
 
   // Filter items based on search
   const filteredItems = useMemo(() => {
@@ -461,7 +498,14 @@ const DevPlaygroundPage: React.FC = () => {
                     : 'hover:bg-muted/50'
                 }`}
               >
-                <div className="font-medium text-sm">{item.name}</div>
+                <div className="flex items-center gap-2">
+                  <span className="font-medium text-sm">{item.name}</span>
+                  {(selectionType === 'skill'
+                    ? hasSkillDefaultTestData(item.id)
+                    : hasWorkflowDefaultTestData(item.id)) && (
+                    <FlaskConical className="h-3 w-3 text-amber-500" title="Curated test data available" />
+                  )}
+                </div>
                 <div className="text-xs text-muted-foreground truncate">
                   {item.description}
                 </div>
@@ -495,35 +539,66 @@ const DevPlaygroundPage: React.FC = () => {
                   Regenerate
                 </Button>
               </div>
+
+              {/* Quick Load Default Data Button */}
+              {hasDefaultTestData && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleLoadDefaultTestData}
+                  className="w-full text-amber-600 border-amber-600/30 hover:bg-amber-600/10"
+                >
+                  <FlaskConical className="h-4 w-4 mr-2" />
+                  Load Curated Test Data
+                </Button>
+              )}
+
               <div className="space-y-2">
-                {testCases.map((tc) => (
-                  <button
-                    key={tc.id}
-                    onClick={() => handleSelectTestCase(tc)}
-                    className={`w-full text-left px-3 py-2 rounded-lg border text-sm transition-colors ${
-                      selectedTestCase?.id === tc.id
-                        ? 'border-primary bg-primary/5'
-                        : 'hover:bg-muted/50'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={`px-2 py-0.5 rounded text-xs ${
-                          tc.type === 'happy-path'
-                            ? 'bg-green-500/20 text-green-400'
-                            : tc.type === 'edge-case'
-                            ? 'bg-yellow-500/20 text-yellow-400'
-                            : 'bg-blue-500/20 text-blue-400'
-                        }`}
-                      >
-                        {tc.type}
-                      </span>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                      {tc.description}
-                    </p>
-                  </button>
-                ))}
+                {testCases.map((tc) => {
+                  // Check if this test case is curated (matches default test data)
+                  const defaultData =
+                    selectionType === 'skill'
+                      ? getSkillDefaultTestData(selectedId)
+                      : getWorkflowDefaultTestData(selectedId);
+                  const isCurated = defaultData && tc.id === defaultData.defaultTestCaseId;
+
+                  return (
+                    <button
+                      key={tc.id}
+                      onClick={() => handleSelectTestCase(tc)}
+                      className={`w-full text-left px-3 py-2 rounded-lg border text-sm transition-colors ${
+                        selectedTestCase?.id === tc.id
+                          ? 'border-primary bg-primary/5'
+                          : isCurated
+                          ? 'border-amber-500/30 hover:bg-amber-500/5'
+                          : 'hover:bg-muted/50'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`px-2 py-0.5 rounded text-xs ${
+                            tc.type === 'happy-path'
+                              ? 'bg-green-500/20 text-green-400'
+                              : tc.type === 'edge-case'
+                              ? 'bg-yellow-500/20 text-yellow-400'
+                              : 'bg-blue-500/20 text-blue-400'
+                          }`}
+                        >
+                          {tc.type}
+                        </span>
+                        {isCurated && (
+                          <span className="flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-amber-500/20 text-amber-500">
+                            <BadgeCheck className="h-3 w-3" />
+                            Curated
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                        {tc.description}
+                      </p>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}

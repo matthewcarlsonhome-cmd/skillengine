@@ -8,6 +8,12 @@
  */
 
 import type { SkillSchema, WorkflowSchema, InputFieldSchema } from './registrySnapshot';
+import {
+  getSkillDefaultTestData,
+  getWorkflowDefaultTestData,
+  hasSkillDefaultTestData,
+  hasWorkflowDefaultTestData,
+} from './defaultTestData';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -412,18 +418,37 @@ function getRubricForSkill(skillId: string): RubricCriterion[] {
 
 /**
  * Generate test suite for a skill
+ *
+ * If default test data is available for this skill, it will be used as the
+ * primary happy-path test case. Additional auto-generated tests are still included.
  */
 export function generateSkillTestSuite(skill: SkillSchema): SkillTestSuite {
   const timestamp = Date.now();
+  const tests: TestCase[] = [];
 
-  const tests: TestCase[] = [
-    {
+  // Check if we have curated default test data for this skill
+  if (hasSkillDefaultTestData(skill.id)) {
+    const defaultData = getSkillDefaultTestData(skill.id)!;
+    tests.push({
+      id: defaultData.defaultTestCaseId,
+      type: 'happy-path',
+      description: defaultData.description,
+      inputPayload: defaultData.inputPayload,
+      rubric: { criteria: getRubricForSkill(skill.id) },
+    });
+  } else {
+    // Generate a happy-path test if no default data available
+    tests.push({
       id: `${skill.id}-happy-${timestamp}`,
       type: 'happy-path',
       description: `Happy path test for ${skill.name} with typical user inputs`,
       inputPayload: generateInputPayload(skill.inputs, 'happy-path', 'tech'),
       rubric: { criteria: getRubricForSkill(skill.id) },
-    },
+    });
+  }
+
+  // Always add edge case and variant tests (auto-generated)
+  tests.push(
     {
       id: `${skill.id}-edge-${timestamp}`,
       type: 'edge-case',
@@ -437,8 +462,8 @@ export function generateSkillTestSuite(skill: SkillSchema): SkillTestSuite {
       description: `Variant test for ${skill.name} with different industry/role`,
       inputPayload: generateInputPayload(skill.inputs, 'variant', 'other'),
       rubric: { criteria: getRubricForSkill(skill.id) },
-    },
-  ];
+    }
+  );
 
   return {
     skillId: skill.id,
@@ -450,25 +475,47 @@ export function generateSkillTestSuite(skill: SkillSchema): SkillTestSuite {
 
 /**
  * Generate test suite for a workflow
+ *
+ * If default test data is available for this workflow, it will be used as the
+ * primary happy-path test case. Additional auto-generated tests are still included.
  */
 export function generateWorkflowTestSuite(workflow: WorkflowSchema): WorkflowTestSuite {
   const timestamp = Date.now();
+  const tests: TestCase[] = [];
 
-  const tests: TestCase[] = [
-    {
+  // Default workflow rubric
+  const defaultRubric = {
+    criteria: [
+      { id: 'completion', description: 'All workflow steps complete successfully', weight: 0.3 },
+      { id: 'coherence', description: 'Outputs from each step build on previous steps', weight: 0.25 },
+      { id: 'quality', description: 'Final output meets quality standards', weight: 0.25 },
+      { id: 'timing', description: 'Execution completes within expected time', weight: 0.2 },
+    ],
+  };
+
+  // Check if we have curated default test data for this workflow
+  if (hasWorkflowDefaultTestData(workflow.id)) {
+    const defaultData = getWorkflowDefaultTestData(workflow.id)!;
+    tests.push({
+      id: defaultData.defaultTestCaseId,
+      type: 'happy-path',
+      description: defaultData.description,
+      inputPayload: defaultData.inputPayload,
+      rubric: defaultRubric,
+    });
+  } else {
+    // Generate a happy-path test if no default data available
+    tests.push({
       id: `${workflow.id}-happy-${timestamp}`,
       type: 'happy-path',
       description: `Happy path test for ${workflow.name} workflow with complete inputs`,
       inputPayload: generateInputPayload(workflow.globalInputs, 'happy-path', 'tech'),
-      rubric: {
-        criteria: [
-          { id: 'completion', description: 'All workflow steps complete successfully', weight: 0.3 },
-          { id: 'coherence', description: 'Outputs from each step build on previous steps', weight: 0.25 },
-          { id: 'quality', description: 'Final output meets quality standards', weight: 0.25 },
-          { id: 'timing', description: 'Execution completes within expected time', weight: 0.2 },
-        ],
-      },
-    },
+      rubric: defaultRubric,
+    });
+  }
+
+  // Always add edge case and variant tests (auto-generated)
+  tests.push(
     {
       id: `${workflow.id}-edge-${timestamp}`,
       type: 'edge-case',
@@ -494,8 +541,8 @@ export function generateWorkflowTestSuite(workflow: WorkflowSchema): WorkflowTes
           { id: 'relevance', description: 'Content relevant to non-tech industry', weight: 0.35 },
         ],
       },
-    },
-  ];
+    }
+  );
 
   return {
     workflowId: workflow.id,
