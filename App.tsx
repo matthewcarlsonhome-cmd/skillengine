@@ -176,6 +176,7 @@ function App() {
                     <Route path="/role-templates" element={<RoleTemplatesPage />} />
                     <Route path="/my-skills" element={<MySkillsPage />} />
                     <Route path="/library" element={<SkillLibraryPage />} />
+                    <Route path="/library/skill/:skillId" element={<LibrarySkillRunnerPage />} />
                     <Route path="/library-skill-runner" element={<LibrarySkillRunnerPage />} />
 
                     {/* ═══════════════════════════════════════════════════════

@@ -13,7 +13,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { executeDynamicSkill } from '../lib/skills/dynamic';
@@ -21,7 +21,7 @@ import { useAppContext } from '../hooks/useAppContext';
 import { useToast } from '../hooks/useToast';
 import type { DynamicSkill, DynamicFormInput, SavedOutput, SkillExecution, FavoriteSkill } from '../lib/storage/types';
 import type { LibrarySkill } from '../lib/skillLibrary/types';
-import { ROLE_DEFINITIONS } from '../lib/skillLibrary';
+import { ROLE_DEFINITIONS, getLibrarySkill } from '../lib/skillLibrary';
 import { db } from '../lib/storage/indexeddb';
 import { getApiKey } from '../lib/apiKeyStorage';
 import { Button } from '../components/ui/Button';
@@ -53,6 +53,7 @@ import {
 
 const LibrarySkillRunnerPage: React.FC = () => {
   const navigate = useNavigate();
+  const { skillId } = useParams<{ skillId: string }>();
   const { addToast } = useToast();
   const { selectedApi, setSelectedApi } = useAppContext();
 
@@ -80,14 +81,22 @@ const LibrarySkillRunnerPage: React.FC = () => {
   const [outputSaved, setOutputSaved] = useState(false);
   const [isFavorited, setIsFavorited] = useState(false);
 
-  // Load skill from sessionStorage
+  // Load skill from sessionStorage or URL parameter
   useEffect(() => {
     const loadSkill = () => {
       try {
+        // First try sessionStorage
         const stored = sessionStorage.getItem('librarySkillToRun');
-        if (stored) {
-          const skill = JSON.parse(stored) as LibrarySkill;
+        let skill: LibrarySkill | undefined;
 
+        if (stored) {
+          skill = JSON.parse(stored) as LibrarySkill;
+        } else if (skillId) {
+          // If no sessionStorage, try to look up by URL param
+          skill = getLibrarySkill(skillId);
+        }
+
+        if (skill) {
           // If it's a builtin skill, redirect to the proper page
           if (skill.source === 'builtin') {
             navigate(`/skill/${skill.id}`);
@@ -112,7 +121,7 @@ const LibrarySkillRunnerPage: React.FC = () => {
     };
 
     loadSkill();
-  }, [navigate]);
+  }, [navigate, skillId]);
 
   // Check if skill is favorited
   useEffect(() => {
