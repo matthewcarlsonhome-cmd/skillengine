@@ -288,7 +288,7 @@ const BrowseSkillsPage: React.FC = () => {
             {recommendedSkills.map((skill) => (
               <Link
                 key={skill.id}
-                to={`/library/skill/${skill.id}`}
+                to={skill.source === 'builtin' ? `/skill/${skill.id}` : `/library/skill/${skill.id}`}
                 className="rounded-lg border bg-card p-4 hover:border-primary/50 transition-colors"
               >
                 <h3 className="font-medium mb-1">{skill.name}</h3>
