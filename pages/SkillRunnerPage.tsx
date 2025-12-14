@@ -632,12 +632,29 @@ const SkillRunnerPage: React.FC = () => {
                     <Button variant="ghost" size="icon" onClick={downloadTextFile} title="Download"><Download className="h-4 w-4" /></Button>
                   </div>
                 )}
-                <div className="prose prose-sm sm:prose-base dark:prose-invert max-w-none p-4 overflow-x-auto">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]} components={{ 
-                      hr: ({...props}) => <hr className="my-8 border-border" {...props} />,
-                      code({node, ...props}) {
-                        return <code className="bg-muted font-mono text-sm p-1 rounded-sm" {...props} />
-                      }
+                <div className="prose prose-sm sm:prose-base dark:prose-invert max-w-none p-4 overflow-x-auto prose-headings:scroll-mt-4 prose-h2:text-xl prose-h2:font-bold prose-h2:border-b prose-h2:border-border prose-h2:pb-2 prose-h2:mt-8 prose-h2:mb-4 prose-h3:text-lg prose-h3:font-semibold prose-h3:mt-6 prose-h3:mb-3 prose-p:leading-relaxed prose-li:my-1 prose-table:border prose-table:border-border prose-th:bg-muted prose-th:px-4 prose-th:py-2 prose-th:text-left prose-th:font-semibold prose-th:border prose-th:border-border prose-td:px-4 prose-td:py-2 prose-td:border prose-td:border-border prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:bg-muted/50 prose-blockquote:py-2 prose-blockquote:px-4 prose-blockquote:not-italic prose-strong:text-primary">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]} components={{
+                      hr: ({...props}) => <hr className="my-8 border-border border-t-2" {...props} />,
+                      h2: ({children, ...props}) => <h2 className="flex items-center gap-2 text-xl font-bold border-b border-border pb-2 mt-8 mb-4" {...props}>{children}</h2>,
+                      h3: ({children, ...props}) => <h3 className="text-lg font-semibold text-foreground/90 mt-6 mb-3" {...props}>{children}</h3>,
+                      table: ({children, ...props}) => <div className="overflow-x-auto my-4"><table className="min-w-full border border-border rounded-md overflow-hidden" {...props}>{children}</table></div>,
+                      thead: ({children, ...props}) => <thead className="bg-muted" {...props}>{children}</thead>,
+                      th: ({children, ...props}) => <th className="px-4 py-3 text-left text-sm font-semibold text-foreground border-b border-border" {...props}>{children}</th>,
+                      td: ({children, ...props}) => <td className="px-4 py-3 text-sm border-b border-border" {...props}>{children}</td>,
+                      blockquote: ({children, ...props}) => <blockquote className="border-l-4 border-primary bg-muted/50 py-3 px-4 my-4 rounded-r-md not-italic" {...props}>{children}</blockquote>,
+                      ul: ({children, ...props}) => <ul className="list-disc pl-6 space-y-2 my-4" {...props}>{children}</ul>,
+                      ol: ({children, ...props}) => <ol className="list-decimal pl-6 space-y-2 my-4" {...props}>{children}</ol>,
+                      li: ({children, ...props}) => <li className="leading-relaxed" {...props}>{children}</li>,
+                      code({node, className, children, ...props}) {
+                        const match = /language-(\w+)/.exec(className || '');
+                        const isInline = !match && !className;
+                        return isInline
+                          ? <code className="bg-muted font-mono text-sm px-1.5 py-0.5 rounded-md text-primary" {...props}>{children}</code>
+                          : <code className="block bg-muted font-mono text-sm p-4 rounded-md overflow-x-auto my-4 border border-border" {...props}>{children}</code>;
+                      },
+                      pre: ({children, ...props}) => <pre className="bg-muted rounded-md overflow-x-auto my-4 border border-border" {...props}>{children}</pre>,
+                      strong: ({children, ...props}) => <strong className="font-semibold text-foreground" {...props}>{children}</strong>,
+                      a: ({children, href, ...props}) => <a href={href} className="text-primary hover:underline" target="_blank" rel="noopener noreferrer" {...props}>{children}</a>,
                   }}>
                     {output}
                   </ReactMarkdown>
