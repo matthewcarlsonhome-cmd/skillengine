@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Moon, Sun, Briefcase, Users, Sparkles, FolderOpen, LogIn, LogOut, Loader2, ChevronDown, LayoutDashboard, Package, Menu, X, Settings, FileSpreadsheet, DollarSign, Wrench, MessageSquare, Calculator, Mail, Building2, Trophy, Target, BarChart3, Bot, Bell, Lock, TrendingUp, Calendar, User, PlusCircle, Wand2, Heart, Download, Zap, Play, Shield, BookOpen, Layers } from 'lucide-react';
+import { Moon, Sun, Briefcase, Users, Sparkles, LogIn, LogOut, Loader2, ChevronDown, LayoutDashboard, Package, Menu, X, Settings, FileSpreadsheet, MessageSquare, Calculator, Mail, Building2, Trophy, Target, BarChart3, Bot, Bell, Lock, TrendingUp, Calendar, User, Wand2, Download, Shield, BookOpen, Layers } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme.tsx';
 import { useAuth } from '../hooks/useAuth.tsx';
 import { useToast } from '../hooks/useToast.tsx';
@@ -59,6 +59,7 @@ const Header: React.FC = () => {
           </Link>
 
           <nav className="hidden md:flex items-center gap-1">
+            {/* Core Navigation - 5 primary destinations */}
             <Link to="/dashboard">
               <Button
                 variant={isActive('/dashboard') ? 'secondary' : 'ghost'}
@@ -76,7 +77,7 @@ const Header: React.FC = () => {
                 className="gap-2"
               >
                 <Sparkles className="h-4 w-4" />
-                AI Skills
+                Skills
               </Button>
             </Link>
             <Link to="/library">
@@ -86,7 +87,7 @@ const Header: React.FC = () => {
                 className="gap-2"
               >
                 <BookOpen className="h-4 w-4" />
-                Skill Library
+                Library
               </Button>
             </Link>
             <Link to="/workflows">
@@ -99,38 +100,8 @@ const Header: React.FC = () => {
                 Workflows
               </Button>
             </Link>
-            <Link to="/role-templates">
-              <Button
-                variant={isActive('/role-templates') ? 'secondary' : 'ghost'}
-                size="sm"
-                className="gap-2"
-              >
-                <Package className="h-4 w-4" />
-                Role Templates
-              </Button>
-            </Link>
-            <Link to="/analyze">
-              <Button
-                variant={isActive('/analyze') ? 'secondary' : 'ghost'}
-                size="sm"
-                className="gap-2"
-              >
-                <Wand2 className="h-4 w-4" />
-                Custom Skills
-              </Button>
-            </Link>
-            <Link to="/community">
-              <Button
-                variant={isActive('/community') ? 'secondary' : 'ghost'}
-                size="sm"
-                className="gap-2"
-              >
-                <Users className="h-4 w-4" />
-                Community
-              </Button>
-            </Link>
 
-            {/* Tools Dropdown */}
+            {/* More Dropdown - Consolidated menu for secondary features */}
             <div className="relative">
               <Button
                 variant="ghost"
@@ -138,8 +109,7 @@ const Header: React.FC = () => {
                 className="gap-2"
                 onClick={() => setShowToolsMenu(!showToolsMenu)}
               >
-                <Wrench className="h-4 w-4" />
-                Tools
+                More
                 <ChevronDown className="h-3 w-3" />
               </Button>
 
@@ -149,174 +119,159 @@ const Header: React.FC = () => {
                     className="fixed inset-0 z-40"
                     onClick={() => setShowToolsMenu(false)}
                   />
-                  <div className="absolute left-0 mt-2 w-72 rounded-lg border bg-card shadow-lg z-50 max-h-[80vh] overflow-y-auto">
+                  <div className="absolute left-0 mt-2 w-80 rounded-lg border bg-card shadow-lg z-50 max-h-[80vh] overflow-y-auto">
                     <div className="p-2">
-                      {/* Workflows Section */}
-                      <p className="px-3 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">AI Workflows</p>
-                      <Link to="/workflows" onClick={() => setShowToolsMenu(false)}>
-                        <div className="flex items-center gap-2 px-3 py-2 rounded hover:bg-muted transition-colors">
-                          <Layers className="h-4 w-4 text-primary" />
+                      {/* Create & Customize */}
+                      <p className="px-3 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Create & Customize</p>
+                      <Link to="/role-templates" onClick={() => setShowToolsMenu(false)}>
+                        <div className="flex items-center gap-3 px-3 py-2 rounded hover:bg-muted transition-colors">
+                          <Package className="h-4 w-4 text-primary" />
                           <div>
-                            <span className="text-sm font-medium">Browse All Workflows</span>
-                            <p className="text-xs text-muted-foreground">View complete workflow library</p>
+                            <span className="text-sm font-medium">Role Templates</span>
+                            <p className="text-xs text-muted-foreground">Pre-built skill sets for roles</p>
                           </div>
                         </div>
                       </Link>
-                      <Link to="/workflow/job-application" onClick={() => setShowToolsMenu(false)}>
-                        <div className="flex items-center gap-2 px-3 py-2 rounded hover:bg-muted transition-colors">
-                          <Briefcase className="h-4 w-4 text-blue-500" />
+                      <Link to="/analyze" onClick={() => setShowToolsMenu(false)}>
+                        <div className="flex items-center gap-3 px-3 py-2 rounded hover:bg-muted transition-colors">
+                          <Wand2 className="h-4 w-4 text-purple-500" />
                           <div>
-                            <span className="text-sm">Job Application</span>
-                            <p className="text-xs text-muted-foreground">Complete application package</p>
+                            <span className="text-sm font-medium">Custom Skills</span>
+                            <p className="text-xs text-muted-foreground">Create your own AI skills</p>
                           </div>
                         </div>
                       </Link>
-                      <Link to="/workflow/interview-prep" onClick={() => setShowToolsMenu(false)}>
-                        <div className="flex items-center gap-2 px-3 py-2 rounded hover:bg-muted transition-colors">
-                          <MessageSquare className="h-4 w-4 text-purple-500" />
+                      <Link to="/community" onClick={() => setShowToolsMenu(false)}>
+                        <div className="flex items-center gap-3 px-3 py-2 rounded hover:bg-muted transition-colors">
+                          <Users className="h-4 w-4 text-blue-500" />
                           <div>
-                            <span className="text-sm">Interview Prep</span>
-                            <p className="text-xs text-muted-foreground">Full interview preparation</p>
-                          </div>
-                        </div>
-                      </Link>
-                      <Link to="/workflow/post-interview" onClick={() => setShowToolsMenu(false)}>
-                        <div className="flex items-center gap-2 px-3 py-2 rounded hover:bg-muted transition-colors">
-                          <Mail className="h-4 w-4 text-green-500" />
-                          <div>
-                            <span className="text-sm">Post-Interview</span>
-                            <p className="text-xs text-muted-foreground">Follow-up & thank you notes</p>
+                            <span className="text-sm font-medium">Community</span>
+                            <p className="text-xs text-muted-foreground">Share & discover skills</p>
                           </div>
                         </div>
                       </Link>
 
-                      {/* Job Tracking Section */}
+                      {/* Track Progress */}
                       <div className="border-t my-2" />
-                      <p className="px-3 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Job Tracking</p>
+                      <p className="px-3 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Track Progress</p>
                       <Link to="/job-tracker" onClick={() => setShowToolsMenu(false)}>
-                        <div className="flex items-center gap-2 px-3 py-2 rounded hover:bg-muted transition-colors">
+                        <div className="flex items-center gap-3 px-3 py-2 rounded hover:bg-muted transition-colors">
                           <Briefcase className="h-4 w-4 text-blue-500" />
                           <span className="text-sm">Job Tracker</span>
                         </div>
                       </Link>
                       <Link to="/daily-planner" onClick={() => setShowToolsMenu(false)}>
-                        <div className="flex items-center gap-2 px-3 py-2 rounded hover:bg-muted transition-colors">
+                        <div className="flex items-center gap-3 px-3 py-2 rounded hover:bg-muted transition-colors">
                           <Calendar className="h-4 w-4 text-sky-500" />
                           <span className="text-sm">Daily Planner</span>
                         </div>
                       </Link>
                       <Link to="/follow-ups" onClick={() => setShowToolsMenu(false)}>
-                        <div className="flex items-center gap-2 px-3 py-2 rounded hover:bg-muted transition-colors">
+                        <div className="flex items-center gap-3 px-3 py-2 rounded hover:bg-muted transition-colors">
                           <Bell className="h-4 w-4 text-red-500" />
                           <span className="text-sm">Follow-up Reminders</span>
                         </div>
                       </Link>
                       <Link to="/progress" onClick={() => setShowToolsMenu(false)}>
-                        <div className="flex items-center gap-2 px-3 py-2 rounded hover:bg-muted transition-colors">
+                        <div className="flex items-center gap-3 px-3 py-2 rounded hover:bg-muted transition-colors">
                           <BarChart3 className="h-4 w-4 text-indigo-500" />
                           <span className="text-sm">Progress Report</span>
                         </div>
                       </Link>
 
-                      {/* Interview Prep Section */}
+                      {/* Interview Prep */}
                       <div className="border-t my-2" />
                       <p className="px-3 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Interview Prep</p>
                       <Link to="/mock-interview" onClick={() => setShowToolsMenu(false)}>
-                        <div className="flex items-center gap-2 px-3 py-2 rounded hover:bg-muted transition-colors">
+                        <div className="flex items-center gap-3 px-3 py-2 rounded hover:bg-muted transition-colors">
                           <Bot className="h-4 w-4 text-violet-500" />
                           <span className="text-sm">Mock Interview</span>
                         </div>
                       </Link>
                       <Link to="/interview-bank" onClick={() => setShowToolsMenu(false)}>
-                        <div className="flex items-center gap-2 px-3 py-2 rounded hover:bg-muted transition-colors">
+                        <div className="flex items-center gap-3 px-3 py-2 rounded hover:bg-muted transition-colors">
                           <MessageSquare className="h-4 w-4 text-green-500" />
                           <span className="text-sm">Interview Q&A Bank</span>
                         </div>
                       </Link>
                       <Link to="/company-notes" onClick={() => setShowToolsMenu(false)}>
-                        <div className="flex items-center gap-2 px-3 py-2 rounded hover:bg-muted transition-colors">
+                        <div className="flex items-center gap-3 px-3 py-2 rounded hover:bg-muted transition-colors">
                           <Building2 className="h-4 w-4 text-orange-500" />
                           <span className="text-sm">Company Research</span>
                         </div>
                       </Link>
 
-                      {/* Networking Section */}
+                      {/* Networking & Outreach */}
                       <div className="border-t my-2" />
                       <p className="px-3 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Networking</p>
                       <Link to="/networking" onClick={() => setShowToolsMenu(false)}>
-                        <div className="flex items-center gap-2 px-3 py-2 rounded hover:bg-muted transition-colors">
+                        <div className="flex items-center gap-3 px-3 py-2 rounded hover:bg-muted transition-colors">
                           <Mail className="h-4 w-4 text-cyan-500" />
                           <span className="text-sm">Outreach Templates</span>
                         </div>
                       </Link>
                       <Link to="/referral-network" onClick={() => setShowToolsMenu(false)}>
-                        <div className="flex items-center gap-2 px-3 py-2 rounded hover:bg-muted transition-colors">
+                        <div className="flex items-center gap-3 px-3 py-2 rounded hover:bg-muted transition-colors">
                           <Users className="h-4 w-4 text-blue-400" />
                           <span className="text-sm">Referral Network</span>
                         </div>
                       </Link>
 
-                      {/* Research & Analysis Section */}
+                      {/* Research & Analysis */}
                       <div className="border-t my-2" />
                       <p className="px-3 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Research</p>
                       <Link to="/salary-calculator" onClick={() => setShowToolsMenu(false)}>
-                        <div className="flex items-center gap-2 px-3 py-2 rounded hover:bg-muted transition-colors">
+                        <div className="flex items-center gap-3 px-3 py-2 rounded hover:bg-muted transition-colors">
                           <Calculator className="h-4 w-4 text-purple-500" />
                           <span className="text-sm">Salary Calculator</span>
                         </div>
                       </Link>
                       <Link to="/market-insights" onClick={() => setShowToolsMenu(false)}>
-                        <div className="flex items-center gap-2 px-3 py-2 rounded hover:bg-muted transition-colors">
+                        <div className="flex items-center gap-3 px-3 py-2 rounded hover:bg-muted transition-colors">
                           <TrendingUp className="h-4 w-4 text-teal-500" />
                           <span className="text-sm">Market Insights</span>
                         </div>
                       </Link>
                       <Link to="/skills-gap" onClick={() => setShowToolsMenu(false)}>
-                        <div className="flex items-center gap-2 px-3 py-2 rounded hover:bg-muted transition-colors">
+                        <div className="flex items-center gap-3 px-3 py-2 rounded hover:bg-muted transition-colors">
                           <Target className="h-4 w-4 text-pink-500" />
                           <span className="text-sm">Skills Gap Analyzer</span>
                         </div>
                       </Link>
 
-                      {/* Utilities Section */}
+                      {/* Utilities */}
                       <div className="border-t my-2" />
                       <p className="px-3 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Utilities</p>
                       <Link to="/autofill-vault" onClick={() => setShowToolsMenu(false)}>
-                        <div className="flex items-center gap-2 px-3 py-2 rounded hover:bg-muted transition-colors">
+                        <div className="flex items-center gap-3 px-3 py-2 rounded hover:bg-muted transition-colors">
                           <Lock className="h-4 w-4 text-emerald-500" />
                           <span className="text-sm">Auto-Fill Vault</span>
                         </div>
                       </Link>
                       <Link to="/batch" onClick={() => setShowToolsMenu(false)}>
-                        <div className="flex items-center gap-2 px-3 py-2 rounded hover:bg-muted transition-colors">
+                        <div className="flex items-center gap-3 px-3 py-2 rounded hover:bg-muted transition-colors">
                           <FileSpreadsheet className="h-4 w-4 text-amber-500" />
                           <span className="text-sm">Batch Processing</span>
                         </div>
                       </Link>
                       <Link to="/export-skills" onClick={() => setShowToolsMenu(false)}>
-                        <div className="flex items-center gap-2 px-3 py-2 rounded hover:bg-muted transition-colors">
+                        <div className="flex items-center gap-3 px-3 py-2 rounded hover:bg-muted transition-colors">
                           <Download className="h-4 w-4 text-orange-500" />
                           <span className="text-sm">Export Skills</span>
                         </div>
                       </Link>
                       <Link to="/achievements" onClick={() => setShowToolsMenu(false)}>
-                        <div className="flex items-center gap-2 px-3 py-2 rounded hover:bg-muted transition-colors">
+                        <div className="flex items-center gap-3 px-3 py-2 rounded hover:bg-muted transition-colors">
                           <Trophy className="h-4 w-4 text-yellow-500" />
                           <span className="text-sm">Achievements</span>
                         </div>
                       </Link>
-                      <Link to="/skill/healthcare-resume-parser" onClick={() => setShowToolsMenu(false)}>
-                        <div className="flex items-center gap-2 px-3 py-2 rounded hover:bg-muted transition-colors">
-                          <Heart className="h-4 w-4 text-emerald-500" />
-                          <span className="text-sm">Resume Parser</span>
-                        </div>
-                      </Link>
 
-                      {/* Admin Section - Only visible to admins or everyone for now */}
+                      {/* Admin */}
                       <div className="border-t my-2" />
                       <p className="px-3 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Admin</p>
                       <Link to="/admin" onClick={() => setShowToolsMenu(false)}>
-                        <div className="flex items-center gap-2 px-3 py-2 rounded hover:bg-muted transition-colors">
+                        <div className="flex items-center gap-3 px-3 py-2 rounded hover:bg-muted transition-colors">
                           <Shield className="h-4 w-4 text-amber-500" />
                           <span className="text-sm">Control Panel</span>
                         </div>
@@ -327,7 +282,7 @@ const Header: React.FC = () => {
               )}
             </div>
 
-            {/* Settings */}
+            {/* Settings Icon */}
             <Link to="/settings">
               <Button
                 variant={isActive('/settings') ? 'secondary' : 'ghost'}
@@ -464,19 +419,7 @@ const Header: React.FC = () => {
       {mobileMenuOpen && (
         <div className="md:hidden border-t bg-background/95 backdrop-blur max-h-[80vh] overflow-y-auto">
           <nav className="container mx-auto max-w-7xl px-4 py-4 flex flex-col gap-1">
-            {/* Profile Banner */}
-            <Link to="/profile">
-              <div className="p-3 mb-2 rounded-lg bg-gradient-to-r from-blue-500/10 to-purple-500/10 border flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center">
-                  <User className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <p className="font-medium text-sm">My Profile</p>
-                  <p className="text-xs text-muted-foreground">Set up your resume & background</p>
-                </div>
-              </div>
-            </Link>
-
+            {/* Core Navigation */}
             <Link to="/dashboard">
               <Button
                 variant={isActive('/dashboard') ? 'secondary' : 'ghost'}
@@ -492,7 +435,7 @@ const Header: React.FC = () => {
                 className="w-full justify-start gap-2"
               >
                 <Sparkles className="h-4 w-4" />
-                AI Skills
+                Skills
               </Button>
             </Link>
             <Link to="/library">
@@ -501,7 +444,7 @@ const Header: React.FC = () => {
                 className="w-full justify-start gap-2"
               >
                 <BookOpen className="h-4 w-4" />
-                Skill Library
+                Library
               </Button>
             </Link>
             <Link to="/workflows">
@@ -513,86 +456,59 @@ const Header: React.FC = () => {
                 Workflows
               </Button>
             </Link>
+            <Link to="/settings">
+              <Button variant={isActive('/settings') ? 'secondary' : 'ghost'} className="w-full justify-start gap-2">
+                <Settings className="h-4 w-4" />
+                Settings
+              </Button>
+            </Link>
+
+            {/* Create & Customize */}
+            <div className="border-t my-2" />
+            <p className="px-3 py-1 text-xs font-semibold text-muted-foreground uppercase">Create & Customize</p>
             <Link to="/role-templates">
-              <Button
-                variant={isActive('/role-templates') ? 'secondary' : 'ghost'}
-                className="w-full justify-start gap-2"
-              >
-                <Package className="h-4 w-4" />
+              <Button variant={isActive('/role-templates') ? 'secondary' : 'ghost'} className="w-full justify-start gap-2">
+                <Package className="h-4 w-4 text-primary" />
                 Role Templates
               </Button>
             </Link>
             <Link to="/analyze">
-              <Button
-                variant={isActive('/analyze') ? 'secondary' : 'ghost'}
-                className="w-full justify-start gap-2"
-              >
-                <Wand2 className="h-4 w-4" />
+              <Button variant={isActive('/analyze') ? 'secondary' : 'ghost'} className="w-full justify-start gap-2">
+                <Wand2 className="h-4 w-4 text-purple-500" />
                 Custom Skills
               </Button>
             </Link>
             <Link to="/community">
-              <Button
-                variant={isActive('/community') ? 'secondary' : 'ghost'}
-                className="w-full justify-start gap-2"
-              >
-                <Users className="h-4 w-4" />
+              <Button variant={isActive('/community') ? 'secondary' : 'ghost'} className="w-full justify-start gap-2">
+                <Users className="h-4 w-4 text-blue-500" />
                 Community
               </Button>
             </Link>
 
-            {/* AI Workflows */}
+            {/* Track Progress */}
             <div className="border-t my-2" />
-            <p className="px-3 py-1 text-xs font-semibold text-muted-foreground uppercase">AI Workflows</p>
-            <Link to="/workflows">
-              <Button variant={isActive('/workflows') ? 'secondary' : 'ghost'} className="w-full justify-start gap-2">
-                <Layers className="h-4 w-4 text-primary" />
-                Browse All Workflows
-              </Button>
-            </Link>
-            <Link to="/workflow/job-application">
-              <Button variant="ghost" className="w-full justify-start gap-2">
-                <Briefcase className="h-4 w-4 text-blue-500" />
-                Job Application Package
-              </Button>
-            </Link>
-            <Link to="/workflow/interview-prep">
-              <Button variant="ghost" className="w-full justify-start gap-2">
-                <MessageSquare className="h-4 w-4 text-purple-500" />
-                Interview Preparation
-              </Button>
-            </Link>
-            <Link to="/workflow/post-interview">
-              <Button variant="ghost" className="w-full justify-start gap-2">
-                <Mail className="h-4 w-4 text-green-500" />
-                Post-Interview Follow-Up
-              </Button>
-            </Link>
-
-            {/* Job Tracking */}
-            <div className="border-t my-2" />
-            <p className="px-3 py-1 text-xs font-semibold text-muted-foreground uppercase">Job Tracking</p>
+            <p className="px-3 py-1 text-xs font-semibold text-muted-foreground uppercase">Track Progress</p>
             <Link to="/job-tracker">
               <Button variant={isActive('/job-tracker') ? 'secondary' : 'ghost'} className="w-full justify-start gap-2">
-                <Briefcase className="h-4 w-4" />
+                <Briefcase className="h-4 w-4 text-blue-500" />
                 Job Tracker
               </Button>
             </Link>
             <Link to="/daily-planner">
               <Button variant={isActive('/daily-planner') ? 'secondary' : 'ghost'} className="w-full justify-start gap-2">
-                <Calendar className="h-4 w-4" />
+                <Calendar className="h-4 w-4 text-sky-500" />
                 Daily Planner
               </Button>
             </Link>
             <Link to="/follow-ups">
               <Button variant={isActive('/follow-ups') ? 'secondary' : 'ghost'} className="w-full justify-start gap-2">
-                <Bell className="h-4 w-4" />
+                <Bell className="h-4 w-4 text-red-500" />
                 Follow-up Reminders
               </Button>
             </Link>
             <Link to="/progress">
               <Button variant={isActive('/progress') ? 'secondary' : 'ghost'} className="w-full justify-start gap-2">
-                <BarChart3 className="h-4 w-4" />
+                <BarChart3 className="h-4 w-4 text-indigo-500" />
                 Progress Report
               </Button>
             </Link>
@@ -602,19 +518,19 @@ const Header: React.FC = () => {
             <p className="px-3 py-1 text-xs font-semibold text-muted-foreground uppercase">Interview Prep</p>
             <Link to="/mock-interview">
               <Button variant={isActive('/mock-interview') ? 'secondary' : 'ghost'} className="w-full justify-start gap-2">
-                <Bot className="h-4 w-4" />
+                <Bot className="h-4 w-4 text-violet-500" />
                 Mock Interview
               </Button>
             </Link>
             <Link to="/interview-bank">
               <Button variant={isActive('/interview-bank') ? 'secondary' : 'ghost'} className="w-full justify-start gap-2">
-                <MessageSquare className="h-4 w-4" />
+                <MessageSquare className="h-4 w-4 text-green-500" />
                 Interview Q&A Bank
               </Button>
             </Link>
             <Link to="/company-notes">
               <Button variant={isActive('/company-notes') ? 'secondary' : 'ghost'} className="w-full justify-start gap-2">
-                <Building2 className="h-4 w-4" />
+                <Building2 className="h-4 w-4 text-orange-500" />
                 Company Research
               </Button>
             </Link>
@@ -624,13 +540,13 @@ const Header: React.FC = () => {
             <p className="px-3 py-1 text-xs font-semibold text-muted-foreground uppercase">Networking</p>
             <Link to="/networking">
               <Button variant={isActive('/networking') ? 'secondary' : 'ghost'} className="w-full justify-start gap-2">
-                <Mail className="h-4 w-4" />
+                <Mail className="h-4 w-4 text-cyan-500" />
                 Outreach Templates
               </Button>
             </Link>
             <Link to="/referral-network">
               <Button variant={isActive('/referral-network') ? 'secondary' : 'ghost'} className="w-full justify-start gap-2">
-                <Users className="h-4 w-4" />
+                <Users className="h-4 w-4 text-blue-400" />
                 Referral Network
               </Button>
             </Link>
@@ -640,19 +556,19 @@ const Header: React.FC = () => {
             <p className="px-3 py-1 text-xs font-semibold text-muted-foreground uppercase">Research</p>
             <Link to="/salary-calculator">
               <Button variant={isActive('/salary-calculator') ? 'secondary' : 'ghost'} className="w-full justify-start gap-2">
-                <Calculator className="h-4 w-4" />
+                <Calculator className="h-4 w-4 text-purple-500" />
                 Salary Calculator
               </Button>
             </Link>
             <Link to="/market-insights">
               <Button variant={isActive('/market-insights') ? 'secondary' : 'ghost'} className="w-full justify-start gap-2">
-                <TrendingUp className="h-4 w-4" />
+                <TrendingUp className="h-4 w-4 text-teal-500" />
                 Market Insights
               </Button>
             </Link>
             <Link to="/skills-gap">
               <Button variant={isActive('/skills-gap') ? 'secondary' : 'ghost'} className="w-full justify-start gap-2">
-                <Target className="h-4 w-4" />
+                <Target className="h-4 w-4 text-pink-500" />
                 Skills Gap Analyzer
               </Button>
             </Link>
@@ -662,47 +578,26 @@ const Header: React.FC = () => {
             <p className="px-3 py-1 text-xs font-semibold text-muted-foreground uppercase">Utilities</p>
             <Link to="/autofill-vault">
               <Button variant={isActive('/autofill-vault') ? 'secondary' : 'ghost'} className="w-full justify-start gap-2">
-                <Lock className="h-4 w-4" />
+                <Lock className="h-4 w-4 text-emerald-500" />
                 Auto-Fill Vault
               </Button>
             </Link>
             <Link to="/batch">
               <Button variant={isActive('/batch') ? 'secondary' : 'ghost'} className="w-full justify-start gap-2">
-                <FileSpreadsheet className="h-4 w-4" />
+                <FileSpreadsheet className="h-4 w-4 text-amber-500" />
                 Batch Processing
               </Button>
             </Link>
             <Link to="/export-skills">
               <Button variant={isActive('/export-skills') ? 'secondary' : 'ghost'} className="w-full justify-start gap-2">
-                <Download className="h-4 w-4" />
+                <Download className="h-4 w-4 text-orange-500" />
                 Export Skills
               </Button>
             </Link>
             <Link to="/achievements">
               <Button variant={isActive('/achievements') ? 'secondary' : 'ghost'} className="w-full justify-start gap-2">
-                <Trophy className="h-4 w-4" />
+                <Trophy className="h-4 w-4 text-yellow-500" />
                 Achievements
-              </Button>
-            </Link>
-            <Link to="/skill/healthcare-resume-parser">
-              <Button variant={isActive('/skill/healthcare-resume-parser') ? 'secondary' : 'ghost'} className="w-full justify-start gap-2">
-                <Heart className="h-4 w-4" />
-                Resume Parser
-              </Button>
-            </Link>
-
-            {/* Settings */}
-            <div className="border-t my-2" />
-            <Link to="/settings">
-              <Button variant={isActive('/settings') ? 'secondary' : 'ghost'} className="w-full justify-start gap-2">
-                <Settings className="h-4 w-4" />
-                Settings
-              </Button>
-            </Link>
-            <Link to="/pricing">
-              <Button variant={isActive('/pricing') ? 'secondary' : 'ghost'} className="w-full justify-start gap-2">
-                <DollarSign className="h-4 w-4" />
-                Pricing
               </Button>
             </Link>
 
