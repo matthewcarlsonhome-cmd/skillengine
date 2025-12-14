@@ -21,6 +21,7 @@ import { db } from '../lib/storage/indexeddb';
 import type { SavedOutput, FavoriteSkill, SkillExecution } from '../lib/storage/types';
 import { getApiKey, saveApiKey as storeApiKey } from '../lib/apiKeyStorage';
 import { trackSkillUsage } from '../lib/admin';
+import { TestDataBanner } from '../components/TestOutputButton';
 
 const SkillRunnerPage: React.FC = () => {
   const { skillId } = useParams<{ skillId: string }>();
@@ -324,6 +325,15 @@ const SkillRunnerPage: React.FC = () => {
     addToast(`${label} copied to clipboard!`, 'success');
   };
 
+  // Load test data into form
+  const handleLoadTestData = (inputPayload: Record<string, string>) => {
+    setFormState((prev) => ({
+      ...prev,
+      ...inputPayload,
+    }));
+    addToast('Test data loaded into form fields', 'success');
+  };
+
   const downloadPrompts = () => {
     if (!skill) return;
 
@@ -540,6 +550,12 @@ const SkillRunnerPage: React.FC = () => {
 
         <div className="lg:col-span-2">
           <div className="space-y-6">
+            {/* Test Data Banner */}
+            <TestDataBanner
+              skillId={skillId}
+              onLoadTestData={handleLoadTestData}
+            />
+
             <div className="p-4 border rounded-lg bg-card">
                 <h3 className="text-lg font-semibold mb-4">Run Configuration</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

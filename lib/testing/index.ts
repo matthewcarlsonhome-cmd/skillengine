@@ -98,3 +98,25 @@ export {
   type OptimizationResult,
   type OptimizationOptions,
 } from './promptOptimizer';
+
+// Default Test Data
+export {
+  getSkillDefaultTestData,
+  getWorkflowDefaultTestData,
+  hasSkillDefaultTestData,
+  hasWorkflowDefaultTestData,
+  getSkillsWithDefaultTestData,
+  getWorkflowsWithDefaultTestData,
+  applyDefaultTestDataToForm,
+  extractInputIds,
+  defaultTestDataToTestCase,
+  createDefaultTestSuite,
+  ALL_SKILL_DEFAULT_TEST_DATA,
+  ALL_WORKFLOW_DEFAULT_TEST_DATA,
+  JOB_SEEKER_DEFAULT_TEST_DATA,
+  ENTERPRISE_DEFAULT_TEST_DATA,
+  EXCEL_DEFAULT_TEST_DATA,
+  WORKFLOW_DEFAULT_TEST_DATA,
+  type SkillDefaultTestData,
+  type WorkflowDefaultTestData,
+} from './defaultTestData';
