@@ -765,6 +765,355 @@ Goals:
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
+// AI SOLUTIONS ARCHITECT SKILLS - DEFAULT TEST DATA
+// ═══════════════════════════════════════════════════════════════════════════
+
+export const AI_SOLUTIONS_ARCHITECT_DEFAULT_TEST_DATA: Record<string, SkillDefaultTestData> = {
+  'ai-solutions-architect-ai-use-case-prioritization-framework': {
+    skillId: 'ai-solutions-architect-ai-use-case-prioritization-framework',
+    defaultTestCaseId: 'ai-use-case-prioritization-default-1',
+    description: 'AI use case prioritization for financial services company',
+    inputPayload: {
+      industry: 'Financial Services / Banking',
+      companySize: 'Large (1001-5000)',
+      annualRevenue: '$2.5B',
+      aiMaturityLevel: 'Developing (experiments)',
+      strategicPriorities: `1. Reduce operational costs by 15% through automation
+2. Improve fraud detection accuracy to >99%
+3. Enhance customer experience with personalized services
+4. Meet regulatory compliance requirements efficiently
+5. Enable faster time-to-market for new products`,
+      useCasesToEvaluate: `1. Fraud Detection Enhancement - Real-time ML-based transaction monitoring
+2. Customer Churn Prediction - Identify at-risk customers for retention
+3. Document Processing Automation - Extract data from loan applications
+4. Personalized Product Recommendations - Next-best-offer engine
+5. Credit Risk Scoring - ML-enhanced credit decisioning
+6. Customer Service Chatbot - AI-powered customer support
+7. Regulatory Compliance Monitoring - Automated compliance checking
+8. AML Transaction Monitoring - Anti-money laundering detection`,
+      budgetRange: '$1M - $5M',
+      timelineConstraints: '12-18 months',
+      technicalCapabilities: `- 5 data scientists, 3 ML engineers
+- AWS cloud environment (partially AI-ready)
+- Snowflake data warehouse
+- Limited MLOps experience
+- Strong data engineering team`,
+      additionalContext: 'Recent regulatory pressure to improve fraud detection. CEO has prioritized AI as strategic initiative for next 2 years. Some legacy systems may require modernization.',
+    },
+  },
+
+  'ai-solutions-architect-ai-data-readiness-audit': {
+    skillId: 'ai-solutions-architect-ai-data-readiness-audit',
+    defaultTestCaseId: 'ai-data-readiness-default-1',
+    description: 'Data readiness audit for retail AI initiative',
+    inputPayload: {
+      companyName: 'RetailMax Corporation',
+      industry: 'Retail / E-commerce',
+      companySize: 'Large (1001-5000)',
+      currentDataPlatform: `- Cloud: AWS (primary), some Azure legacy
+- Data Warehouse: Snowflake
+- Data Lake: S3 with some organization issues
+- ETL: Mix of Airflow and legacy SSIS
+- Analytics: Tableau, Looker`,
+      plannedAIUseCases: `1. Demand Forecasting - predict inventory needs
+2. Customer Segmentation - personalized marketing
+3. Price Optimization - dynamic pricing engine
+4. Recommendation Engine - product recommendations`,
+      targetTimeline: '12-18 months',
+      dataBudget: '$500K - $1M',
+      primaryDataSources: `- Point of Sale: 500M transactions/year in Oracle
+- E-commerce: Shopify data, 50M sessions/month
+- Customer Data: CDP with 10M customer profiles
+- Inventory: SAP inventory management
+- Marketing: Google Analytics, Meta, TikTok pixels`,
+      dataVolume: '50TB total, 500GB daily ingestion',
+      dataTeamSize: '4 data engineers, 2 analysts, 1 data architect',
+      knownDataChallenges: 'Customer ID resolution across channels is inconsistent. Historical data quality issues in legacy systems. Real-time data access limited.',
+      complianceRequirements: 'CCPA (California customers), GDPR (EU operations), PCI-DSS (payment data)',
+      additionalContext: 'Recently completed data warehouse migration to Snowflake. Data governance program started 6 months ago.',
+    },
+  },
+
+  'ai-solutions-architect-ai-risk-assessment-mitigation-plan': {
+    skillId: 'ai-solutions-architect-ai-risk-assessment-mitigation-plan',
+    defaultTestCaseId: 'ai-risk-assessment-default-1',
+    description: 'Risk assessment for AI-powered lending decision system',
+    inputPayload: {
+      companyName: 'QuickLend Financial',
+      industry: 'Financial Services / Lending',
+      companySize: 'Medium (201-1000)',
+      riskAppetite: 'Conservative',
+      aiUseCase: `AI-powered credit decisioning system that will:
+- Score loan applications using ML models
+- Recommend loan terms and pricing
+- Flag applications for human review
+- Automate decisions for low-risk applications
+Processing 50,000 applications/month, average loan size $15,000`,
+      technologyStack: `- Cloud: AWS
+- ML Platform: SageMaker
+- Models: XGBoost, Neural Network ensemble
+- Data: Snowflake, bureau data feeds
+- Integration: REST APIs to loan origination system`,
+      dataSources: `- Customer application data (income, employment, etc.)
+- Credit bureau data (Equifax, TransUnion, Experian)
+- Bank statement analysis
+- Employment verification
+- Property valuations (for secured loans)`,
+      targetUsers: 'Loan applicants (external), underwriters (internal), compliance team',
+      decisionImpact: 'Automated approval/denial of loans up to $25,000. Affects customer credit access and company risk exposure.',
+      existingControls: 'Manual underwriting process, basic scoring models, compliance review for large loans',
+      applicableRegulations: 'ECOA (Equal Credit Opportunity Act), FCRA (Fair Credit Reporting Act), State lending laws, CFPB guidance on AI in lending',
+      stakeholderConcerns: 'Fair lending compliance, model explainability for denials, bias in historical training data, regulatory examination risk',
+      additionalContext: 'Regulators have increased scrutiny of AI in lending. Recent consent orders in industry for discriminatory lending practices.',
+    },
+  },
+
+  'ai-solutions-architect-ai-integration-architecture-blueprint': {
+    skillId: 'ai-solutions-architect-ai-integration-architecture-blueprint',
+    defaultTestCaseId: 'ai-architecture-default-1',
+    description: 'Architecture blueprint for real-time recommendation engine',
+    inputPayload: {
+      companyName: 'StreamFlix Media',
+      industry: 'Media / Entertainment',
+      companySize: 'Large (1001-5000)',
+      currentTechStack: `- Cloud: GCP (primary)
+- Backend: Go microservices, gRPC
+- Databases: PostgreSQL, Redis, BigQuery
+- Streaming: Kafka
+- Frontend: React, React Native
+- CDN: Cloudflare`,
+      useCaseDescription: `Build a real-time content recommendation engine that:
+- Personalizes content recommendations for 10M+ users
+- Updates recommendations based on real-time viewing behavior
+- Supports multiple content types (movies, series, live events)
+- Enables A/B testing of recommendation algorithms
+- Provides explainable recommendations ("Because you watched...")`,
+      predictionsPerDay: '500M+ recommendation requests',
+      latencyRequirement: 'Real-time (<100ms)',
+      availabilityRequirement: '99.99% (52.6 min)',
+      sourceSystems: `- User viewing history (BigQuery)
+- Content metadata catalog (PostgreSQL)
+- Real-time viewing events (Kafka)
+- User preferences (Redis)
+- Social signals (external API)`,
+      targetSystems: `- Web application
+- Mobile apps (iOS, Android)
+- Smart TV apps
+- Email marketing system
+- Push notification service`,
+      cloudProvider: 'GCP',
+      budgetRange: '$500K - $1M',
+      complianceRequirements: 'GDPR (EU users), COPPA (children\'s content), CCPA',
+      teamCapabilities: '3 ML engineers, 5 backend engineers, strong DevOps team, limited feature store experience',
+    },
+  },
+
+  'ai-solutions-architect-ai-cost-benefit-analysis-calculator': {
+    skillId: 'ai-solutions-architect-ai-cost-benefit-analysis-calculator',
+    defaultTestCaseId: 'ai-cost-benefit-default-1',
+    description: 'Cost-benefit analysis for customer service AI automation',
+    inputPayload: {
+      companyName: 'TelcoGlobal Communications',
+      industry: 'Telecommunications',
+      annualRevenue: '$5B',
+      discountRate: '12%',
+      aiUseCase: `Deploy AI-powered customer service automation:
+- Conversational AI chatbot for tier-1 support
+- Agent assist AI for complex issues
+- Automated ticket routing and prioritization
+- Sentiment analysis and escalation detection
+- Knowledge base auto-generation from resolved tickets`,
+      projectScope: '3 contact centers, 2,000 agents, 15M customer interactions/year',
+      expectedDuration: '18-24 months',
+      initialInvestment: '$3.5M (platform, integration, training)',
+      ongoingCosts: `- Cloud infrastructure: $50K/month
+- AI platform licenses: $200K/year
+- 2 FTE ML engineers: $400K/year
+- Support and maintenance: $150K/year`,
+      teamSize: '2 ML engineers, 1 PM, support from IT (3 FTE equivalent)',
+      revenueImpact: 'Expect 5% reduction in churn due to improved experience = $25M revenue retention over 3 years',
+      costSavings: `- 30% reduction in average handle time
+- 40% of tier-1 inquiries fully automated
+- 500 FTE equivalent reduction (through attrition, not layoffs)
+- $15M/year labor savings at full deployment`,
+      strategicBenefits: '24/7 support capability, faster response times, improved CSAT, competitive differentiation',
+      riskFactors: 'Technology adoption by agents, customer acceptance of AI, integration complexity with legacy systems',
+      additionalContext: 'Union agreement requires no layoffs - savings through attrition and redeployment. Competitor launched similar system last year.',
+    },
+  },
+
+  'ai-solutions-architect-ai-change-management-playbook': {
+    skillId: 'ai-solutions-architect-ai-change-management-playbook',
+    defaultTestCaseId: 'ai-change-management-default-1',
+    description: 'Change management for AI-powered sales enablement platform',
+    inputPayload: {
+      companyName: 'Enterprise Software Inc.',
+      industry: 'Technology / B2B SaaS',
+      employeeCount: '2,500',
+      geographicSpread: 'Multiple countries',
+      organizationalCulture: 'Modern/Collaborative',
+      aiUseCase: `Deploying AI-powered sales enablement platform:
+- AI-generated personalized outreach emails
+- Meeting intelligence (transcription, action items)
+- Opportunity scoring and next-best-action
+- Competitive intelligence alerts
+- Automated CRM data entry`,
+      departmentsAffected: 'Sales (500 reps), Sales Operations (25), Marketing (100), Customer Success (150)',
+      rolesImpacted: 'Account Executives, SDRs, Sales Managers, Sales Engineers, Marketing Ops',
+      estimatedUsers: '775 direct users',
+      previousChangeInitiatives: 'CRM migration 2 years ago - mixed results, 60% adoption after 1 year. Sales methodology change - successful with executive sponsorship.',
+      knownConcerns: `- Sales reps worry AI will replace them or monitor performance
+- Managers concerned about data quality from AI transcription
+- Some resistance to changing established workflows
+- Privacy concerns about meeting recording`,
+      executiveSponsor: 'Chief Revenue Officer',
+      goLiveDate: 'Q2 2025 (4 months)',
+      additionalContext: 'Sales team exceeded quota last year and may resist changes. High-performing reps especially skeptical. Need quick wins to build momentum.',
+    },
+  },
+
+  'ai-solutions-architect-ai-pilot-program-designer': {
+    skillId: 'ai-solutions-architect-ai-pilot-program-designer',
+    defaultTestCaseId: 'ai-pilot-program-default-1',
+    description: 'Pilot program design for AI-powered quality inspection',
+    inputPayload: {
+      companyName: 'PrecisionMFG Industries',
+      industry: 'Manufacturing',
+      companySize: 'Large (1001-5000)',
+      aiMaturityLevel: 'Initial (no AI)',
+      aiUseCase: `Computer vision AI for automated quality inspection:
+- Visual defect detection on production line
+- Real-time alerts for quality issues
+- Defect classification and root cause analysis
+- Quality metrics dashboard
+- Integration with MES system`,
+      businessObjectives: `- Reduce defect escape rate from 2% to 0.5%
+- Decrease manual inspection time by 50%
+- Improve first-pass yield by 5%
+- Enable 100% inspection (vs. current sampling)`,
+      technicalApproach: 'Edge AI cameras with cloud training. Pre-trained models fine-tuned on our defect types. Real-time inference at production speed (100 parts/minute).',
+      targetUsers: 'Quality inspectors (20), Production supervisors (8), Quality Manager',
+      geographicScope: 'Single location',
+      pilotDuration: '12 weeks',
+      baselineMetrics: `- Current defect escape rate: 2.1%
+- Manual inspection time: 30 seconds/part
+- First-pass yield: 94%
+- Customer returns (quality): 150/month`,
+      pilotBudget: '$150K',
+      constraints: `- Cannot disrupt production line
+- Union rules on job changes
+- Limited IT support at plant
+- Network bandwidth constraints
+- Clean room requirements for cameras`,
+      additionalContext: 'First AI project for the company. Success here will unlock budget for other use cases. Plant manager is champion but workers are skeptical.',
+    },
+  },
+
+  'ai-solutions-architect-ai-performance-monitoring-dashboard-spec': {
+    skillId: 'ai-solutions-architect-ai-performance-monitoring-dashboard-spec',
+    defaultTestCaseId: 'ai-monitoring-dashboard-default-1',
+    description: 'Monitoring dashboard for production ML models in insurance',
+    inputPayload: {
+      companyName: 'SecureLife Insurance',
+      industry: 'Insurance',
+      companySize: 'Large (1001-5000)',
+      currentMonitoringTools: 'Datadog for infrastructure, Splunk for logs, custom Python dashboards for some metrics',
+      aiUseCase: `Production ML models in use:
+- Claims fraud detection (500K predictions/month)
+- Underwriting risk scoring (100K quotes/month)
+- Customer churn prediction (weekly batch)
+- Document classification (1M documents/month)`,
+      modelTypes: 'XGBoost, Random Forest, Neural Networks, NLP transformers',
+      predictionVolume: '50K+ predictions per day across all models',
+      deploymentArchitecture: 'SageMaker endpoints, Lambda for some batch jobs, Step Functions orchestration',
+      dashboardUsers: 'Data Science team (10), MLOps (3), Business stakeholders (5), Executive sponsors (2)',
+      slaRequirements: `- Model availability: 99.9%
+- Inference latency: <200ms for real-time
+- Model accuracy: maintain within 5% of baseline
+- Data freshness: features updated within 4 hours`,
+      cloudPlatform: 'AWS',
+      alertRequirements: 'PagerDuty for critical (P1), Slack for high (P2), email for medium/low. Follow-the-sun on-call rotation.',
+      complianceNeeds: 'Model performance documentation for regulatory exams. Audit trail for predictions. Fairness monitoring for underwriting.',
+      additionalContext: 'Regulators have asked about model governance. Need to demonstrate we monitor and can explain model decisions.',
+    },
+  },
+
+  'ai-solutions-architect-ai-security-privacy-compliance-checker': {
+    skillId: 'ai-solutions-architect-ai-security-privacy-compliance-checker',
+    defaultTestCaseId: 'ai-security-compliance-default-1',
+    description: 'Security and compliance assessment for AI chatbot with PII',
+    inputPayload: {
+      companyName: 'GlobalBank Financial',
+      industry: 'Financial Services / Banking',
+      companySize: 'Enterprise (5000+)',
+      geographicPresence: 'US, EU, UK, Canada, Singapore',
+      aiUseCase: `Customer-facing AI chatbot:
+- Handles account inquiries and transactions
+- Processes customer PII (name, account numbers, SSN)
+- Integrates with core banking system
+- Uses LLM for natural language understanding
+- 24/7 availability for 5M customers`,
+      dataTypes: `- Customer PII (name, address, SSN, DOB)
+- Account information (balances, transactions)
+- Authentication tokens
+- Conversation logs (may contain PII)
+- Voice recordings (if voice enabled)`,
+      modelArchitecture: `- LLM: Azure OpenAI GPT-4
+- Custom fine-tuned intent classifier
+- Entity extraction model
+- Sentiment analysis
+- Deployed on Azure with private endpoints`,
+      deploymentModel: 'Cloud-hosted',
+      existingSecurityControls: 'WAF, DDoS protection, MFA, data encryption (AES-256), VPN access, SOC monitoring, quarterly pen tests',
+      applicableRegulations: 'GLBA, SOX, FFIEC guidance, GDPR (EU), UK FCA, MAS (Singapore), CCPA, PCI-DSS (if payment processing)',
+      currentComplianceStatus: 'SOC 2 Type II, PCI-DSS Level 1, ISO 27001 certified',
+      dataSources: 'Core banking (Temenos), CRM (Salesforce), knowledge base (SharePoint), customer authentication (Okta)',
+      dataFlows: 'Customer → Azure WAF → Azure OpenAI → Custom models → Core banking APIs → Response',
+      additionalContext: 'Board and regulators are closely watching AI deployments in banking. Recent industry incidents have increased scrutiny.',
+    },
+  },
+
+  'ai-solutions-architect-ai-stakeholder-communication-package': {
+    skillId: 'ai-solutions-architect-ai-stakeholder-communication-package',
+    defaultTestCaseId: 'ai-stakeholder-comms-default-1',
+    description: 'Communication package for enterprise AI transformation',
+    inputPayload: {
+      companyName: 'Industrial Dynamics Corp',
+      industry: 'Manufacturing / Industrial',
+      employeeCount: '8,000',
+      brandVoice: 'Professional/Formal',
+      initiativeName: 'Smart Factory AI Initiative',
+      aiUseCase: `Company-wide AI transformation including:
+- Predictive maintenance for equipment
+- Quality inspection automation
+- Demand forecasting
+- Supply chain optimization
+- Safety incident prediction`,
+      businessImpact: `- $50M cost savings over 3 years
+- 30% reduction in unplanned downtime
+- 25% improvement in forecast accuracy
+- 15% reduction in safety incidents
+- 5% improvement in OEE`,
+      timeline: '24+ months',
+      keyAudiences: 'Board of Directors, Executive Leadership, Plant Managers (15), Union Leadership, All Employees (8,000), Customers (for quality improvements), Investors',
+      knownConcerns: `- Union concerns about job displacement
+- Skepticism from long-tenured employees
+- Safety team concerns about AI making safety decisions
+- Board wants clear ROI timeline
+- Some managers resistant to data-driven decisions`,
+      primaryGoals: `- Build excitement about AI opportunities
+- Address job security concerns directly
+- Demonstrate commitment to workforce development
+- Show clear business value
+- Establish trust in AI governance`,
+      sensitiveTopics: 'Workforce implications, safety-critical decisions, data collection from workers, performance monitoring',
+      legalRequirements: 'Union consultation requirements, works council approval (EU plants), SEC disclosure considerations',
+      additionalContext: 'CEO committed publicly to no AI-related layoffs. Need to balance transformation messaging with workforce sensitivity. Union contract renewal in 18 months.',
+    },
+  },
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
 // GOVERNANCE SKILLS - DEFAULT TEST DATA
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -1323,6 +1672,58 @@ Governing Law: State of Delaware`,
   // AI GOVERNANCE WORKFLOWS
   // ═══════════════════════════════════════════════════════════════════════════
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // AI IMPLEMENTATION WORKFLOW
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  'ai-implementation': {
+    workflowId: 'ai-implementation',
+    defaultTestCaseId: 'ai-implementation-default-1',
+    description: 'Complete AI implementation journey for healthcare organization',
+    inputPayload: {
+      companyName: 'MedTech Health Systems',
+      industry: 'Healthcare',
+      companySize: 'Large (1001-5000)',
+      aiUseCases: `1. Patient Risk Prediction - Use ML to identify patients at high risk of readmission within 30 days, enabling proactive intervention
+2. Medical Imaging Analysis - AI-assisted analysis of radiology images (X-rays, MRIs, CT scans) to help radiologists identify potential issues faster
+3. Appointment No-Show Prediction - Predict which appointments are likely to be missed and enable proactive outreach
+4. Clinical Documentation Assistant - AI to help physicians generate clinical notes from voice recordings
+5. Claims Denial Prediction - Predict which claims are likely to be denied and flag for review before submission`,
+      strategicPriorities: `1. Reduce 30-day readmission rates by 20% to meet CMS quality targets
+2. Improve radiologist productivity by 30% while maintaining accuracy
+3. Reduce claim denial rate from 12% to 5%
+4. Achieve CSAT score of 4.5/5 for patient experience
+5. Maintain HIPAA compliance across all new technology implementations`,
+      budgetRange: '$1M - $5M',
+      timeline: '12-18 months',
+      currentTechStack: `- Cloud: AWS (us-east-1, HIPAA-compliant)
+- EHR: Epic Systems
+- Data Warehouse: Snowflake Healthcare Edition
+- Analytics: Tableau, some Python notebooks
+- Integration: MuleSoft for system integration
+- Security: CrowdStrike, Splunk for SIEM`,
+      dataLandscape: `- Patient Demographics: 2M+ patient records in Epic
+- Clinical Data: 10 years of lab results, diagnoses, procedures
+- Imaging: 500K+ radiology images stored in PACS system
+- Claims Data: 5 years of claims history (10M+ claims)
+- Operational Data: Scheduling, appointments, capacity
+- All data subject to HIPAA - PHI handling required`,
+      teamCapabilities: `- 3 data scientists with healthcare experience
+- 5 data engineers (familiar with Snowflake, Python)
+- 2 ML engineers (mostly tabular data experience)
+- No dedicated MLOps or AI platform experience
+- Strong Epic integration team
+- Security team experienced with HIPAA audits`,
+      complianceRequirements: `- HIPAA (covered entity)
+- HITECH Act
+- State-specific health data privacy laws
+- FDA guidance for AI/ML in medical devices (for imaging use case)
+- CMS requirements for quality reporting
+- HITRUST certification in progress`,
+      additionalContext: `Recently appointed new Chief Digital Officer who is championing AI adoption. Board approved initial AI budget in last quarter. Some physician skepticism about AI replacing clinical judgment - need strong change management. Prior failed attempt at AI implementation 2 years ago due to data quality issues - need to address data foundation first. Epic has announced new AI features - need to evaluate build vs. buy for some use cases.`,
+    },
+  },
+
   'ai-data-protection-assessment': {
     workflowId: 'ai-data-protection-assessment',
     defaultTestCaseId: 'ai-data-protection-default-1',
@@ -1371,6 +1772,7 @@ export const ALL_SKILL_DEFAULT_TEST_DATA: Record<string, SkillDefaultTestData> =
   ...EXCEL_DEFAULT_TEST_DATA,
   ...GOVERNANCE_DEFAULT_TEST_DATA,
   ...OPERATIONS_DEFAULT_TEST_DATA,
+  ...AI_SOLUTIONS_ARCHITECT_DEFAULT_TEST_DATA,
 };
 
 /**

@@ -36133,9 +36133,28 @@ Generate a comprehensive vendor evaluation matrix with scoring and recommendatio
       {
         name: 'AI Use Case Prioritization Framework',
         description: 'Systematically evaluate and prioritize AI opportunities across your organization using strategic impact analysis, feasibility scoring, and ROI projection frameworks.',
-        icon: 'Target',
-        category: 'strategic-planning',
-        prompt: {
+        longDescription: 'Comprehensive AI use case evaluation using a four-dimensional framework covering strategic value (40%), technical feasibility (25%), implementation risk (20%), and time to value (15%). Includes portfolio quadrant analysis, dependency mapping, ROI projections, and implementation roadmaps.',
+        category: 'analysis',
+        estimatedTimeSaved: '20-40 hours per prioritization cycle',
+        theme: {
+          primary: 'text-emerald-400',
+          secondary: 'bg-emerald-900/20',
+          gradient: 'from-emerald-500/20 to-transparent',
+          iconName: 'Target',
+        },
+        inputs: [
+          { id: 'industry', label: 'Industry', type: 'text', placeholder: 'e.g., Healthcare, Financial Services, Retail', validation: { required: true, minLength: 3 } },
+          { id: 'companySize', label: 'Company Size', type: 'select', options: ['Startup (1-50)', 'Small (51-200)', 'Medium (201-1000)', 'Large (1001-5000)', 'Enterprise (5000+)'], validation: { required: true } },
+          { id: 'annualRevenue', label: 'Annual Revenue', type: 'text', placeholder: 'e.g., $10M, $500M, $2B', validation: { required: false } },
+          { id: 'aiMaturityLevel', label: 'AI Maturity Level', type: 'select', options: ['Initial (no AI)', 'Developing (experiments)', 'Defined (some production)', 'Managed (scaled AI)', 'Optimized (AI-first)'], validation: { required: true } },
+          { id: 'strategicPriorities', label: 'Strategic Priorities', type: 'textarea', placeholder: 'List your top 3-5 strategic priorities for the organization...', validation: { required: true, minLength: 50 } },
+          { id: 'useCasesToEvaluate', label: 'AI Use Cases to Evaluate', type: 'textarea', placeholder: 'List each potential AI use case on a separate line with brief description...', validation: { required: true, minLength: 100 } },
+          { id: 'budgetRange', label: 'AI Budget Range', type: 'select', options: ['Under $100K', '$100K - $500K', '$500K - $1M', '$1M - $5M', '$5M - $10M', 'Over $10M'], validation: { required: true } },
+          { id: 'timelineConstraints', label: 'Timeline Constraints', type: 'select', options: ['3-6 months', '6-12 months', '12-18 months', '18-24 months', '24+ months'], validation: { required: true } },
+          { id: 'technicalCapabilities', label: 'Technical Capabilities', type: 'textarea', placeholder: 'Describe your current AI/ML team capabilities and tech stack...', validation: { required: false } },
+          { id: 'additionalContext', label: 'Additional Context', type: 'textarea', placeholder: 'Any other relevant information...', validation: { required: false } },
+        ],
+        prompts: {
           systemInstruction: `You are a world-class AI Strategy Consultant with 15+ years of experience helping Fortune 500 companies and high-growth startups identify and prioritize transformative AI initiatives. You have led AI strategy engagements at McKinsey, BCG, and Bain, and have personally overseen the prioritization and implementation of 200+ AI use cases across industries including healthcare, financial services, manufacturing, retail, and technology.
 
 Your expertise spans:
@@ -36499,9 +36518,31 @@ Format the output with clear headers, tables, and visual separation between sect
       {
         name: 'AI Data Readiness Audit',
         description: 'Comprehensive assessment of your organization\'s data infrastructure, quality, governance, and accessibility to determine readiness for AI/ML initiatives.',
-        icon: 'Database',
-        category: 'data-assessment',
-        prompt: {
+        longDescription: 'Evaluates data readiness across six dimensions: availability (25%), quality (25%), accessibility (20%), governance (15%), security/privacy (10%), and operations (5%). Provides detailed scoring, gap analysis, and remediation roadmaps.',
+        category: 'analysis',
+        estimatedTimeSaved: '30-50 hours per assessment',
+        theme: {
+          primary: 'text-blue-400',
+          secondary: 'bg-blue-900/20',
+          gradient: 'from-blue-500/20 to-transparent',
+          iconName: 'Database',
+        },
+        inputs: [
+          { id: 'companyName', label: 'Company Name', type: 'text', placeholder: 'Your company name', validation: { required: true } },
+          { id: 'industry', label: 'Industry', type: 'text', placeholder: 'e.g., Healthcare, Finance, Retail', validation: { required: true } },
+          { id: 'companySize', label: 'Company Size', type: 'select', options: ['Startup (1-50)', 'Small (51-200)', 'Medium (201-1000)', 'Large (1001-5000)', 'Enterprise (5000+)'], validation: { required: true } },
+          { id: 'currentDataPlatform', label: 'Current Data Platform', type: 'textarea', placeholder: 'Describe your current data infrastructure (cloud, databases, tools)...', validation: { required: true, minLength: 30 } },
+          { id: 'plannedAIUseCases', label: 'Planned AI Use Cases', type: 'textarea', placeholder: 'What AI/ML use cases are you planning?', validation: { required: true, minLength: 30 } },
+          { id: 'targetTimeline', label: 'Target Timeline', type: 'select', options: ['3-6 months', '6-12 months', '12-18 months', '18-24 months'], validation: { required: true } },
+          { id: 'dataBudget', label: 'Data Initiative Budget', type: 'select', options: ['Under $100K', '$100K - $500K', '$500K - $1M', '$1M - $5M', 'Over $5M'], validation: { required: true } },
+          { id: 'primaryDataSources', label: 'Primary Data Sources', type: 'textarea', placeholder: 'List your main data sources (systems, databases, APIs)...', validation: { required: true, minLength: 30 } },
+          { id: 'dataVolume', label: 'Data Volume', type: 'text', placeholder: 'e.g., 10TB, 500M records', validation: { required: false } },
+          { id: 'dataTeamSize', label: 'Data Team Size', type: 'text', placeholder: 'e.g., 5 data engineers, 2 analysts', validation: { required: false } },
+          { id: 'knownDataChallenges', label: 'Known Data Challenges', type: 'textarea', placeholder: 'Any known data quality or access issues...', validation: { required: false } },
+          { id: 'complianceRequirements', label: 'Compliance Requirements', type: 'textarea', placeholder: 'GDPR, HIPAA, SOC2, etc.', validation: { required: false } },
+          { id: 'additionalContext', label: 'Additional Context', type: 'textarea', placeholder: 'Any other relevant information...', validation: { required: false } },
+        ],
+        prompts: {
           systemInstruction: `You are a Chief Data Officer and AI Data Strategy expert with 18+ years of experience building enterprise data platforms and enabling AI/ML initiatives at scale. You have served as CDO at Fortune 100 companies and advised dozens of organizations on data strategy, governance, and AI readiness. Your expertise includes architecting data lakes, implementing data quality frameworks, establishing governance programs, and ensuring organizations have the data foundation required for successful AI adoption.
 
 Your credentials include:
@@ -36884,9 +36925,31 @@ Format the output with clear headers, tables, visual indicators, and separation 
       {
         name: 'AI Risk Assessment & Mitigation Plan',
         description: 'Comprehensive risk identification, analysis, and mitigation planning for AI initiatives covering technical, operational, ethical, regulatory, and strategic risks.',
-        icon: 'ShieldAlert',
-        category: 'risk-management',
-        prompt: {
+        longDescription: 'Evaluates AI risks across seven categories: model/algorithm, operational, ethical/fairness, regulatory compliance, security/privacy, strategic/business, and third-party risks. Provides risk scoring matrices, mitigation plans, and governance frameworks.',
+        category: 'analysis',
+        estimatedTimeSaved: '25-40 hours per risk assessment',
+        theme: {
+          primary: 'text-red-400',
+          secondary: 'bg-red-900/20',
+          gradient: 'from-red-500/20 to-transparent',
+          iconName: 'ShieldAlert',
+        },
+        inputs: [
+          { id: 'companyName', label: 'Company Name', type: 'text', placeholder: 'Your company name', validation: { required: true } },
+          { id: 'industry', label: 'Industry', type: 'text', placeholder: 'e.g., Healthcare, Finance, Retail', validation: { required: true } },
+          { id: 'companySize', label: 'Company Size', type: 'select', options: ['Startup (1-50)', 'Small (51-200)', 'Medium (201-1000)', 'Large (1001-5000)', 'Enterprise (5000+)'], validation: { required: true } },
+          { id: 'riskAppetite', label: 'Risk Appetite', type: 'select', options: ['Conservative', 'Moderate', 'Aggressive'], validation: { required: true } },
+          { id: 'aiUseCase', label: 'AI Use Case', type: 'textarea', placeholder: 'Describe the AI use case being assessed...', validation: { required: true, minLength: 50 } },
+          { id: 'technologyStack', label: 'Technology Stack', type: 'textarea', placeholder: 'AI/ML technologies being used or considered...', validation: { required: true, minLength: 30 } },
+          { id: 'dataSources', label: 'Data Sources', type: 'textarea', placeholder: 'What data will the AI system use?', validation: { required: true, minLength: 30 } },
+          { id: 'targetUsers', label: 'Target Users', type: 'textarea', placeholder: 'Who will use or be affected by this AI system?', validation: { required: true, minLength: 20 } },
+          { id: 'decisionImpact', label: 'Decision Impact', type: 'textarea', placeholder: 'What decisions will be made or influenced by the AI?', validation: { required: true, minLength: 30 } },
+          { id: 'existingControls', label: 'Existing Controls', type: 'textarea', placeholder: 'Current risk controls in place...', validation: { required: false } },
+          { id: 'applicableRegulations', label: 'Applicable Regulations', type: 'textarea', placeholder: 'GDPR, HIPAA, EU AI Act, industry-specific...', validation: { required: true, minLength: 10 } },
+          { id: 'stakeholderConcerns', label: 'Stakeholder Concerns', type: 'textarea', placeholder: 'Any known concerns from stakeholders...', validation: { required: false } },
+          { id: 'additionalContext', label: 'Additional Context', type: 'textarea', placeholder: 'Any other relevant information...', validation: { required: false } },
+        ],
+        prompts: {
           systemInstruction: `You are a Chief Risk Officer and AI Ethics expert with 20+ years of experience in enterprise risk management, with the last 8 years focused specifically on AI/ML risk governance. You have developed AI risk frameworks for major financial institutions, healthcare systems, and technology companies. Your expertise spans technical model risks, operational AI risks, ethical AI considerations, regulatory compliance, and strategic AI risks.
 
 Your credentials include:
@@ -37304,9 +37367,32 @@ Format the output with clear headers, tables, risk indicators, and separation be
       {
         name: 'AI Integration Architecture Blueprint',
         description: 'Design comprehensive technical architecture for integrating AI/ML capabilities into existing enterprise systems, including data flows, APIs, infrastructure, and operational patterns.',
-        icon: 'Network',
-        category: 'technical-architecture',
-        prompt: {
+        longDescription: 'Creates detailed architecture designs across six layers: data foundation, ML platform, API/integration, infrastructure/deployment, MLOps/operations, and security/governance. Includes infrastructure specs, scaling strategies, and implementation roadmaps.',
+        category: 'generation',
+        estimatedTimeSaved: '40-80 hours per architecture design',
+        theme: {
+          primary: 'text-purple-400',
+          secondary: 'bg-purple-900/20',
+          gradient: 'from-purple-500/20 to-transparent',
+          iconName: 'Network',
+        },
+        inputs: [
+          { id: 'companyName', label: 'Company Name', type: 'text', placeholder: 'Your company name', validation: { required: true } },
+          { id: 'industry', label: 'Industry', type: 'text', placeholder: 'e.g., Healthcare, Finance, Retail', validation: { required: true } },
+          { id: 'companySize', label: 'Company Size', type: 'select', options: ['Startup (1-50)', 'Small (51-200)', 'Medium (201-1000)', 'Large (1001-5000)', 'Enterprise (5000+)'], validation: { required: true } },
+          { id: 'currentTechStack', label: 'Current Tech Stack', type: 'textarea', placeholder: 'Describe your current technology environment (cloud, databases, frameworks)...', validation: { required: true, minLength: 50 } },
+          { id: 'useCaseDescription', label: 'AI Use Case', type: 'textarea', placeholder: 'Describe the AI use case to be architected...', validation: { required: true, minLength: 50 } },
+          { id: 'predictionsPerDay', label: 'Predictions Per Day', type: 'text', placeholder: 'e.g., 1000, 100K, 10M', validation: { required: true } },
+          { id: 'latencyRequirement', label: 'Latency Requirement', type: 'select', options: ['Real-time (<100ms)', 'Near real-time (<1s)', 'Batch (minutes)', 'Batch (hours)'], validation: { required: true } },
+          { id: 'availabilityRequirement', label: 'Availability SLA', type: 'select', options: ['99.9% (8.76 hrs downtime/yr)', '99.95% (4.38 hrs)', '99.99% (52.6 min)', '99.999% (5.26 min)'], validation: { required: true } },
+          { id: 'sourceSystems', label: 'Source Systems', type: 'textarea', placeholder: 'Data sources the AI will need to integrate with...', validation: { required: true, minLength: 30 } },
+          { id: 'targetSystems', label: 'Target Systems', type: 'textarea', placeholder: 'Systems that will consume AI outputs...', validation: { required: true, minLength: 20 } },
+          { id: 'cloudProvider', label: 'Cloud Provider', type: 'select', options: ['AWS', 'Azure', 'GCP', 'Multi-cloud', 'On-premises', 'Hybrid'], validation: { required: true } },
+          { id: 'budgetRange', label: 'Budget Range', type: 'select', options: ['Under $100K', '$100K - $500K', '$500K - $1M', '$1M - $5M', 'Over $5M'], validation: { required: true } },
+          { id: 'complianceRequirements', label: 'Compliance Requirements', type: 'textarea', placeholder: 'GDPR, HIPAA, SOC2, PCI-DSS, etc.', validation: { required: false } },
+          { id: 'teamCapabilities', label: 'Team Capabilities', type: 'textarea', placeholder: 'Describe your engineering team skills...', validation: { required: false } },
+        ],
+        prompts: {
           systemInstruction: `You are a Principal AI Solutions Architect with 15+ years of experience designing and implementing enterprise AI architectures at scale. You have architected AI platforms for Fortune 100 companies across financial services, healthcare, retail, and technology sectors. Your expertise spans cloud architecture (AWS, Azure, GCP), MLOps, data engineering, API design, and enterprise integration patterns.
 
 Your credentials include:
@@ -37731,9 +37817,33 @@ Format the output with clear headers, diagrams, tables, and code blocks for maxi
       {
         name: 'AI Cost-Benefit Analysis Calculator',
         description: 'Comprehensive financial analysis framework for AI initiatives including TCO calculation, ROI projection, NPV analysis, and investment payback modeling.',
-        icon: 'Calculator',
-        category: 'financial-analysis',
-        prompt: {
+        longDescription: 'Provides detailed financial modeling including Total Cost of Ownership breakdown, benefit quantification, ROI calculations (NPV, IRR, payback), risk-adjusted analysis, scenario modeling, and five-year cash flow projections.',
+        category: 'analysis',
+        estimatedTimeSaved: '15-25 hours per analysis',
+        theme: {
+          primary: 'text-green-400',
+          secondary: 'bg-green-900/20',
+          gradient: 'from-green-500/20 to-transparent',
+          iconName: 'Calculator',
+        },
+        inputs: [
+          { id: 'companyName', label: 'Company Name', type: 'text', placeholder: 'Your company name', validation: { required: true } },
+          { id: 'industry', label: 'Industry', type: 'text', placeholder: 'e.g., Healthcare, Finance, Retail', validation: { required: true } },
+          { id: 'annualRevenue', label: 'Annual Revenue', type: 'text', placeholder: 'e.g., $50M, $500M, $5B', validation: { required: true } },
+          { id: 'discountRate', label: 'Discount Rate/WACC', type: 'text', placeholder: 'e.g., 10%, 12%, 15%', validation: { required: true } },
+          { id: 'aiUseCase', label: 'AI Use Case', type: 'textarea', placeholder: 'Describe the AI initiative being evaluated...', validation: { required: true, minLength: 50 } },
+          { id: 'projectScope', label: 'Project Scope', type: 'textarea', placeholder: 'Scope of implementation (users, departments, systems)...', validation: { required: true, minLength: 30 } },
+          { id: 'expectedDuration', label: 'Expected Duration', type: 'select', options: ['3-6 months', '6-12 months', '12-18 months', '18-24 months', '24+ months'], validation: { required: true } },
+          { id: 'initialInvestment', label: 'Estimated Initial Investment', type: 'text', placeholder: 'e.g., $500K, $2M', validation: { required: true } },
+          { id: 'ongoingCosts', label: 'Known Ongoing Costs', type: 'textarea', placeholder: 'Cloud, personnel, maintenance estimates...', validation: { required: false } },
+          { id: 'teamSize', label: 'Team Size Required', type: 'text', placeholder: 'e.g., 5 FTEs, 2 contractors', validation: { required: false } },
+          { id: 'revenueImpact', label: 'Expected Revenue Impact', type: 'textarea', placeholder: 'How will this increase revenue?', validation: { required: false } },
+          { id: 'costSavings', label: 'Expected Cost Savings', type: 'textarea', placeholder: 'What costs will be reduced?', validation: { required: false } },
+          { id: 'strategicBenefits', label: 'Strategic Benefits', type: 'textarea', placeholder: 'Non-financial strategic benefits...', validation: { required: false } },
+          { id: 'riskFactors', label: 'Risk Factors', type: 'textarea', placeholder: 'Known risks that could impact ROI...', validation: { required: false } },
+          { id: 'additionalContext', label: 'Additional Context', type: 'textarea', placeholder: 'Any other relevant information...', validation: { required: false } },
+        ],
+        prompts: {
           systemInstruction: `You are a Chief Financial Officer and AI Investment Analyst with 20+ years of experience in technology investment evaluation and financial modeling. You have led AI investment decisions at Fortune 500 companies and private equity firms, evaluating hundreds of AI initiatives worth billions of dollars. Your expertise spans financial modeling, technology valuation, risk-adjusted returns, and strategic investment analysis.
 
 Your credentials include:
@@ -38116,9 +38226,32 @@ Format the output with clear headers, financial tables, and separation between s
       {
         name: 'AI Change Management Playbook',
         description: 'Comprehensive organizational change management strategy for AI adoption including stakeholder engagement, communication plans, training programs, and resistance management.',
-        icon: 'Users',
-        category: 'change-management',
-        prompt: {
+        longDescription: 'Creates complete change management strategies covering readiness assessment, stakeholder engagement, communication plans, training programs, resistance management, and adoption measurement frameworks.',
+        category: 'generation',
+        estimatedTimeSaved: '30-50 hours per change program',
+        theme: {
+          primary: 'text-orange-400',
+          secondary: 'bg-orange-900/20',
+          gradient: 'from-orange-500/20 to-transparent',
+          iconName: 'Users',
+        },
+        inputs: [
+          { id: 'companyName', label: 'Company Name', type: 'text', placeholder: 'Your company name', validation: { required: true } },
+          { id: 'industry', label: 'Industry', type: 'text', placeholder: 'e.g., Healthcare, Finance, Retail', validation: { required: true } },
+          { id: 'employeeCount', label: 'Number of Employees', type: 'text', placeholder: 'e.g., 500, 5000, 50000', validation: { required: true } },
+          { id: 'geographicSpread', label: 'Geographic Spread', type: 'select', options: ['Single location', 'Multiple locations (same country)', 'Multiple countries', 'Global'], validation: { required: true } },
+          { id: 'organizationalCulture', label: 'Organizational Culture', type: 'select', options: ['Traditional/Hierarchical', 'Modern/Collaborative', 'Startup/Agile', 'Mixed'], validation: { required: true } },
+          { id: 'aiUseCase', label: 'AI Use Case', type: 'textarea', placeholder: 'Describe the AI initiative requiring change management...', validation: { required: true, minLength: 50 } },
+          { id: 'departmentsAffected', label: 'Departments Affected', type: 'textarea', placeholder: 'Which departments will be impacted?', validation: { required: true, minLength: 20 } },
+          { id: 'rolesImpacted', label: 'Roles Impacted', type: 'textarea', placeholder: 'Which job roles will be affected?', validation: { required: true, minLength: 20 } },
+          { id: 'estimatedUsers', label: 'Estimated Users', type: 'text', placeholder: 'How many people will use the AI system?', validation: { required: true } },
+          { id: 'previousChangeInitiatives', label: 'Previous Change Initiatives', type: 'textarea', placeholder: 'How have past change initiatives gone?', validation: { required: false } },
+          { id: 'knownConcerns', label: 'Known Concerns', type: 'textarea', placeholder: 'Any known employee concerns about AI?', validation: { required: false } },
+          { id: 'executiveSponsor', label: 'Executive Sponsor', type: 'text', placeholder: 'Who is sponsoring this initiative?', validation: { required: false } },
+          { id: 'goLiveDate', label: 'Target Go-Live Date', type: 'text', placeholder: 'e.g., Q2 2025, June 2025', validation: { required: true } },
+          { id: 'additionalContext', label: 'Additional Context', type: 'textarea', placeholder: 'Any other relevant information...', validation: { required: false } },
+        ],
+        prompts: {
           systemInstruction: `You are a Chief Transformation Officer and Organizational Change Management expert with 18+ years of experience leading enterprise transformation initiatives, with the last 7 years focused specifically on AI adoption. You have led AI transformation programs at Fortune 500 companies affecting 100,000+ employees. Your expertise spans organizational psychology, change leadership, communication strategy, training design, and cultural transformation.
 
 Your credentials include:
@@ -38510,9 +38643,32 @@ Format the output with clear headers, tables, timelines, and separation between 
       {
         name: 'AI Pilot Program Designer',
         description: 'Design structured AI pilot programs with clear success criteria, participant selection, measurement frameworks, and scale-up decision gates.',
-        icon: 'Rocket',
-        category: 'pilot-design',
-        prompt: {
+        longDescription: 'Creates comprehensive pilot program designs including scope definition, participant selection criteria, success metrics, execution plans, risk management frameworks, and scale decision gates.',
+        category: 'generation',
+        estimatedTimeSaved: '20-35 hours per pilot design',
+        theme: {
+          primary: 'text-sky-400',
+          secondary: 'bg-sky-900/20',
+          gradient: 'from-sky-500/20 to-transparent',
+          iconName: 'Rocket',
+        },
+        inputs: [
+          { id: 'companyName', label: 'Company Name', type: 'text', placeholder: 'Your company name', validation: { required: true } },
+          { id: 'industry', label: 'Industry', type: 'text', placeholder: 'e.g., Healthcare, Finance, Retail', validation: { required: true } },
+          { id: 'companySize', label: 'Company Size', type: 'select', options: ['Startup (1-50)', 'Small (51-200)', 'Medium (201-1000)', 'Large (1001-5000)', 'Enterprise (5000+)'], validation: { required: true } },
+          { id: 'aiMaturityLevel', label: 'AI Maturity Level', type: 'select', options: ['Initial (no AI)', 'Developing (experiments)', 'Defined (some production)', 'Managed (scaled AI)', 'Optimized (AI-first)'], validation: { required: true } },
+          { id: 'aiUseCase', label: 'AI Use Case', type: 'textarea', placeholder: 'Describe the AI use case for the pilot...', validation: { required: true, minLength: 50 } },
+          { id: 'businessObjectives', label: 'Business Objectives', type: 'textarea', placeholder: 'What business outcomes should the pilot achieve?', validation: { required: true, minLength: 30 } },
+          { id: 'technicalApproach', label: 'Technical Approach', type: 'textarea', placeholder: 'High-level technical approach or solution...', validation: { required: true, minLength: 30 } },
+          { id: 'targetUsers', label: 'Target Users', type: 'textarea', placeholder: 'Who will participate in the pilot?', validation: { required: true, minLength: 20 } },
+          { id: 'geographicScope', label: 'Geographic Scope', type: 'select', options: ['Single team', 'Single department', 'Single location', 'Multiple locations', 'Company-wide'], validation: { required: true } },
+          { id: 'pilotDuration', label: 'Pilot Duration', type: 'select', options: ['4 weeks', '6 weeks', '8 weeks', '12 weeks', '16+ weeks'], validation: { required: true } },
+          { id: 'baselineMetrics', label: 'Baseline Metrics', type: 'textarea', placeholder: 'Current performance metrics to compare against...', validation: { required: false } },
+          { id: 'pilotBudget', label: 'Pilot Budget', type: 'text', placeholder: 'e.g., $50K, $200K', validation: { required: true } },
+          { id: 'constraints', label: 'Constraints', type: 'textarea', placeholder: 'Any constraints or limitations...', validation: { required: false } },
+          { id: 'additionalContext', label: 'Additional Context', type: 'textarea', placeholder: 'Any other relevant information...', validation: { required: false } },
+        ],
+        prompts: {
           systemInstruction: `You are a Chief Innovation Officer and AI Pilot Program expert with 15+ years of experience designing and executing technology pilot programs at Fortune 500 companies. You have designed 100+ AI pilot programs with an 85% success rate in achieving defined objectives and progressing to full deployment. Your expertise spans experimental design, success metrics, risk management, and scaling strategies.
 
 Your credentials include:
@@ -38898,9 +39054,32 @@ Format the output with clear headers, tables, checklists, and separation between
       {
         name: 'AI Performance Monitoring Dashboard Spec',
         description: 'Design comprehensive monitoring dashboards for AI systems including model performance metrics, operational health, business KPIs, and alerting frameworks.',
-        icon: 'BarChart3',
-        category: 'monitoring',
-        prompt: {
+        longDescription: 'Creates complete monitoring specifications including executive summary dashboards, model performance metrics, operational health indicators, data quality metrics, business KPIs, and alerting/escalation frameworks.',
+        category: 'generation',
+        estimatedTimeSaved: '25-40 hours per dashboard spec',
+        theme: {
+          primary: 'text-indigo-400',
+          secondary: 'bg-indigo-900/20',
+          gradient: 'from-indigo-500/20 to-transparent',
+          iconName: 'BarChart3',
+        },
+        inputs: [
+          { id: 'companyName', label: 'Company Name', type: 'text', placeholder: 'Your company name', validation: { required: true } },
+          { id: 'industry', label: 'Industry', type: 'text', placeholder: 'e.g., Healthcare, Finance, Retail', validation: { required: true } },
+          { id: 'companySize', label: 'Company Size', type: 'select', options: ['Startup (1-50)', 'Small (51-200)', 'Medium (201-1000)', 'Large (1001-5000)', 'Enterprise (5000+)'], validation: { required: true } },
+          { id: 'currentMonitoringTools', label: 'Current Monitoring Tools', type: 'textarea', placeholder: 'What monitoring tools do you currently use? (Grafana, Datadog, etc.)', validation: { required: false } },
+          { id: 'aiUseCase', label: 'AI Use Case', type: 'textarea', placeholder: 'Describe the AI system to be monitored...', validation: { required: true, minLength: 50 } },
+          { id: 'modelTypes', label: 'Model Types', type: 'textarea', placeholder: 'What types of models? (classification, regression, LLM, etc.)', validation: { required: true, minLength: 20 } },
+          { id: 'predictionVolume', label: 'Prediction Volume', type: 'text', placeholder: 'e.g., 1000/day, 100K/day, 10M/day', validation: { required: true } },
+          { id: 'deploymentArchitecture', label: 'Deployment Architecture', type: 'textarea', placeholder: 'How is the model deployed? (cloud, on-prem, edge)', validation: { required: true, minLength: 20 } },
+          { id: 'dashboardUsers', label: 'Dashboard Users', type: 'textarea', placeholder: 'Who will use these dashboards? (executives, engineers, analysts)', validation: { required: true, minLength: 20 } },
+          { id: 'slaRequirements', label: 'SLA Requirements', type: 'textarea', placeholder: 'Availability, latency, accuracy requirements...', validation: { required: true, minLength: 20 } },
+          { id: 'cloudPlatform', label: 'Cloud Platform', type: 'select', options: ['AWS', 'Azure', 'GCP', 'Multi-cloud', 'On-premises', 'Hybrid'], validation: { required: true } },
+          { id: 'alertRequirements', label: 'Alert Requirements', type: 'textarea', placeholder: 'How should alerts be handled? (PagerDuty, Slack, email)', validation: { required: false } },
+          { id: 'complianceNeeds', label: 'Compliance Needs', type: 'textarea', placeholder: 'Any compliance-related monitoring needs?', validation: { required: false } },
+          { id: 'additionalContext', label: 'Additional Context', type: 'textarea', placeholder: 'Any other relevant information...', validation: { required: false } },
+        ],
+        prompts: {
           systemInstruction: `You are a Chief Analytics Officer and AI Observability expert with 15+ years of experience designing enterprise monitoring and analytics systems, with the last 6 years focused specifically on AI/ML observability. You have built monitoring platforms for AI systems processing billions of predictions daily at Fortune 500 companies. Your expertise spans data visualization, MLOps, system reliability engineering, and business intelligence.
 
 Your credentials include:
@@ -39294,9 +39473,32 @@ Format the output with clear headers, tables, visual layouts, and separation bet
       {
         name: 'AI Security & Privacy Compliance Checker',
         description: 'Comprehensive security and privacy assessment for AI systems including threat modeling, vulnerability analysis, privacy impact assessment, and compliance mapping.',
-        icon: 'Lock',
-        category: 'security-compliance',
-        prompt: {
+        longDescription: 'Provides complete security assessments including AI-specific threat modeling, security controls evaluation, privacy impact assessment, regulatory compliance mapping (GDPR, EU AI Act, HIPAA), vulnerability assessment, and remediation roadmaps.',
+        category: 'analysis',
+        estimatedTimeSaved: '40-60 hours per assessment',
+        theme: {
+          primary: 'text-rose-400',
+          secondary: 'bg-rose-900/20',
+          gradient: 'from-rose-500/20 to-transparent',
+          iconName: 'Lock',
+        },
+        inputs: [
+          { id: 'companyName', label: 'Company Name', type: 'text', placeholder: 'Your company name', validation: { required: true } },
+          { id: 'industry', label: 'Industry', type: 'text', placeholder: 'e.g., Healthcare, Finance, Retail', validation: { required: true } },
+          { id: 'companySize', label: 'Company Size', type: 'select', options: ['Startup (1-50)', 'Small (51-200)', 'Medium (201-1000)', 'Large (1001-5000)', 'Enterprise (5000+)'], validation: { required: true } },
+          { id: 'geographicPresence', label: 'Geographic Presence', type: 'textarea', placeholder: 'Where does your company operate? (countries, regions)', validation: { required: true, minLength: 10 } },
+          { id: 'aiUseCase', label: 'AI Use Case', type: 'textarea', placeholder: 'Describe the AI system to be assessed...', validation: { required: true, minLength: 50 } },
+          { id: 'dataTypes', label: 'Data Types Processed', type: 'textarea', placeholder: 'What types of data does the AI system process?', validation: { required: true, minLength: 30 } },
+          { id: 'modelArchitecture', label: 'Model Architecture', type: 'textarea', placeholder: 'High-level model architecture and deployment...', validation: { required: true, minLength: 30 } },
+          { id: 'deploymentModel', label: 'Deployment Model', type: 'select', options: ['Cloud-hosted', 'On-premises', 'Hybrid', 'Edge'], validation: { required: true } },
+          { id: 'existingSecurityControls', label: 'Existing Security Controls', type: 'textarea', placeholder: 'Current security measures in place...', validation: { required: false } },
+          { id: 'applicableRegulations', label: 'Applicable Regulations', type: 'textarea', placeholder: 'GDPR, HIPAA, EU AI Act, SOC2, PCI-DSS, etc.', validation: { required: true, minLength: 10 } },
+          { id: 'currentComplianceStatus', label: 'Current Compliance Status', type: 'textarea', placeholder: 'What compliance certifications do you have?', validation: { required: false } },
+          { id: 'dataSources', label: 'Data Sources', type: 'textarea', placeholder: 'Where does the training/inference data come from?', validation: { required: true, minLength: 20 } },
+          { id: 'dataFlows', label: 'Data Flows', type: 'textarea', placeholder: 'How does data flow through the system?', validation: { required: false } },
+          { id: 'additionalContext', label: 'Additional Context', type: 'textarea', placeholder: 'Any other relevant information...', validation: { required: false } },
+        ],
+        prompts: {
           systemInstruction: `You are a Chief Information Security Officer and AI Privacy expert with 18+ years of experience in enterprise security, with the last 7 years focused specifically on AI/ML security and privacy. You have led security programs for AI systems at Fortune 500 companies and advised regulatory bodies on AI security standards. Your expertise spans threat modeling, vulnerability assessment, privacy engineering, and regulatory compliance.
 
 Your credentials include:
@@ -39705,9 +39907,32 @@ Format the output with clear headers, compliance indicators, tables, and separat
       {
         name: 'AI Stakeholder Communication Package',
         description: 'Create comprehensive communication materials for AI initiatives including executive briefings, board presentations, employee communications, and customer-facing explanations.',
-        icon: 'MessageSquare',
-        category: 'communications',
-        prompt: {
+        longDescription: 'Creates complete communication packages including board/executive presentations, employee announcements with FAQs, customer communications, regulatory briefings, crisis communication plans, and communication calendars.',
+        category: 'communication',
+        estimatedTimeSaved: '20-35 hours per communication package',
+        theme: {
+          primary: 'text-teal-400',
+          secondary: 'bg-teal-900/20',
+          gradient: 'from-teal-500/20 to-transparent',
+          iconName: 'MessageSquare',
+        },
+        inputs: [
+          { id: 'companyName', label: 'Company Name', type: 'text', placeholder: 'Your company name', validation: { required: true } },
+          { id: 'industry', label: 'Industry', type: 'text', placeholder: 'e.g., Healthcare, Finance, Retail', validation: { required: true } },
+          { id: 'employeeCount', label: 'Number of Employees', type: 'text', placeholder: 'e.g., 500, 5000, 50000', validation: { required: true } },
+          { id: 'brandVoice', label: 'Brand Voice', type: 'select', options: ['Professional/Formal', 'Friendly/Approachable', 'Innovative/Bold', 'Traditional/Trustworthy'], validation: { required: true } },
+          { id: 'initiativeName', label: 'AI Initiative Name', type: 'text', placeholder: 'Name for this AI initiative', validation: { required: true } },
+          { id: 'aiUseCase', label: 'AI Use Case', type: 'textarea', placeholder: 'Describe the AI initiative...', validation: { required: true, minLength: 50 } },
+          { id: 'businessImpact', label: 'Business Impact', type: 'textarea', placeholder: 'What business outcomes will this drive?', validation: { required: true, minLength: 30 } },
+          { id: 'timeline', label: 'Implementation Timeline', type: 'text', placeholder: 'e.g., Q1-Q2 2025, 6 months', validation: { required: true } },
+          { id: 'keyAudiences', label: 'Key Audiences', type: 'textarea', placeholder: 'Who needs to be communicated with?', validation: { required: true, minLength: 20 } },
+          { id: 'knownConcerns', label: 'Known Concerns', type: 'textarea', placeholder: 'Any known stakeholder concerns about the AI initiative?', validation: { required: false } },
+          { id: 'primaryGoals', label: 'Communication Goals', type: 'textarea', placeholder: 'What do you want to achieve with these communications?', validation: { required: true, minLength: 20 } },
+          { id: 'sensitiveTopics', label: 'Sensitive Topics', type: 'textarea', placeholder: 'Any topics that need careful handling?', validation: { required: false } },
+          { id: 'legalRequirements', label: 'Legal/Compliance Requirements', type: 'textarea', placeholder: 'Any legal constraints on communications?', validation: { required: false } },
+          { id: 'additionalContext', label: 'Additional Context', type: 'textarea', placeholder: 'Any other relevant information...', validation: { required: false } },
+        ],
+        prompts: {
           systemInstruction: `You are a Chief Communications Officer and AI Storyteller with 18+ years of experience in corporate communications, with the last 6 years focused specifically on AI initiatives. You have led communications for AI transformations at Fortune 500 companies, crafting messages that resonate with boards, executives, employees, customers, and regulators. Your expertise spans executive communications, change management messaging, crisis communications, and regulatory affairs.
 
 Your credentials include:
