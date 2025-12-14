@@ -5879,7 +5879,7 @@ Include:
         config: {
           recommendedModel: 'claude',
           useWebSearch: false,
-          maxTokens: 16384,
+          maxTokens: 8192,
           temperature: 0.7,
         },
       },
@@ -6293,7 +6293,7 @@ Each email should build strategically on the previous one, moving the reader thr
         config: {
           recommendedModel: 'claude',
           useWebSearch: false,
-          maxTokens: 16384,
+          maxTokens: 8192,
           temperature: 0.6,
         },
       },
@@ -6673,7 +6673,7 @@ Provide a detailed SEO audit including:
         config: {
           recommendedModel: 'claude',
           useWebSearch: false,
-          maxTokens: 16384,
+          maxTokens: 8192,
           temperature: 0.4,
         },
       },
@@ -7057,7 +7057,7 @@ Provide a comprehensive performance analysis including:
         config: {
           recommendedModel: 'claude',
           useWebSearch: false,
-          maxTokens: 16384,
+          maxTokens: 8192,
           temperature: 0.3,
         },
       },
@@ -7441,7 +7441,7 @@ Generate a detailed, actionable content calendar including:
         config: {
           recommendedModel: 'claude',
           useWebSearch: false,
-          maxTokens: 16384,
+          maxTokens: 8192,
           temperature: 0.6,
         },
       },
@@ -7908,7 +7908,7 @@ Conduct a comprehensive competitive intelligence analysis using established fram
         config: {
           recommendedModel: 'claude',
           useWebSearch: true,
-          maxTokens: 16384,
+          maxTokens: 8192,
           temperature: 0.4,
         },
       },
@@ -8439,7 +8439,7 @@ Ensure all recommendations are grounded in conversion psychology principles and 
         config: {
           recommendedModel: 'claude',
           useWebSearch: false,
-          maxTokens: 16384,
+          maxTokens: 8192,
           temperature: 0.4,
         },
       },
@@ -8821,7 +8821,7 @@ Create a complete, implementation-ready Google Ads campaign with specific keywor
         config: {
           recommendedModel: 'gemini',
           useWebSearch: false,
-          maxTokens: 16384,
+          maxTokens: 8192,
           temperature: 0.3,
         },
       },
@@ -9263,7 +9263,7 @@ Create a complete, implementation-ready Meta Ads campaign with specific audience
         config: {
           recommendedModel: 'gemini',
           useWebSearch: false,
-          maxTokens: 16384,
+          maxTokens: 8192,
           temperature: 0.3,
         },
       },
@@ -9694,7 +9694,7 @@ Create a complete, implementation-ready Google Shopping campaign strategy includ
         config: {
           recommendedModel: 'gemini',
           useWebSearch: false,
-          maxTokens: 16384,
+          maxTokens: 8192,
           temperature: 0.3,
         },
       },
@@ -10206,7 +10206,7 @@ Create a complete Local Inventory Ads implementation plan including feed specifi
         config: {
           recommendedModel: 'gemini',
           useWebSearch: false,
-          maxTokens: 16384,
+          maxTokens: 8192,
           temperature: 0.3,
         },
       },
@@ -10952,7 +10952,7 @@ Create a complete, implementation-ready LinkedIn Ads campaign with specific audi
         config: {
           recommendedModel: 'claude',
           useWebSearch: false,
-          maxTokens: 16384,
+          maxTokens: 8192,
           temperature: 0.3,
         },
       },
@@ -13719,7 +13719,7 @@ Create a comprehensive SQL solution including:
         config: {
           recommendedModel: 'claude',
           useWebSearch: false,
-          maxTokens: 16384,
+          maxTokens: 8192,
           temperature: 0.2,
         },
       },
@@ -14122,7 +14122,7 @@ Ensure findings are statistically supported, impacts are quantified in dollars o
         config: {
           recommendedModel: 'claude',
           useWebSearch: false,
-          maxTokens: 16384,
+          maxTokens: 8192,
           temperature: 0.3,
         },
       },
@@ -14316,7 +14316,7 @@ Create a complete dashboard specification including KPI hierarchy, wireframe lay
         config: {
           recommendedModel: 'claude',
           useWebSearch: false,
-          maxTokens: 16384,
+          maxTokens: 8192,
           temperature: 0.3,
         },
       },
@@ -14488,7 +14488,7 @@ Provide a complete data quality audit with dimension scores, detailed findings, 
         config: {
           recommendedModel: 'claude',
           useWebSearch: false,
-          maxTokens: 16384,
+          maxTokens: 8192,
           temperature: 0.2,
         },
       },
@@ -14674,7 +14674,7 @@ Provide a complete statistical analysis including validity checks, frequentist a
         config: {
           recommendedModel: 'claude',
           useWebSearch: false,
-          maxTokens: 16384,
+          maxTokens: 8192,
           temperature: 0.2,
         },
       },
@@ -29561,7 +29561,7 @@ Provide comprehensive AEO/GEO optimization including readiness scores, featured 
         config: {
           recommendedModel: 'claude',
           useWebSearch: true,
-          maxTokens: 16384,
+          maxTokens: 8192,
           temperature: 0.3,
         },
       },
@@ -32823,7 +32823,7 @@ Provide a comprehensive internal linking analysis including:
         config: {
           recommendedModel: 'claude',
           useWebSearch: false,
-          maxTokens: 16384,
+          maxTokens: 8192,
           temperature: 0.3,
         },
       },
@@ -33472,7 +33472,7 @@ Provide a complete competitive analysis including:
         config: {
           recommendedModel: 'claude',
           useWebSearch: false,
-          maxTokens: 16384,
+          maxTokens: 8192,
           temperature: 0.3,
         },
       },
@@ -33608,7 +33608,7 @@ Provide complete slide-by-slide breakdown with speaker notes, engagement activit
         config: {
           recommendedModel: 'claude',
           useWebSearch: false,
-          maxTokens: 16384,
+          maxTokens: 8192,
           temperature: 0.4,
         },
       },
@@ -33705,7 +33705,7 @@ Provide complete email sequences, social posts, and landing page copy.`,
         config: {
           recommendedModel: 'claude',
           useWebSearch: false,
-          maxTokens: 16384,
+          maxTokens: 8192,
           temperature: 0.5,
         },
       },
@@ -33877,7 +33877,7 @@ Provide complete program architecture, session plans, and assessment rubrics.`,
         config: {
           recommendedModel: 'claude',
           useWebSearch: false,
-          maxTokens: 16384,
+          maxTokens: 8192,
           temperature: 0.4,
         },
       },
@@ -33963,7 +33963,7 @@ Provide complete gap analysis with prioritized learning roadmap.`,
         config: {
           recommendedModel: 'claude',
           useWebSearch: false,
-          maxTokens: 16384,
+          maxTokens: 8192,
           temperature: 0.4,
         },
       },
@@ -34192,7 +34192,7 @@ Create a complete McKinsey-style deck with pyramid structure, MECE frameworks, a
         config: {
           recommendedModel: 'claude',
           useWebSearch: false,
-          maxTokens: 16384,
+          maxTokens: 8192,
           temperature: 0.4,
         },
       },
@@ -34808,7 +34808,7 @@ Create a compelling pitch deck that will resonate with investors.`,
         config: {
           recommendedModel: 'claude',
           useWebSearch: false,
-          maxTokens: 16384,
+          maxTokens: 8192,
           temperature: 0.4,
         },
       },
@@ -34937,7 +34937,7 @@ Create a complete business plan appropriate for the intended audience.`,
         config: {
           recommendedModel: 'claude',
           useWebSearch: false,
-          maxTokens: 16384,
+          maxTokens: 8192,
           temperature: 0.4,
         },
       },
@@ -35191,7 +35191,7 @@ Create a comprehensive financial model with clear assumptions and metrics.`,
         config: {
           recommendedModel: 'claude',
           useWebSearch: false,
-          maxTokens: 16384,
+          maxTokens: 8192,
           temperature: 0.3,
         },
       },
@@ -35546,7 +35546,7 @@ Generate a thorough preparation document covering the hardest questions this inv
         config: {
           recommendedModel: 'claude',
           useWebSearch: false,
-          maxTokens: 16384,
+          maxTokens: 8192,
           temperature: 0.4,
         },
       },
@@ -36508,7 +36508,7 @@ Format the output with clear headers, tables, and visual separation between sect
         config: {
           recommendedModel: 'claude',
           useWebSearch: true,
-          maxTokens: 16384,
+          maxTokens: 8192,
           temperature: 0.3,
         },
       },
@@ -36915,7 +36915,7 @@ Format the output with clear headers, tables, visual indicators, and separation 
         config: {
           recommendedModel: 'claude',
           useWebSearch: true,
-          maxTokens: 16384,
+          maxTokens: 8192,
           temperature: 0.3,
         },
       },
@@ -37357,7 +37357,7 @@ Format the output with clear headers, tables, risk indicators, and separation be
         config: {
           recommendedModel: 'claude',
           useWebSearch: true,
-          maxTokens: 16384,
+          maxTokens: 8192,
           temperature: 0.3,
         },
       },
@@ -37807,7 +37807,7 @@ Format the output with clear headers, diagrams, tables, and code blocks for maxi
         config: {
           recommendedModel: 'claude',
           useWebSearch: true,
-          maxTokens: 16384,
+          maxTokens: 8192,
           temperature: 0.3,
         },
       },
@@ -38216,7 +38216,7 @@ Format the output with clear headers, financial tables, and separation between s
         config: {
           recommendedModel: 'claude',
           useWebSearch: true,
-          maxTokens: 16384,
+          maxTokens: 8192,
           temperature: 0.3,
         },
       },
@@ -38633,7 +38633,7 @@ Format the output with clear headers, tables, timelines, and separation between 
         config: {
           recommendedModel: 'claude',
           useWebSearch: true,
-          maxTokens: 16384,
+          maxTokens: 8192,
           temperature: 0.3,
         },
       },
@@ -39044,7 +39044,7 @@ Format the output with clear headers, tables, checklists, and separation between
         config: {
           recommendedModel: 'claude',
           useWebSearch: true,
-          maxTokens: 16384,
+          maxTokens: 8192,
           temperature: 0.3,
         },
       },
@@ -39463,7 +39463,7 @@ Format the output with clear headers, tables, visual layouts, and separation bet
         config: {
           recommendedModel: 'claude',
           useWebSearch: true,
-          maxTokens: 16384,
+          maxTokens: 8192,
           temperature: 0.3,
         },
       },
@@ -39897,7 +39897,7 @@ Format the output with clear headers, compliance indicators, tables, and separat
         config: {
           recommendedModel: 'claude',
           useWebSearch: true,
-          maxTokens: 16384,
+          maxTokens: 8192,
           temperature: 0.3,
         },
       },
@@ -40331,7 +40331,7 @@ Format the output with clear headers, usable templates, and separation between s
         config: {
           recommendedModel: 'claude',
           useWebSearch: true,
-          maxTokens: 16384,
+          maxTokens: 8192,
           temperature: 0.3,
         },
       },
