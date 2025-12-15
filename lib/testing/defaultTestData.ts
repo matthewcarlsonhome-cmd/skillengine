@@ -181,10 +181,11 @@ Nice to have:
     defaultTestCaseId: 'linkedin-optimizer-default-1',
     description: 'Optimizing LinkedIn profile for engineering leadership roles',
     inputPayload: {
-      linkedinProfile: SAMPLE_LINKEDIN_PROFILE,
-      targetRole: 'Engineering Manager',
+      jobTitleTarget: 'Engineering Manager, Technical Lead',
       industry: 'B2B SaaS / Developer Tools',
-      additionalContext: 'Looking to transition from senior IC to engineering management. Have been leading a small team informally for the past year.',
+      currentLinkedinProfile: SAMPLE_LINKEDIN_PROFILE,
+      userBackground: SAMPLE_RESUME,
+      jobDescription: SAMPLE_JOB_DESCRIPTION,
     },
   },
 
@@ -231,12 +232,11 @@ Nice to have:
     defaultTestCaseId: 'networking-default-1',
     description: 'Creating networking scripts for informational interviews',
     inputPayload: {
-      targetRole: 'Engineering Manager',
-      targetCompany: 'TechForward Inc',
-      connectionContext: 'We attended the same university and they spoke at a recent tech meetup I attended. They are currently a Senior Engineering Manager at the company.',
+      networkingScenario: 'Informational Interview',
+      targetPerson: 'Jane Chen, Senior Engineering Manager at TechForward Inc. We attended the same university (State University) and she spoke at a recent tech meetup I attended about scaling engineering teams.',
+      jobTitleTarget: 'Transition into Engineering Management',
       userBackground: SAMPLE_RESUME,
-      networkingGoal: 'Learn about the engineering culture and what qualities they look for in engineering managers. Also understand the career path from senior IC to management.',
-      additionalContext: 'I have been doing some informal team leadership at my current company and want to make the formal transition to management.',
+      specificGoal: 'Learn about the engineering culture and what qualities they look for in engineering managers. Also understand the career path from senior IC to management.',
     },
   },
 
@@ -273,11 +273,13 @@ Nice to have:
     inputPayload: {
       jobTitle: 'Senior Software Engineer',
       companyName: 'TechForward Inc',
-      interviewerName: 'Sarah Chen',
-      interviewerRole: 'Engineering Manager',
-      interviewHighlights: 'We discussed the architecture of their event-driven system and how they handle data consistency across microservices. Sarah mentioned they are scaling to support 10x traffic growth. We also talked about their mentorship culture and how they support career growth.',
-      userBackground: SAMPLE_RESUME,
-      additionalContext: 'The interview went well overall. I felt particularly strong on the system design portion where I proposed a CQRS pattern that Sarah seemed interested in.',
+      interviewerDetails: `Sarah Chen, Engineering Manager - Discussed architecture of event-driven system and data consistency across microservices. Mentioned scaling to support 10x traffic growth.
+
+Michael Rodriguez, Senior Staff Engineer - Deep dive on system design for their data pipeline. Explored trade-offs between consistency and availability.
+
+Lisa Park, VP of Engineering - Culture and team dynamics discussion. Talked about their mentorship program and career growth paths.`,
+      interviewHighlights: 'The interview went well overall. I felt particularly strong on the system design portion where I proposed a CQRS pattern that Sarah seemed interested in. Michael was engaged when I discussed my experience with event sourcing.',
+      additionalContext: 'I mentioned my experience leading the migration project at TechScale, which seemed to resonate with their current scaling challenges.',
     },
   },
 
@@ -289,13 +291,19 @@ Nice to have:
       jobTitle: 'Senior Software Engineer',
       companyName: 'TechForward Inc',
       location: 'San Francisco, CA (Remote-first)',
-      baseSalary: '$195,000',
-      bonus: '15% target bonus',
-      equity: '0.05% equity vesting over 4 years with 1-year cliff',
-      benefits: 'Comprehensive health/dental/vision, 401k with 4% match, unlimited PTO, $5,000 learning budget, home office stipend',
+      offerDetails: `Base Salary: $195,000/year
+Bonus: 15% target bonus (paid annually)
+Equity: 0.05% equity vesting over 4 years with 1-year cliff
+Benefits:
+- Comprehensive health/dental/vision coverage
+- 401k with 4% company match
+- Unlimited PTO policy
+- $5,000 annual learning budget
+- $1,500 home office stipend
+- Flexible remote work policy`,
+      currentCompensation: 'Currently making $175,000 base + 10% bonus at TechScale Solutions.',
       otherOffers: 'Also have an offer from DataScale Corp: $185,000 base, 10% bonus, 0.03% equity, standard benefits. DataScale is more established but slower growth.',
-      userBackground: SAMPLE_RESUME,
-      priorities: 'My top priorities are: 1) Growth potential and learning opportunities, 2) Work-life balance, 3) Total compensation. I am currently making $175,000 base.',
+      careerGoals: 'My top priorities are: 1) Growth potential and learning opportunities, 2) Work-life balance, 3) Total compensation.',
     },
   },
 
@@ -307,11 +315,14 @@ Nice to have:
       jobTitle: 'Senior Software Engineer',
       companyName: 'TechForward Inc',
       location: 'San Francisco, CA',
-      currentOffer: '$195,000 base + 15% bonus + 0.05% equity over 4 years',
-      targetCompensation: '$215,000 base or equivalent equity increase',
-      leverage: 'I have a competing offer from DataScale Corp at similar base but less equity. I also have a strong performance record at my current company with documented impact.',
-      concerns: 'I want to negotiate respectfully without risking the offer. The recruiter mentioned the budget is somewhat flexible for strong candidates.',
+      offerDetails: `Base Salary: $195,000/year
+Bonus: 15% target bonus
+Equity: 0.05% over 4 years with 1-year cliff
+Sign-on: None offered
+Start Date: January 15, 2025`,
       userBackground: SAMPLE_RESUME,
+      currentCompensation: 'Currently at $175,000 base + 10% bonus at TechScale Solutions. Been in role 3 years with strong performance reviews.',
+      competingOffers: 'DataScale Corp: $185,000 base, 10% bonus, 0.03% equity. More established company but slower growth trajectory.',
     },
   },
 
@@ -603,55 +614,25 @@ export const EXCEL_DEFAULT_TEST_DATA: Record<string, SkillDefaultTestData> = {
     defaultTestCaseId: 'excel-analyzer-default-1',
     description: 'Analyzing sales data for quarterly trends',
     inputPayload: {
-      dataDescription: `Sales Performance Dataset - Q1-Q3 2024
-
-Columns:
-- Date (daily records from Jan 1 - Sep 30, 2024)
-- Region (North, South, East, West)
-- Product Category (Software, Hardware, Services)
-- Sales Rep Name (50 unique reps)
-- Deal Size (Small <$10K, Medium $10-50K, Large >$50K)
-- Revenue (USD)
-- Units Sold
-- Customer Type (New, Existing, Renewal)
-- Sales Cycle Days
-- Win Rate (%)
-
-Dataset size: ~15,000 rows
-Notable: Software sales spiked in March (new product launch)
-Notable: West region added 5 new reps in Q2`,
-      analysisGoal: 'Identify top performing reps and regions, understand seasonality patterns, and find factors that correlate with faster sales cycles and higher win rates.',
-      specificQuestions: `1. Which region has the highest revenue growth rate Q-over-Q?
-2. Is there a correlation between deal size and sales cycle length?
-3. Who are the top 10 performers by revenue and win rate?
-4. What is the customer acquisition vs retention revenue split?
-5. Are there any concerning trends in the data?`,
-    },
-  },
-
-  'excel-formula-builder': {
-    skillId: 'excel-formula-builder',
-    defaultTestCaseId: 'excel-formula-default-1',
-    description: 'Building commission calculation formula',
-    inputPayload: {
-      taskDescription: `Need to calculate sales commission with tiered rates:
-- 0-$50K quota: 5% commission
-- $50K-$100K: 8% commission on amount over $50K
-- $100K-$200K: 10% commission on amount over $100K
-- Over $200K: 12% commission on amount over $200K
-
-Plus, if they hit 150% of quota, add a 2% bonus on total sales.
-If they are a "Senior" rep (indicated in column D), add an extra 1% base rate to all tiers.`,
-      currentSetup: `Column A: Rep Name
-Column B: Quota Amount
-Column C: Actual Sales
-Column D: Rep Level (Junior/Senior)
-Column E: Commission (need formula)
-Column F: Bonus (need formula)
-Column G: Total Payout (need formula)`,
-      exampleData: `Row 2: John Smith, $100,000 quota, $175,000 sales, Senior
-Row 3: Jane Doe, $75,000 quota, $120,000 sales, Junior
-Row 4: Bob Wilson, $150,000 quota, $250,000 sales, Senior`,
+      dataDescription: `Sales Performance Dataset - Q1-Q3 2024 with daily records tracking revenue, units, and customer metrics across 4 regions and 3 product categories. Contains 15,000 rows from 50 sales reps. Software sales spiked in March due to new product launch. West region added 5 new reps in Q2.`,
+      dataSample: `Date	Region	Product	Sales Rep	Deal Size	Revenue	Units	Customer Type	Cycle Days	Win Rate
+2024-01-15	North	Software	John Smith	Large	75000	15	New	45	68%
+2024-01-15	South	Hardware	Jane Doe	Medium	32000	8	Existing	22	82%
+2024-01-16	East	Services	Bob Wilson	Small	8500	2	Renewal	12	91%
+2024-01-16	West	Software	Alice Chen	Large	125000	25	New	62	71%
+2024-01-17	North	Hardware	Tom Brown	Medium	28000	7	Existing	18	79%
+2024-02-01	South	Software	Jane Doe	Large	95000	19	New	55	65%
+2024-02-15	East	Services	Carol White	Small	6500	1	Renewal	8	88%
+2024-03-01	West	Software	David Lee	Large	180000	35	New	72	74%
+2024-03-15	North	Software	John Smith	Medium	42000	10	Existing	28	85%
+2024-03-20	South	Hardware	Maria Garcia	Small	9200	3	New	15	77%`,
+      analysisGoal: 'Identify Trends & Patterns',
+      contextInfo: `Key context:
+- Q1 target: $2.5M (achieved $2.8M)
+- Q2 target: $3.0M (achieved $2.6M - missed due to supply chain)
+- New product launch in March drove software spike
+- Industry average win rate: 72%
+- Average sales cycle for our category: 35 days`,
     },
   },
 
@@ -660,47 +641,19 @@ Row 4: Bob Wilson, $150,000 quota, $250,000 sales, Senior`,
     defaultTestCaseId: 'excel-chart-default-1',
     description: 'Creating executive dashboard charts',
     inputPayload: {
-      dataOverview: `Monthly performance metrics for 2024:
-- Revenue (by product line: SaaS, Professional Services, Hardware)
-- Customer count (New, Churned, Net)
-- NPS Score (0-100)
-- Support ticket volume and resolution time
-- Employee headcount and satisfaction
-
-Currently have raw data in multiple tabs. Need to create an executive dashboard that tells the story of our growth while highlighting areas needing attention.`,
-      visualizationGoal: 'Create a one-page executive dashboard showing key business metrics with appropriate visualizations. Should be printable and suitable for board meetings.',
-      audience: 'Board of Directors and Executive Team - prefer clean, professional look with minimal color. They want to see trends over time and comparisons to plan/targets.',
-      specificCharts: `Must include:
-1. Revenue trend with target line
-2. Customer acquisition funnel
-3. Product mix breakdown
-4. Key metric scorecard (4-6 KPIs)
-
-Optional:
-- Geographic performance map
-- YoY comparison`,
-    },
-  },
-
-  'excel-pivot-architect': {
-    skillId: 'excel-pivot-architect',
-    defaultTestCaseId: 'excel-pivot-default-1',
-    description: 'Designing pivot tables for financial analysis',
-    inputPayload: {
-      datasetDescription: `Transaction-level general ledger data for FY2024:
-- 50,000+ rows of journal entries
-- Fields: Date, Account Code, Account Name, Department, Cost Center, Project Code, Debit, Credit, Description, Posted By, Approval Status
-
-Need to analyze spending by department, track budget vs actual, and identify unusual patterns for the audit committee.`,
-      analysisNeeds: `Primary analyses needed:
-1. Monthly spending by department with YoY comparison
-2. Top 10 vendors by spend with trend
-3. Budget variance by cost center
-4. Expense distribution by category
-5. Unusual transactions (outliers, round numbers, specific keywords)
-
-Should be able to drill down from summary to detail.`,
-      outputFormat: 'Interactive pivot tables with slicers for department, date range, and cost center. Include calculated fields for variance % and running totals.',
+      dataSample: `Month	SaaS Revenue	Services Revenue	Hardware Revenue	New Customers	Churned	NPS	Support Tickets	Avg Resolution (hrs)
+Jan-24	450000	125000	85000	48	12	72	234	4.2
+Feb-24	465000	118000	92000	52	8	74	218	3.8
+Mar-24	510000	142000	78000	61	15	71	256	4.5
+Apr-24	525000	135000	88000	55	10	75	241	3.9
+May-24	548000	128000	95000	63	9	77	229	3.6
+Jun-24	572000	155000	82000	71	14	73	267	4.1
+Jul-24	595000	148000	91000	68	11	76	248	3.7
+Aug-24	618000	162000	86000	74	13	78	232	3.5
+Sep-24	645000	170000	94000	82	10	80	221	3.3`,
+      messageToConvey: 'Demonstrate strong YoY revenue growth driven primarily by SaaS expansion, while highlighting improving customer satisfaction (NPS up 8 points) and operational efficiency (support resolution time down 20%). Flag concern about Services revenue volatility.',
+      audienceType: 'Executive Presentation',
+      toolVersion: 'Excel 365',
     },
   },
 
@@ -709,31 +662,20 @@ Should be able to drill down from summary to detail.`,
     defaultTestCaseId: 'excel-marketing-default-1',
     description: 'Building marketing campaign performance dashboard',
     inputPayload: {
-      campaignData: `Marketing Campaign Data (Jan-Sep 2024):
-
-Channels tracked: Google Ads, LinkedIn, Facebook, Email, Content/SEO, Events
-Metrics available: Impressions, Clicks, Cost, Leads, MQLs, SQLs, Opportunities, Closed Won
-
-Budget allocation:
-- Digital Ads: 45% ($450K)
-- Content/SEO: 25% ($250K)
-- Events: 20% ($200K)
-- Email: 10% ($100K)
-
-Goals:
-- Generate 5,000 MQLs
-- Achieve CAC under $500
-- 3:1 pipeline to spend ratio`,
-      stakeholders: 'CMO (weekly), CEO (monthly), Sales Leadership (weekly), Board (quarterly)',
-      kpisTracked: `Primary KPIs:
-- Cost per Lead (CPL)
-- Cost per MQL
-- MQL to SQL conversion rate
-- SQL to Opportunity rate
-- Marketing-sourced pipeline
-- Marketing-influenced revenue
-- CAC by channel
-- ROI by campaign type`,
+      marketingData: `Channel	Month	Impressions	Clicks	Cost	Leads	MQLs	SQLs	Opps	Won	Revenue
+Google Ads	Jan-24	2500000	45000	42000	890	312	156	78	23	184000
+Google Ads	Feb-24	2750000	52000	45000	1050	368	184	92	31	248000
+LinkedIn	Jan-24	850000	12500	35000	425	170	85	42	12	96000
+LinkedIn	Feb-24	920000	14200	38000	510	204	102	51	18	144000
+Facebook	Jan-24	3200000	28000	22000	320	112	45	18	5	40000
+Facebook	Feb-24	3500000	32000	25000	380	133	53	21	7	56000
+Email	Jan-24	125000	8500	3500	680	340	204	102	35	280000
+Email	Feb-24	132000	9200	3800	750	375	225	112	42	336000
+Content/SEO	Jan-24	450000	32000	18000	520	260	130	65	22	176000
+Content/SEO	Feb-24	485000	35500	19000	580	290	145	72	26	208000`,
+      channels: 'Google Ads, LinkedIn Ads, Facebook/Meta Ads, Email Marketing, Content/SEO (Organic)',
+      reportingPeriod: 'Q1 2024 (January - March)',
+      audienceLevel: 'CMO/Executive',
     },
   },
 
@@ -742,25 +684,33 @@ Goals:
     defaultTestCaseId: 'excel-cleaner-default-1',
     description: 'Cleaning messy customer data export',
     inputPayload: {
-      dataIssues: `Customer database export with 25,000 rows. Known issues:
-
-1. Names: Mixed formats (JOHN SMITH, john smith, Smith, John), some with titles (Mr., Dr.)
-2. Phone numbers: Various formats (555-123-4567, (555) 123-4567, 5551234567, +1-555-123-4567)
-3. Addresses: Inconsistent abbreviations (Street vs St vs St., missing zip+4)
-4. Dates: Mixed formats (1/15/2024, 15-Jan-24, 2024-01-15, January 15, 2024)
-5. Duplicates: ~5% estimated duplicate records (same email, different name spellings)
-6. Missing data: ~10% missing phone, ~3% missing email
-7. Invalid emails: Some obvious typos (@gmial.com, @yaho.com)
-8. Status field: Mix of Active/active/ACTIVE/A/1/Yes`,
-      targetFormat: `Clean format needed:
-- Name: First Name, Last Name (separate columns, proper case)
-- Phone: (XXX) XXX-XXXX
-- Address: Street, City, State (2-letter), ZIP (5-digit)
-- Date: YYYY-MM-DD
-- Status: Active/Inactive only
-- Email: lowercase, validated format
-- One row per unique customer (deduplicated)`,
-      outputRequirements: 'Provide step-by-step cleaning process with formulas. Flag records that need manual review. Create summary of changes made.',
+      dataSample: `CustomerID	Name	Email	Phone	Address	City	State	Zip	SignupDate	Status
+1001	JOHN SMITH	john.smith@gmail.com	555-123-4567	123 Main Street	New York	NY	10001	1/15/2024	Active
+1002	jane doe	jane.doe@gmial.com	(555) 234-5678	456 Oak St.	Los Angeles	California	90210-1234	15-Jan-24	active
+1003	Mr. Bob Wilson	bob.wilson@yahoo.com	5553456789	789 Pine Ave	Chicago	IL	60601	2024-01-20	A
+1004	ALICE CHEN	alice.chen@yaho.com	+1-555-456-7890	321 Elm Street	San Francisco	CA	94102	January 22, 2024	1
+1005	Smith, John	john.smith@gmail.com	555.123.4567	123 Main St	new york	ny	10001	01/15/2024	Yes
+1006	Dr. Carol White		(555)567-8901	654 Maple Dr.	Boston	Massachusetts	02101	2024-02-01	Active
+1007	david lee	david.lee@hotmail.com	555 678 9012	987 Cedar Blvd	Seattle	WA		Feb 5, 2024	ACTIVE
+1008	MARIA GARCIA	maria.garcia@outlook.com		111 Birch Lane	Miami	FL	33101	2024-02-10	Inactive`,
+      expectedFormat: `Required clean format:
+- CustomerID: Integer, no changes needed
+- Name: Split to FirstName, LastName columns, proper case, no titles
+- Email: lowercase, must contain @ and valid domain
+- Phone: Format as (XXX) XXX-XXXX
+- Address: Standardize abbreviations (St., Ave., Dr., Blvd., Ln.)
+- City: Proper case
+- State: 2-letter abbreviation only
+- Zip: 5-digit only (strip +4)
+- SignupDate: Format as YYYY-MM-DD
+- Status: Only "Active" or "Inactive"`,
+      cleaningPriority: 'Full Audit',
+      businessRules: `Validation rules:
+- Duplicate detection: same email = duplicate (keep most recent)
+- Phone required for Status=Active customers
+- Email required for all customers
+- State must be valid US state abbreviation
+- Zip must be valid 5-digit format`,
     },
   },
 };
@@ -1774,9 +1724,9 @@ export const WAVE_SKILLS_DEFAULT_TEST_DATA: Record<string, SkillDefaultTestData>
       decisionContext: 'Our company currently runs all applications on-premise with aging infrastructure (5+ years old). We\'re facing increasing maintenance costs, scaling challenges during peak seasons, and difficulty hiring ops talent. The CEO has asked for a recommendation on migrating to cloud infrastructure.',
       options: 'Option A: Full migration to AWS (move all workloads, estimated 12 months)\nOption B: Hybrid approach - keep sensitive workloads on-prem, move others to Azure (estimated 8 months)\nOption C: Maintain status quo with infrastructure refresh (replace aging hardware)',
       criteria: 'Cost (TCO over 5 years), Security/Compliance (we handle healthcare data - HIPAA), Time to implement, Team capability/training needs, Business continuity risk',
-      stakeholders: 'CTO (technical feasibility), CFO (budget approval), CISO (security sign-off), VP Engineering (team impact), Legal (compliance review)',
-      urgency: 'high',
-      constraints: 'Budget ceiling of $2M for migration. Must maintain HIPAA compliance throughout. Cannot have more than 4 hours downtime for any critical system. Current team has limited cloud experience.',
+      background: 'Current infrastructure: 3 data centers, 200+ servers, 15 applications. Annual maintenance: $1.8M. Last major outage: 6 months ago (8 hours, cost $500K). Competitors have moved to cloud and reduced costs 30-40%. Our DevOps team (8 people) has AWS certifications but limited production experience. Previous cloud pilot in 2022 failed due to security concerns. Budget ceiling: $2M for migration. Must maintain HIPAA compliance. Max 4 hours downtime for critical systems.',
+      audience: 'CEO and Executive Committee',
+      urgency: 'thisMonth',
     },
   },
   'one-on-one-meeting-prep': {
@@ -1785,11 +1735,11 @@ export const WAVE_SKILLS_DEFAULT_TEST_DATA: Record<string, SkillDefaultTestData>
     description: 'Performance discussion with senior engineer',
     inputPayload: {
       relationship: 'manager',
-      employeeContext: 'Sarah is a Senior Software Engineer who has been on the team for 2.5 years. She was a top performer in her first year but has seemed less engaged lately. Her code quality remains high but she\'s been missing deadlines and seems frustrated in team meetings.',
-      recentEvents: 'Last sprint: Delivered feature 3 days late, though quality was excellent. Skipped two team lunches. Had a tense exchange with PM about scope changes. Mentioned in passing that she\'s "not sure about her growth path here."',
-      meetingGoals: 'Understand what\'s causing her disengagement, discuss her career aspirations, address the deadline issue constructively, and re-engage her as a key team member.',
-      previousFeedback: 'In her last review (6 months ago), we discussed her interest in tech lead opportunities. I mentioned she\'d need to improve her stakeholder communication. Since then, I haven\'t followed up on that conversation.',
-      meetingType: 'career-development',
+      personContext: 'Sarah is a Senior Software Engineer who has been on the team for 2.5 years. She was a top performer in her first year but has seemed less engaged lately. Her code quality remains high but she\'s been missing deadlines and seems frustrated in team meetings. Known strengths: technical depth, code quality, mentoring juniors. Development areas: stakeholder communication, deadline estimation.',
+      recentContext: 'Last sprint: Delivered feature 3 days late, though quality was excellent. Skipped two team lunches. Had a tense exchange with PM about scope changes. Mentioned in passing that she\'s "not sure about her growth path here." Team just went through reorg - her close collaborator moved to another team.',
+      topicsToDiscuss: '1. Check in on how she\'s feeling about the role and team\n2. Discuss the deadline slip and get her perspective\n3. Revisit career aspirations - tech lead path\n4. Address the PM interaction constructively\n5. Understand what support she needs from me',
+      previousActions: 'From last 1:1: She was going to draft a tech lead development plan (hasn\'t happened). I was going to connect her with our Staff Engineer for mentorship (did happen, but only one meeting so far).',
+      meetingGoal: 'performance',
     },
   },
   'team-retrospective-facilitator': {
@@ -1797,12 +1747,12 @@ export const WAVE_SKILLS_DEFAULT_TEST_DATA: Record<string, SkillDefaultTestData>
     defaultTestCaseId: 'retro-post-launch',
     description: 'Post-launch retrospective for major release',
     inputPayload: {
-      retroContext: 'Just completed a 3-month project to rebuild our checkout flow. Launched last week. The launch was successful but the final month was intense with lots of late nights and weekend work.',
-      teamDynamics: '8-person cross-functional team (4 engineers, 2 designers, 1 PM, 1 QA). Mix of remote and in-office. Two engineers are new (joined during the project). There\'s some tension between design and engineering about last-minute changes.',
-      knownIssues: 'Scope creep in final weeks, unclear decision-making authority between PM and design lead, testing bottleneck (only 1 QA), some team members burned out',
-      successesToCelebrate: 'Conversion rate up 23% since launch, zero critical bugs in production, great collaboration between frontend and backend engineers, new team members ramped up quickly',
-      retroFormat: 'starfish',
-      duration: '90min',
+      retroContext: 'Just completed a 3-month project to rebuild our checkout flow. Launched last week. The launch was successful (conversion rate up 23%, zero critical bugs) but the final month was intense with lots of late nights and weekend work.',
+      teamContext: '8-person cross-functional team (4 engineers, 2 designers, 1 PM, 1 QA). Mix of remote (5) and in-office (3). Two engineers are new (joined during the project). There\'s some tension between design and engineering about last-minute changes. Psychological safety is generally good but people hesitate to call out leadership decisions. Team has been together 8 months.',
+      format: 'starfish',
+      duration: '90',
+      previousActions: 'From last retro (2 months ago): 1. Implement design review checkpoint before dev starts (partially done). 2. Add QA to sprint planning (done). 3. Create escalation path for scope disagreements (not done).',
+      knownIssues: 'Scope creep in final weeks, unclear decision-making authority between PM and design lead, testing bottleneck (only 1 QA), some team members showing signs of burnout.',
     },
   },
   'ab-test-analysis-reporter': {
