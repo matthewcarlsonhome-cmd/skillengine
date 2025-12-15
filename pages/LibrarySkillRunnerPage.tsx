@@ -17,6 +17,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { executeDynamicSkill } from '../lib/skills/dynamic';
+import type { ChatGPTModelType } from '../lib/chatgpt';
 import { useAppContext } from '../hooks/useAppContext';
 import { useToast } from '../hooks/useToast';
 import type { DynamicSkill, DynamicFormInput, SavedOutput, SkillExecution, FavoriteSkill } from '../lib/storage/types';
@@ -66,6 +67,7 @@ const LibrarySkillRunnerPage: React.FC = () => {
   const [formState, setFormState] = useState<Record<string, unknown>>({});
   const [apiKey, setApiKey] = useState('');
   const [claudeModel, setClaudeModel] = useState<'haiku' | 'sonnet' | 'opus'>('haiku');
+  const [chatgptModel, setChatgptModel] = useState<ChatGPTModelType>('gpt-4o-mini');
 
   // Execution state
   const [output, setOutput] = useState('');
@@ -133,9 +135,11 @@ const LibrarySkillRunnerPage: React.FC = () => {
 
   // Load stored API key when provider changes
   useEffect(() => {
-    const storedKey = getApiKey(selectedApi as 'gemini' | 'claude');
+    const storedKey = getApiKey(selectedApi as 'gemini' | 'claude' | 'chatgpt');
     if (storedKey) {
       setApiKey(storedKey);
+    } else {
+      setApiKey('');
     }
   }, [selectedApi]);
 
@@ -264,8 +268,9 @@ const LibrarySkillRunnerPage: React.FC = () => {
         skill,
         formInputs: formState,
         apiKey,
-        provider: selectedApi as 'gemini' | 'claude',
+        provider: selectedApi as 'gemini' | 'claude' | 'chatgpt',
         claudeModel,
+        chatgptModel,
       })) {
         fullOutput += chunk;
         setOutput(fullOutput);
@@ -640,22 +645,23 @@ const LibrarySkillRunnerPage: React.FC = () => {
                 <label className="block text-sm font-medium mb-1">AI Provider</label>
                 <Select
                   value={selectedApi}
-                  onChange={(e) => setSelectedApi(e.target.value as 'gemini' | 'claude')}
+                  onChange={(e) => setSelectedApi(e.target.value as 'gemini' | 'claude' | 'chatgpt')}
                 >
                   <option value="gemini">Google Gemini</option>
                   <option value="claude">Anthropic Claude</option>
+                  <option value="chatgpt">OpenAI ChatGPT</option>
                 </Select>
               </div>
 
               <div>
                 <label className="block text-sm font-medium mb-1">
-                  {selectedApi === 'gemini' ? 'Gemini' : 'Claude'} API Key
+                  {selectedApi === 'gemini' ? 'Gemini' : selectedApi === 'claude' ? 'Claude' : 'ChatGPT'} API Key
                 </label>
                 <Input
                   type="password"
                   value={apiKey}
                   onChange={(e) => setApiKey(e.target.value)}
-                  placeholder={`Enter your ${selectedApi === 'gemini' ? 'Gemini' : 'Claude'} API key`}
+                  placeholder={`Enter your ${selectedApi === 'gemini' ? 'Gemini' : selectedApi === 'claude' ? 'Claude' : 'ChatGPT'} API key`}
                 />
               </div>
 
@@ -669,6 +675,21 @@ const LibrarySkillRunnerPage: React.FC = () => {
                     <option value="haiku">Claude Haiku (Fast)</option>
                     <option value="sonnet">Claude Sonnet (Balanced)</option>
                     <option value="opus">Claude Opus (Most Capable)</option>
+                  </Select>
+                </div>
+              )}
+
+              {selectedApi === 'chatgpt' && (
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium mb-1">ChatGPT Model</label>
+                  <Select
+                    value={chatgptModel}
+                    onChange={(e) => setChatgptModel(e.target.value as ChatGPTModelType)}
+                  >
+                    <option value="gpt-4o-mini">GPT-4o Mini (Fast, Cost-Effective)</option>
+                    <option value="gpt-4o">GPT-4o (Most Capable)</option>
+                    <option value="o1-mini">o1 Mini (Reasoning)</option>
+                    <option value="o1-preview">o1 Preview (Advanced Reasoning)</option>
                   </Select>
                 </div>
               )}

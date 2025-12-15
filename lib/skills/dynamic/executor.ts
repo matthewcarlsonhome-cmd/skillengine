@@ -1,13 +1,15 @@
 // Dynamic Skill Executor - Runs generated skills
 
 import type { DynamicSkill } from '../../storage/types';
+import type { ChatGPTModelType } from '../../chatgpt';
 
 export interface ExecuteSkillOptions {
   skill: DynamicSkill;
   formInputs: Record<string, unknown>;
   apiKey: string;
-  provider: 'gemini' | 'claude';
+  provider: 'gemini' | 'claude' | 'chatgpt';
   claudeModel?: 'haiku' | 'sonnet' | 'opus';
+  chatgptModel?: ChatGPTModelType;
 }
 
 // Claude model mapping - using -latest aliases for reliability
@@ -131,6 +133,58 @@ export async function* executeWithClaude(
   }
 }
 
+// Stream execution for ChatGPT
+export async function* executeWithChatGPT(
+  options: ExecuteSkillOptions
+): AsyncGenerator<string> {
+  const { skill, formInputs, apiKey, chatgptModel = 'gpt-4o-mini' } = options;
+
+  const systemPrompt = skill.prompts.systemInstruction;
+  const userPrompt = interpolateTemplate(skill.prompts.userPromptTemplate, formInputs);
+
+  const { runSkillStream } = await import('../../chatgpt');
+
+  const response = await runSkillStream(
+    apiKey,
+    { systemInstruction: systemPrompt, userPrompt },
+    chatgptModel
+  );
+
+  const reader = response.body?.getReader();
+  if (!reader) {
+    throw new Error('No response body');
+  }
+
+  const decoder = new TextDecoder();
+  let buffer = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop() || '';
+
+    for (const line of lines) {
+      if (line.startsWith('data: ')) {
+        const data = line.slice(6);
+        if (data.trim() === '[DONE]') continue;
+
+        try {
+          const parsed = JSON.parse(data);
+          const content = parsed.choices?.[0]?.delta?.content;
+          if (content) {
+            yield content;
+          }
+        } catch {
+          // Ignore parse errors for incomplete JSON
+        }
+      }
+    }
+  }
+}
+
 // Main execution function
 export async function* executeDynamicSkill(
   options: ExecuteSkillOptions
@@ -139,6 +193,8 @@ export async function* executeDynamicSkill(
 
   if (provider === 'gemini') {
     yield* executeWithGemini(options);
+  } else if (provider === 'chatgpt') {
+    yield* executeWithChatGPT(options);
   } else {
     yield* executeWithClaude(options);
   }

@@ -45,10 +45,13 @@ const SettingsPage: React.FC = () => {
   // API Keys
   const [geminiKey, setGeminiKey] = useState('');
   const [claudeKey, setClaudeKey] = useState('');
+  const [chatgptKey, setChatgptKey] = useState('');
   const [showGeminiKey, setShowGeminiKey] = useState(false);
   const [showClaudeKey, setShowClaudeKey] = useState(false);
+  const [showChatgptKey, setShowChatgptKey] = useState(false);
   const [hasGeminiKey, setHasGeminiKey] = useState(false);
   const [hasClaudeKey, setHasClaudeKey] = useState(false);
+  const [hasChatgptKey, setHasChatgptKey] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
 
   // Data
@@ -63,8 +66,10 @@ const SettingsPage: React.FC = () => {
     // Load API key status
     const gemini = getApiKey('gemini');
     const claude = getApiKey('claude');
+    const chatgpt = getApiKey('chatgpt');
     setHasGeminiKey(!!gemini);
     setHasClaudeKey(!!claude);
+    setHasChatgptKey(!!chatgpt);
     setLastUpdated(getLastUpdated());
 
     // Load data counts
@@ -97,6 +102,15 @@ const SettingsPage: React.FC = () => {
     }
   };
 
+  const handleSaveChatgptKey = () => {
+    if (chatgptKey.trim()) {
+      saveApiKey('chatgpt', chatgptKey.trim());
+      setHasChatgptKey(true);
+      setChatgptKey('');
+      addToast('ChatGPT API key saved', 'success');
+    }
+  };
+
   const handleClearGeminiKey = () => {
     clearApiKey('gemini');
     setHasGeminiKey(false);
@@ -109,11 +123,18 @@ const SettingsPage: React.FC = () => {
     addToast('Claude API key removed', 'success');
   };
 
+  const handleClearChatgptKey = () => {
+    clearApiKey('chatgpt');
+    setHasChatgptKey(false);
+    addToast('ChatGPT API key removed', 'success');
+  };
+
   const handleClearAllKeys = () => {
     if (confirm('Are you sure you want to remove all API keys?')) {
       clearAllApiKeys();
       setHasGeminiKey(false);
       setHasClaudeKey(false);
+      setHasChatgptKey(false);
       addToast('All API keys removed', 'success');
     }
   };
@@ -279,6 +300,60 @@ const SettingsPage: React.FC = () => {
                 className="text-sm text-primary hover:underline flex items-center gap-1"
               >
                 Get a Claude API key
+                <ExternalLink className="h-3 w-3" />
+              </a>
+            </div>
+
+            {/* ChatGPT Key */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-medium">OpenAI ChatGPT</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {hasChatgptKey ? 'Key configured' : 'Not configured'}
+                  </p>
+                </div>
+                {hasChatgptKey && (
+                  <span className="flex items-center gap-1 text-green-500 text-sm">
+                    <Check className="h-4 w-4" />
+                    Active
+                  </span>
+                )}
+              </div>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Input
+                    type={showChatgptKey ? 'text' : 'password'}
+                    placeholder={hasChatgptKey ? '••••••••••••••••' : 'Enter ChatGPT API key'}
+                    value={chatgptKey}
+                    onChange={(e) => setChatgptKey(e.target.value)}
+                  />
+                  <button
+                    onClick={() => setShowChatgptKey(!showChatgptKey)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    {showChatgptKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                {chatgptKey ? (
+                  <Button onClick={handleSaveChatgptKey}>
+                    <Save className="h-4 w-4 mr-1" />
+                    Save
+                  </Button>
+                ) : hasChatgptKey ? (
+                  <Button variant="destructive" onClick={handleClearChatgptKey}>
+                    <Trash2 className="h-4 w-4 mr-1" />
+                    Remove
+                  </Button>
+                ) : null}
+              </div>
+              <a
+                href="https://platform.openai.com/api-keys"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-primary hover:underline flex items-center gap-1"
+              >
+                Get a ChatGPT API key
                 <ExternalLink className="h-3 w-3" />
               </a>
             </div>

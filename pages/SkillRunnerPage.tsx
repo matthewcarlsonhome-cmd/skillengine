@@ -16,6 +16,7 @@ import { SKILLS } from '../lib/skills';
 import { Skill, FormInput as FormInputType, ApiProviderType } from '../types';
 import { runSkillStream as runGeminiSkillStream } from '../lib/gemini';
 import { runSkillStream as runClaudeSkillStream } from '../lib/claude';
+import { runSkillStream as runChatGPTSkillStream, ChatGPTModelType } from '../lib/chatgpt';
 import { useToast } from '../hooks/useToast';
 import { useAppContext } from '../hooks/useAppContext';
 import { useAuth } from '../hooks/useAuth';
@@ -192,6 +193,7 @@ const SkillRunnerPage: React.FC = () => {
   const [formState, setFormState] = useState<Record<string, any>>({});
   const [apiKey, setApiKey] = useState('');
   const [claudeModel, setClaudeModel] = useState<'haiku' | 'sonnet' | 'opus'>('haiku');
+  const [chatgptModel, setChatgptModel] = useState<ChatGPTModelType>('gpt-4o-mini');
 
   // Execution state
   const [output, setOutput] = useState('');
@@ -242,9 +244,11 @@ const SkillRunnerPage: React.FC = () => {
 
   // Load stored API key
   useEffect(() => {
-    const storedKey = getApiKey(selectedApi as 'gemini' | 'claude');
+    const storedKey = getApiKey(selectedApi as 'gemini' | 'claude' | 'chatgpt');
     if (storedKey) {
       setApiKey(storedKey);
+    } else {
+      setApiKey('');
     }
   }, [selectedApi]);
 
@@ -392,6 +396,34 @@ const SkillRunnerPage: React.FC = () => {
             }
           }
         }
+      } else if (selectedApi === 'chatgpt') {
+        const response = await runChatGPTSkillStream(apiKey, promptData, chatgptModel);
+        if (!response.body) throw new Error('Response body is null');
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          const chunk = decoder.decode(value);
+          const lines = chunk.split('\n');
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const jsonStr = line.substring(6);
+              if (jsonStr.trim() === '[DONE]') continue;
+              try {
+                const parsed = JSON.parse(jsonStr);
+                const content = parsed.choices?.[0]?.delta?.content;
+                if (content) {
+                  timing.trackChunk(content.length);
+                  fullResponseText += content;
+                  setOutput(fullResponseText);
+                }
+              } catch {
+                // Ignore parsing errors
+              }
+            }
+          }
+        }
       } else {
         throw new Error(`API provider "${selectedApi}" is not supported yet.`);
       }
@@ -435,6 +467,7 @@ const SkillRunnerPage: React.FC = () => {
     selectedApi,
     apiKey,
     claudeModel,
+    chatgptModel,
     formState,
     appUser,
     user,
@@ -727,7 +760,7 @@ const SkillRunnerPage: React.FC = () => {
           >
             <option value="gemini">Gemini</option>
             <option value="claude">Claude</option>
-            <option value="chatgpt" disabled>ChatGPT (Coming Soon)</option>
+            <option value="chatgpt">ChatGPT</option>
           </Select>
           <Link
             to="/api-keys"
@@ -776,6 +809,31 @@ const SkillRunnerPage: React.FC = () => {
               {claudeModel === 'haiku' && 'Best for quick tasks and high-volume usage.'}
               {claudeModel === 'sonnet' && 'Great balance of speed and intelligence for most tasks.'}
               {claudeModel === 'opus' && 'Best for complex reasoning and nuanced outputs.'}
+            </p>
+          </div>
+        )}
+
+        {selectedApi === 'chatgpt' && (
+          <div className="space-y-2 md:col-span-2">
+            <label htmlFor="chatgpt-model" className={typography.label}>
+              ChatGPT Model
+            </label>
+            <Select
+              id="chatgpt-model"
+              value={chatgptModel}
+              onChange={(e) => setChatgptModel(e.target.value as ChatGPTModelType)}
+              disabled={isLoading}
+            >
+              <option value="gpt-4o-mini">GPT-4o Mini (Fast, Cost-Effective)</option>
+              <option value="gpt-4o">GPT-4o (Most Capable)</option>
+              <option value="o1-mini">o1 Mini (Reasoning, Smaller)</option>
+              <option value="o1-preview">o1 Preview (Advanced Reasoning)</option>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              {chatgptModel === 'gpt-4o-mini' && 'Best for quick tasks and high-volume usage.'}
+              {chatgptModel === 'gpt-4o' && 'Most capable model for complex tasks.'}
+              {chatgptModel === 'o1-mini' && 'Reasoning model for logic-intensive tasks.'}
+              {chatgptModel === 'o1-preview' && 'Advanced reasoning for complex problem-solving.'}
             </p>
           </div>
         )}

@@ -116,6 +116,17 @@ const Footer: React.FC = () => {
                   <ExternalLink className="h-3 w-3" />
                 </a>
               </li>
+              <li>
+                <a
+                  href="https://platform.openai.com/api-keys"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+                >
+                  Get ChatGPT Key
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              </li>
             </ul>
           </div>
 

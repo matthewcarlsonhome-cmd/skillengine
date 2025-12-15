@@ -7,6 +7,7 @@ const OBFUSCATION_KEY = 'sk1ll3ng1n3'; // Simple XOR key for obfuscation
 interface StoredKeys {
   gemini?: string;
   claude?: string;
+  chatgpt?: string;
   lastUpdated?: string;
 }
 
@@ -36,7 +37,7 @@ function deobfuscate(encoded: string): string {
   }
 }
 
-export function saveApiKey(provider: 'gemini' | 'claude', key: string): void {
+export function saveApiKey(provider: 'gemini' | 'claude' | 'chatgpt', key: string): void {
   try {
     const existing = getStoredKeys();
     const updated: StoredKeys = {
@@ -50,7 +51,7 @@ export function saveApiKey(provider: 'gemini' | 'claude', key: string): void {
   }
 }
 
-export function getApiKey(provider: 'gemini' | 'claude'): string {
+export function getApiKey(provider: 'gemini' | 'claude' | 'chatgpt'): string {
   try {
     const stored = getStoredKeys();
     const obfuscatedKey = stored[provider];
@@ -75,12 +76,12 @@ export function getStoredKeys(): StoredKeys {
   return {};
 }
 
-export function hasStoredKey(provider: 'gemini' | 'claude'): boolean {
+export function hasStoredKey(provider: 'gemini' | 'claude' | 'chatgpt'): boolean {
   const stored = getStoredKeys();
   return !!stored[provider];
 }
 
-export function clearApiKey(provider: 'gemini' | 'claude'): void {
+export function clearApiKey(provider: 'gemini' | 'claude' | 'chatgpt'): void {
   try {
     const existing = getStoredKeys();
     delete existing[provider];

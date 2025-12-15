@@ -5,6 +5,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { executeDynamicSkill } from '../lib/skills/dynamic';
+import type { ChatGPTModelType } from '../lib/chatgpt';
 import { db } from '../lib/storage';
 import { useAppContext } from '../hooks/useAppContext';
 import { useToast } from '../hooks/useToast';
@@ -48,6 +49,7 @@ const DynamicSkillRunnerPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [formState, setFormState] = useState<Record<string, unknown>>({});
   const [apiKey, setApiKey] = useState('');
+  const [chatgptModel, setChatgptModel] = useState<ChatGPTModelType>('gpt-4o-mini');
   const [output, setOutput] = useState('');
   const [isRunning, setIsRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -89,9 +91,11 @@ const DynamicSkillRunnerPage: React.FC = () => {
 
   // Load stored API key when provider changes
   useEffect(() => {
-    const storedKey = getApiKey(selectedApi as 'gemini' | 'claude');
+    const storedKey = getApiKey(selectedApi as 'gemini' | 'claude' | 'chatgpt');
     if (storedKey) {
       setApiKey(storedKey);
+    } else {
+      setApiKey('');
     }
   }, [selectedApi]);
 
@@ -151,7 +155,8 @@ const DynamicSkillRunnerPage: React.FC = () => {
         skill,
         formInputs: formState,
         apiKey,
-        provider: selectedApi as 'gemini' | 'claude',
+        provider: selectedApi as 'gemini' | 'claude' | 'chatgpt',
+        chatgptModel,
       })) {
         fullOutput += chunk;
         setOutput(fullOutput);
@@ -570,12 +575,27 @@ const DynamicSkillRunnerPage: React.FC = () => {
                 <label className="text-sm font-medium">AI Provider</label>
                 <Select
                   value={selectedApi}
-                  onChange={(e) => setSelectedApi(e.target.value as 'gemini' | 'claude')}
+                  onChange={(e) => setSelectedApi(e.target.value as 'gemini' | 'claude' | 'chatgpt')}
                 >
                   <option value="gemini">Gemini</option>
                   <option value="claude">Claude</option>
+                  <option value="chatgpt">ChatGPT</option>
                 </Select>
               </div>
+              {selectedApi === 'chatgpt' && (
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">ChatGPT Model</label>
+                  <Select
+                    value={chatgptModel}
+                    onChange={(e) => setChatgptModel(e.target.value as ChatGPTModelType)}
+                  >
+                    <option value="gpt-4o-mini">GPT-4o Mini (Fast)</option>
+                    <option value="gpt-4o">GPT-4o (Most Capable)</option>
+                    <option value="o1-mini">o1 Mini (Reasoning)</option>
+                    <option value="o1-preview">o1 Preview (Advanced)</option>
+                  </Select>
+                </div>
+              )}
               <div className="space-y-2">
                 <label className="text-sm font-medium flex items-center gap-2">
                   <KeyRound className="h-4 w-4" />
