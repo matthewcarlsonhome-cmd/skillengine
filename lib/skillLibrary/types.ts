@@ -220,6 +220,8 @@ export interface LibraryFilters {
   useCases: SkillUseCase[];
   levels: SkillLevel[];
   sources: SkillSource[];
+  /** Filter to specific skill IDs (for collections) */
+  skillIds: string[];
 }
 
 /**
@@ -275,4 +277,5 @@ export const DEFAULT_FILTERS: LibraryFilters = {
   useCases: [],
   levels: [],
   sources: [],
+  skillIds: [],
 };

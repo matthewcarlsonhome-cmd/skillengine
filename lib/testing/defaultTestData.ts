@@ -11,6 +11,7 @@
  */
 
 import type { TestCase, SkillTestSuite, WorkflowTestSuite } from './testCaseGenerator';
+import { ROLE_TEMPLATE_DEFAULT_TEST_DATA } from './roleTemplateTestData';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -1760,6 +1761,305 @@ Planned:
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
+// WAVE SKILLS TEST DATA (20 New Production Skills)
+// ═══════════════════════════════════════════════════════════════════════════
+
+export const WAVE_SKILLS_DEFAULT_TEST_DATA: Record<string, SkillDefaultTestData> = {
+  // Wave 1: Quick Wins
+  'executive-decision-memo': {
+    skillId: 'executive-decision-memo',
+    defaultTestCaseId: 'exec-memo-cloud-migration',
+    description: 'Cloud infrastructure migration decision',
+    inputPayload: {
+      decisionContext: 'Our company currently runs all applications on-premise with aging infrastructure (5+ years old). We\'re facing increasing maintenance costs, scaling challenges during peak seasons, and difficulty hiring ops talent. The CEO has asked for a recommendation on migrating to cloud infrastructure.',
+      options: 'Option A: Full migration to AWS (move all workloads, estimated 12 months)\nOption B: Hybrid approach - keep sensitive workloads on-prem, move others to Azure (estimated 8 months)\nOption C: Maintain status quo with infrastructure refresh (replace aging hardware)',
+      criteria: 'Cost (TCO over 5 years), Security/Compliance (we handle healthcare data - HIPAA), Time to implement, Team capability/training needs, Business continuity risk',
+      stakeholders: 'CTO (technical feasibility), CFO (budget approval), CISO (security sign-off), VP Engineering (team impact), Legal (compliance review)',
+      urgency: 'high',
+      constraints: 'Budget ceiling of $2M for migration. Must maintain HIPAA compliance throughout. Cannot have more than 4 hours downtime for any critical system. Current team has limited cloud experience.',
+    },
+  },
+  'one-on-one-meeting-prep': {
+    skillId: 'one-on-one-meeting-prep',
+    defaultTestCaseId: 'one-on-one-performance',
+    description: 'Performance discussion with senior engineer',
+    inputPayload: {
+      relationship: 'manager',
+      employeeContext: 'Sarah is a Senior Software Engineer who has been on the team for 2.5 years. She was a top performer in her first year but has seemed less engaged lately. Her code quality remains high but she\'s been missing deadlines and seems frustrated in team meetings.',
+      recentEvents: 'Last sprint: Delivered feature 3 days late, though quality was excellent. Skipped two team lunches. Had a tense exchange with PM about scope changes. Mentioned in passing that she\'s "not sure about her growth path here."',
+      meetingGoals: 'Understand what\'s causing her disengagement, discuss her career aspirations, address the deadline issue constructively, and re-engage her as a key team member.',
+      previousFeedback: 'In her last review (6 months ago), we discussed her interest in tech lead opportunities. I mentioned she\'d need to improve her stakeholder communication. Since then, I haven\'t followed up on that conversation.',
+      meetingType: 'career-development',
+    },
+  },
+  'team-retrospective-facilitator': {
+    skillId: 'team-retrospective-facilitator',
+    defaultTestCaseId: 'retro-post-launch',
+    description: 'Post-launch retrospective for major release',
+    inputPayload: {
+      retroContext: 'Just completed a 3-month project to rebuild our checkout flow. Launched last week. The launch was successful but the final month was intense with lots of late nights and weekend work.',
+      teamDynamics: '8-person cross-functional team (4 engineers, 2 designers, 1 PM, 1 QA). Mix of remote and in-office. Two engineers are new (joined during the project). There\'s some tension between design and engineering about last-minute changes.',
+      knownIssues: 'Scope creep in final weeks, unclear decision-making authority between PM and design lead, testing bottleneck (only 1 QA), some team members burned out',
+      successesToCelebrate: 'Conversion rate up 23% since launch, zero critical bugs in production, great collaboration between frontend and backend engineers, new team members ramped up quickly',
+      retroFormat: 'starfish',
+      duration: '90min',
+    },
+  },
+  'ab-test-analysis-reporter': {
+    skillId: 'ab-test-analysis-reporter',
+    defaultTestCaseId: 'ab-test-checkout-redesign',
+    description: 'Checkout page redesign experiment results',
+    inputPayload: {
+      experimentContext: 'We redesigned the checkout page to reduce friction. Control: existing 3-step checkout. Treatment: new single-page checkout with accordion sections. Hypothesis: Single-page will increase conversion by reducing abandonment.',
+      metrics: 'Primary: Checkout completion rate. Control: 68.2% (14,532 completions / 21,308 visitors). Treatment: 71.8% (15,847 completions / 22,071 visitors). Secondary: Average order value - Control $127.43, Treatment $124.89. Time to complete - Control 4.2 min, Treatment 3.1 min.',
+      duration: 'Ran for 21 days. ~43,000 total visitors split 50/50. Traffic allocation was random by session ID.',
+      segments: 'Mobile: Control 61.2%, Treatment 68.9%. Desktop: Control 72.1%, Treatment 73.4%. New users: Control 59.8%, Treatment 67.2%. Returning: Control 74.1%, Treatment 74.8%.',
+      businessContext: 'Checkout is our highest-leverage conversion point. 1% improvement in checkout = ~$800K annual revenue. We\'ve had 3 failed checkout experiments in past year.',
+      confidenceLevel: '95',
+    },
+  },
+
+  // Wave 2: Strategic Differentiators
+  'board-presentation-builder': {
+    skillId: 'board-presentation-builder',
+    defaultTestCaseId: 'board-q3-review',
+    description: 'Q3 quarterly board review presentation',
+    inputPayload: {
+      presentationType: 'quarterly-review',
+      audience: 'Board of 7 members: 2 VCs (focused on growth metrics and path to profitability), 2 independent directors (one former CFO, one former CEO of competitor), CEO, CFO, and founder/CTO. The VC board members have been pushing for faster growth; independent directors are more conservative.',
+      keyMetrics: 'ARR: $12.3M (up 18% QoQ, target was 22%). Net retention: 108% (down from 115%). New customers: 47 (target 55). Churn: 3.2% (up from 2.1%). Runway: 18 months at current burn. Sales pipeline: $8.2M (up 34%).',
+      strategicContext: 'Market is consolidating - two competitors acquired this quarter. Our enterprise segment is growing faster than SMB. We\'re seeing longer sales cycles (up 23%) but larger deal sizes. Team grew from 45 to 58 people.',
+      askOrDecision: 'Seeking approval for $1.5M incremental investment in enterprise sales team (4 new AEs + 1 sales engineer). Also want to discuss potential acquisition of smaller competitor (early stage, $800K ARR, strong tech team).',
+      timeAllocation: '45min',
+    },
+  },
+  'prompt-engineering-optimizer': {
+    skillId: 'prompt-engineering-optimizer',
+    defaultTestCaseId: 'prompt-customer-email',
+    description: 'Customer service email response prompt',
+    inputPayload: {
+      originalPrompt: 'Write a response to this customer complaint email. Be helpful and professional.',
+      intendedTask: 'Generate personalized, empathetic customer service responses that resolve the issue, maintain brand voice, and leave the customer feeling heard. Should work for various complaint types (billing, product, shipping). Need consistent formatting with clear next steps.',
+      currentIssues: 'Responses are too generic - they don\'t reference specific details from the customer\'s email. Tone varies wildly between overly formal and too casual. Sometimes the AI apologizes when it shouldn\'t (e.g., customer misunderstood policy). Responses are too long (customers want quick answers).',
+      targetModel: 'claude',
+      constraints: 'Response must be under 200 words. Must include: acknowledgment of issue, specific resolution/next steps, timeline if applicable. Cannot offer refunds over $100 without escalation note. Must maintain our friendly-but-professional brand voice.',
+      exampleInputs: 'Example 1: "I ordered 3 weeks ago and still haven\'t received my package! Order #12345. This is ridiculous."\n\nExample 2: "You charged me twice for my subscription this month. I want a refund immediately."',
+    },
+  },
+  'kpi-framework-designer': {
+    skillId: 'kpi-framework-designer',
+    defaultTestCaseId: 'kpi-product-team',
+    description: 'Product team KPI framework design',
+    inputPayload: {
+      frameworkType: 'okr',
+      scope: 'product',
+      businessContext: 'B2B SaaS product team (12 people: 2 PMs, 6 engineers, 2 designers, 2 data analysts). Product is a project management tool for marketing teams. $8M ARR, 450 customers, 85% are SMB. Average contract is $18K/year.',
+      strategicGoals: '1. Increase user engagement (too many customers are "shelf-ware" - paying but not using). 2. Improve enterprise readiness (larger deals require SSO, permissions, audit logs). 3. Reduce time-to-value for new customers (currently takes 3 weeks for customers to see value).',
+      existingMetrics: 'Currently tracking: DAU/MAU (32%), feature adoption (varies), NPS (42), support tickets per customer, time to first project created. We have full product analytics via Amplitude.',
+      timePeriod: 'quarterly',
+    },
+  },
+  'ml-model-card-generator': {
+    skillId: 'ml-model-card-generator',
+    defaultTestCaseId: 'model-card-churn',
+    description: 'Customer churn prediction model documentation',
+    inputPayload: {
+      modelName: 'CustomerChurnPredictor v2.3',
+      modelType: 'classification',
+      modelDetails: 'XGBoost classifier trained on 3 years of customer behavior data. 47 features including: usage metrics (login frequency, feature usage), billing (payment history, plan changes), support (ticket volume, sentiment), and firmographic data. Hyperparameters tuned via Bayesian optimization. Model size: 12MB.',
+      intendedUse: 'Predict which customers are likely to churn in the next 90 days so Customer Success team can proactively intervene. Used in weekly batch scoring of all active customers. Results feed into Salesforce for CSM prioritization. Not intended for individual customer communication or pricing decisions.',
+      trainingData: 'Training data: 125,000 customer records from Jan 2021 - Dec 2023. 8.2% positive class (churned). Data from production database + Mixpanel events + Zendesk. Known issues: enterprise customers underrepresented (only 12% of training data but 35% of revenue). Some features have 5-15% missing values (imputed with median).',
+      performanceMetrics: 'Test set (20% holdout): AUC-ROC 0.84, Precision@10% 0.62, Recall@10% 0.48. Calibration: slight overconfidence in 0.7-0.9 probability range. Lift@10%: 4.2x vs random.',
+      limitationsRisks: 'Model struggles with: new customers (<3 months tenure), customers with irregular usage patterns (seasonal businesses), enterprise customers (different behavior). Potential bias: model may underpredict churn for customers acquired through certain channels (limited training data). Model performance degrades if not retrained quarterly.',
+    },
+  },
+
+  // Wave 3: Technical Excellence
+  'sql-query-optimizer': {
+    skillId: 'sql-query-optimizer',
+    defaultTestCaseId: 'sql-slow-report',
+    description: 'Slow customer analytics report query',
+    inputPayload: {
+      sqlQuery: `SELECT
+  c.customer_id,
+  c.company_name,
+  c.created_at as customer_since,
+  (SELECT COUNT(*) FROM orders o WHERE o.customer_id = c.customer_id) as total_orders,
+  (SELECT SUM(amount) FROM orders o WHERE o.customer_id = c.customer_id) as total_revenue,
+  (SELECT MAX(order_date) FROM orders o WHERE o.customer_id = c.customer_id) as last_order_date,
+  (SELECT COUNT(*) FROM support_tickets t WHERE t.customer_id = c.customer_id AND t.status = 'open') as open_tickets
+FROM customers c
+WHERE c.status = 'active'
+  AND c.created_at >= '2023-01-01'
+  AND EXISTS (SELECT 1 FROM orders o WHERE o.customer_id = c.customer_id)
+ORDER BY total_revenue DESC
+LIMIT 1000;`,
+      dbType: 'postgresql',
+      tableSchema: `customers: ~500K rows (customer_id PK, company_name, status, created_at, updated_at)
+orders: ~5M rows (order_id PK, customer_id FK, order_date, amount, status) - has index on customer_id
+support_tickets: ~2M rows (ticket_id PK, customer_id FK, status, created_at) - no index on customer_id`,
+      performanceIssue: 'This query runs every morning for our daily customer health report. Currently taking 45+ seconds. Sometimes times out at 60 seconds. Need to get it under 5 seconds.',
+      dataVolume: 'large',
+    },
+  },
+  'api-documentation-generator': {
+    skillId: 'api-documentation-generator',
+    defaultTestCaseId: 'api-doc-users',
+    description: 'User management API documentation',
+    inputPayload: {
+      apiEndpoints: `// User Management Endpoints
+POST /api/v1/users - Create new user (requires admin role)
+GET /api/v1/users - List users (paginated, filterable)
+GET /api/v1/users/:id - Get user by ID
+PATCH /api/v1/users/:id - Update user
+DELETE /api/v1/users/:id - Soft delete user
+
+// User model
+{
+  id: uuid,
+  email: string (unique),
+  name: string,
+  role: enum('admin', 'member', 'viewer'),
+  status: enum('active', 'invited', 'suspended'),
+  created_at: timestamp,
+  updated_at: timestamp,
+  last_login_at: timestamp | null,
+  metadata: json
+}`,
+      apiType: 'rest',
+      authMethod: 'bearer',
+      targetAudience: 'external',
+      additionalContext: 'Rate limit: 100 requests/minute per API key. Pagination default 20, max 100. Soft delete means user.status becomes "deleted" but record is retained for 90 days. Webhooks are sent for user.created, user.updated, user.deleted events.',
+    },
+  },
+  'adr-writer': {
+    skillId: 'adr-writer',
+    defaultTestCaseId: 'adr-database-choice',
+    description: 'Primary database selection ADR',
+    inputPayload: {
+      decisionTitle: 'Use PostgreSQL as primary database',
+      context: 'We\'re building a new B2B SaaS application for project management. Need to choose a primary database. The application will have: complex relational data (projects, tasks, users, teams, permissions), need for full-text search, JSON storage for flexible metadata, and expected scale of 10K customers with avg 50 users each.',
+      options: 'Option 1: PostgreSQL - mature, feature-rich, great JSON support, strong community\nOption 2: MySQL - widely known, good performance, simpler\nOption 3: MongoDB - flexible schema, easy to start, native JSON\nOption 4: CockroachDB - PostgreSQL compatible, distributed, auto-scaling',
+      decision: 'PostgreSQL. It offers the best balance of features we need (JSONB, full-text search, complex queries) with maturity and team familiarity. While CockroachDB is interesting, we don\'t need distributed capabilities yet and it adds operational complexity.',
+      stakeholders: 'CTO (final decision), Backend Lead (implementation), DevOps Lead (operations), DBA consultant (reviewed options)',
+      constraints: 'Team has strong PostgreSQL experience (4/6 backend engineers). Need to launch MVP in 3 months. Budget is limited so managed hosting preferred. Must support our CI/CD pipeline and infrastructure-as-code approach.',
+    },
+  },
+  'data-quality-assessment': {
+    skillId: 'data-quality-assessment',
+    defaultTestCaseId: 'dq-customer-data',
+    description: 'Customer master data quality assessment',
+    inputPayload: {
+      dataDescription: 'Customer master data table in our data warehouse. ~150K customer records integrated from: Salesforce CRM, Stripe billing, Intercom support, product database. Key fields: customer_id, company_name, domain, industry, employee_count, arr, health_score, csm_owner, created_date.',
+      qualityIssues: 'Known problems: duplicate companies with slightly different names, missing industry for ~30% of records, employee_count seems wrong for many companies (shows 1 for enterprises), health_score calculation failing for some customers, some customers have multiple Stripe IDs.',
+      businessContext: 'This data feeds our customer 360 dashboard, renewal forecasting model, and CSM territory assignments. Bad data = CSMs working with wrong info, inaccurate forecasts, and missed upsell opportunities. CEO mentioned data quality issues in last all-hands.',
+      dataProfile: 'company_name: 0% null, ~3% look like duplicates\ndomain: 8% null\nindustry: 31% null\nemployee_count: 2% null, 15% value = 1\narr: 0% null, some negative values\nhealth_score: 12% null\ncsm_owner: 18% null',
+      qualityDimensions: 'all',
+    },
+  },
+
+  // Wave 4: Advanced Capabilities
+  'rag-system-design': {
+    skillId: 'rag-system-design',
+    defaultTestCaseId: 'rag-support-kb',
+    description: 'Customer support knowledge base RAG system',
+    inputPayload: {
+      useCase: 'Build an AI-powered support chatbot that can answer customer questions using our existing knowledge base. Should reduce ticket volume by handling common questions, provide 24/7 support, and help support agents find answers faster. Must cite sources and know when to escalate to human.',
+      dataSource: 'Sources to index: ~500 help articles (Zendesk), ~1000 past ticket resolutions (summarized), 50 product docs (Notion), 20 how-to videos (transcripts), release notes (last 2 years). Total ~2M words. Content updated weekly. Mix of technical and non-technical content.',
+      scale: 'medium',
+      latencyReq: 'interactive',
+      constraints: 'Must run on our existing AWS infrastructure. Budget $2K/month for AI costs. Team has Python experience but limited ML expertise. Need to maintain data privacy (no customer data in prompts). Must integrate with existing Zendesk workflow.',
+    },
+  },
+  'ai-ethics-review': {
+    skillId: 'ai-ethics-review',
+    defaultTestCaseId: 'ethics-hiring-ai',
+    description: 'AI-powered resume screening tool ethics review',
+    inputPayload: {
+      systemDescription: 'AI system that screens resumes for job applications. Takes in resume text and job description, outputs a match score (0-100) and key qualification gaps. HR uses this to prioritize which candidates to interview first. Currently in pilot with 3 job postings.',
+      affectedGroups: 'Job applicants (diverse backgrounds, ages, education levels), hiring managers (rely on scores for decisions), HR team (uses tool daily), company (reputation risk), unsuccessful candidates (may never know AI was involved)',
+      dataUsed: 'Training data: 50,000 historical resumes labeled as "hired" or "not hired" from past 5 years. Features extracted: skills keywords, years of experience, education level, job titles. No explicit demographic data but names and graduation years are present in training data.',
+      riskLevel: 'high',
+      regulatoryContext: 'Operating in US (federal contractors require OFCCP compliance) and EU (GDPR, proposed AI Act would classify as high-risk). NYC Local Law 144 requires bias audits for automated employment decision tools. Company has DEI commitments and public diversity goals.',
+    },
+  },
+  'process-automation-spec': {
+    skillId: 'process-automation-spec',
+    defaultTestCaseId: 'automation-invoice',
+    description: 'Invoice processing automation specification',
+    inputPayload: {
+      processDescription: 'Current invoice processing: 1) Vendor emails invoice PDF to AP team. 2) AP clerk manually opens email, downloads PDF. 3) Clerk logs into accounting system, creates new invoice record. 4) Clerk manually enters invoice number, vendor, line items, amounts. 5) Clerk matches to PO if applicable. 6) Routes to manager for approval (email). 7) Manager reviews, approves in accounting system. 8) Payment scheduled. Takes 15-30 min per invoice.',
+      painPoints: 'Manual data entry is slow and error-prone (5% error rate). Lost invoices when emails are missed. No visibility into invoice status. Late payment penalties ($20K last year). AP team of 3 processing 800 invoices/month. 40% of their time is data entry.',
+      systems: 'Gmail for invoice receipt, NetSuite for accounting, DocuSign for some contracts, Slack for internal comms, Notion for PO tracking spreadsheet. No current integrations between systems.',
+      volume: 'high',
+      constraints: 'Budget: $50K implementation + $1K/month ongoing. NetSuite API access available. Must maintain audit trail for SOX compliance. AP team not technical (need low-code solution). Want to pilot with one vendor before full rollout.',
+    },
+  },
+  'crisis-communication-playbook': {
+    skillId: 'crisis-communication-playbook',
+    defaultTestCaseId: 'crisis-data-breach',
+    description: 'Data breach crisis communication playbook',
+    inputPayload: {
+      crisisType: 'data-breach',
+      situation: 'Discovered unauthorized access to customer database. Attacker exploited unpatched vulnerability and had access for ~2 weeks. Affected data: names, emails, hashed passwords for approximately 50,000 customers. No financial data exposed. Attack vector identified and patched. Forensics ongoing.',
+      stakeholders: 'Affected customers (50K), all customers (200K), employees (150), board of directors, investors, media (we\'re a known brand in our space), regulators (GDPR for EU customers, state AGs for US), security researchers who might discover, partners who integrate with us',
+      companyContext: 'B2B SaaS company, 200K customers, mid-market focus. First significant security incident. Strong brand reputation for reliability. Publicly known company in our industry. CISO hired 6 months ago and has been improving security posture.',
+      timeline: 'immediate',
+    },
+  },
+
+  // Wave 5: Comprehensive Coverage
+  'all-hands-meeting-script': {
+    skillId: 'all-hands-meeting-script',
+    defaultTestCaseId: 'all-hands-q4',
+    description: 'Q4 kickoff all-hands meeting script',
+    inputPayload: {
+      meetingPurpose: 'quarterly',
+      keyTopics: 'Q3 results (beat revenue target, missed hiring target), Q4 priorities (enterprise push, platform reliability), org changes (new VP Sales starting, engineering reorg into squads), recognition (product launch team, sales winners), preview of 2024 planning process, open Q&A',
+      audienceSize: 'medium',
+      duration: '60min',
+      tone: 'inspiring',
+    },
+  },
+  'rfp-response-generator': {
+    skillId: 'rfp-response-generator',
+    defaultTestCaseId: 'rfp-enterprise',
+    description: 'Enterprise software RFP response',
+    inputPayload: {
+      rfpSummary: 'Fortune 500 manufacturing company seeking project management software for 5,000 users. Key requirements: SSO integration (Okta), advanced permissions, audit logging, 99.9% SLA, on-prem deployment option, migration from legacy system (MS Project Server). Timeline: decision in 60 days, implementation complete in 6 months. Evaluation criteria: functionality (35%), security (25%), price (20%), implementation plan (20%).',
+      companyCapabilities: 'Our PM software: 450 enterprise customers, SOC 2 Type II certified, supports SSO (Okta, Azure AD, Ping), granular permissions with custom roles, full audit logging with SIEM integration, 99.95% actual uptime last year, cloud-only (no on-prem). Professional services team for enterprise migrations.',
+      differentiators: '1) Best-in-class UX (NPS 65 vs industry avg 32), 2) Fastest implementation (avg 8 weeks vs competitor 16 weeks), 3) Modern API enabling deep integrations, 4) AI-powered resource optimization unique in market, 5) Named customer success manager for all enterprise accounts',
+      competitors: 'Likely competing against: Monday.com (strong brand, weaker enterprise features), Smartsheet (good enterprise but clunky UX), MS Project (incumbent, strong MS relationship). We\'ve won 7 of last 10 deals against Monday in enterprise.',
+      dealSize: 'large',
+    },
+  },
+  'role-transition-playbook': {
+    skillId: 'role-transition-playbook',
+    defaultTestCaseId: 'transition-promotion',
+    description: 'Senior engineer to engineering manager transition',
+    inputPayload: {
+      transitionType: 'internal-promotion',
+      roleDescription: 'Engineering Manager for the Platform team (6 engineers). Responsible for team health, career development, sprint planning, stakeholder management, hiring. Reports to VP Engineering. Team owns core infrastructure: APIs, database, authentication, deployment pipeline.',
+      criticalKnowledge: 'Systems: deep knowledge of our API architecture, incident response procedures, deployment pipeline. Processes: sprint planning approach, on-call rotation, code review standards. Relationships: key stakeholders in Product (PM for platform), DevOps (shared services), and Security (compliance requirements). History: why we made certain architectural decisions, past incidents and lessons learned.',
+      timeline: '30days',
+      context: 'Previous manager left suddenly (new opportunity). Team has been self-managing for 2 weeks. Two team members also applied for the role and didn\'t get it. Q4 is our busiest quarter with a major platform upgrade planned.',
+    },
+  },
+  'skills-development-path': {
+    skillId: 'skills-development-path',
+    defaultTestCaseId: 'skills-pm-career',
+    description: 'Product management career development path',
+    inputPayload: {
+      targetSkill: 'Product Management',
+      currentLevel: 'intermediate',
+      goals: 'Currently a PM for 2 years at a mid-stage startup. Want to become a Senior PM in next 12-18 months, eventually move into product leadership (Director/VP). Specifically want to improve in: strategy and roadmapping, stakeholder management, data/analytics, and leading larger initiatives.',
+      timeCommitment: '10hrs',
+      learningStyle: 'mixed',
+    },
+  },
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
 // COMBINED DEFAULT TEST DATA
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -1773,6 +2073,8 @@ export const ALL_SKILL_DEFAULT_TEST_DATA: Record<string, SkillDefaultTestData> =
   ...GOVERNANCE_DEFAULT_TEST_DATA,
   ...OPERATIONS_DEFAULT_TEST_DATA,
   ...AI_SOLUTIONS_ARCHITECT_DEFAULT_TEST_DATA,
+  ...ROLE_TEMPLATE_DEFAULT_TEST_DATA,
+  ...WAVE_SKILLS_DEFAULT_TEST_DATA,
 };
 
 /**

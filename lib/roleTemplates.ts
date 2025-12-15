@@ -25,6 +25,9 @@ export const ROLE_TEMPLATES: RoleTemplate[] = [
       'interview-prep',
       'salary-negotiation-master',
       'linkedin-optimizer-pro',
+      'sql-query-optimizer',
+      'api-documentation-generator',
+      'adr-writer',
     ],
     dynamicSkills: [
       // SKILL 1: Production-Quality Code Review Assistant
@@ -11101,6 +11104,10 @@ Create an engaging script with hooks, retention techniques, and clear structure.
       'linkedin-optimizer-pro',
       'company-research',
       'salary-negotiation-master',
+      'ab-test-analysis-reporter',
+      'kpi-framework-designer',
+      'crisis-communication-playbook',
+      'all-hands-meeting-script',
     ],
     dynamicSkills: [
       // SKILL 1: Production-Quality Marketing Strategy
@@ -12419,6 +12426,10 @@ Provide detailed, actionable creative direction that will help elevate this work
       'interview-prep',
       'company-research',
       'salary-negotiation-master',
+      'executive-decision-memo',
+      'kpi-framework-designer',
+      'ab-test-analysis-reporter',
+      'all-hands-meeting-script',
     ],
     dynamicSkills: [
       // SKILL 1: Production-Quality PRD Generator
@@ -13390,6 +13401,10 @@ Provide a complete competitive intelligence report with market landscape, compet
       'interview-prep',
       'linkedin-optimizer-pro',
       'role-ai-automation-analyzer',
+      'sql-query-optimizer',
+      'data-quality-assessment',
+      'ab-test-analysis-reporter',
+      'kpi-framework-designer',
     ],
     dynamicSkills: [
       // SKILL 1: Production-Quality SQL Query Generator
@@ -16409,6 +16424,8 @@ Provide a comprehensive UX evaluation with heuristic analysis, accessibility aud
       'linkedin-optimizer-pro',
       'networking-script-generator',
       'salary-negotiation-master',
+      'rfp-response-generator',
+      'board-presentation-builder',
     ],
     dynamicSkills: [
       // SKILL 1: Production-Quality Multi-Touch Outreach Sequences
@@ -17679,6 +17696,9 @@ Generate a strategic deal plan with clear next actions to advance and close this
       'linkedin-optimizer-pro',
       'networking-script-generator',
       'company-research',
+      'role-transition-playbook',
+      'skills-development-path',
+      'one-on-one-meeting-prep',
     ],
     dynamicSkills: [
       // SKILL 1: Production-Quality Job Description System
@@ -22870,6 +22890,9 @@ Evaluate each opportunity using the scoring framework and provide a prioritized 
       'interview-prep',
       'salary-negotiation-master',
       'linkedin-optimizer-pro',
+      'adr-writer',
+      'api-documentation-generator',
+      'process-automation-spec',
     ],
     dynamicSkills: [
       // ═══════════════════════════════════════════════════════════════════════════
@@ -24248,6 +24271,9 @@ Ensure all nursing diagnoses are supported by data provided in the patient summa
       'linkedin-optimizer-pro',
       'salary-negotiation-master',
       'company-research',
+      'process-automation-spec',
+      'kpi-framework-designer',
+      'team-retrospective-facilitator',
     ],
     dynamicSkills: [
       // ═══════════════════════════════════════════════════════════════════════════
@@ -33493,6 +33519,8 @@ Provide a complete competitive analysis including:
       'linkedin-optimizer-pro',
       'skills-gap-analyzer',
       'cover-letter-generator',
+      'skills-development-path',
+      'all-hands-meeting-script',
     ],
     dynamicSkills: [
       // SKILL 1: Training Presentation Builder
@@ -34072,6 +34100,10 @@ Provide complete activity with facilitator instructions, materials, debrief ques
       'linkedin-optimizer-pro',
       'skills-gap-analyzer',
       'cover-letter-generator',
+      'executive-decision-memo',
+      'kpi-framework-designer',
+      'process-automation-spec',
+      'board-presentation-builder',
     ],
     dynamicSkills: [
       // SKILL 1: Strategy Consulting Deck Builder
@@ -34669,6 +34701,11 @@ Create a complete business case with financial analysis, risk assessment, and cl
       'job-readiness-score',
       'linkedin-optimizer-pro',
       'skills-gap-analyzer',
+      'executive-decision-memo',
+      'board-presentation-builder',
+      'kpi-framework-designer',
+      'crisis-communication-playbook',
+      'all-hands-meeting-script',
     ],
     dynamicSkills: [
       // SKILL 1: Investor Pitch Deck Builder
@@ -35996,6 +36033,10 @@ Create an executive-ready variance explanation with actionable insights.`,
       'skills-gap-analyzer',
       'interview-prep',
       'role-ai-automation-analyzer',
+      'rag-system-design',
+      'ml-model-card-generator',
+      'prompt-engineering-optimizer',
+      'ai-ethics-review',
     ],
     dynamicSkills: [
       {

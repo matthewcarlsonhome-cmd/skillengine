@@ -211,7 +211,8 @@ const SkillLibraryPage: React.FC = () => {
     filters.categories.length > 0 ||
     filters.roles.length > 0 ||
     filters.useCases.length > 0 ||
-    filters.levels.length > 0;
+    filters.levels.length > 0 ||
+    filters.skillIds.length > 0;
 
   // Handle skill launch
   const handleLaunchSkill = (skill: LibrarySkill) => {
@@ -481,7 +482,7 @@ const SkillLibraryPage: React.FC = () => {
                           // Filter to show only collection skills
                           setFilters({
                             ...DEFAULT_FILTERS,
-                            search: collection.skillIds.join(' OR '),
+                            skillIds: collection.skillIds,
                           });
                         }}
                         className={`group p-4 rounded-xl border bg-card hover:border-primary/50 transition-all text-left`}
@@ -507,10 +508,24 @@ const SkillLibraryPage: React.FC = () => {
 
             {/* Results Header */}
             <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-sm text-muted-foreground">
                   {filteredSkills.length} {filteredSkills.length === 1 ? 'skill' : 'skills'}
                 </span>
+                {filters.skillIds.length > 0 && (
+                  <span className="px-2 py-0.5 rounded bg-blue-500/10 text-blue-500 text-xs font-medium flex items-center gap-1">
+                    {SKILL_COLLECTIONS.find((c) =>
+                      c.skillIds.length === filters.skillIds.length &&
+                      c.skillIds.every((id) => filters.skillIds.includes(id))
+                    )?.name || `${filters.skillIds.length} selected`}
+                    <button
+                      onClick={() => setFilters((prev) => ({ ...prev, skillIds: [] }))}
+                      className="hover:text-blue-400"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                )}
                 {filters.roles.length === 1 && (
                   <span className="px-2 py-0.5 rounded bg-primary/10 text-primary text-xs font-medium flex items-center gap-1">
                     {ROLE_DEFINITIONS.find((r) => r.id === filters.roles[0])?.name}

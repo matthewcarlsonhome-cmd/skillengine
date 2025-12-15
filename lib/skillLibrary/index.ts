@@ -668,6 +668,11 @@ export function filterSkills(
   filters: LibraryFilters
 ): LibrarySkill[] {
   return skills.filter((skill) => {
+    // Skill IDs filter (for collections) - takes precedence
+    if (filters.skillIds && filters.skillIds.length > 0) {
+      if (!filters.skillIds.includes(skill.id)) return false;
+    }
+
     // Search filter
     if (filters.search) {
       const searchLower = filters.search.toLowerCase();
