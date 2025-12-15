@@ -90,7 +90,29 @@ export async function runSkillStream(
         );
       }
       if (response.status === 429) {
-        throw new Error('Rate limit exceeded. Please wait a moment and try again.');
+        const retryAfter = response.headers.get('retry-after');
+        const errorMessage = errorBody.error?.message || '';
+
+        // Check for specific rate limit types
+        if (errorMessage.includes('quota')) {
+          throw new Error(
+            'OpenAI API quota exceeded. Please check your OpenAI account billing and usage limits at https://platform.openai.com/usage'
+          );
+        }
+        if (errorMessage.includes('tokens per min') || errorMessage.includes('TPM')) {
+          throw new Error(
+            `Rate limit: Too many tokens per minute. ${retryAfter ? `Try again in ${retryAfter} seconds.` : 'Please wait 30-60 seconds and try again.'}`
+          );
+        }
+        if (errorMessage.includes('requests per min') || errorMessage.includes('RPM')) {
+          throw new Error(
+            `Rate limit: Too many requests. ${retryAfter ? `Try again in ${retryAfter} seconds.` : 'Please wait a moment and try again.'}`
+          );
+        }
+
+        throw new Error(
+          `Rate limit exceeded. ${retryAfter ? `Try again in ${retryAfter} seconds.` : 'Please wait a moment and try again, or check your OpenAI usage limits.'}`
+        );
       }
       if (response.status === 400) {
         throw new Error(
