@@ -95,6 +95,27 @@ import {
   FileContractIcon,
   CpuIcon,
   PresentationIcon,
+  // Revenue & Operations icons
+  RenewalRadarIcon,
+  QBRIcon,
+  SecurityQuestionnaireIcon,
+  PrivacyImpactIcon,
+  PostmortemIcon,
+  RunbookIcon,
+  SalesCallIcon,
+  ProposalIcon,
+  ContractIcon,
+  PricingIcon,
+  ChangelogIcon,
+  BacklogIcon,
+  ResearchSynthIcon,
+  ABTestIcon,
+  SEOIcon,
+  AccessibilityIcon,
+  DataQualityIcon,
+  FinanceVarianceIcon,
+  BoardPackIcon,
+  HiringPipelineIcon,
 } from '../../components/icons';
 
 // ─────────────────────────────────────────────────────────────────────────────
