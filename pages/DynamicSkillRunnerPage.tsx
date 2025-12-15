@@ -34,6 +34,7 @@ import {
   Share2,
   Users
 } from 'lucide-react';
+import { TestDataPanel } from '../components/TestDataPanel';
 
 const DynamicSkillRunnerPage: React.FC = () => {
   const { workspaceId, skillId } = useParams<{ workspaceId: string; skillId: string }>();
@@ -96,6 +97,22 @@ const DynamicSkillRunnerPage: React.FC = () => {
 
   const handleInputChange = (id: string, value: unknown) => {
     setFormState(prev => ({ ...prev, [id]: value }));
+  };
+
+  // Load test data into form
+  const handleLoadTestData = (inputPayload: Record<string, string>) => {
+    setFormState(prev => ({ ...prev, ...inputPayload }));
+  };
+
+  // Reset form to blank
+  const handleResetForm = () => {
+    if (skill) {
+      const initial: Record<string, unknown> = {};
+      skill.inputs.forEach(input => {
+        initial[input.id] = input.defaultValue ?? (input.type === 'checkbox' ? false : '');
+      });
+      setFormState(initial);
+    }
   };
 
   const validateForm = (): boolean => {
@@ -536,6 +553,15 @@ const DynamicSkillRunnerPage: React.FC = () => {
 
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
+          {/* Test Data Panel */}
+          <TestDataPanel
+            skillId={skill.id}
+            onLoadTestData={handleLoadTestData}
+            onReset={handleResetForm}
+            onExecute={handleRun}
+            isExecuting={isRunning}
+          />
+
           {/* Config */}
           <div className="p-4 border rounded-lg bg-card">
             <h3 className="text-lg font-semibold mb-4">Configuration</h3>

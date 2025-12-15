@@ -37,6 +37,7 @@ import {
   Save,
   Check,
 } from 'lucide-react';
+import { TestDataPanel } from '../components/TestDataPanel';
 
 // Theme palette for display
 const THEME = {
@@ -140,6 +141,23 @@ const CommunitySkillRunnerPage: React.FC = () => {
 
   const handleInputChange = (id: string, value: unknown) => {
     setFormState(prev => ({ ...prev, [id]: value }));
+  };
+
+  // Load test data into form
+  const handleLoadTestData = (inputPayload: Record<string, string>) => {
+    setFormState(prev => ({ ...prev, ...inputPayload }));
+  };
+
+  // Reset form to blank
+  const handleResetForm = () => {
+    if (communitySkill) {
+      const inputs = (communitySkill.inputs as DynamicFormInput[]) || [];
+      const initial: Record<string, unknown> = {};
+      inputs.forEach(input => {
+        initial[input.id] = input.defaultValue ?? (input.type === 'checkbox' ? false : '');
+      });
+      setFormState(initial);
+    }
   };
 
   const validateForm = (): boolean => {
@@ -630,6 +648,15 @@ const CommunitySkillRunnerPage: React.FC = () => {
 
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
+          {/* Test Data Panel */}
+          <TestDataPanel
+            skillId={communitySkill.id}
+            onLoadTestData={handleLoadTestData}
+            onReset={handleResetForm}
+            onExecute={handleRun}
+            isExecuting={isRunning}
+          />
+
           {/* Config */}
           <div className="p-4 border rounded-lg bg-card">
             <h3 className="text-lg font-semibold mb-4">Configuration</h3>
