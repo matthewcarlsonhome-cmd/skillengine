@@ -50,6 +50,7 @@ import {
   Star,
   CheckCircle,
 } from 'lucide-react';
+import { TestDataPanel } from '../components/TestDataPanel';
 
 const LibrarySkillRunnerPage: React.FC = () => {
   const navigate = useNavigate();
@@ -206,6 +207,23 @@ const LibrarySkillRunnerPage: React.FC = () => {
 
   const handleInputChange = (id: string, value: unknown) => {
     setFormState((prev) => ({ ...prev, [id]: value }));
+  };
+
+  // Load test data into form
+  const handleLoadTestData = (inputPayload: Record<string, string>) => {
+    setFormState((prev) => ({ ...prev, ...inputPayload }));
+  };
+
+  // Reset form to blank
+  const handleResetForm = () => {
+    if (librarySkill) {
+      const inputs = librarySkill.inputs || [];
+      const initial: Record<string, unknown> = {};
+      inputs.forEach((input) => {
+        initial[input.id] = input.defaultValue ?? (input.type === 'checkbox' ? false : '');
+      });
+      setFormState(initial);
+    }
   };
 
   const validateForm = (): boolean => {
@@ -601,6 +619,15 @@ const LibrarySkillRunnerPage: React.FC = () => {
             MAIN CONTENT - Form & Output
         ═══════════════════════════════════════════════════════════════════ */}
         <div className="lg:col-span-2 space-y-6">
+          {/* Test Data Panel */}
+          <TestDataPanel
+            skillId={librarySkill.id}
+            onLoadTestData={handleLoadTestData}
+            onReset={handleResetForm}
+            onExecute={handleRun}
+            isExecuting={isRunning}
+          />
+
           {/* API Configuration */}
           <div className="rounded-xl border bg-card p-6">
             <h2 className="font-semibold flex items-center gap-2 mb-4">
