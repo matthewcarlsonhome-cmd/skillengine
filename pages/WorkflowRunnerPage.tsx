@@ -65,6 +65,7 @@ import { useToast } from '../hooks/useToast';
 import { useAppContext } from '../hooks/useAppContext';
 import { runSkillStream as runGeminiSkillStream } from '../lib/gemini';
 import { runSkillStream as runClaudeSkillStream } from '../lib/claude';
+import { runSkillStream as runChatGPTSkillStream, ChatGPTModelType } from '../lib/chatgpt';
 import { getApiKey } from '../lib/apiKeyStorage';
 import type { ApiProviderType } from '../types';
 import { TestDataBanner } from '../components/TestOutputButton';
@@ -99,6 +100,7 @@ const WorkflowRunnerPage: React.FC = () => {
   const [globalInputs, setGlobalInputs] = useState<Record<string, string>>({});
   const [apiKey, setApiKey] = useState('');
   const [claudeModel, setClaudeModel] = useState<'haiku' | 'sonnet' | 'opus'>('sonnet');
+  const [chatgptModel, setChatgptModel] = useState<ChatGPTModelType>('gpt-4o-mini');
 
   // Execution state
   const [isRunning, setIsRunning] = useState(false);
@@ -190,9 +192,11 @@ const WorkflowRunnerPage: React.FC = () => {
 
   // Load stored API key
   useEffect(() => {
-    const storedKey = getApiKey(selectedApi as 'gemini' | 'claude');
+    const storedKey = getApiKey(selectedApi as 'gemini' | 'claude' | 'chatgpt');
     if (storedKey) {
       setApiKey(storedKey);
+    } else {
+      setApiKey('');
     }
   }, [selectedApi]);
 
@@ -315,6 +319,32 @@ const WorkflowRunnerPage: React.FC = () => {
             }
           }
         }
+      } else if (selectedApi === 'chatgpt') {
+        const response = await runChatGPTSkillStream(apiKey, promptData, chatgptModel);
+        if (!response.body) throw new Error('Response body is null');
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          const chunk = decoder.decode(value);
+          const lines = chunk.split('\n');
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const jsonStr = line.substring(6);
+              if (jsonStr.trim() === '[DONE]') continue;
+              try {
+                const parsed = JSON.parse(jsonStr);
+                const content = parsed.choices?.[0]?.delta?.content;
+                if (content) {
+                  fullResponse += content;
+                }
+              } catch {
+                // Ignore parsing errors
+              }
+            }
+          }
+        }
       }
 
       return fullResponse;
@@ -414,6 +444,36 @@ const WorkflowRunnerPage: React.FC = () => {
                 const parsed = JSON.parse(jsonStr);
                 if (parsed.type === 'content_block_delta' && parsed.delta?.type === 'text_delta') {
                   fullResponse += parsed.delta.text;
+                }
+              } catch {
+                // Ignore parsing errors
+              }
+            }
+          }
+        }
+      } else if (selectedApi === 'chatgpt') {
+        const response = await runChatGPTSkillStream(
+          apiKey,
+          { systemInstruction: systemPrompt, userPrompt },
+          chatgptModel
+        );
+        if (!response.body) throw new Error('Response body is null');
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          const chunk = decoder.decode(value);
+          const lines = chunk.split('\n');
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const jsonStr = line.substring(6);
+              if (jsonStr.trim() === '[DONE]') continue;
+              try {
+                const parsed = JSON.parse(jsonStr);
+                const content = parsed.choices?.[0]?.delta?.content;
+                if (content) {
+                  fullResponse += content;
                 }
               } catch {
                 // Ignore parsing errors
@@ -936,6 +996,7 @@ const WorkflowRunnerPage: React.FC = () => {
                 >
                   <option value="gemini">Gemini</option>
                   <option value="claude">Claude</option>
+                  <option value="chatgpt">ChatGPT</option>
                 </Select>
                 <Link
                   to="/api-keys"
@@ -976,6 +1037,24 @@ const WorkflowRunnerPage: React.FC = () => {
                     <option value="haiku">Haiku (Fastest)</option>
                     <option value="sonnet">Sonnet (Recommended)</option>
                     <option value="opus">Opus (Most Capable)</option>
+                  </Select>
+                </div>
+              )}
+              {selectedApi === 'chatgpt' && (
+                <div className="space-y-2 md:col-span-2">
+                  <label htmlFor="chatgpt-model" className="text-sm font-medium">
+                    ChatGPT Model
+                  </label>
+                  <Select
+                    id="chatgpt-model"
+                    value={chatgptModel}
+                    onChange={(e) => setChatgptModel(e.target.value as ChatGPTModelType)}
+                    disabled={isRunning}
+                  >
+                    <option value="gpt-4o-mini">GPT-4o Mini (Fast, Cost-Effective)</option>
+                    <option value="gpt-4o">GPT-4o (Most Capable)</option>
+                    <option value="o1-mini">o1 Mini (Reasoning)</option>
+                    <option value="o1-preview">o1 Preview (Advanced Reasoning)</option>
                   </Select>
                 </div>
               )}

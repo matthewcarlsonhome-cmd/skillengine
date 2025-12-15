@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { executeDynamicSkill } from '../lib/skills/dynamic';
+import type { ChatGPTModelType } from '../lib/chatgpt';
 import { incrementSkillUseCount, rateSkill, type CommunitySkill } from '../lib/supabase';
 import { useAppContext } from '../hooks/useAppContext';
 import { useToast } from '../hooks/useToast';
@@ -61,6 +62,7 @@ const CommunitySkillRunnerPage: React.FC = () => {
   const [hasRated, setHasRated] = useState(false);
   const [apiKey, setApiKey] = useState('');
   const [claudeModel, setClaudeModel] = useState<'haiku' | 'sonnet' | 'opus'>('haiku');
+  const [chatgptModel, setChatgptModel] = useState<ChatGPTModelType>('gpt-4o-mini');
   const [output, setOutput] = useState('');
   const [isRunning, setIsRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -101,9 +103,11 @@ const CommunitySkillRunnerPage: React.FC = () => {
 
   // Load stored API key when provider changes
   useEffect(() => {
-    const storedKey = getApiKey(selectedApi as 'gemini' | 'claude');
+    const storedKey = getApiKey(selectedApi as 'gemini' | 'claude' | 'chatgpt');
     if (storedKey) {
       setApiKey(storedKey);
+    } else {
+      setApiKey('');
     }
   }, [selectedApi]);
 
@@ -198,8 +202,9 @@ const CommunitySkillRunnerPage: React.FC = () => {
         skill,
         formInputs: formState,
         apiKey,
-        provider: selectedApi as 'gemini' | 'claude',
+        provider: selectedApi as 'gemini' | 'claude' | 'chatgpt',
         claudeModel,
+        chatgptModel,
       })) {
         fullOutput += chunk;
         setOutput(fullOutput);
@@ -665,10 +670,11 @@ const CommunitySkillRunnerPage: React.FC = () => {
                 <label className="text-sm font-medium">AI Provider</label>
                 <Select
                   value={selectedApi}
-                  onChange={(e) => setSelectedApi(e.target.value as 'gemini' | 'claude')}
+                  onChange={(e) => setSelectedApi(e.target.value as 'gemini' | 'claude' | 'chatgpt')}
                 >
                   <option value="gemini">Gemini</option>
                   <option value="claude">Claude</option>
+                  <option value="chatgpt">ChatGPT</option>
                 </Select>
               </div>
               <div className="space-y-2">
@@ -698,6 +704,26 @@ const CommunitySkillRunnerPage: React.FC = () => {
                     {claudeModel === 'haiku' && 'Best for quick tasks and high-volume usage.'}
                     {claudeModel === 'sonnet' && 'Great balance of speed and intelligence for most tasks.'}
                     {claudeModel === 'opus' && 'Best for complex reasoning and nuanced outputs.'}
+                  </p>
+                </div>
+              )}
+              {selectedApi === 'chatgpt' && (
+                <div className="space-y-2 md:col-span-2">
+                  <label className="text-sm font-medium">ChatGPT Model</label>
+                  <Select
+                    value={chatgptModel}
+                    onChange={(e) => setChatgptModel(e.target.value as ChatGPTModelType)}
+                  >
+                    <option value="gpt-4o-mini">GPT-4o Mini (Fast, Cost-Effective)</option>
+                    <option value="gpt-4o">GPT-4o (Most Capable)</option>
+                    <option value="o1-mini">o1 Mini (Reasoning)</option>
+                    <option value="o1-preview">o1 Preview (Advanced Reasoning)</option>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    {chatgptModel === 'gpt-4o-mini' && 'Best for quick tasks and high-volume usage.'}
+                    {chatgptModel === 'gpt-4o' && 'Most capable model for complex tasks.'}
+                    {chatgptModel === 'o1-mini' && 'Reasoning model for logic-intensive tasks.'}
+                    {chatgptModel === 'o1-preview' && 'Advanced reasoning for complex problem-solving.'}
                   </p>
                 </div>
               )}
