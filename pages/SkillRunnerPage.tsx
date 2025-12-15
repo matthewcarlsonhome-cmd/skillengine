@@ -1,45 +1,206 @@
+/**
+ * SkillRunnerPage - Skill Execution Page (Refactored)
+ *
+ * Uses shared layout components for consistent UI across all runners.
+ * Features:
+ * - RunnerLayout for standardized grid structure
+ * - TestDataPanel with fixture metadata
+ * - FormattedOutput for LLM response rendering
+ * - useRequestTiming for performance observability
+ * - Responsive design for demo presentation
+ */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, memo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import { SKILLS } from '../lib/skills';
-import { Skill, FormInput as FormInputType, ApiProviderType } from '../types.ts';
-import { runSkillStream as runGeminiSkillStream } from '../lib/gemini.ts';
-import { runSkillStream as runClaudeSkillStream } from '../lib/claude.ts';
-import { useToast } from '../hooks/useToast.tsx';
-import { useAppContext } from '../hooks/useAppContext.tsx';
-import { useAuth } from '../hooks/useAuth.tsx';
-import { Button } from '../components/ui/Button.tsx';
-import { Input } from '../components/ui/Input.tsx';
-import { Textarea } from '../components/ui/Textarea.tsx';
-import { Select } from '../components/ui/Select.tsx';
-import { Checkbox } from '../components/ui/Checkbox.tsx';
-import { Progress } from '../components/ui/Progress.tsx';
-import { Sparkles, Clipboard, Download, AlertTriangle, ArrowLeft, KeyRound, Link as LinkIcon, Upload, HelpCircle, Save, Star, Check, Code, ChevronDown, ChevronUp, FileCode } from 'lucide-react';
+import { Skill, FormInput as FormInputType, ApiProviderType } from '../types';
+import { runSkillStream as runGeminiSkillStream } from '../lib/gemini';
+import { runSkillStream as runClaudeSkillStream } from '../lib/claude';
+import { useToast } from '../hooks/useToast';
+import { useAppContext } from '../hooks/useAppContext';
+import { useAuth } from '../hooks/useAuth';
+import { useRequestTiming } from '../hooks/useRequestTiming';
+import { Button } from '../components/ui/Button';
+import { Input } from '../components/ui/Input';
+import { Textarea } from '../components/ui/Textarea';
+import { Select } from '../components/ui/Select';
+import { Checkbox } from '../components/ui/Checkbox';
+import { Progress } from '../components/ui/Progress';
+import {
+  RunnerLayout,
+  InfoCard,
+  ConfigPanel,
+  OutputPanel,
+  ActionFooter,
+  FeatureList,
+  SectionDivider,
+} from '../components/RunnerLayout';
+import { TestDataPanel } from '../components/TestDataPanel';
+import { FormattedOutput, Citations } from '../components/FormattedOutput';
+import { ErrorBanner } from '../components/ui/ErrorBanner';
+import { SkeletonRunnerPage } from '../components/ui/Skeleton';
+import {
+  Sparkles,
+  AlertTriangle,
+  KeyRound,
+  HelpCircle,
+  Upload,
+  Star,
+  Code,
+  ChevronDown,
+  ChevronUp,
+  FileCode,
+  Download,
+  Clipboard,
+} from 'lucide-react';
 import { db } from '../lib/storage/indexeddb';
 import type { SavedOutput, FavoriteSkill, SkillExecution } from '../lib/storage/types';
-import { getApiKey, saveApiKey as storeApiKey } from '../lib/apiKeyStorage';
+import { getApiKey } from '../lib/apiKeyStorage';
 import { trackSkillUsage } from '../lib/admin';
-import { TestDataBanner } from '../components/TestOutputButton';
+import { typography, cards, cn } from '../lib/theme';
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MEMOIZED FORM INPUT COMPONENT
+// ═══════════════════════════════════════════════════════════════════════════
+
+interface FormFieldProps {
+  input: FormInputType;
+  value: string | boolean;
+  onChange: (id: string, value: string | boolean) => void;
+  onFileChange: (event: React.ChangeEvent<HTMLInputElement>, inputId: string) => void;
+  disabled?: boolean;
+}
+
+const FormField = memo<FormFieldProps>(({
+  input,
+  value,
+  onChange,
+  onFileChange,
+  disabled = false,
+}) => {
+  const isUploadable = input.type === 'textarea' &&
+    ['jobDescription', 'userBackground', 'additionalContext'].includes(input.id);
+
+  return (
+    <div className="space-y-2">
+      <div className="flex justify-between items-center">
+        {input.type !== 'checkbox' && (
+          <label htmlFor={input.id} className={cn(typography.label)}>
+            {input.label}
+            {input.required && <span className="text-red-500 ml-1">*</span>}
+          </label>
+        )}
+        {isUploadable && (
+          <label className="text-sm font-medium text-primary hover:underline cursor-pointer flex items-center gap-1">
+            <Upload className="h-3 w-3" />
+            Upload File
+            <input
+              type="file"
+              className="hidden"
+              accept=".txt,.md"
+              onChange={(e) => onFileChange(e, input.id)}
+              disabled={disabled}
+            />
+          </label>
+        )}
+      </div>
+
+      {input.type === 'text' && (
+        <Input
+          id={input.id}
+          placeholder={input.placeholder}
+          value={value as string}
+          onChange={(e) => onChange(input.id, e.target.value)}
+          required={input.required}
+          disabled={disabled}
+        />
+      )}
+
+      {input.type === 'textarea' && (
+        <Textarea
+          id={input.id}
+          placeholder={input.placeholder}
+          value={value as string}
+          onChange={(e) => onChange(input.id, e.target.value)}
+          required={input.required}
+          rows={input.rows || 5}
+          disabled={disabled}
+        />
+      )}
+
+      {input.type === 'select' && (
+        <Select
+          id={input.id}
+          value={value as string}
+          onChange={(e) => onChange(input.id, e.target.value)}
+          required={input.required}
+          disabled={disabled}
+        >
+          {input.options?.map((opt) => (
+            <option key={opt} value={opt}>{opt}</option>
+          ))}
+        </Select>
+      )}
+
+      {input.type === 'checkbox' && (
+        <div className="flex items-center gap-2">
+          <Checkbox
+            id={input.id}
+            checked={!!value}
+            onCheckedChange={(checked) => onChange(input.id, !!checked)}
+            disabled={disabled}
+          />
+          <label
+            htmlFor={input.id}
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          >
+            {input.label}
+          </label>
+        </div>
+      )}
+    </div>
+  );
+});
+
+FormField.displayName = 'FormField';
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MAIN COMPONENT
+// ═══════════════════════════════════════════════════════════════════════════
 
 const SkillRunnerPage: React.FC = () => {
   const { skillId } = useParams<{ skillId: string }>();
   const navigate = useNavigate();
   const { addToast } = useToast();
-  const { selectedApi, setSelectedApi, resumeText, jobDescriptionText, additionalInfoText, refreshProfileFromStorage } = useAppContext();
+  const {
+    selectedApi,
+    setSelectedApi,
+    resumeText,
+    jobDescriptionText,
+    additionalInfoText,
+    refreshProfileFromStorage,
+  } = useAppContext();
   const { user, appUser } = useAuth();
+  const timing = useRequestTiming();
 
-  const skill: Skill | undefined = useMemo(() => skillId ? SKILLS[skillId] : undefined, [skillId]);
+  const skill: Skill | undefined = useMemo(
+    () => (skillId ? SKILLS[skillId] : undefined),
+    [skillId]
+  );
 
+  // Form state
   const [formState, setFormState] = useState<Record<string, any>>({});
   const [apiKey, setApiKey] = useState('');
   const [claudeModel, setClaudeModel] = useState<'haiku' | 'sonnet' | 'opus'>('haiku');
+
+  // Execution state
   const [output, setOutput] = useState('');
   const [citations, setCitations] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
+
+  // UI state
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [saveTitle, setSaveTitle] = useState('');
   const [isSaving, setIsSaving] = useState(false);
@@ -47,7 +208,7 @@ const SkillRunnerPage: React.FC = () => {
   const [outputSaved, setOutputSaved] = useState(false);
   const [showPrompts, setShowPrompts] = useState(false);
 
-  // Refresh profile from storage on mount to ensure we have latest data
+  // Initialize form state
   useEffect(() => {
     refreshProfileFromStorage();
   }, [refreshProfileFromStorage]);
@@ -72,14 +233,14 @@ const SkillRunnerPage: React.FC = () => {
     }
   }, [skill, resumeText, jobDescriptionText, additionalInfoText]);
 
-  // Check if skill is favorited
+  // Check favorite status
   useEffect(() => {
     if (skillId) {
       db.isSkillFavorited(skillId).then(setIsFavorited);
     }
   }, [skillId]);
 
-  // Load stored API key when provider changes
+  // Load stored API key
   useEffect(() => {
     const storedKey = getApiKey(selectedApi as 'gemini' | 'claude');
     if (storedKey) {
@@ -92,11 +253,15 @@ const SkillRunnerPage: React.FC = () => {
     setOutputSaved(false);
   }, [output]);
 
-  const handleInputChange = (id: string, value: string | boolean) => {
-    setFormState(prev => ({ ...prev, [id]: value }));
-  };
-  
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>, inputId: string) => {
+  // Form handlers
+  const handleInputChange = useCallback((id: string, value: string | boolean) => {
+    setFormState((prev) => ({ ...prev, [id]: value }));
+  }, []);
+
+  const handleFileChange = useCallback((
+    event: React.ChangeEvent<HTMLInputElement>,
+    inputId: string
+  ) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -114,10 +279,29 @@ const SkillRunnerPage: React.FC = () => {
       addToast(`Error reading file: ${reader.error}`, 'error');
     };
     reader.readAsText(file);
-    event.target.value = ''; // Reset file input
-  };
+    event.target.value = '';
+  }, [handleInputChange, addToast]);
 
-  const validateForm = () => {
+  // Load test data
+  const handleLoadTestData = useCallback((inputPayload: Record<string, string>) => {
+    setFormState((prev) => ({ ...prev, ...inputPayload }));
+    addToast('Test data loaded into form fields', 'success');
+  }, [addToast]);
+
+  // Reset form
+  const handleResetForm = useCallback(() => {
+    if (skill) {
+      const emptyState = skill.inputs.reduce((acc, input) => {
+        acc[input.id] = input.type === 'checkbox' ? false : '';
+        return acc;
+      }, {} as Record<string, any>);
+      setFormState(emptyState);
+      addToast('Form reset to blank', 'success');
+    }
+  }, [skill, addToast]);
+
+  // Validation
+  const validateForm = useCallback((): boolean => {
     if (!apiKey) {
       addToast('API Key is required.', 'error');
       return false;
@@ -130,10 +314,18 @@ const SkillRunnerPage: React.FC = () => {
       }
     }
     return true;
-  };
+  }, [apiKey, skill, formState, addToast]);
 
-  const handleRunSkill = async () => {
+  // Run skill
+  const handleRunSkill = useCallback(async () => {
     if (!validateForm() || !skill) return;
+
+    // Start timing
+    const requestId = timing.startRequest({
+      skillId: skill.id,
+      skillName: skill.name,
+      provider: selectedApi,
+    });
 
     setIsLoading(true);
     setOutput('');
@@ -143,7 +335,7 @@ const SkillRunnerPage: React.FC = () => {
 
     const startTime = Date.now();
     const progressInterval = setInterval(() => {
-      setProgress(prev => Math.min(prev + 2, 95));
+      setProgress((prev) => Math.min(prev + 2, 95));
     }, 200);
 
     try {
@@ -154,54 +346,58 @@ const SkillRunnerPage: React.FC = () => {
         const result = await runGeminiSkillStream(apiKey, promptData, skill.useGoogleSearch);
         const stream = result && result.stream ? result.stream : result;
         if (!stream || typeof stream[Symbol.asyncIterator] !== 'function') {
-          throw new Error("Received an invalid response from the Gemini service.");
+          throw new Error('Received an invalid response from the Gemini service.');
         }
         for await (const chunk of stream) {
-          // Use chunk.text() for @google/generative-ai SDK
           const text = typeof chunk.text === 'function' ? chunk.text() : chunk.text;
           if (text) {
+            timing.trackChunk(text.length);
             fullResponseText += text;
             setOutput(fullResponseText);
           }
         }
-        // Get final response for citations
+        // Get citations
         try {
           const finalResponse = await result.response;
           if (finalResponse?.candidates?.[0]?.groundingMetadata?.groundingChunks) {
             setCitations(finalResponse.candidates[0].groundingMetadata.groundingChunks);
           }
-        } catch (e) {
-          // Citations may not be available, continue without them
+        } catch {
+          // Citations may not be available
         }
       } else if (selectedApi === 'claude') {
         const response = await runClaudeSkillStream(apiKey, promptData, claudeModel);
-        if (!response.body) throw new Error("Response body is null");
+        if (!response.body) throw new Error('Response body is null');
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
         while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            const chunk = decoder.decode(value);
-            const lines = chunk.split('\n');
-            for (const line of lines) {
-                if (line.startsWith('data: ')) {
-                    const jsonStr = line.substring(6);
-                    if (jsonStr.trim() === '[DONE]') break;
-                    try {
-                        const parsed = JSON.parse(jsonStr);
-                        if (parsed.type === 'content_block_delta' && parsed.delta.type === 'text_delta') {
-                            fullResponseText += parsed.delta.text;
-                            setOutput(fullResponseText);
-                        }
-                    } catch (e) {
-                        // Ignore parsing errors for incomplete JSON chunks
-                    }
+          const { done, value } = await reader.read();
+          if (done) break;
+          const chunk = decoder.decode(value);
+          const lines = chunk.split('\n');
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const jsonStr = line.substring(6);
+              if (jsonStr.trim() === '[DONE]') break;
+              try {
+                const parsed = JSON.parse(jsonStr);
+                if (parsed.type === 'content_block_delta' && parsed.delta.type === 'text_delta') {
+                  timing.trackChunk(parsed.delta.text.length);
+                  fullResponseText += parsed.delta.text;
+                  setOutput(fullResponseText);
                 }
+              } catch {
+                // Ignore parsing errors
+              }
             }
+          }
         }
       } else {
         throw new Error(`API provider "${selectedApi}" is not supported yet.`);
       }
+
+      // Complete timing
+      const timingResult = timing.completeRequest();
 
       // Save execution to history
       const execution: SkillExecution = {
@@ -217,25 +413,14 @@ const SkillRunnerPage: React.FC = () => {
       };
       await db.saveExecution(execution);
 
-      // Track skill usage for admin analytics
+      // Track usage
       if (appUser) {
-        trackSkillUsage(
-          appUser.id,
-          appUser.email,
-          skill.id,
-          skill.name,
-          'static'
-        );
+        trackSkillUsage(appUser.id, appUser.email, skill.id, skill.name, 'static');
       } else if (user) {
-        trackSkillUsage(
-          user.id,
-          user.email || 'anonymous',
-          skill.id,
-          skill.name,
-          'static'
-        );
+        trackSkillUsage(user.id, user.email || 'anonymous', skill.id, skill.name, 'static');
       }
     } catch (e: any) {
+      timing.failRequest(e);
       setError(e.message || 'An unknown error occurred.');
       addToast(e.message || 'An unknown error occurred.', 'error');
     } finally {
@@ -243,14 +428,26 @@ const SkillRunnerPage: React.FC = () => {
       setProgress(100);
       setIsLoading(false);
     }
-  };
+  }, [
+    validateForm,
+    skill,
+    timing,
+    selectedApi,
+    apiKey,
+    claudeModel,
+    formState,
+    appUser,
+    user,
+    addToast,
+  ]);
 
-  const copyToClipboard = () => {
+  // Output actions
+  const copyToClipboard = useCallback(() => {
     navigator.clipboard.writeText(output);
     addToast('Copied to clipboard!', 'success');
-  };
+  }, [output, addToast]);
 
-  const downloadTextFile = () => {
+  const downloadTextFile = useCallback(() => {
     const blob = new Blob([output], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -261,11 +458,10 @@ const SkillRunnerPage: React.FC = () => {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     addToast('Text file downloaded.', 'success');
-  };
+  }, [output, skill, addToast]);
 
-  const handleSaveOutput = async () => {
+  const handleSaveOutput = useCallback(async () => {
     if (!skill || !saveTitle.trim()) return;
-
     setIsSaving(true);
     try {
       const savedOutput: SavedOutput = {
@@ -279,23 +475,22 @@ const SkillRunnerPage: React.FC = () => {
         model: selectedApi as 'gemini' | 'claude',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        isFavorite: false
+        isFavorite: false,
       };
       await db.saveOutput(savedOutput);
       setShowSaveDialog(false);
       setSaveTitle('');
       setOutputSaved(true);
       addToast('Output saved to dashboard!', 'success');
-    } catch (error) {
+    } catch {
       addToast('Failed to save output', 'error');
     } finally {
       setIsSaving(false);
     }
-  };
+  }, [skill, saveTitle, output, formState, selectedApi, addToast]);
 
-  const handleToggleFavorite = async () => {
+  const handleToggleFavorite = useCallback(async () => {
     if (!skill) return;
-
     try {
       if (isFavorited) {
         await db.removeFavoriteBySkillId(skill.id);
@@ -309,34 +504,30 @@ const SkillRunnerPage: React.FC = () => {
           skillDescription: skill.description,
           skillSource: 'static',
           category: skill.category,
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
         };
         await db.addFavoriteSkill(favorite);
         setIsFavorited(true);
         addToast('Added to favorites!', 'success');
       }
-    } catch (error) {
+    } catch {
       addToast('Failed to update favorite', 'error');
     }
-  };
+  }, [skill, isFavorited, addToast]);
 
-  const copyPromptToClipboard = (text: string, label: string) => {
+  // Prompt helpers
+  const getCurrentPrompts = useCallback(() => {
+    if (!skill) return { systemInstruction: '', userPrompt: '' };
+    return skill.generatePrompt(formState);
+  }, [skill, formState]);
+
+  const copyPromptToClipboard = useCallback((text: string, label: string) => {
     navigator.clipboard.writeText(text);
     addToast(`${label} copied to clipboard!`, 'success');
-  };
+  }, [addToast]);
 
-  // Load test data into form
-  const handleLoadTestData = (inputPayload: Record<string, string>) => {
-    setFormState((prev) => ({
-      ...prev,
-      ...inputPayload,
-    }));
-    addToast('Test data loaded into form fields', 'success');
-  };
-
-  const downloadPrompts = () => {
+  const downloadPrompts = useCallback(() => {
     if (!skill) return;
-
     const promptData = skill.generatePrompt(formState);
     const promptExport = {
       skillName: skill.name,
@@ -346,7 +537,7 @@ const SkillRunnerPage: React.FC = () => {
         systemInstruction: promptData.systemInstruction,
         userPrompt: promptData.userPrompt,
       },
-      inputs: skill.inputs.map(input => ({
+      inputs: skill.inputs.map((input) => ({
         id: input.id,
         label: input.label,
         type: input.type,
@@ -354,7 +545,6 @@ const SkillRunnerPage: React.FC = () => {
         currentValue: formState[input.id] || '',
       })),
     };
-
     const blob = new Blob([JSON.stringify(promptExport, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -365,14 +555,9 @@ const SkillRunnerPage: React.FC = () => {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     addToast('Prompts exported!', 'success');
-  };
+  }, [skill, formState, addToast]);
 
-  // Get current prompts based on form state
-  const getCurrentPrompts = () => {
-    if (!skill) return { systemInstruction: '', userPrompt: '' };
-    return skill.generatePrompt(formState);
-  };
-
+  // 404 state
   if (!skill) {
     return (
       <div className="container mx-auto max-w-4xl text-center py-20">
@@ -380,94 +565,64 @@ const SkillRunnerPage: React.FC = () => {
         <h1 className="mt-4 text-3xl font-bold">Skill Not Found</h1>
         <p className="mt-2 text-muted-foreground">The skill you are looking for does not exist.</p>
         <Button onClick={() => navigate('/')} className="mt-6">
-          <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Home
         </Button>
       </div>
     );
   }
 
-  const renderInput = (input: FormInputType) => {
-    const value = formState[input.id] || '';
-    const isUploadable = input.type === 'textarea' && ['jobDescription', 'userBackground', 'additionalContext'].includes(input.id);
+  const timingSummary = timing.getTimingSummary();
 
-    return (
-      <div className="space-y-2">
-        <div className="flex justify-between items-center">
-          {input.type !== 'checkbox' && <label htmlFor={input.id} className="text-sm font-medium">{input.label}{input.required && <span className="text-red-500 ml-1">*</span>}</label>}
-          {isUploadable && (
-            <label className="text-sm font-medium text-primary hover:underline cursor-pointer flex items-center gap-1">
-              <Upload className="h-3 w-3" />
-              Upload File
-              <input type="file" className="hidden" accept=".txt,.md" onChange={(e) => handleFileChange(e, input.id)} />
-            </label>
-          )}
-        </div>
-        {(() => {
-          switch (input.type) {
-            case 'text':
-              return <Input id={input.id} placeholder={input.placeholder} value={value} onChange={(e) => handleInputChange(input.id, e.target.value)} required={input.required} />;
-            case 'textarea':
-              return <Textarea id={input.id} placeholder={input.placeholder} value={value} onChange={(e) => handleInputChange(input.id, e.target.value)} required={input.required} rows={input.rows || 5} />;
-            case 'select':
-              return <Select id={input.id} value={value} onChange={(e) => handleInputChange(input.id, e.target.value)} required={input.required}>
-                {input.options?.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-              </Select>;
-            case 'checkbox':
-              return <div className="flex items-center gap-2"><Checkbox id={input.id} checked={!!value} onCheckedChange={(checked) => handleInputChange(input.id, !!checked)} /><label htmlFor={input.id} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">{input.label}</label></div>;
-            default:
-              return null;
-          }
-        })()}
-      </div>
-    );
-  };
+  // ═══════════════════════════════════════════════════════════════════════════
+  // RENDER
+  // ═══════════════════════════════════════════════════════════════════════════
 
   return (
-    <div className="container mx-auto max-w-7xl px-4 py-8">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <aside className="lg:col-span-1 lg:sticky lg:top-24 self-start">
-          <div className="rounded-xl border bg-card text-card-foreground p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${skill.theme.secondary}`}>
-                <skill.icon className={`h-6 w-6 ${skill.theme.primary}`} />
-              </div>
-              <h1 className="text-2xl font-bold">{skill.name}</h1>
-            </div>
-            <p className="text-muted-foreground text-sm mb-4">{skill.longDescription}</p>
-            <h3 className="font-semibold mb-2">What you'll get:</h3>
-            <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
-              {skill.whatYouGet.map((item, i) => <li key={i}>{item}</li>)}
-            </ul>
-            <div className="mt-4 pt-4 border-t">
-              <Button
-                variant={isFavorited ? 'secondary' : 'outline'}
-                className="w-full"
-                onClick={handleToggleFavorite}
-              >
-                <Star className={`h-4 w-4 mr-2 ${isFavorited ? 'fill-current text-yellow-500' : ''}`} />
-                {isFavorited ? 'Favorited' : 'Add to Favorites'}
-              </Button>
-            </div>
+    <RunnerLayout
+      backUrl="/"
+      backLabel="Back to Home"
+      sidebar={
+        <>
+          {/* Skill Info Card */}
+          <InfoCard
+            icon={skill.icon}
+            iconBg={skill.theme.secondary}
+            iconColor={skill.theme.primary}
+            title={skill.name}
+            description={skill.longDescription}
+          >
+            <FeatureList items={skill.whatYouGet} className="mt-4" />
+
+            <SectionDivider />
+
+            {/* Favorite button */}
+            <Button
+              variant={isFavorited ? 'secondary' : 'outline'}
+              className="w-full"
+              onClick={handleToggleFavorite}
+            >
+              <Star className={cn('h-4 w-4 mr-2', isFavorited && 'fill-current text-yellow-500')} />
+              {isFavorited ? 'Favorited' : 'Add to Favorites'}
+            </Button>
+
+            <SectionDivider />
 
             {/* View Prompts Toggle */}
-            <div className="mt-4 pt-4 border-t">
-              <button
-                onClick={() => setShowPrompts(!showPrompts)}
-                className="flex items-center justify-between w-full text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <span className="flex items-center gap-2">
-                  <Code className="h-4 w-4" />
-                  View Skill Prompts
-                </span>
-                {showPrompts ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-              </button>
-            </div>
-          </div>
+            <button
+              onClick={() => setShowPrompts(!showPrompts)}
+              className="flex items-center justify-between w-full text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <span className="flex items-center gap-2">
+                <Code className="h-4 w-4" />
+                View Skill Prompts
+              </span>
+              {showPrompts ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            </button>
+          </InfoCard>
 
           {/* Prompts Panel */}
           {showPrompts && (
-            <div className="mt-4 rounded-xl border bg-card p-4 space-y-4">
+            <div className={cn(cards.padded, 'space-y-4')}>
               <div className="flex items-center justify-between">
                 <h3 className="font-semibold flex items-center gap-2">
                   <FileCode className="h-4 w-4" />
@@ -524,7 +679,7 @@ const SkillRunnerPage: React.FC = () => {
                   </pre>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  This prompt is generated based on your current form inputs. Fill in the form above to see the complete prompt.
+                  This prompt is generated based on your current form inputs.
                 </p>
               </div>
 
@@ -546,147 +701,154 @@ const SkillRunnerPage: React.FC = () => {
               </div>
             </div>
           )}
-        </aside>
+        </>
+      }
+    >
+      {/* Test Data Panel */}
+      <TestDataPanel
+        skillId={skillId}
+        onLoadTestData={handleLoadTestData}
+        onReset={handleResetForm}
+        onExecute={handleRunSkill}
+        isExecuting={isLoading}
+      />
 
-        <div className="lg:col-span-2">
-          <div className="space-y-6">
-            {/* Test Data Banner */}
-            <TestDataBanner
-              skillId={skillId}
-              onLoadTestData={handleLoadTestData}
-            />
-
-            <div className="p-4 border rounded-lg bg-card">
-                <h3 className="text-lg font-semibold mb-4">Run Configuration</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                        <label htmlFor="api-provider" className="text-sm font-medium">AI Provider</label>
-                        <Select id="api-provider" value={selectedApi} onChange={(e) => setSelectedApi(e.target.value as ApiProviderType)}>
-                            <option value="gemini">Gemini</option>
-                            <option value="claude">Claude</option>
-                            <option value="chatgpt" disabled>ChatGPT (Coming Soon)</option>
-                        </Select>
-                        <Link to="/api-keys" className="text-xs text-muted-foreground hover:underline flex items-center gap-1">
-                            <HelpCircle className="h-3 w-3" />
-                            Get API Key
-                        </Link>
-                    </div>
-                    <div className="space-y-2">
-                        <label htmlFor="api-key" className="text-sm font-medium">API Key<span className="text-red-500 ml-1">*</span></label>
-                        <div className="relative">
-                            <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input id="api-key" type="password" placeholder="Enter your API key" value={apiKey} onChange={(e) => setApiKey(e.target.value)} required className="pl-10" />
-                        </div>
-                    </div>
-                    {selectedApi === 'claude' && (
-                      <div className="space-y-2 md:col-span-2">
-                        <label htmlFor="claude-model" className="text-sm font-medium">Claude Model</label>
-                        <Select
-                          id="claude-model"
-                          value={claudeModel}
-                          onChange={(e) => setClaudeModel(e.target.value as 'haiku' | 'sonnet' | 'opus')}
-                        >
-                          <option value="haiku">Haiku (Fastest, Most Cost-Effective)</option>
-                          <option value="sonnet">Sonnet (Balanced Speed & Quality)</option>
-                          <option value="opus">Opus (Most Capable, Slowest)</option>
-                        </Select>
-                        <p className="text-xs text-muted-foreground">
-                          {claudeModel === 'haiku' && 'Best for quick tasks and high-volume usage.'}
-                          {claudeModel === 'sonnet' && 'Great balance of speed and intelligence for most tasks.'}
-                          {claudeModel === 'opus' && 'Best for complex reasoning and nuanced outputs.'}
-                        </p>
-                      </div>
-                    )}
-                </div>
-            </div>
-
-            {skill.inputs.map(input => <div key={input.id}>{renderInput(input)}</div>)}
-          </div>
-
-          <div className="my-8 text-center">
-            <Button size="lg" onClick={handleRunSkill} disabled={isLoading}>
-              {isLoading ? (<><Sparkles className="mr-2 h-5 w-5 animate-pulse" />Generating...</>) : (<><Sparkles className="mr-2 h-5 w-5" />Run Skill</>)}
-            </Button>
-          </div>
-
-          {(isLoading || output || error) && (
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold">Output</h2>
-              <div className="relative rounded-xl border bg-muted/50 min-h-[200px] p-1">
-                {isLoading && <div className="p-4"><Progress value={progress} className="w-full" /><p className="text-center text-sm text-muted-foreground mt-2">AI is thinking...</p></div>}
-                {output && !isLoading && (
-                  <div className="absolute top-2 right-2 flex gap-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => {
-                        setSaveTitle(`${skill.name} - ${new Date().toLocaleDateString()}`);
-                        setShowSaveDialog(true);
-                      }}
-                      title="Save to Dashboard"
-                      className={outputSaved ? 'text-green-500' : ''}
-                    >
-                      {outputSaved ? <Check className="h-4 w-4" /> : <Save className="h-4 w-4" />}
-                    </Button>
-                    <Button variant="ghost" size="icon" onClick={copyToClipboard} title="Copy to Clipboard"><Clipboard className="h-4 w-4" /></Button>
-                    <Button variant="ghost" size="icon" onClick={downloadTextFile} title="Download"><Download className="h-4 w-4" /></Button>
-                  </div>
-                )}
-                <div className="prose prose-sm sm:prose-base dark:prose-invert max-w-none p-4 overflow-x-auto prose-headings:scroll-mt-4 prose-h2:text-xl prose-h2:font-bold prose-h2:border-b prose-h2:border-border prose-h2:pb-2 prose-h2:mt-8 prose-h2:mb-4 prose-h3:text-lg prose-h3:font-semibold prose-h3:mt-6 prose-h3:mb-3 prose-p:leading-relaxed prose-li:my-1 prose-table:border prose-table:border-border prose-th:bg-muted prose-th:px-4 prose-th:py-2 prose-th:text-left prose-th:font-semibold prose-th:border prose-th:border-border prose-td:px-4 prose-td:py-2 prose-td:border prose-td:border-border prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:bg-muted/50 prose-blockquote:py-2 prose-blockquote:px-4 prose-blockquote:not-italic prose-strong:text-primary">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]} components={{
-                      hr: ({...props}) => <hr className="my-8 border-border border-t-2" {...props} />,
-                      h2: ({children, ...props}) => <h2 className="flex items-center gap-2 text-xl font-bold border-b border-border pb-2 mt-8 mb-4" {...props}>{children}</h2>,
-                      h3: ({children, ...props}) => <h3 className="text-lg font-semibold text-foreground/90 mt-6 mb-3" {...props}>{children}</h3>,
-                      table: ({children, ...props}) => <div className="overflow-x-auto my-4"><table className="min-w-full border border-border rounded-md overflow-hidden" {...props}>{children}</table></div>,
-                      thead: ({children, ...props}) => <thead className="bg-muted" {...props}>{children}</thead>,
-                      th: ({children, ...props}) => <th className="px-4 py-3 text-left text-sm font-semibold text-foreground border-b border-border" {...props}>{children}</th>,
-                      td: ({children, ...props}) => <td className="px-4 py-3 text-sm border-b border-border" {...props}>{children}</td>,
-                      blockquote: ({children, ...props}) => <blockquote className="border-l-4 border-primary bg-muted/50 py-3 px-4 my-4 rounded-r-md not-italic" {...props}>{children}</blockquote>,
-                      ul: ({children, ...props}) => <ul className="list-disc pl-6 space-y-2 my-4" {...props}>{children}</ul>,
-                      ol: ({children, ...props}) => <ol className="list-decimal pl-6 space-y-2 my-4" {...props}>{children}</ol>,
-                      li: ({children, ...props}) => <li className="leading-relaxed" {...props}>{children}</li>,
-                      code({node, className, children, ...props}) {
-                        const match = /language-(\w+)/.exec(className || '');
-                        const isInline = !match && !className;
-                        return isInline
-                          ? <code className="bg-muted font-mono text-sm px-1.5 py-0.5 rounded-md text-primary" {...props}>{children}</code>
-                          : <code className="block bg-muted font-mono text-sm p-4 rounded-md overflow-x-auto my-4 border border-border" {...props}>{children}</code>;
-                      },
-                      pre: ({children, ...props}) => <pre className="bg-muted rounded-md overflow-x-auto my-4 border border-border" {...props}>{children}</pre>,
-                      strong: ({children, ...props}) => <strong className="font-semibold text-foreground" {...props}>{children}</strong>,
-                      a: ({children, href, ...props}) => <a href={href} className="text-primary hover:underline" target="_blank" rel="noopener noreferrer" {...props}>{children}</a>,
-                  }}>
-                    {output}
-                  </ReactMarkdown>
-                </div>
-                {error && (
-                  <div className="p-4 text-red-500 flex items-center gap-2">
-                    <AlertTriangle className="h-5 w-5" />
-                    <p>Error: {error}</p>
-                  </div>
-                )}
-              </div>
-              {citations.length > 0 && (
-                <div className="space-y-2">
-                  <h3 className="text-lg font-semibold">Sources</h3>
-                  <div className="p-4 border rounded-lg bg-card text-sm">
-                    <ul className="space-y-2">
-                      {citations.map((citation, index) => (
-                        <li key={index} className="flex items-start gap-2">
-                          <LinkIcon className="h-4 w-4 mt-1 text-muted-foreground flex-shrink-0" />
-                          <a href={citation.web.uri} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline truncate" title={citation.web.uri}>
-                            {citation.web.title || citation.web.uri}
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
+      {/* Configuration Panel */}
+      <ConfigPanel title="Run Configuration">
+        <div className="space-y-2">
+          <label htmlFor="api-provider" className={typography.label}>
+            AI Provider
+          </label>
+          <Select
+            id="api-provider"
+            value={selectedApi}
+            onChange={(e) => setSelectedApi(e.target.value as ApiProviderType)}
+            disabled={isLoading}
+          >
+            <option value="gemini">Gemini</option>
+            <option value="claude">Claude</option>
+            <option value="chatgpt" disabled>ChatGPT (Coming Soon)</option>
+          </Select>
+          <Link
+            to="/api-keys"
+            className="text-xs text-muted-foreground hover:underline flex items-center gap-1"
+          >
+            <HelpCircle className="h-3 w-3" />
+            Get API Key
+          </Link>
         </div>
+
+        <div className="space-y-2">
+          <label htmlFor="api-key" className={typography.label}>
+            API Key<span className="text-red-500 ml-1">*</span>
+          </label>
+          <div className="relative">
+            <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              id="api-key"
+              type="password"
+              placeholder="Enter your API key"
+              value={apiKey}
+              onChange={(e) => setApiKey(e.target.value)}
+              required
+              className="pl-10"
+              disabled={isLoading}
+            />
+          </div>
+        </div>
+
+        {selectedApi === 'claude' && (
+          <div className="space-y-2 md:col-span-2">
+            <label htmlFor="claude-model" className={typography.label}>
+              Claude Model
+            </label>
+            <Select
+              id="claude-model"
+              value={claudeModel}
+              onChange={(e) => setClaudeModel(e.target.value as 'haiku' | 'sonnet' | 'opus')}
+              disabled={isLoading}
+            >
+              <option value="haiku">Haiku (Fastest, Most Cost-Effective)</option>
+              <option value="sonnet">Sonnet (Balanced Speed & Quality)</option>
+              <option value="opus">Opus (Most Capable, Slowest)</option>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              {claudeModel === 'haiku' && 'Best for quick tasks and high-volume usage.'}
+              {claudeModel === 'sonnet' && 'Great balance of speed and intelligence for most tasks.'}
+              {claudeModel === 'opus' && 'Best for complex reasoning and nuanced outputs.'}
+            </p>
+          </div>
+        )}
+      </ConfigPanel>
+
+      {/* Form Inputs */}
+      <div className="space-y-6">
+        {skill.inputs.map((input) => (
+          <FormField
+            key={input.id}
+            input={input}
+            value={formState[input.id] || ''}
+            onChange={handleInputChange}
+            onFileChange={handleFileChange}
+            disabled={isLoading}
+          />
+        ))}
       </div>
+
+      {/* Run Button */}
+      <ActionFooter>
+        <Button
+          size="lg"
+          onClick={handleRunSkill}
+          disabled={isLoading}
+          className="min-w-[200px]"
+        >
+          {isLoading ? (
+            <>
+              <Sparkles className="mr-2 h-5 w-5 animate-pulse" />
+              Generating...
+            </>
+          ) : (
+            <>
+              <Sparkles className="mr-2 h-5 w-5" />
+              Run Skill
+            </>
+          )}
+        </Button>
+      </ActionFooter>
+
+      {/* Output Section */}
+      {(isLoading || output || error) && (
+        <OutputPanel
+          title="Output"
+          isLoading={isLoading}
+          hasOutput={!!output}
+          hasError={!!error}
+        >
+          <FormattedOutput
+            output={output}
+            isLoading={isLoading}
+            progress={progress}
+            error={error}
+            onRetry={handleRunSkill}
+            onCopy={copyToClipboard}
+            onDownload={downloadTextFile}
+            onSave={() => {
+              setSaveTitle(`${skill.name} - ${new Date().toLocaleDateString()}`);
+              setShowSaveDialog(true);
+            }}
+            isSaved={outputSaved}
+            requestId={timingSummary?.requestId}
+            timingInfo={timingSummary ? {
+              timeToFirstToken: timingSummary.timeToFirstToken || undefined,
+              totalDuration: timingSummary.totalDuration || undefined,
+            } : undefined}
+          />
+        </OutputPanel>
+      )}
+
+      {/* Citations */}
+      {citations.length > 0 && <Citations citations={citations} />}
 
       {/* Save Output Dialog */}
       {showSaveDialog && (
@@ -699,7 +861,7 @@ const SkillRunnerPage: React.FC = () => {
             <h3 className="text-lg font-semibold mb-4">Save Output to Dashboard</h3>
             <div className="space-y-4">
               <div className="space-y-2">
-                <label htmlFor="save-title" className="text-sm font-medium">
+                <label htmlFor="save-title" className={typography.label}>
                   Title
                 </label>
                 <Input
@@ -722,7 +884,7 @@ const SkillRunnerPage: React.FC = () => {
           </div>
         </>
       )}
-    </div>
+    </RunnerLayout>
   );
 };
 
