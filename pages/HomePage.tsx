@@ -152,14 +152,14 @@ const HomePage: React.FC = () => {
                     <span>Salary negotiation scripts</span>
                   </li>
                 </ul>
-                <Link to="/skills">
+                <Link to="/library?useCase=job-search">
                   <Button size="lg" className="w-full bg-blue-500 hover:bg-blue-600">
                     Start Job Search
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
                 <p className="text-xs text-muted-foreground text-center mt-4">
-                  16 specialized job search skills
+                  Job search, interview prep & career growth skills
                 </p>
               </div>
             </div>
