@@ -139,9 +139,11 @@ const SkillLibraryPage: React.FC = () => {
   const [filters, setFilters] = useState<LibraryFilters>(() => {
     // Initialize from URL params
     const roleParam = searchParams.get('role');
+    const useCaseParam = searchParams.get('useCase');
     return {
       ...DEFAULT_FILTERS,
       roles: roleParam ? [roleParam] : [],
+      useCases: useCaseParam ? [useCaseParam as SkillUseCase] : [],
     };
   });
   const [sortBy, setSortBy] = useState<LibrarySortOption>('name');
@@ -164,14 +166,17 @@ const SkillLibraryPage: React.FC = () => {
   const skillCountByRole = useMemo(() => getSkillCountByRole(), []);
   const skillCountByCategory = useMemo(() => getSkillCountByCategory(), []);
 
-  // Update URL when role filter changes
+  // Update URL when role or useCase filter changes
   useEffect(() => {
+    const params: Record<string, string> = {};
     if (filters.roles.length === 1) {
-      setSearchParams({ role: filters.roles[0] });
-    } else if (filters.roles.length === 0) {
-      setSearchParams({});
+      params.role = filters.roles[0];
     }
-  }, [filters.roles, setSearchParams]);
+    if (filters.useCases.length === 1) {
+      params.useCase = filters.useCases[0];
+    }
+    setSearchParams(params);
+  }, [filters.roles, filters.useCases, setSearchParams]);
 
   // Toggle a filter value
   const toggleFilter = <K extends keyof LibraryFilters>(

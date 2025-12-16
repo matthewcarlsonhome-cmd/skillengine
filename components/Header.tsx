@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Moon, Sun, Briefcase, Users, Sparkles, LogIn, LogOut, Loader2, ChevronDown, LayoutDashboard, Package, Menu, X, Settings, FileSpreadsheet, MessageSquare, Calculator, Mail, Building2, Trophy, Target, BarChart3, Bot, Bell, Lock, TrendingUp, Calendar, User, Wand2, Download, Shield, BookOpen, Layers } from 'lucide-react';
+import { Moon, Sun, Briefcase, Users, LogIn, LogOut, Loader2, ChevronDown, LayoutDashboard, Package, Menu, X, Settings, FileSpreadsheet, MessageSquare, Calculator, Mail, Building2, Trophy, Target, BarChart3, Bot, Bell, Lock, TrendingUp, Calendar, User, Wand2, Download, Shield, BookOpen, Layers } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme.tsx';
 import { useAuth } from '../hooks/useAuth.tsx';
 import { useToast } from '../hooks/useToast.tsx';
@@ -59,7 +59,7 @@ const Header: React.FC = () => {
           </Link>
 
           <nav className="hidden md:flex items-center gap-1">
-            {/* Core Navigation - 5 primary destinations */}
+            {/* Core Navigation - 4 primary destinations */}
             <Link to="/dashboard">
               <Button
                 variant={isActive('/dashboard') ? 'secondary' : 'ghost'}
@@ -70,16 +70,6 @@ const Header: React.FC = () => {
                 Dashboard
               </Button>
             </Link>
-            <Link to="/skills">
-              <Button
-                variant={isActive('/skills') ? 'secondary' : 'ghost'}
-                size="sm"
-                className="gap-2"
-              >
-                <Sparkles className="h-4 w-4" />
-                Skills
-              </Button>
-            </Link>
             <Link to="/library">
               <Button
                 variant={isActive('/library') ? 'secondary' : 'ghost'}
@@ -87,7 +77,7 @@ const Header: React.FC = () => {
                 className="gap-2"
               >
                 <BookOpen className="h-4 w-4" />
-                Library
+                Skill Library
               </Button>
             </Link>
             <Link to="/workflows">
@@ -429,22 +419,13 @@ const Header: React.FC = () => {
                 Dashboard
               </Button>
             </Link>
-            <Link to="/skills">
-              <Button
-                variant={isActive('/skills') ? 'secondary' : 'ghost'}
-                className="w-full justify-start gap-2"
-              >
-                <Sparkles className="h-4 w-4" />
-                Skills
-              </Button>
-            </Link>
             <Link to="/library">
               <Button
                 variant={isActive('/library') ? 'secondary' : 'ghost'}
                 className="w-full justify-start gap-2"
               >
                 <BookOpen className="h-4 w-4" />
-                Library
+                Skill Library
               </Button>
             </Link>
             <Link to="/workflows">
