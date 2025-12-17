@@ -563,4 +563,139 @@ export const CompactProviderSelector: React.FC<CompactProviderSelectorProps> = (
   );
 };
 
+// ═══════════════════════════════════════════════════════════════════════════
+// PROVIDER CONFIG STATUS (Simplified view for skill pages)
+// Shows current configuration with link to change settings
+// ═══════════════════════════════════════════════════════════════════════════
+
+export interface ProviderConfigStatusProps {
+  /** Current provider state from useProviderConfig */
+  providerState: ProviderConfigState;
+  /** Available models for current provider */
+  availableModels: ModelOption[];
+  /** Whether user can run skills */
+  canRun: boolean;
+  /** Callbacks for quick model changes */
+  onProviderChange: (provider: ApiProvider) => void;
+  onModelChange: (modelId: string) => void;
+  /** Whether currently running */
+  isRunning?: boolean;
+}
+
+export const ProviderConfigStatus: React.FC<ProviderConfigStatusProps> = ({
+  providerState,
+  availableModels,
+  canRun,
+  onProviderChange,
+  onModelChange,
+  isRunning = false,
+}) => {
+  const { provider, model, apiKey, tier, isAdmin: userIsAdmin } = providerState;
+  const hasKey = !!apiKey || hasStoredKey(provider);
+  const tierConfig = TIER_CONFIGS[tier];
+  const currentModel = availableModels.find(m => m.id === model) || availableModels[0];
+  const providerInfo = PROVIDER_INFO[provider];
+
+  // If not configured, show setup prompt
+  if (!hasKey) {
+    return (
+      <div className="rounded-xl border-2 border-dashed border-amber-500/50 bg-amber-500/5 p-6">
+        <div className="flex items-start gap-4">
+          <div className="h-12 w-12 rounded-lg bg-amber-500/20 flex items-center justify-center shrink-0">
+            <Key className="h-6 w-6 text-amber-500" />
+          </div>
+          <div className="flex-1">
+            <h3 className="font-semibold text-lg mb-1">Setup Required</h3>
+            <p className="text-muted-foreground text-sm mb-4">
+              Configure your API key once to run any skill. Keys are stored securely in your browser.
+            </p>
+            <Link to="/account">
+              <Button>
+                <Settings className="h-4 w-4 mr-2" />
+                Configure API Keys
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Configured state - show compact info
+  return (
+    <div className="rounded-xl border bg-card p-4">
+      <div className="flex items-center justify-between">
+        {/* Status */}
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-lg bg-green-500/20 flex items-center justify-center">
+            <CheckCircle2 className="h-5 w-5 text-green-500" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="font-medium">Ready to run</span>
+              {userIsAdmin && (
+                <span className="text-xs bg-yellow-500/20 text-yellow-600 px-2 py-0.5 rounded-full flex items-center gap-1">
+                  <Crown className="h-3 w-3" />
+                  Admin
+                </span>
+              )}
+            </div>
+            <div className="text-sm text-muted-foreground">
+              Using {providerInfo.name}
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Settings */}
+        <Link to="/account" className="text-sm text-primary hover:underline flex items-center gap-1">
+          <Settings className="h-4 w-4" />
+          Settings
+        </Link>
+      </div>
+
+      {/* Model Selector */}
+      <div className="mt-4 pt-4 border-t">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 flex-1">
+            <label className="text-sm font-medium whitespace-nowrap">Provider & Model:</label>
+            <div className="flex items-center gap-2 flex-1">
+              <select
+                value={provider}
+                onChange={(e) => onProviderChange(e.target.value as ApiProvider)}
+                disabled={isRunning}
+                className="text-sm border rounded-lg px-3 py-2 bg-background flex-1"
+              >
+                <option value="gemini">Gemini</option>
+                <option value="claude">Claude</option>
+                <option value="chatgpt">ChatGPT</option>
+              </select>
+              <select
+                value={model}
+                onChange={(e) => onModelChange(e.target.value)}
+                disabled={isRunning}
+                className="text-sm border rounded-lg px-3 py-2 bg-background flex-1"
+              >
+                {availableModels.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Model info */}
+        {currentModel && (
+          <div className="mt-2 text-xs text-muted-foreground">
+            {currentModel.qualityTier === 'premium' && '👑 Premium model • '}
+            {currentModel.qualityTier === 'basic' && '⚡ Fast & economical • '}
+            Est. ${((currentModel.costPer1kTokens || 0.1) * 3).toFixed(3)}/run
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 export default ProviderConfig;
