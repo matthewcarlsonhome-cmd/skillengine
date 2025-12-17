@@ -129,6 +129,7 @@ import DailyPlannerPage from './pages/DailyPlannerPage';         // Daily task p
 // Settings, configuration, and help
 // ─────────────────────────────────────────────────────────────────────────────
 import ApiKeyInstructionsPage from './pages/ApiKeyInstructionsPage'; // API key setup guide
+import PlatformKeysSetupPage from './pages/PlatformKeysSetupPage';   // Platform keys admin setup
 import SettingsPage from './pages/SettingsPage';                     // App settings
 import PricingPage from './pages/PricingPage';                       // Pricing information
 import AdminPage from './pages/AdminPage';                           // Admin control panel
@@ -259,6 +260,7 @@ function App() {
                         Configuration and help resources
                     ═══════════════════════════════════════════════════════ */}
                     <Route path="/api-keys" element={<ApiKeyInstructionsPage />} />
+                    <Route path="/docs/platform-keys-setup" element={<PlatformKeysSetupPage />} />
                     <Route path="/settings" element={<SettingsPage />} />
                     <Route path="/pricing" element={<PricingPage />} />
                     <Route path="/account" element={<AccountPage />} />
