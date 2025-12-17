@@ -134,24 +134,53 @@ const COLLECTION_ICONS: Record<string, React.ElementType> = {
 const SkillLibraryPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const fromQuiz = searchParams.get('fromQuiz') === 'true';
 
   // State
   const [filters, setFilters] = useState<LibraryFilters>(() => {
-    // Initialize from URL params
+    // Initialize from URL params (supports comma-separated values from quiz)
     const roleParam = searchParams.get('role');
+    const rolesParam = searchParams.get('roles');
     const useCaseParam = searchParams.get('useCase');
+    const useCasesParam = searchParams.get('useCases');
+    const categoriesParam = searchParams.get('categories');
+
+    // Parse roles (single or multiple)
+    const roles: string[] = [];
+    if (rolesParam) {
+      roles.push(...rolesParam.split(',').filter(Boolean));
+    } else if (roleParam) {
+      roles.push(roleParam);
+    }
+
+    // Parse use cases (single or multiple)
+    const useCases: SkillUseCase[] = [];
+    if (useCasesParam) {
+      useCases.push(...useCasesParam.split(',').filter(Boolean) as SkillUseCase[]);
+    } else if (useCaseParam) {
+      useCases.push(useCaseParam as SkillUseCase);
+    }
+
+    // Parse categories (from quiz)
+    const categories: string[] = [];
+    if (categoriesParam) {
+      categories.push(...categoriesParam.split(',').filter(Boolean));
+    }
+
     return {
       ...DEFAULT_FILTERS,
-      roles: roleParam ? [roleParam] : [],
-      useCases: useCaseParam ? [useCaseParam as SkillUseCase] : [],
+      roles,
+      useCases,
+      categories,
     };
   });
+  const [showQuizBanner, setShowQuizBanner] = useState(fromQuiz);
   const [sortBy, setSortBy] = useState<LibrarySortOption>('name');
   const [showFilters, setShowFilters] = useState(true);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     roles: true,
     categories: true,
-    useCases: false,
+    useCases: fromQuiz, // Expand use cases if coming from quiz
     levels: false,
   });
 
@@ -397,6 +426,40 @@ const SkillLibraryPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Quiz Results Banner */}
+      {showQuizBanner && (
+        <div className="border-b bg-gradient-to-r from-primary/5 to-purple-500/5">
+          <div className="container mx-auto max-w-7xl px-4 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
+                  <Sparkles className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-sm">Personalized Results</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Showing {filteredSkills.length} skills based on your quiz answers.{' '}
+                    <button
+                      onClick={clearFilters}
+                      className="text-primary hover:underline"
+                    >
+                      Clear filters
+                    </button>{' '}
+                    to see all skills.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowQuizBanner(false)}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="container mx-auto max-w-7xl px-4 py-6">
         <div className="flex gap-6">

@@ -47,9 +47,16 @@ import {
   MessageSquare,
   DollarSign,
   Linkedin,
+  Key,
+  HelpCircle,
+  Circle,
+  Compass,
 } from 'lucide-react';
 import { getUserProfile } from './UserProfilePage';
 import { ROLE_DEFINITIONS } from '../lib/skillLibrary';
+import { hasStoredKey } from '../lib/apiKeyStorage';
+import { getUserCredits, isAdmin } from '../lib/billing';
+import { useAuth } from '../hooks/useAuth';
 
 // Featured skills for quick access - curated top 6 most useful
 const FEATURED_SKILLS = [
@@ -151,13 +158,33 @@ const USE_CASES = [
 
 const HomePage: React.FC = () => {
   const { workspaces, deleteWorkspace, loading: workspacesLoading } = useWorkspaces();
+  const navigate = useNavigate();
+  const { user, appUser } = useAuth();
   const [hasProfile, setHasProfile] = useState(false);
+  const [setupStatus, setSetupStatus] = useState({
+    hasApiKey: false,
+    hasProfile: false,
+    isConfigured: false,
+    isAdminUser: false,
+  });
 
   useEffect(() => {
     const profile = getUserProfile();
     const hasData = profile.fullName || profile.resumeText || profile.professionalTitle;
     setHasProfile(!!hasData);
-  }, []);
+
+    // Check setup status
+    const hasAnyKey = hasStoredKey('gemini') || hasStoredKey('claude') || hasStoredKey('chatgpt');
+    const userEmail = appUser?.email || user?.email;
+    const adminUser = isAdmin(userEmail);
+
+    setSetupStatus({
+      hasApiKey: hasAnyKey,
+      hasProfile: !!hasData,
+      isConfigured: hasAnyKey,
+      isAdminUser: adminUser,
+    });
+  }, [user, appUser]);
 
   return (
     <div className="min-h-screen">
@@ -298,6 +325,133 @@ const HomePage: React.FC = () => {
       </section>
 
       <div className="container mx-auto max-w-7xl px-4 py-12">
+        {/* ═══════════════════════════════════════════════════════════════════════════
+            GETTING STARTED SECTION
+        ═══════════════════════════════════════════════════════════════════════════ */}
+        <section className="mb-12">
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Setup Checklist */}
+            <div className="rounded-xl border bg-card p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <Settings className="h-5 w-5 text-primary" />
+                <h2 className="text-lg font-semibold">Quick Setup</h2>
+                {setupStatus.isConfigured && (
+                  <span className="ml-auto text-xs bg-green-500/20 text-green-600 px-2 py-0.5 rounded-full">
+                    Ready to use
+                  </span>
+                )}
+              </div>
+              <p className="text-sm text-muted-foreground mb-4">
+                Complete these steps once to run any skill:
+              </p>
+              <div className="space-y-3">
+                {/* API Key Setup */}
+                <div className="flex items-center gap-3">
+                  {setupStatus.hasApiKey ? (
+                    <CheckCircle2 className="h-5 w-5 text-green-500 shrink-0" />
+                  ) : (
+                    <Circle className="h-5 w-5 text-muted-foreground shrink-0" />
+                  )}
+                  <div className="flex-1">
+                    <div className={`text-sm font-medium ${setupStatus.hasApiKey ? 'text-green-600' : ''}`}>
+                      Configure API Key
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {setupStatus.hasApiKey ? 'API key configured' : 'Required to run AI skills'}
+                    </div>
+                  </div>
+                  {!setupStatus.hasApiKey && (
+                    <Link to="/account">
+                      <Button size="sm" variant="outline">
+                        <Key className="h-3 w-3 mr-1" />
+                        Setup
+                      </Button>
+                    </Link>
+                  )}
+                </div>
+
+                {/* Profile Setup */}
+                <div className="flex items-center gap-3">
+                  {setupStatus.hasProfile ? (
+                    <CheckCircle2 className="h-5 w-5 text-green-500 shrink-0" />
+                  ) : (
+                    <Circle className="h-5 w-5 text-muted-foreground shrink-0" />
+                  )}
+                  <div className="flex-1">
+                    <div className={`text-sm font-medium ${setupStatus.hasProfile ? 'text-green-600' : ''}`}>
+                      Add Your Resume
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {setupStatus.hasProfile ? 'Profile saved' : 'Optional - personalizes all outputs'}
+                    </div>
+                  </div>
+                  {!setupStatus.hasProfile && (
+                    <Link to="/profile">
+                      <Button size="sm" variant="ghost">
+                        Add
+                      </Button>
+                    </Link>
+                  )}
+                </div>
+
+                {/* Admin indicator */}
+                {setupStatus.isAdminUser && (
+                  <div className="flex items-center gap-3 pt-2 border-t">
+                    <CheckCircle2 className="h-5 w-5 text-yellow-500 shrink-0" />
+                    <div className="flex-1">
+                      <div className="text-sm font-medium text-yellow-600">Admin Access</div>
+                      <div className="text-xs text-muted-foreground">All models unlocked</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {!setupStatus.hasApiKey && (
+                <div className="mt-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                  <div className="flex items-start gap-2">
+                    <HelpCircle className="h-4 w-4 text-amber-500 mt-0.5 shrink-0" />
+                    <div className="text-xs text-muted-foreground">
+                      <span className="font-medium text-amber-600">Need an API key?</span>{' '}
+                      Go to <Link to="/account" className="text-primary hover:underline">Account Settings</Link> to configure your keys for Gemini, Claude, or ChatGPT.
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Find Your Skills Quiz */}
+            <div className="rounded-xl border-2 border-dashed border-primary/30 bg-gradient-to-br from-primary/5 to-purple-500/5 p-6 hover:border-primary/50 transition-colors">
+              <div className="flex items-center gap-2 mb-4">
+                <Compass className="h-5 w-5 text-primary" />
+                <h2 className="text-lg font-semibold">Not sure where to start?</h2>
+              </div>
+              <p className="text-muted-foreground mb-6">
+                Take a 30-second quiz to discover the AI skills most relevant to your situation and goals.
+              </p>
+              <ul className="space-y-2 mb-6 text-sm">
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
+                  <span>3 quick questions</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
+                  <span>Personalized skill recommendations</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
+                  <span>Filter 270+ skills to your needs</span>
+                </li>
+              </ul>
+              <Link to="/discover">
+                <Button size="lg" className="w-full">
+                  <Compass className="h-4 w-4 mr-2" />
+                  Find My Skills
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </section>
+
         {/* ═══════════════════════════════════════════════════════════════════════════
             FEATURED SKILLS - Quick Launch
         ═══════════════════════════════════════════════════════════════════════════ */}
