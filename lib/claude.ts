@@ -23,6 +23,13 @@ const MODEL_NAMES = {
 // Default to Haiku for fastest responses
 const DEFAULT_MODEL = CLAUDE_MODELS.haiku;
 
+// Max output tokens vary by model - Opus only supports 4096
+const MAX_TOKENS: Record<string, number> = {
+  haiku: 8192,
+  sonnet: 8192,
+  opus: 4096,
+};
+
 export async function runSkillStream(
   apiKey: string,
   promptData: { systemInstruction: string; userPrompt: string; },
@@ -34,6 +41,7 @@ export async function runSkillStream(
 
   const API_URL = "https://api.anthropic.com/v1/messages";
   const MODEL_NAME = CLAUDE_MODELS[modelType] || DEFAULT_MODEL;
+  const maxTokens = MAX_TOKENS[modelType] || 4096;
 
   try {
     const response = await fetch(API_URL, {
@@ -47,7 +55,7 @@ export async function runSkillStream(
       },
       body: JSON.stringify({
         model: MODEL_NAME,
-        max_tokens: 8192, // Claude 3.5 models support up to 8192 output tokens
+        max_tokens: maxTokens,
         system: promptData.systemInstruction,
         messages: [{ role: 'user', content: promptData.userPrompt }],
         stream: true,

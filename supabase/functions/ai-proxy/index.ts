@@ -37,15 +37,15 @@ const MODEL_PRICING: Record<string, { input: number; output: number }> = {
   'gpt-4o': { input: 250, output: 1000 },
 };
 
-// Map simple model IDs to full API model names
-const MODEL_MAP: Record<string, { provider: string; apiModel: string }> = {
-  'gemini-2.0-flash': { provider: 'gemini', apiModel: 'gemini-2.0-flash-exp' },
-  'gemini-1.5-pro': { provider: 'gemini', apiModel: 'gemini-1.5-pro' },
-  'haiku': { provider: 'claude', apiModel: 'claude-3-haiku-20240307' },
-  'sonnet': { provider: 'claude', apiModel: 'claude-3-5-sonnet-20241022' },
-  'opus': { provider: 'claude', apiModel: 'claude-3-opus-20240229' },
-  'gpt-4o-mini': { provider: 'openai', apiModel: 'gpt-4o-mini' },
-  'gpt-4o': { provider: 'openai', apiModel: 'gpt-4o' },
+// Map simple model IDs to full API model names and max tokens
+const MODEL_MAP: Record<string, { provider: string; apiModel: string; maxTokens: number }> = {
+  'gemini-2.0-flash': { provider: 'gemini', apiModel: 'gemini-2.0-flash-exp', maxTokens: 8192 },
+  'gemini-1.5-pro': { provider: 'gemini', apiModel: 'gemini-1.5-pro', maxTokens: 8192 },
+  'haiku': { provider: 'claude', apiModel: 'claude-3-haiku-20240307', maxTokens: 8192 },
+  'sonnet': { provider: 'claude', apiModel: 'claude-3-5-sonnet-20241022', maxTokens: 8192 },
+  'opus': { provider: 'claude', apiModel: 'claude-3-opus-20240229', maxTokens: 4096 },
+  'gpt-4o-mini': { provider: 'openai', apiModel: 'gpt-4o-mini', maxTokens: 16384 },
+  'gpt-4o': { provider: 'openai', apiModel: 'gpt-4o', maxTokens: 16384 },
 };
 
 interface RequestBody {
@@ -118,6 +118,9 @@ serve(async (req) => {
       );
     }
 
+    // Enforce model-specific max token limit
+    const effectiveMaxTokens = Math.min(maxTokens, modelInfo.maxTokens);
+
     // 4. Check user credits (get from database)
     const { data: userCredits, error: creditsError } = await supabase
       .from('user_credits')
@@ -171,7 +174,7 @@ serve(async (req) => {
     let outputText = '';
 
     if (modelInfo.provider === 'gemini') {
-      response = await callGemini(apiKey, modelInfo.apiModel, prompt, systemPrompt, maxTokens, temperature);
+      response = await callGemini(apiKey, modelInfo.apiModel, prompt, systemPrompt, effectiveMaxTokens, temperature);
       const data = await response.json();
       if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
         outputText = data.candidates[0].content.parts[0].text;
@@ -179,7 +182,7 @@ serve(async (req) => {
       inputTokens = data.usageMetadata?.promptTokenCount || Math.ceil(prompt.length / 4);
       outputTokens = data.usageMetadata?.candidatesTokenCount || Math.ceil(outputText.length / 4);
     } else if (modelInfo.provider === 'claude') {
-      response = await callClaude(apiKey, modelInfo.apiModel, prompt, systemPrompt, maxTokens, temperature);
+      response = await callClaude(apiKey, modelInfo.apiModel, prompt, systemPrompt, effectiveMaxTokens, temperature);
       const data = await response.json();
       if (data.content?.[0]?.text) {
         outputText = data.content[0].text;
@@ -187,7 +190,7 @@ serve(async (req) => {
       inputTokens = data.usage?.input_tokens || Math.ceil(prompt.length / 4);
       outputTokens = data.usage?.output_tokens || Math.ceil(outputText.length / 4);
     } else if (modelInfo.provider === 'openai') {
-      response = await callOpenAI(apiKey, modelInfo.apiModel, prompt, systemPrompt, maxTokens, temperature);
+      response = await callOpenAI(apiKey, modelInfo.apiModel, prompt, systemPrompt, effectiveMaxTokens, temperature);
       const data = await response.json();
       if (data.choices?.[0]?.message?.content) {
         outputText = data.choices[0].message.content;
