@@ -325,7 +325,7 @@ const AIConfigurationSection: React.FC = () => {
         {!platformKeyAvailable && !checkingPlatform && (
           <p className="text-xs text-muted-foreground mt-2">
             <strong>Admin:</strong> To enable Platform Keys, see{' '}
-            <a href="/docs/PLATFORM_KEYS_SETUP.md" className="text-primary hover:underline">
+            <a href="#/docs/platform-keys-setup" className="text-primary hover:underline">
               Platform Keys Setup Guide
             </a>
           </p>
