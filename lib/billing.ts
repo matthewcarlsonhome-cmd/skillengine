@@ -177,24 +177,24 @@ export const TIER_CONFIGS: Record<UserTier, TierConfig> = {
 
 // ═══════════════════════════════════════════════════════════════════════════
 // MODEL PRICING (Accurate as of Dec 2024)
-// Cost per 1 MILLION tokens
+// Cost per 1 MILLION tokens in DOLLARS
 // ═══════════════════════════════════════════════════════════════════════════
 
 export const MODEL_PRICING = {
-  // Gemini
-  'gemini-2.0-flash': { input: 7.5, output: 30 }, // $0.0075/1K in, $0.03/1K out
-  'gemini-1.5-pro': { input: 125, output: 500 }, // $0.125/1K in, $0.50/1K out
+  // Gemini (very affordable)
+  'gemini-2.0-flash': { input: 0.075, output: 0.30 }, // $0.075/1M in, $0.30/1M out
+  'gemini-1.5-pro': { input: 1.25, output: 5.00 }, // $1.25/1M in, $5.00/1M out
 
-  // Claude (per million tokens)
-  'haiku': { input: 80, output: 400 }, // $0.08/1K in, $0.40/1K out
-  'sonnet': { input: 300, output: 1500 }, // $0.30/1K in, $1.50/1K out
-  'opus': { input: 1500, output: 7500 }, // $1.50/1K in, $7.50/1K out
+  // Claude (Dec 2024 pricing)
+  'haiku': { input: 0.25, output: 1.25 }, // Claude 3.5 Haiku: $0.25/1M in, $1.25/1M out
+  'sonnet': { input: 3.00, output: 15.00 }, // Claude 3.5 Sonnet: $3/1M in, $15/1M out
+  'opus': { input: 15.00, output: 75.00 }, // Claude Opus 4: $15/1M in, $75/1M out
 
   // ChatGPT
-  'gpt-4o-mini': { input: 15, output: 60 }, // $0.015/1K in, $0.06/1K out
-  'gpt-4o': { input: 250, output: 1000 }, // $0.25/1K in, $1.00/1K out
-  'o1-mini': { input: 300, output: 1200 }, // $0.30/1K in, $1.20/1K out
-  'o1-preview': { input: 1500, output: 6000 }, // $1.50/1K in, $6.00/1K out
+  'gpt-4o-mini': { input: 0.15, output: 0.60 }, // $0.15/1M in, $0.60/1M out
+  'gpt-4o': { input: 2.50, output: 10.00 }, // $2.50/1M in, $10.00/1M out
+  'o1-mini': { input: 3.00, output: 12.00 }, // $3/1M in, $12/1M out
+  'o1-preview': { input: 15.00, output: 60.00 }, // $15/1M in, $60/1M out
 } as const;
 
 // ═══════════════════════════════════════════════════════════════════════════

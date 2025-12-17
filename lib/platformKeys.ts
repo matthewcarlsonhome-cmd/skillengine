@@ -98,9 +98,9 @@ export const CLAUDE_MODELS: ModelOption[] = [
   },
   {
     id: 'opus',
-    name: 'Claude 3 Opus',
-    description: 'Highest quality for complex tasks',
-    costPer1kTokens: 1.5,
+    name: 'Claude Opus 4',
+    description: 'Most capable model for complex tasks',
+    costPer1kTokens: 0.09, // $15/1M in, $75/1M out = ~$0.09/1K average
     speedTier: 'slow',
     qualityTier: 'premium',
     maxTokens: 4096,
