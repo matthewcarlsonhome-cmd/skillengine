@@ -58,6 +58,12 @@ import type { SavedOutput, FavoriteSkill, SkillExecution } from '../lib/storage/
 import { trackSkillUsage } from '../lib/admin';
 import { recordUsage, createUsageRecordFromExecution } from '../lib/usageLedger';
 import { typography, cards, cn } from '../lib/theme';
+import { ReadyToRunChecklist } from '../components/ReadyToRunChecklist';
+import { ExecutionSummary } from '../components/ExecutionSummary';
+import { InlineProviderSelector } from '../components/InlineProviderSelector';
+import { checkPlatformStatus, type PlatformStatus } from '../lib/platformProxy';
+import { hasStoredKey } from '../lib/apiKeyStorage';
+import { calculateCost } from '../lib/billing';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // MEMOIZED FORM INPUT COMPONENT
@@ -216,6 +222,18 @@ const SkillRunnerPage: React.FC = () => {
   const [outputSaved, setOutputSaved] = useState(false);
   const [showPrompts, setShowPrompts] = useState(false);
 
+  // Platform status for inline selector
+  const [platformStatus, setPlatformStatus] = useState<PlatformStatus | null>(null);
+
+  // Execution summary data
+  const [executionComplete, setExecutionComplete] = useState(false);
+  const [executionDuration, setExecutionDuration] = useState<number | undefined>();
+  const [executionTokens, setExecutionTokens] = useState<{ input: number; output: number } | undefined>();
+  const [executionCost, setExecutionCost] = useState<number | undefined>();
+
+  // Test data applied tracking
+  const [testDataApplied, setTestDataApplied] = useState(false);
+
   // Initialize form state
   useEffect(() => {
     refreshProfileFromStorage();
@@ -282,9 +300,15 @@ const SkillRunnerPage: React.FC = () => {
     event.target.value = '';
   }, [handleInputChange, addToast]);
 
+  // Fetch platform status on mount
+  useEffect(() => {
+    checkPlatformStatus().then(setPlatformStatus).catch(console.error);
+  }, []);
+
   // Load test data
   const handleLoadTestData = useCallback((inputPayload: Record<string, string>) => {
     setFormState((prev) => ({ ...prev, ...inputPayload }));
+    setTestDataApplied(true);
     addToast('Test data loaded into form fields', 'success');
   }, [addToast]);
 
@@ -296,6 +320,8 @@ const SkillRunnerPage: React.FC = () => {
         return acc;
       }, {} as Record<string, any>);
       setFormState(emptyState);
+      setTestDataApplied(false);
+      setExecutionComplete(false);
       addToast('Form reset to blank', 'success');
     }
   }, [skill, addToast]);
@@ -339,6 +365,10 @@ const SkillRunnerPage: React.FC = () => {
     setCitations([]);
     setError(null);
     setProgress(0);
+    setExecutionComplete(false);
+    setExecutionDuration(undefined);
+    setExecutionTokens(undefined);
+    setExecutionCost(undefined);
 
     const startTime = Date.now();
     const progressInterval = setInterval(() => {
@@ -480,6 +510,15 @@ const SkillRunnerPage: React.FC = () => {
       } else if (user) {
         trackSkillUsage(user.id, user.email || 'anonymous', skill.id, skill.name, 'static');
       }
+
+      // Populate execution summary
+      const estimatedInputTokens = Math.ceil(promptData.userPrompt.length / 4);
+      const estimatedOutputTokens = Math.ceil(fullResponseText.length / 4);
+      const costEstimate = calculateCost(model, estimatedInputTokens, estimatedOutputTokens);
+      setExecutionDuration(durationMs / 1000);
+      setExecutionTokens({ input: estimatedInputTokens, output: estimatedOutputTokens });
+      setExecutionCost(costEstimate.totalCost / 100); // Convert cents to dollars
+      setExecutionComplete(true);
     } catch (e: any) {
       timing.failRequest(e);
       setError(e.message || 'An unknown error occurred.');
@@ -779,6 +818,35 @@ const SkillRunnerPage: React.FC = () => {
         canRun={canRun}
       />
 
+      {/* Ready to Run Checklist */}
+      <ReadyToRunChecklist
+        providerName={
+          providerState.provider === 'gemini' ? 'Gemini' :
+          providerState.provider === 'claude' ? 'Claude' : 'ChatGPT'
+        }
+        modelName={availableModels.find(m => m.id === providerState.model)?.name || providerState.model}
+        keyMode={providerState.keyMode}
+        keyConfigured={
+          providerState.keyMode === 'platform'
+            ? (platformStatus?.available ?? false)
+            : !!providerState.apiKey
+        }
+        platformBalance={platformStatus?.available ? 100 : undefined}
+        requiredInputs={skill.inputs
+          .filter(input => input.required)
+          .map(input => ({
+            id: input.id,
+            label: input.label,
+            filled: !!formState[input.id],
+          }))}
+        hasTestData={true}
+        testDataApplied={testDataApplied}
+        onLoadTestData={() => {
+          // This will trigger TestDataPanel load
+        }}
+        canRun={canRun && skill.inputs.filter(i => i.required).every(i => !!formState[i.id])}
+      />
+
       {/* Form Inputs */}
       <div className="space-y-6">
         {skill.inputs.map((input) => (
@@ -847,6 +915,31 @@ const SkillRunnerPage: React.FC = () => {
 
       {/* Citations */}
       {citations.length > 0 && <Citations citations={citations} />}
+
+      {/* Execution Summary */}
+      {executionComplete && output && (
+        <ExecutionSummary
+          success={!error}
+          durationMs={executionDuration ? executionDuration * 1000 : undefined}
+          inputTokens={executionTokens?.input}
+          outputTokens={executionTokens?.output}
+          costDollars={executionCost}
+          modelName={availableModels.find(m => m.id === providerState.model)?.name || providerState.model}
+          providerName={
+            providerState.provider === 'gemini' ? 'Gemini' :
+            providerState.provider === 'claude' ? 'Claude' : 'ChatGPT'
+          }
+          outputText={output}
+          onCopy={copyToClipboard}
+          onDownload={downloadTextFile}
+          onSave={() => {
+            setSaveTitle(`${skill.name} - ${new Date().toLocaleDateString()}`);
+            setShowSaveDialog(true);
+          }}
+          onRunAgain={handleRunSkill}
+          isSaved={outputSaved}
+        />
+      )}
 
       {/* Save Output Dialog */}
       {showSaveDialog && (
