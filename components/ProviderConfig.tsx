@@ -38,7 +38,16 @@ import {
   canRunSkill,
 } from '../lib/platformKeys';
 import { getApiKey, hasStoredKey, saveApiKey } from '../lib/apiKeyStorage';
+import {
+  getUserCredits,
+  isAdmin,
+  getAllowedModels,
+  getMaxOutputTokens,
+  type UserTier,
+  TIER_CONFIGS,
+} from '../lib/billing';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -67,6 +76,14 @@ export interface ProviderConfigProps {
   compact?: boolean;
   /** Show model selector */
   showModelSelector?: boolean;
+  /** Override available models (if not provided, uses tier-filtered models) */
+  availableModels?: ModelOption[];
+  /** User tier for display */
+  userTier?: UserTier;
+  /** User credits for display */
+  userCredits?: number;
+  /** Whether user is admin */
+  isUserAdmin?: boolean;
 }
 
 export interface ProviderConfigState {
@@ -74,6 +91,9 @@ export interface ProviderConfigState {
   model: string;
   keyMode: KeyMode;
   apiKey: string;
+  tier: UserTier;
+  credits: number;
+  isAdmin: boolean;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -88,13 +108,29 @@ export function useProviderConfig(): {
   setApiKey: (key: string) => void;
   canRun: boolean;
   runStatus: ReturnType<typeof canRunSkill>;
+  availableModels: ModelOption[];
+  maxOutputTokens: number;
 } {
   const stored = getStoredKeyMode();
+  const { user, appUser } = useAuth();
 
   const [provider, setProviderState] = useState<ApiProvider>(stored.provider);
   const [model, setModelState] = useState<string>(stored.models[stored.provider] || getDefaultModel(stored.provider)?.id || '');
   const [keyMode, setKeyModeState] = useState<KeyMode>(stored.mode);
   const [apiKey, setApiKeyState] = useState<string>('');
+
+  // Get user tier and admin status
+  const userEmail = appUser?.email || user?.email;
+  const userCredits = getUserCredits();
+  const userIsAdmin = isAdmin(userEmail);
+
+  // Get available models based on tier (admins get all)
+  const availableModels = userIsAdmin
+    ? getModelsForProvider(provider)
+    : getAllowedModels(userCredits.tier, provider);
+
+  // Get max output tokens for current model/tier
+  const maxOutputTokens = userIsAdmin ? 32768 : getMaxOutputTokens(userCredits.tier, model);
 
   // Load stored API key on mount
   useEffect(() => {
@@ -107,8 +143,11 @@ export function useProviderConfig(): {
   const setProvider = (newProvider: ApiProvider) => {
     setProviderState(newProvider);
     saveSelectedProvider(newProvider);
-    // Update model to default for new provider
-    const defaultModel = getDefaultModel(newProvider);
+    // Update model to default for new provider (respecting tier)
+    const newAvailableModels = userIsAdmin
+      ? getModelsForProvider(newProvider)
+      : getAllowedModels(userCredits.tier, newProvider);
+    const defaultModel = newAvailableModels[0] || getDefaultModel(newProvider);
     if (defaultModel) {
       setModelState(defaultModel.id);
       saveSelectedModel(newProvider, defaultModel.id);
@@ -138,13 +177,23 @@ export function useProviderConfig(): {
   const runStatus = canRunSkill(provider);
 
   return {
-    state: { provider, model, keyMode, apiKey },
+    state: {
+      provider,
+      model,
+      keyMode,
+      apiKey,
+      tier: userCredits.tier,
+      credits: userCredits.balance,
+      isAdmin: userIsAdmin,
+    },
     setProvider,
     setModel,
     setKeyMode,
     setApiKey,
     canRun: runStatus.canRun || !!apiKey,
     runStatus,
+    availableModels,
+    maxOutputTokens,
   };
 }
 
@@ -182,11 +231,27 @@ export const ProviderConfig: React.FC<ProviderConfigProps> = ({
   isRunning = false,
   compact = false,
   showModelSelector = true,
+  availableModels: propModels,
+  userTier,
+  userCredits,
+  isUserAdmin,
 }) => {
   const [showKey, setShowKey] = useState(false);
   const [showProviderDropdown, setShowProviderDropdown] = useState(false);
+  const { user, appUser } = useAuth();
 
-  const models = getModelsForProvider(selectedProvider);
+  // Get user tier info if not provided via props
+  const userEmail = appUser?.email || user?.email;
+  const credits = userCredits ?? getUserCredits().balance;
+  const tier = userTier ?? getUserCredits().tier;
+  const userIsAdmin = isUserAdmin ?? isAdmin(userEmail);
+  const tierConfig = TIER_CONFIGS[tier];
+
+  // Use provided models or get tier-filtered models
+  const models = propModels ?? (userIsAdmin
+    ? getModelsForProvider(selectedProvider)
+    : getAllowedModels(tier, selectedProvider));
+
   const currentModel = models.find(m => m.id === selectedModel) || models[0];
   const providerInfo = PROVIDER_INFO[selectedProvider];
 
@@ -198,6 +263,36 @@ export const ProviderConfig: React.FC<ProviderConfigProps> = ({
 
   return (
     <div className={`space-y-${compact ? '3' : '4'}`}>
+      {/* Tier Info Banner */}
+      <div className="rounded-lg border bg-muted/30 p-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            {userIsAdmin ? (
+              <>
+                <Crown className="h-4 w-4 text-yellow-500" />
+                <span className="text-sm font-medium">Admin Access</span>
+                <span className="text-xs text-muted-foreground">• All models unlocked</span>
+              </>
+            ) : (
+              <>
+                <Zap className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium">{tierConfig.name} Tier</span>
+                <span className="text-xs text-muted-foreground">
+                  • ${(credits / 100).toFixed(2)} credits
+                </span>
+              </>
+            )}
+          </div>
+          <Link
+            to="/account"
+            className="text-xs text-primary hover:underline flex items-center gap-1"
+          >
+            {userIsAdmin ? 'Settings' : 'Upgrade'}
+            <ExternalLink className="h-3 w-3" />
+          </Link>
+        </div>
+      </div>
+
       {/* Key Mode Toggle */}
       <div>
         <label className="text-sm font-medium mb-2 block">API Key Mode</label>

@@ -66,9 +66,11 @@ import { useAppContext } from '../hooks/useAppContext';
 import { runSkillStream as runGeminiSkillStream } from '../lib/gemini';
 import { runSkillStream as runClaudeSkillStream } from '../lib/claude';
 import { runSkillStream as runChatGPTSkillStream, ChatGPTModelType } from '../lib/chatgpt';
-import { getApiKey } from '../lib/apiKeyStorage';
 import type { ApiProviderType } from '../types';
 import { TestDataBanner } from '../components/TestOutputButton';
+import { ProviderConfig, useProviderConfig } from '../components/ProviderConfig';
+import { recordUsage, createUsageRecordFromExecution } from '../lib/usageLedger';
+import { useAuth } from '../hooks/useAuth';
 
 // Icon mapping for workflows
 const WORKFLOW_ICONS: Record<string, React.FC<{ className?: string }>> = {
@@ -89,7 +91,20 @@ const WorkflowRunnerPage: React.FC = () => {
   const { workflowId } = useParams<{ workflowId: string }>();
   const navigate = useNavigate();
   const { addToast } = useToast();
-  const { selectedApi, setSelectedApi, resumeText, jobDescriptionText, refreshProfileFromStorage, userProfile } = useAppContext();
+  const { resumeText, jobDescriptionText, refreshProfileFromStorage, userProfile } = useAppContext();
+  const { user, appUser } = useAuth();
+
+  // Provider configuration (unified key mode, provider, model selection)
+  const {
+    state: providerState,
+    setProvider,
+    setModel,
+    setKeyMode,
+    setApiKey,
+    canRun,
+    runStatus,
+    availableModels,
+  } = useProviderConfig();
 
   // Get the workflow definition
   const workflow: Workflow | undefined = useMemo(() => {
@@ -98,9 +113,6 @@ const WorkflowRunnerPage: React.FC = () => {
 
   // Form state for global inputs
   const [globalInputs, setGlobalInputs] = useState<Record<string, string>>({});
-  const [apiKey, setApiKey] = useState('');
-  const [claudeModel, setClaudeModel] = useState<'haiku' | 'sonnet' | 'opus'>('sonnet');
-  const [chatgptModel, setChatgptModel] = useState<ChatGPTModelType>('gpt-4o-mini');
 
   // Execution state
   const [isRunning, setIsRunning] = useState(false);
@@ -190,16 +202,6 @@ const WorkflowRunnerPage: React.FC = () => {
     }
   }, [workflow, resumeText, jobDescriptionText, userProfile]);
 
-  // Load stored API key
-  useEffect(() => {
-    const storedKey = getApiKey(selectedApi as 'gemini' | 'claude' | 'chatgpt');
-    if (storedKey) {
-      setApiKey(storedKey);
-    } else {
-      setApiKey('');
-    }
-  }, [selectedApi]);
-
   // Handle input changes
   const handleInputChange = (id: string, value: string) => {
     setGlobalInputs((prev) => ({ ...prev, [id]: value }));
@@ -216,8 +218,13 @@ const WorkflowRunnerPage: React.FC = () => {
 
   // Validate form before running
   const validateForm = (): boolean => {
-    if (!apiKey) {
+    // Check if we can run (either platform key or personal key available)
+    if (!canRun && providerState.keyMode === 'personal' && !providerState.apiKey) {
       addToast('API Key is required.', 'error');
+      return false;
+    }
+    if (!canRun && providerState.keyMode === 'platform') {
+      addToast(runStatus.reason || 'Platform key not available.', 'error');
       return false;
     }
     if (!workflow) return false;
@@ -282,8 +289,14 @@ const WorkflowRunnerPage: React.FC = () => {
       const promptData = staticSkill.generatePrompt(inputValues);
       let fullResponse = '';
 
-      if (selectedApi === 'gemini') {
-        const result = await runGeminiSkillStream(apiKey, promptData, staticSkill.useGoogleSearch);
+      const { provider, model, keyMode, apiKey } = providerState;
+      const currentApiKey = apiKey;
+      if (!currentApiKey && keyMode === 'platform') {
+        throw new Error('Platform key mode requires server-side proxy (not yet implemented). Please use personal key mode.');
+      }
+
+      if (provider === 'gemini') {
+        const result = await runGeminiSkillStream(currentApiKey, promptData, staticSkill.useGoogleSearch);
         const stream = result && result.stream ? result.stream : result;
         if (!stream || typeof stream[Symbol.asyncIterator] !== 'function') {
           throw new Error('Invalid response from Gemini service');
@@ -294,8 +307,9 @@ const WorkflowRunnerPage: React.FC = () => {
             fullResponse += text;
           }
         }
-      } else if (selectedApi === 'claude') {
-        const response = await runClaudeSkillStream(apiKey, promptData, claudeModel);
+      } else if (provider === 'claude') {
+        const claudeModel = model as 'haiku' | 'sonnet' | 'opus';
+        const response = await runClaudeSkillStream(currentApiKey, promptData, claudeModel);
         if (!response.body) throw new Error('Response body is null');
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
@@ -319,8 +333,9 @@ const WorkflowRunnerPage: React.FC = () => {
             }
           }
         }
-      } else if (selectedApi === 'chatgpt') {
-        const response = await runChatGPTSkillStream(apiKey, promptData, chatgptModel);
+      } else if (provider === 'chatgpt') {
+        const chatgptModel = model as ChatGPTModelType;
+        const response = await runChatGPTSkillStream(currentApiKey, promptData, chatgptModel);
         if (!response.body) throw new Error('Response body is null');
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
@@ -376,15 +391,21 @@ const WorkflowRunnerPage: React.FC = () => {
 
       let fullResponse = '';
 
-      if (selectedApi === 'gemini') {
+      const { provider, model, keyMode, apiKey } = providerState;
+      const currentApiKey = apiKey;
+      if (!currentApiKey && keyMode === 'platform') {
+        throw new Error('Platform key mode requires server-side proxy (not yet implemented). Please use personal key mode.');
+      }
+
+      if (provider === 'gemini') {
         const { GoogleGenerativeAI } = await import('@google/generative-ai');
-        const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({
+        const genAI = new GoogleGenerativeAI(currentApiKey);
+        const geminiModel = genAI.getGenerativeModel({
           model: 'gemini-2.0-flash',
           systemInstruction: systemPrompt,
         });
 
-        const result = await model.generateContentStream({
+        const result = await geminiModel.generateContentStream({
           contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
           generationConfig: {
             temperature: librarySkill.config.temperature,
@@ -398,18 +419,19 @@ const WorkflowRunnerPage: React.FC = () => {
             fullResponse += text;
           }
         }
-      } else if (selectedApi === 'claude') {
+      } else if (provider === 'claude') {
         const CLAUDE_MODELS = {
           haiku: 'claude-3-5-haiku-latest',
           sonnet: 'claude-3-5-sonnet-latest',
           opus: 'claude-3-opus-latest',
         };
+        const claudeModel = model as 'haiku' | 'sonnet' | 'opus';
 
         const response = await fetch('https://api.anthropic.com/v1/messages', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'x-api-key': apiKey,
+            'x-api-key': currentApiKey,
             'anthropic-version': '2023-06-01',
             'anthropic-dangerous-direct-browser-access': 'true',
           },
@@ -451,9 +473,10 @@ const WorkflowRunnerPage: React.FC = () => {
             }
           }
         }
-      } else if (selectedApi === 'chatgpt') {
+      } else if (provider === 'chatgpt') {
+        const chatgptModel = model as ChatGPTModelType;
         const response = await runChatGPTSkillStream(
-          apiKey,
+          currentApiKey,
           { systemInstruction: systemPrompt, userPrompt },
           chatgptModel
         );
@@ -983,82 +1006,22 @@ const WorkflowRunnerPage: React.FC = () => {
           {/* API Configuration */}
           <div className="rounded-xl border bg-card p-6">
             <h3 className="text-lg font-semibold mb-4">Configuration</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label htmlFor="api-provider" className="text-sm font-medium">
-                  AI Provider
-                </label>
-                <Select
-                  id="api-provider"
-                  value={selectedApi}
-                  onChange={(e) => setSelectedApi(e.target.value as ApiProviderType)}
-                  disabled={isRunning}
-                >
-                  <option value="gemini">Gemini</option>
-                  <option value="claude">Claude</option>
-                  <option value="chatgpt">ChatGPT</option>
-                </Select>
-                <Link
-                  to="/api-keys"
-                  className="text-xs text-muted-foreground hover:underline flex items-center gap-1"
-                >
-                  <HelpCircle className="h-3 w-3" />
-                  Get API Key
-                </Link>
-              </div>
-              <div className="space-y-2">
-                <label htmlFor="api-key" className="text-sm font-medium">
-                  API Key<span className="text-red-500 ml-1">*</span>
-                </label>
-                <div className="relative">
-                  <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="api-key"
-                    type="password"
-                    placeholder="Enter your API key"
-                    value={apiKey}
-                    onChange={(e) => setApiKey(e.target.value)}
-                    className="pl-10"
-                    disabled={isRunning}
-                  />
-                </div>
-              </div>
-              {selectedApi === 'claude' && (
-                <div className="space-y-2 md:col-span-2">
-                  <label htmlFor="claude-model" className="text-sm font-medium">
-                    Claude Model
-                  </label>
-                  <Select
-                    id="claude-model"
-                    value={claudeModel}
-                    onChange={(e) => setClaudeModel(e.target.value as 'haiku' | 'sonnet' | 'opus')}
-                    disabled={isRunning}
-                  >
-                    <option value="haiku">Haiku (Fastest)</option>
-                    <option value="sonnet">Sonnet (Recommended)</option>
-                    <option value="opus">Opus (Most Capable)</option>
-                  </Select>
-                </div>
-              )}
-              {selectedApi === 'chatgpt' && (
-                <div className="space-y-2 md:col-span-2">
-                  <label htmlFor="chatgpt-model" className="text-sm font-medium">
-                    ChatGPT Model
-                  </label>
-                  <Select
-                    id="chatgpt-model"
-                    value={chatgptModel}
-                    onChange={(e) => setChatgptModel(e.target.value as ChatGPTModelType)}
-                    disabled={isRunning}
-                  >
-                    <option value="gpt-4o-mini">GPT-4o Mini (Fast, Cost-Effective)</option>
-                    <option value="gpt-4o">GPT-4o (Most Capable)</option>
-                    <option value="o1-mini">o1 Mini (Reasoning)</option>
-                    <option value="o1-preview">o1 Preview (Advanced Reasoning)</option>
-                  </Select>
-                </div>
-              )}
-            </div>
+            <ProviderConfig
+              selectedProvider={providerState.provider}
+              onProviderChange={setProvider}
+              selectedModel={providerState.model}
+              onModelChange={setModel}
+              keyMode={providerState.keyMode}
+              onKeyModeChange={setKeyMode}
+              apiKey={providerState.apiKey}
+              onApiKeyChange={setApiKey}
+              isRunning={isRunning}
+              showModelSelector={true}
+              availableModels={availableModels}
+              userTier={providerState.tier}
+              userCredits={providerState.credits}
+              isUserAdmin={providerState.isAdmin}
+            />
           </div>
 
           {/* Test Data Banner */}

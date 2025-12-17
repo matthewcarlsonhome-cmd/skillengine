@@ -323,6 +323,64 @@ Each provider shows available models with cost/speed indicators:
 | `components/ProviderConfig.tsx` | UI for key/model selection |
 | `lib/apiKeyStorage.ts` | Personal key storage |
 
+## Admin Setup (Quick Start)
+
+### Step 1: Access the Account Page
+
+Navigate to `/account` in your browser.
+
+### Step 2: Grant Yourself Admin Access
+
+**Option A - Add Your Email to Admin List:**
+1. In the Account page, click "Admin Settings"
+2. Enter your email address in the "Admin Users" section
+3. Click "Add"
+4. Refresh the page - you should now see "Admin Access" badge
+
+**Option B - Set Admin Tier:**
+1. On the Account page, select "Team" or "Custom" tier
+2. This automatically grants admin access
+
+### Step 3: Configure API Keys
+
+Once you have admin access:
+
+1. Click "Admin Settings" to expand the section
+2. Enter your API keys for each provider:
+   - **Google Gemini**: Get from [Google AI Studio](https://aistudio.google.com/)
+   - **Anthropic Claude**: Get from [Anthropic Console](https://console.anthropic.com/)
+   - **OpenAI ChatGPT**: Get from [OpenAI Platform](https://platform.openai.com/)
+3. Click "Save" for each key
+
+### Step 4: Test Your Setup
+
+1. Go to any skill (e.g., `/skill/resume-customizer`)
+2. Verify you see "Admin Access • All models unlocked"
+3. Select any model from any provider
+4. Run a test to confirm everything works
+
+### Admin vs Regular User Experience
+
+| Feature | Regular User | Admin User |
+|---------|--------------|------------|
+| Model Access | Tier-limited | All models |
+| Output Tokens | Tier-limited (2K-16K) | Full (32K+) |
+| Tier Display | Shows "Free/Starter/Pro" | Shows "Admin Access" |
+| Settings | Standard | + Admin Settings section |
+
+### Programmatic Admin Setup
+
+```javascript
+// In browser console (for initial setup)
+import { addAdminEmail, setUserTier } from './lib/billing';
+
+// Option 1: Add admin by email
+addAdminEmail('your.email@example.com');
+
+// Option 2: Set tier
+setUserTier('team'); // or 'custom'
+```
+
 ## Migration from Current System
 
 The new system is backwards-compatible:
