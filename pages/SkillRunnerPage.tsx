@@ -40,11 +40,10 @@ import { TestDataPanel } from '../components/TestDataPanel';
 import { FormattedOutput, Citations } from '../components/FormattedOutput';
 import { ErrorBanner } from '../components/ui/ErrorBanner';
 import { SkeletonRunnerPage } from '../components/ui/Skeleton';
+import { ProviderConfig, useProviderConfig } from '../components/ProviderConfig';
 import {
   Sparkles,
   AlertTriangle,
-  KeyRound,
-  HelpCircle,
   Upload,
   Star,
   Code,
@@ -56,8 +55,8 @@ import {
 } from 'lucide-react';
 import { db } from '../lib/storage/indexeddb';
 import type { SavedOutput, FavoriteSkill, SkillExecution } from '../lib/storage/types';
-import { getApiKey } from '../lib/apiKeyStorage';
 import { trackSkillUsage } from '../lib/admin';
+import { recordUsage, createUsageRecordFromExecution } from '../lib/usageLedger';
 import { typography, cards, cn } from '../lib/theme';
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -174,8 +173,6 @@ const SkillRunnerPage: React.FC = () => {
   const navigate = useNavigate();
   const { addToast } = useToast();
   const {
-    selectedApi,
-    setSelectedApi,
     resumeText,
     jobDescriptionText,
     additionalInfoText,
@@ -184,6 +181,17 @@ const SkillRunnerPage: React.FC = () => {
   const { user, appUser } = useAuth();
   const timing = useRequestTiming();
 
+  // Provider configuration (unified key mode, provider, model selection)
+  const {
+    state: providerState,
+    setProvider,
+    setModel,
+    setKeyMode,
+    setApiKey,
+    canRun,
+    runStatus,
+  } = useProviderConfig();
+
   const skill: Skill | undefined = useMemo(
     () => (skillId ? SKILLS[skillId] : undefined),
     [skillId]
@@ -191,9 +199,6 @@ const SkillRunnerPage: React.FC = () => {
 
   // Form state
   const [formState, setFormState] = useState<Record<string, any>>({});
-  const [apiKey, setApiKey] = useState('');
-  const [claudeModel, setClaudeModel] = useState<'haiku' | 'sonnet' | 'opus'>('haiku');
-  const [chatgptModel, setChatgptModel] = useState<ChatGPTModelType>('gpt-4o-mini');
 
   // Execution state
   const [output, setOutput] = useState('');
@@ -241,16 +246,6 @@ const SkillRunnerPage: React.FC = () => {
       db.isSkillFavorited(skillId).then(setIsFavorited);
     }
   }, [skillId]);
-
-  // Load stored API key
-  useEffect(() => {
-    const storedKey = getApiKey(selectedApi as 'gemini' | 'claude' | 'chatgpt');
-    if (storedKey) {
-      setApiKey(storedKey);
-    } else {
-      setApiKey('');
-    }
-  }, [selectedApi]);
 
   // Reset saved state when output changes
   useEffect(() => {
@@ -306,8 +301,13 @@ const SkillRunnerPage: React.FC = () => {
 
   // Validation
   const validateForm = useCallback((): boolean => {
-    if (!apiKey) {
+    // Check if we can run (either platform key or personal key available)
+    if (!canRun && providerState.keyMode === 'personal' && !providerState.apiKey) {
       addToast('API Key is required.', 'error');
+      return false;
+    }
+    if (!canRun && providerState.keyMode === 'platform') {
+      addToast(runStatus.reason || 'Platform key not available.', 'error');
       return false;
     }
     if (!skill) return false;
@@ -318,17 +318,19 @@ const SkillRunnerPage: React.FC = () => {
       }
     }
     return true;
-  }, [apiKey, skill, formState, addToast]);
+  }, [canRun, providerState, runStatus, skill, formState, addToast]);
 
   // Run skill
   const handleRunSkill = useCallback(async () => {
     if (!validateForm() || !skill) return;
 
+    const { provider, model, keyMode, apiKey } = providerState;
+
     // Start timing
     const requestId = timing.startRequest({
       skillId: skill.id,
       skillName: skill.name,
-      provider: selectedApi,
+      provider,
     });
 
     setIsLoading(true);
@@ -346,8 +348,15 @@ const SkillRunnerPage: React.FC = () => {
       const promptData = skill.generatePrompt(formState);
       let fullResponseText = '';
 
-      if (selectedApi === 'gemini') {
-        const result = await runGeminiSkillStream(apiKey, promptData, skill.useGoogleSearch);
+      // Note: For platform key mode, API calls would go through a proxy
+      // For now, personal key mode is required for actual execution
+      const currentApiKey = apiKey;
+      if (!currentApiKey && keyMode === 'platform') {
+        throw new Error('Platform key mode requires server-side proxy (not yet implemented). Please use personal key mode.');
+      }
+
+      if (provider === 'gemini') {
+        const result = await runGeminiSkillStream(currentApiKey, promptData, skill.useGoogleSearch);
         const stream = result && result.stream ? result.stream : result;
         if (!stream || typeof stream[Symbol.asyncIterator] !== 'function') {
           throw new Error('Received an invalid response from the Gemini service.');
@@ -369,8 +378,9 @@ const SkillRunnerPage: React.FC = () => {
         } catch {
           // Citations may not be available
         }
-      } else if (selectedApi === 'claude') {
-        const response = await runClaudeSkillStream(apiKey, promptData, claudeModel);
+      } else if (provider === 'claude') {
+        const claudeModel = model as 'haiku' | 'sonnet' | 'opus';
+        const response = await runClaudeSkillStream(currentApiKey, promptData, claudeModel);
         if (!response.body) throw new Error('Response body is null');
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
@@ -396,8 +406,9 @@ const SkillRunnerPage: React.FC = () => {
             }
           }
         }
-      } else if (selectedApi === 'chatgpt') {
-        const response = await runChatGPTSkillStream(apiKey, promptData, chatgptModel);
+      } else if (provider === 'chatgpt') {
+        const chatgptModel = model as ChatGPTModelType;
+        const response = await runChatGPTSkillStream(currentApiKey, promptData, chatgptModel);
         if (!response.body) throw new Error('Response body is null');
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
@@ -425,11 +436,12 @@ const SkillRunnerPage: React.FC = () => {
           }
         }
       } else {
-        throw new Error(`API provider "${selectedApi}" is not supported yet.`);
+        throw new Error(`API provider "${provider}" is not supported yet.`);
       }
 
       // Complete timing
       const timingResult = timing.completeRequest();
+      const durationMs = Date.now() - startTime;
 
       // Save execution to history
       const execution: SkillExecution = {
@@ -440,10 +452,26 @@ const SkillRunnerPage: React.FC = () => {
         createdAt: new Date().toISOString(),
         inputs: formState,
         output: fullResponseText,
-        model: selectedApi as 'gemini' | 'claude',
-        durationMs: Date.now() - startTime,
+        model: provider as 'gemini' | 'claude',
+        durationMs,
       };
       await db.saveExecution(execution);
+
+      // Record usage for billing
+      const usageRecord = createUsageRecordFromExecution({
+        userId: appUser?.id || user?.id || null,
+        userEmail: appUser?.email || user?.email,
+        skillId: skill.id,
+        skillName: skill.name,
+        provider,
+        model,
+        inputText: promptData.userPrompt,
+        outputText: fullResponseText,
+        billingMode: keyMode,
+        durationMs,
+        success: true,
+      });
+      await recordUsage(usageRecord);
 
       // Track usage
       if (appUser) {
@@ -464,10 +492,7 @@ const SkillRunnerPage: React.FC = () => {
     validateForm,
     skill,
     timing,
-    selectedApi,
-    apiKey,
-    claudeModel,
-    chatgptModel,
+    providerState,
     formState,
     appUser,
     user,
@@ -505,7 +530,7 @@ const SkillRunnerPage: React.FC = () => {
         skillSource: 'static',
         output: output,
         inputs: formState,
-        model: selectedApi as 'gemini' | 'claude',
+        model: providerState.provider as 'gemini' | 'claude',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         isFavorite: false,
@@ -520,7 +545,7 @@ const SkillRunnerPage: React.FC = () => {
     } finally {
       setIsSaving(false);
     }
-  }, [skill, saveTitle, output, formState, selectedApi, addToast]);
+  }, [skill, saveTitle, output, formState, providerState.provider, addToast]);
 
   const handleToggleFavorite = useCallback(async () => {
     if (!skill) return;
@@ -748,95 +773,20 @@ const SkillRunnerPage: React.FC = () => {
 
       {/* Configuration Panel */}
       <ConfigPanel title="Run Configuration">
-        <div className="space-y-2">
-          <label htmlFor="api-provider" className={typography.label}>
-            AI Provider
-          </label>
-          <Select
-            id="api-provider"
-            value={selectedApi}
-            onChange={(e) => setSelectedApi(e.target.value as ApiProviderType)}
-            disabled={isLoading}
-          >
-            <option value="gemini">Gemini</option>
-            <option value="claude">Claude</option>
-            <option value="chatgpt">ChatGPT</option>
-          </Select>
-          <Link
-            to="/api-keys"
-            className="text-xs text-muted-foreground hover:underline flex items-center gap-1"
-          >
-            <HelpCircle className="h-3 w-3" />
-            Get API Key
-          </Link>
+        <div className="md:col-span-2">
+          <ProviderConfig
+            selectedProvider={providerState.provider}
+            onProviderChange={setProvider}
+            selectedModel={providerState.model}
+            onModelChange={setModel}
+            keyMode={providerState.keyMode}
+            onKeyModeChange={setKeyMode}
+            apiKey={providerState.apiKey}
+            onApiKeyChange={setApiKey}
+            isRunning={isLoading}
+            showModelSelector={true}
+          />
         </div>
-
-        <div className="space-y-2">
-          <label htmlFor="api-key" className={typography.label}>
-            API Key<span className="text-red-500 ml-1">*</span>
-          </label>
-          <div className="relative">
-            <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              id="api-key"
-              type="password"
-              placeholder="Enter your API key"
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
-              required
-              className="pl-10"
-              disabled={isLoading}
-            />
-          </div>
-        </div>
-
-        {selectedApi === 'claude' && (
-          <div className="space-y-2 md:col-span-2">
-            <label htmlFor="claude-model" className={typography.label}>
-              Claude Model
-            </label>
-            <Select
-              id="claude-model"
-              value={claudeModel}
-              onChange={(e) => setClaudeModel(e.target.value as 'haiku' | 'sonnet' | 'opus')}
-              disabled={isLoading}
-            >
-              <option value="haiku">Haiku (Fastest, Most Cost-Effective)</option>
-              <option value="sonnet">Sonnet (Balanced Speed & Quality)</option>
-              <option value="opus">Opus (Most Capable, Slowest)</option>
-            </Select>
-            <p className="text-xs text-muted-foreground">
-              {claudeModel === 'haiku' && 'Best for quick tasks and high-volume usage.'}
-              {claudeModel === 'sonnet' && 'Great balance of speed and intelligence for most tasks.'}
-              {claudeModel === 'opus' && 'Best for complex reasoning and nuanced outputs.'}
-            </p>
-          </div>
-        )}
-
-        {selectedApi === 'chatgpt' && (
-          <div className="space-y-2 md:col-span-2">
-            <label htmlFor="chatgpt-model" className={typography.label}>
-              ChatGPT Model
-            </label>
-            <Select
-              id="chatgpt-model"
-              value={chatgptModel}
-              onChange={(e) => setChatgptModel(e.target.value as ChatGPTModelType)}
-              disabled={isLoading}
-            >
-              <option value="gpt-4o-mini">GPT-4o Mini (Fast, Cost-Effective)</option>
-              <option value="gpt-4o">GPT-4o (Most Capable)</option>
-              <option value="o1-mini">o1 Mini (Reasoning, Smaller)</option>
-              <option value="o1-preview">o1 Preview (Advanced Reasoning)</option>
-            </Select>
-            <p className="text-xs text-muted-foreground">
-              {chatgptModel === 'gpt-4o-mini' && 'Best for quick tasks and high-volume usage.'}
-              {chatgptModel === 'gpt-4o' && 'Most capable model for complex tasks.'}
-              {chatgptModel === 'o1-mini' && 'Reasoning model for logic-intensive tasks.'}
-              {chatgptModel === 'o1-preview' && 'Advanced reasoning for complex problem-solving.'}
-            </p>
-          </div>
-        )}
       </ConfigPanel>
 
       {/* Form Inputs */}
