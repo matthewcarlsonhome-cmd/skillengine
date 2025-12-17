@@ -18,13 +18,11 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { executeDynamicSkill } from '../lib/skills/dynamic';
 import type { ChatGPTModelType } from '../lib/chatgpt';
-import { useAppContext } from '../hooks/useAppContext';
 import { useToast } from '../hooks/useToast';
 import type { DynamicSkill, DynamicFormInput, SavedOutput, SkillExecution, FavoriteSkill } from '../lib/storage/types';
 import type { LibrarySkill } from '../lib/skillLibrary/types';
 import { ROLE_DEFINITIONS, getLibrarySkill } from '../lib/skillLibrary';
 import { db } from '../lib/storage/indexeddb';
-import { getApiKey } from '../lib/apiKeyStorage';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Textarea } from '../components/ui/Textarea';
@@ -37,7 +35,6 @@ import {
   Clipboard,
   Download,
   AlertTriangle,
-  KeyRound,
   Loader2,
   Clock,
   Code,
@@ -52,12 +49,19 @@ import {
   CheckCircle,
 } from 'lucide-react';
 import { TestDataPanel } from '../components/TestDataPanel';
+import { ProviderConfigStatus, useProviderConfig } from '../components/ProviderConfig';
 
 const LibrarySkillRunnerPage: React.FC = () => {
   const navigate = useNavigate();
   const { skillId } = useParams<{ skillId: string }>();
   const { addToast } = useToast();
-  const { selectedApi, setSelectedApi } = useAppContext();
+
+  // Provider configuration (centralized at /account)
+  const {
+    state: providerState,
+    canRun,
+    availableModels,
+  } = useProviderConfig();
 
   // Skill state
   const [librarySkill, setLibrarySkill] = useState<LibrarySkill | null>(null);
@@ -65,9 +69,6 @@ const LibrarySkillRunnerPage: React.FC = () => {
 
   // Form state
   const [formState, setFormState] = useState<Record<string, unknown>>({});
-  const [apiKey, setApiKey] = useState('');
-  const [claudeModel, setClaudeModel] = useState<'haiku' | 'sonnet' | 'opus'>('haiku');
-  const [chatgptModel, setChatgptModel] = useState<ChatGPTModelType>('gpt-4o-mini');
 
   // Execution state
   const [output, setOutput] = useState('');
@@ -133,15 +134,6 @@ const LibrarySkillRunnerPage: React.FC = () => {
     }
   }, [librarySkill?.id]);
 
-  // Load stored API key when provider changes
-  useEffect(() => {
-    const storedKey = getApiKey(selectedApi as 'gemini' | 'claude' | 'chatgpt');
-    if (storedKey) {
-      setApiKey(storedKey);
-    } else {
-      setApiKey('');
-    }
-  }, [selectedApi]);
 
   // Reset saved state when output changes
   useEffect(() => {
@@ -231,8 +223,8 @@ const LibrarySkillRunnerPage: React.FC = () => {
   };
 
   const validateForm = (): boolean => {
-    if (!apiKey) {
-      addToast('API Key is required', 'error');
+    if (!canRun && !providerState.apiKey) {
+      addToast('Please configure your API key in Account Settings', 'error');
       return false;
     }
     if (!librarySkill) return false;
@@ -267,10 +259,10 @@ const LibrarySkillRunnerPage: React.FC = () => {
       for await (const chunk of executeDynamicSkill({
         skill,
         formInputs: formState,
-        apiKey,
-        provider: selectedApi as 'gemini' | 'claude' | 'chatgpt',
-        claudeModel,
-        chatgptModel,
+        apiKey: providerState.apiKey,
+        provider: providerState.provider,
+        claudeModel: providerState.model as 'haiku' | 'sonnet' | 'opus',
+        chatgptModel: providerState.model as ChatGPTModelType,
       })) {
         fullOutput += chunk;
         setOutput(fullOutput);
@@ -286,7 +278,7 @@ const LibrarySkillRunnerPage: React.FC = () => {
           createdAt: new Date().toISOString(),
           inputs: formState,
           output: fullOutput,
-          model: selectedApi as 'gemini' | 'claude',
+          model: providerState.provider,
           durationMs: Date.now() - startTime,
         };
         await db.saveExecution(execution);
@@ -400,7 +392,7 @@ const LibrarySkillRunnerPage: React.FC = () => {
         skillSource: 'dynamic',
         output: output,
         inputs: formState,
-        model: selectedApi as 'gemini' | 'claude',
+        model: providerState.provider,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         isFavorite: false,
@@ -633,68 +625,12 @@ const LibrarySkillRunnerPage: React.FC = () => {
             isExecuting={isRunning}
           />
 
-          {/* API Configuration */}
-          <div className="rounded-xl border bg-card p-6">
-            <h2 className="font-semibold flex items-center gap-2 mb-4">
-              <KeyRound className="h-5 w-5 text-primary" />
-              Run Configuration
-            </h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">AI Provider</label>
-                <Select
-                  value={selectedApi}
-                  onChange={(e) => setSelectedApi(e.target.value as 'gemini' | 'claude' | 'chatgpt')}
-                >
-                  <option value="gemini">Google Gemini</option>
-                  <option value="claude">Anthropic Claude</option>
-                  <option value="chatgpt">OpenAI ChatGPT</option>
-                </Select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  {selectedApi === 'gemini' ? 'Gemini' : selectedApi === 'claude' ? 'Claude' : 'ChatGPT'} API Key
-                </label>
-                <Input
-                  type="password"
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
-                  placeholder={`Enter your ${selectedApi === 'gemini' ? 'Gemini' : selectedApi === 'claude' ? 'Claude' : 'ChatGPT'} API key`}
-                />
-              </div>
-
-              {selectedApi === 'claude' && (
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium mb-1">Claude Model</label>
-                  <Select
-                    value={claudeModel}
-                    onChange={(e) => setClaudeModel(e.target.value as 'haiku' | 'sonnet' | 'opus')}
-                  >
-                    <option value="haiku">Claude Haiku (Fast)</option>
-                    <option value="sonnet">Claude Sonnet (Balanced)</option>
-                    <option value="opus">Claude Opus (Most Capable)</option>
-                  </Select>
-                </div>
-              )}
-
-              {selectedApi === 'chatgpt' && (
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium mb-1">ChatGPT Model</label>
-                  <Select
-                    value={chatgptModel}
-                    onChange={(e) => setChatgptModel(e.target.value as ChatGPTModelType)}
-                  >
-                    <option value="gpt-4o-mini">GPT-4o Mini (Fast, Cost-Effective)</option>
-                    <option value="gpt-4o">GPT-4o (Most Capable)</option>
-                    <option value="o1-mini">o1 Mini (Reasoning)</option>
-                    <option value="o1-preview">o1 Preview (Advanced Reasoning)</option>
-                  </Select>
-                </div>
-              )}
-            </div>
-          </div>
+          {/* AI Status - All configuration at /account */}
+          <ProviderConfigStatus
+            providerState={providerState}
+            availableModels={availableModels}
+            canRun={canRun}
+          />
 
           {/* Skill Inputs */}
           {inputs.length > 0 && (

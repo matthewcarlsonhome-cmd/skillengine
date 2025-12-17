@@ -189,6 +189,53 @@ const HomePage: React.FC = () => {
   return (
     <div className="min-h-screen">
       {/* ═══════════════════════════════════════════════════════════════════════════
+          PRIMARY CTA - Setup Flow for New Users (show above hero if not configured)
+      ═══════════════════════════════════════════════════════════════════════════ */}
+      {!setupStatus.isConfigured && (
+        <section className="bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-amber-500/10 border-b-2 border-amber-500/30">
+          <div className="container mx-auto max-w-5xl px-4 py-8">
+            <div className="text-center">
+              <h2 className="text-2xl sm:text-3xl font-bold mb-3">
+                Get Started in 2 Minutes
+              </h2>
+              <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
+                Configure your API key once, then run any of our 270+ AI skills instantly.
+                Free tiers available from all providers.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <Link to="/account">
+                  <Button size="lg" className="bg-amber-500 hover:bg-amber-600 text-white px-8">
+                    <Key className="h-5 w-5 mr-2" />
+                    Set Up API Key
+                  </Button>
+                </Link>
+                <Link to="/discover">
+                  <Button size="lg" variant="outline">
+                    <Compass className="h-5 w-5 mr-2" />
+                    Take Quiz First
+                  </Button>
+                </Link>
+              </div>
+              <div className="mt-6 flex flex-wrap justify-center gap-6 text-sm text-muted-foreground">
+                <span className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                  Free tier on all providers
+                </span>
+                <span className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                  ~$0.001 per skill run (Gemini Flash)
+                </span>
+                <span className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                  No subscription required
+                </span>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════════════════════
           HERO SECTION - Two-Path Approach
       ═══════════════════════════════════════════════════════════════════════════ */}
       <section className="relative overflow-hidden bg-gradient-to-b from-background via-background to-muted/30">
@@ -197,7 +244,7 @@ const HomePage: React.FC = () => {
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
               <Sparkles className="h-4 w-4" />
-              <span>100+ Expert-Level AI Skills</span>
+              <span>270+ Expert-Level AI Skills</span>
             </div>
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight mb-4">
               AI Skills for{' '}
@@ -209,6 +256,22 @@ const HomePage: React.FC = () => {
               Automate hours of work with production-ready AI prompts. Pre-built for 20+ professions
               or custom-generated from any job description.
             </p>
+            {setupStatus.isConfigured && (
+              <div className="mt-6 flex justify-center gap-4">
+                <Link to="/library">
+                  <Button size="lg">
+                    <Play className="h-4 w-4 mr-2" />
+                    Run Skills Now
+                  </Button>
+                </Link>
+                <Link to="/account">
+                  <Button size="lg" variant="outline">
+                    <Settings className="h-4 w-4 mr-2" />
+                    Settings
+                  </Button>
+                </Link>
+              </div>
+            )}
           </div>
 
           {/* Two-Path Cards */}
