@@ -30,6 +30,9 @@ import {
   Building2,
   Star,
   RefreshCw,
+  Play,
+  Loader2,
+  Key,
 } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
@@ -59,8 +62,14 @@ import type {
   CapturedEmail,
   SkillUsageRecord,
 } from '../lib/storage/types';
+import { getModelsForProvider, type ApiProvider, type ModelOption } from '../lib/platformKeys';
+import { checkPlatformStatus, callProxyAPI, type PlatformStatus } from '../lib/platformProxy';
+import { getApiKey, saveApiKey as savePersonalApiKey } from '../lib/apiKeyStorage';
+import { runSkillStream as runGeminiStream } from '../lib/gemini';
+import { runSkillStream as runClaudeStream } from '../lib/claude';
+import { runSkillStream as runChatGPTStream, type ChatGPTModelType } from '../lib/chatgpt';
 
-type TabId = 'overview' | 'emails' | 'roles' | 'usage' | 'settings';
+type TabId = 'overview' | 'emails' | 'roles' | 'usage' | 'api-test' | 'settings';
 
 const ROLE_ICONS: Record<UserRole, React.FC<{ className?: string }>> = {
   free: Users,
@@ -184,6 +193,7 @@ const AdminPage: React.FC = () => {
     { id: 'emails', label: 'Email List', icon: Mail },
     { id: 'roles', label: 'Role Config', icon: Crown },
     { id: 'usage', label: 'Skill Usage', icon: BarChart3 },
+    { id: 'api-test', label: 'API Test', icon: Key },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
 
@@ -640,6 +650,11 @@ const AdminPage: React.FC = () => {
           </div>
         )}
 
+        {/* API Test Tab */}
+        {activeTab === 'api-test' && (
+          <ApiTestPanel />
+        )}
+
         {/* Settings Tab */}
         {activeTab === 'settings' && (
           <div className="space-y-6 max-w-2xl">
@@ -788,6 +803,355 @@ const RoleConfigEditor: React.FC<RoleConfigEditorProps> = ({ config, onSave, onC
           Cancel
         </Button>
       </div>
+    </div>
+  );
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// API Test Panel Component
+// ═══════════════════════════════════════════════════════════════════════════
+
+const PROVIDER_OPTIONS: { id: ApiProvider; name: string; color: string }[] = [
+  { id: 'gemini', name: 'Google Gemini', color: 'bg-blue-500' },
+  { id: 'claude', name: 'Anthropic Claude', color: 'bg-purple-500' },
+  { id: 'chatgpt', name: 'OpenAI ChatGPT', color: 'bg-green-500' },
+];
+
+const ApiTestPanel: React.FC = () => {
+  const [provider, setProvider] = useState<ApiProvider>('gemini');
+  const [model, setModel] = useState<string>('');
+  const [keyMode, setKeyMode] = useState<'platform' | 'personal'>('platform');
+  const [personalKey, setPersonalKey] = useState<string>('');
+  const [testPrompt, setTestPrompt] = useState<string>('Say hello in exactly one word.');
+  const [isRunning, setIsRunning] = useState(false);
+  const [result, setResult] = useState<{ success: boolean; message: string; time?: number } | null>(null);
+  const [platformStatus, setPlatformStatus] = useState<PlatformStatus | null>(null);
+
+  // Get models for selected provider
+  const availableModels = getModelsForProvider(provider);
+
+  // Load platform status and stored personal key
+  useEffect(() => {
+    checkPlatformStatus().then(setPlatformStatus);
+  }, []);
+
+  useEffect(() => {
+    // Set default model when provider changes
+    if (availableModels.length > 0) {
+      setModel(availableModels[0].id);
+    }
+    // Load stored personal key for this provider
+    const storedKey = getApiKey(provider);
+    if (storedKey) {
+      setPersonalKey(storedKey);
+    } else {
+      setPersonalKey('');
+    }
+  }, [provider, availableModels]);
+
+  const providerHasPlatformKey = platformStatus?.providers?.[
+    provider === 'chatgpt' ? 'openai' : provider
+  ] ?? false;
+
+  const canTest = keyMode === 'platform'
+    ? providerHasPlatformKey
+    : personalKey.length > 10;
+
+  const runTest = async () => {
+    if (!canTest || isRunning) return;
+
+    setIsRunning(true);
+    setResult(null);
+    const startTime = Date.now();
+
+    try {
+      let outputText = '';
+
+      if (keyMode === 'platform') {
+        // Use platform proxy
+        const response = await callProxyAPI({
+          model: model,
+          prompt: testPrompt,
+          systemPrompt: 'You are a helpful assistant. Respond concisely.',
+          maxTokens: 100,
+          temperature: 0.7,
+        });
+        outputText = response.output;
+      } else {
+        // Use personal key - direct API call
+        if (provider === 'gemini') {
+          const result = await runGeminiStream(
+            personalKey,
+            { systemInstruction: 'You are a helpful assistant. Respond concisely.', userPrompt: testPrompt },
+            false
+          );
+          // Gemini returns a stream, collect all chunks
+          for await (const chunk of result.stream) {
+            outputText += chunk.text();
+          }
+        } else if (provider === 'claude') {
+          // Find the model type from model id
+          const modelType = model.includes('opus') ? 'opus' : model.includes('sonnet') ? 'sonnet' : 'haiku';
+          const response = await runClaudeStream(
+            personalKey,
+            { systemInstruction: 'You are a helpful assistant. Respond concisely.', userPrompt: testPrompt },
+            modelType as 'haiku' | 'sonnet' | 'opus'
+          );
+          // Claude returns a streaming response, read it
+          const reader = response.body?.getReader();
+          const decoder = new TextDecoder();
+          if (reader) {
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+              const chunk = decoder.decode(value);
+              // Parse SSE events
+              const lines = chunk.split('\n');
+              for (const line of lines) {
+                if (line.startsWith('data: ')) {
+                  try {
+                    const data = JSON.parse(line.slice(6));
+                    if (data.type === 'content_block_delta' && data.delta?.text) {
+                      outputText += data.delta.text;
+                    }
+                  } catch {
+                    // Skip non-JSON lines
+                  }
+                }
+              }
+            }
+          }
+        } else if (provider === 'chatgpt') {
+          const modelType = model as ChatGPTModelType;
+          const response = await runChatGPTStream(
+            personalKey,
+            { systemInstruction: 'You are a helpful assistant. Respond concisely.', userPrompt: testPrompt },
+            modelType
+          );
+          // ChatGPT returns a streaming response
+          const reader = response.body?.getReader();
+          const decoder = new TextDecoder();
+          if (reader) {
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+              const chunk = decoder.decode(value);
+              const lines = chunk.split('\n');
+              for (const line of lines) {
+                if (line.startsWith('data: ') && line !== 'data: [DONE]') {
+                  try {
+                    const data = JSON.parse(line.slice(6));
+                    if (data.choices?.[0]?.delta?.content) {
+                      outputText += data.choices[0].delta.content;
+                    }
+                  } catch {
+                    // Skip non-JSON lines
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      const elapsed = Date.now() - startTime;
+      setResult({
+        success: true,
+        message: outputText || '(Empty response)',
+        time: elapsed,
+      });
+
+      // Save personal key if it worked
+      if (keyMode === 'personal' && personalKey) {
+        savePersonalApiKey(provider, personalKey);
+      }
+    } catch (error) {
+      const elapsed = Date.now() - startTime;
+      setResult({
+        success: false,
+        message: error instanceof Error ? error.message : 'Unknown error occurred',
+        time: elapsed,
+      });
+    } finally {
+      setIsRunning(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6 max-w-2xl">
+      <h2 className="text-xl font-semibold">API Connection Test</h2>
+      <p className="text-sm text-muted-foreground">
+        Test your API connections to verify Platform Keys or Personal Keys are working correctly.
+      </p>
+
+      {/* Provider Selection */}
+      <div className="rounded-xl border bg-card p-6">
+        <h3 className="text-lg font-semibold mb-4">1. Select Provider</h3>
+        <div className="grid grid-cols-3 gap-3">
+          {PROVIDER_OPTIONS.map((p) => (
+            <button
+              key={p.id}
+              onClick={() => setProvider(p.id)}
+              className={`p-4 rounded-xl border-2 text-left transition-all ${
+                provider === p.id
+                  ? 'border-primary bg-primary/10'
+                  : 'border-border hover:border-muted-foreground/50'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <span className={`h-3 w-3 rounded-full ${p.color}`} />
+                <span className="font-medium text-sm">{p.name}</span>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Model Selection */}
+      <div className="rounded-xl border bg-card p-6">
+        <h3 className="text-lg font-semibold mb-4">2. Select Model</h3>
+        <Select
+          value={model}
+          onChange={(e) => setModel(e.target.value)}
+          className="w-full"
+        >
+          {availableModels.map((m) => (
+            <option key={m.id} value={m.id}>
+              {m.name}
+            </option>
+          ))}
+        </Select>
+      </div>
+
+      {/* Key Mode Selection */}
+      <div className="rounded-xl border bg-card p-6">
+        <h3 className="text-lg font-semibold mb-4">3. Select Key Mode</h3>
+        <div className="grid grid-cols-2 gap-3 mb-4">
+          <button
+            onClick={() => setKeyMode('platform')}
+            disabled={!platformStatus?.available}
+            className={`p-4 rounded-xl border-2 text-left transition-all ${
+              keyMode === 'platform'
+                ? 'border-primary bg-primary/10'
+                : platformStatus?.available
+                ? 'border-border hover:border-muted-foreground/50'
+                : 'border-border opacity-50 cursor-not-allowed'
+            }`}
+          >
+            <div className="flex items-center gap-2 mb-1">
+              <Zap className="h-4 w-4" />
+              <span className="font-medium">Platform Key</span>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {providerHasPlatformKey ? 'Configured ✓' : 'Not configured'}
+            </p>
+          </button>
+
+          <button
+            onClick={() => setKeyMode('personal')}
+            className={`p-4 rounded-xl border-2 text-left transition-all ${
+              keyMode === 'personal'
+                ? 'border-primary bg-primary/10'
+                : 'border-border hover:border-muted-foreground/50'
+            }`}
+          >
+            <div className="flex items-center gap-2 mb-1">
+              <Key className="h-4 w-4" />
+              <span className="font-medium">Personal Key</span>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {personalKey ? 'Key entered ✓' : 'Enter your own key'}
+            </p>
+          </button>
+        </div>
+
+        {/* Personal Key Input */}
+        {keyMode === 'personal' && (
+          <div className="mt-4">
+            <label className="block text-sm font-medium mb-2">API Key</label>
+            <Input
+              type="password"
+              value={personalKey}
+              onChange={(e) => setPersonalKey(e.target.value)}
+              placeholder={
+                provider === 'gemini' ? 'AIza...' :
+                provider === 'claude' ? 'sk-ant-...' :
+                'sk-...'
+              }
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Test Prompt */}
+      <div className="rounded-xl border bg-card p-6">
+        <h3 className="text-lg font-semibold mb-4">4. Test Prompt</h3>
+        <Input
+          value={testPrompt}
+          onChange={(e) => setTestPrompt(e.target.value)}
+          placeholder="Enter a test prompt..."
+        />
+      </div>
+
+      {/* Run Test Button */}
+      <div className="rounded-xl border bg-card p-6">
+        <Button
+          onClick={runTest}
+          disabled={!canTest || isRunning}
+          className="w-full"
+        >
+          {isRunning ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Testing...
+            </>
+          ) : (
+            <>
+              <Play className="h-4 w-4 mr-2" />
+              Run Test
+            </>
+          )}
+        </Button>
+
+        {!canTest && !isRunning && (
+          <p className="text-sm text-amber-600 mt-2 text-center">
+            {keyMode === 'platform'
+              ? `Platform key not configured for ${PROVIDER_OPTIONS.find(p => p.id === provider)?.name}`
+              : 'Please enter an API key'
+            }
+          </p>
+        )}
+      </div>
+
+      {/* Test Result */}
+      {result && (
+        <div className={`rounded-xl border p-6 ${
+          result.success
+            ? 'bg-green-500/10 border-green-500/30'
+            : 'bg-red-500/10 border-red-500/30'
+        }`}>
+          <div className="flex items-center gap-2 mb-3">
+            {result.success ? (
+              <Check className="h-5 w-5 text-green-600" />
+            ) : (
+              <AlertTriangle className="h-5 w-5 text-red-600" />
+            )}
+            <h3 className={`font-semibold ${result.success ? 'text-green-600' : 'text-red-600'}`}>
+              {result.success ? 'Test Passed' : 'Test Failed'}
+            </h3>
+            {result.time && (
+              <span className="text-xs text-muted-foreground ml-auto">
+                {result.time}ms
+              </span>
+            )}
+          </div>
+          <div className={`text-sm p-3 rounded-lg ${
+            result.success ? 'bg-green-500/10' : 'bg-red-500/10'
+          }`}>
+            <p className="font-mono whitespace-pre-wrap break-words">{result.message}</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -69,6 +69,10 @@ import { runSkillStream as runChatGPTSkillStream, ChatGPTModelType } from '../li
 import type { ApiProviderType } from '../types';
 import { TestDataBanner } from '../components/TestOutputButton';
 import { ProviderConfigStatus, useProviderConfig } from '../components/ProviderConfig';
+import { ReadyToRunChecklist } from '../components/ReadyToRunChecklist';
+import { ExecutionSummary } from '../components/ExecutionSummary';
+import { checkPlatformStatus, type PlatformStatus } from '../lib/platformProxy';
+import { calculateCost } from '../lib/billing';
 import { recordUsage, createUsageRecordFromExecution } from '../lib/usageLedger';
 import { useAuth } from '../hooks/useAuth';
 
@@ -131,12 +135,29 @@ const WorkflowRunnerPage: React.FC = () => {
   const [executionHistory, setExecutionHistory] = useState<WorkflowExecution[]>([]);
   const [currentExecutionId, setCurrentExecutionId] = useState<string | null>(null);
 
+  // Platform status for ReadyToRunChecklist
+  const [platformStatus, setPlatformStatus] = useState<PlatformStatus | null>(null);
+
+  // Execution summary data
+  const [executionComplete, setExecutionComplete] = useState(false);
+  const [executionDuration, setExecutionDuration] = useState<number | undefined>();
+  const [executionTokens, setExecutionTokens] = useState<{ input: number; output: number } | undefined>();
+  const [executionCost, setExecutionCost] = useState<number | undefined>();
+
+  // Test data applied tracking
+  const [testDataApplied, setTestDataApplied] = useState(false);
+
   // Load execution history for this workflow
   useEffect(() => {
     if (workflowId) {
       db.getWorkflowExecutionsByWorkflow(workflowId).then(setExecutionHistory);
     }
   }, [workflowId]);
+
+  // Fetch platform status on mount
+  useEffect(() => {
+    checkPlatformStatus().then(setPlatformStatus).catch(console.error);
+  }, []);
 
   // Refresh profile data on mount
   useEffect(() => {
@@ -213,6 +234,7 @@ const WorkflowRunnerPage: React.FC = () => {
       ...prev,
       ...inputPayload,
     }));
+    setTestDataApplied(true);
     addToast('Test data loaded into form fields', 'success');
   };
 
@@ -1014,6 +1036,32 @@ const WorkflowRunnerPage: React.FC = () => {
           <TestDataBanner
             workflowId={workflowId}
             onLoadTestData={handleLoadTestData}
+          />
+
+          {/* Ready to Run Checklist */}
+          <ReadyToRunChecklist
+            providerName={
+              providerState.provider === 'gemini' ? 'Gemini' :
+              providerState.provider === 'claude' ? 'Claude' : 'ChatGPT'
+            }
+            modelName={availableModels.find(m => m.id === providerState.model)?.name || providerState.model}
+            keyMode={providerState.keyMode}
+            keyConfigured={
+              providerState.keyMode === 'platform'
+                ? (platformStatus?.available ?? false)
+                : !!providerState.apiKey
+            }
+            platformBalance={platformStatus?.available ? 100 : undefined}
+            requiredInputs={workflow.globalInputs
+              .filter(input => input.required)
+              .map(input => ({
+                id: input.id,
+                label: input.label,
+                filled: !!globalInputs[input.id]?.trim(),
+              }))}
+            hasTestData={true}
+            testDataApplied={testDataApplied}
+            canRun={canRun && workflow.globalInputs.filter(i => i.required).every(i => !!globalInputs[i.id]?.trim())}
           />
 
           {/* Global Inputs Form */}

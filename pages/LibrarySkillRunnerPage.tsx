@@ -50,6 +50,10 @@ import {
 } from 'lucide-react';
 import { TestDataPanel } from '../components/TestDataPanel';
 import { ProviderConfigStatus, useProviderConfig } from '../components/ProviderConfig';
+import { ReadyToRunChecklist } from '../components/ReadyToRunChecklist';
+import { ExecutionSummary } from '../components/ExecutionSummary';
+import { checkPlatformStatus, type PlatformStatus } from '../lib/platformProxy';
+import { calculateCost } from '../lib/billing';
 
 const LibrarySkillRunnerPage: React.FC = () => {
   const navigate = useNavigate();
@@ -84,6 +88,18 @@ const LibrarySkillRunnerPage: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [outputSaved, setOutputSaved] = useState(false);
   const [isFavorited, setIsFavorited] = useState(false);
+
+  // Platform status for inline selector
+  const [platformStatus, setPlatformStatus] = useState<PlatformStatus | null>(null);
+
+  // Execution summary data
+  const [executionComplete, setExecutionComplete] = useState(false);
+  const [executionDuration, setExecutionDuration] = useState<number | undefined>();
+  const [executionTokens, setExecutionTokens] = useState<{ input: number; output: number } | undefined>();
+  const [executionCost, setExecutionCost] = useState<number | undefined>();
+
+  // Test data applied tracking
+  const [testDataApplied, setTestDataApplied] = useState(false);
 
   // Load skill from sessionStorage or URL parameter
   useEffect(() => {
@@ -133,6 +149,11 @@ const LibrarySkillRunnerPage: React.FC = () => {
       db.isSkillFavorited(librarySkill.id).then(setIsFavorited);
     }
   }, [librarySkill?.id]);
+
+  // Fetch platform status on mount
+  useEffect(() => {
+    checkPlatformStatus().then(setPlatformStatus).catch(console.error);
+  }, []);
 
 
   // Reset saved state when output changes
@@ -208,6 +229,7 @@ const LibrarySkillRunnerPage: React.FC = () => {
   // Load test data into form
   const handleLoadTestData = (inputPayload: Record<string, string>) => {
     setFormState((prev) => ({ ...prev, ...inputPayload }));
+    setTestDataApplied(true);
   };
 
   // Reset form to blank
@@ -219,6 +241,8 @@ const LibrarySkillRunnerPage: React.FC = () => {
         initial[input.id] = input.defaultValue ?? (input.type === 'checkbox' ? false : '');
       });
       setFormState(initial);
+      setTestDataApplied(false);
+      setExecutionComplete(false);
     }
   };
 
@@ -248,6 +272,10 @@ const LibrarySkillRunnerPage: React.FC = () => {
     setError(null);
     setProgress(0);
     setStartTime(Date.now());
+    setExecutionComplete(false);
+    setExecutionDuration(undefined);
+    setExecutionTokens(undefined);
+    setExecutionCost(undefined);
 
     const progressInterval = setInterval(() => {
       setProgress((prev) => Math.min(prev + 2, 95));
@@ -269,6 +297,7 @@ const LibrarySkillRunnerPage: React.FC = () => {
       }
 
       // Save execution to history
+      const durationMs = Date.now() - (startTime || Date.now());
       if (librarySkill && startTime) {
         const execution: SkillExecution = {
           id: crypto.randomUUID(),
@@ -279,10 +308,19 @@ const LibrarySkillRunnerPage: React.FC = () => {
           inputs: formState,
           output: fullOutput,
           model: providerState.provider,
-          durationMs: Date.now() - startTime,
+          durationMs,
         };
         await db.saveExecution(execution);
       }
+
+      // Populate execution summary
+      const estimatedInputTokens = Math.ceil(JSON.stringify(formState).length / 4);
+      const estimatedOutputTokens = Math.ceil(fullOutput.length / 4);
+      const costEstimate = calculateCost(providerState.model, estimatedInputTokens, estimatedOutputTokens);
+      setExecutionDuration(durationMs / 1000);
+      setExecutionTokens({ input: estimatedInputTokens, output: estimatedOutputTokens });
+      setExecutionCost(costEstimate.totalCost / 100);
+      setExecutionComplete(true);
 
       setProgress(100);
     } catch (e) {
@@ -632,6 +670,32 @@ const LibrarySkillRunnerPage: React.FC = () => {
             canRun={canRun}
           />
 
+          {/* Ready to Run Checklist */}
+          <ReadyToRunChecklist
+            providerName={
+              providerState.provider === 'gemini' ? 'Gemini' :
+              providerState.provider === 'claude' ? 'Claude' : 'ChatGPT'
+            }
+            modelName={availableModels.find(m => m.id === providerState.model)?.name || providerState.model}
+            keyMode={providerState.keyMode}
+            keyConfigured={
+              providerState.keyMode === 'platform'
+                ? (platformStatus?.available ?? false)
+                : !!providerState.apiKey
+            }
+            platformBalance={platformStatus?.available ? 100 : undefined}
+            requiredInputs={inputs
+              .filter(input => input.validation?.required)
+              .map(input => ({
+                id: input.id,
+                label: input.label,
+                filled: !!formState[input.id],
+              }))}
+            hasTestData={true}
+            testDataApplied={testDataApplied}
+            canRun={canRun && inputs.filter(i => i.validation?.required).every(i => !!formState[i.id])}
+          />
+
           {/* Skill Inputs */}
           {inputs.length > 0 && (
             <div className="rounded-xl border bg-card p-6">
@@ -755,6 +819,28 @@ const LibrarySkillRunnerPage: React.FC = () => {
               )}
             </div>
           </div>
+
+          {/* Execution Summary */}
+          {executionComplete && output && (
+            <ExecutionSummary
+              success={!error}
+              durationMs={executionDuration ? executionDuration * 1000 : undefined}
+              inputTokens={executionTokens?.input}
+              outputTokens={executionTokens?.output}
+              costDollars={executionCost}
+              modelName={availableModels.find(m => m.id === providerState.model)?.name || providerState.model}
+              providerName={
+                providerState.provider === 'gemini' ? 'Gemini' :
+                providerState.provider === 'claude' ? 'Claude' : 'ChatGPT'
+              }
+              outputText={output}
+              onCopy={copyToClipboard}
+              onDownload={downloadOutput}
+              onSave={() => setShowSaveDialog(true)}
+              onRunAgain={handleRun}
+              isSaved={outputSaved}
+            />
+          )}
         </div>
       </div>
 
