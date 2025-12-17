@@ -1,0 +1,471 @@
+/**
+ * ProviderConfig Component
+ *
+ * Unified provider selection and API key configuration.
+ * Supports both platform keys and personal keys with model selection.
+ */
+
+import React, { useState, useEffect } from 'react';
+import {
+  Key,
+  Sparkles,
+  ChevronDown,
+  AlertCircle,
+  CheckCircle2,
+  Info,
+  Zap,
+  Crown,
+  Clock,
+  Eye,
+  EyeOff,
+  ExternalLink,
+} from 'lucide-react';
+import { Button } from './ui/Button';
+import { Input } from './ui/Input';
+import {
+  type ApiProvider,
+  type KeyMode,
+  type ModelOption,
+  getModelsForProvider,
+  getDefaultModel,
+  getStoredKeyMode,
+  saveKeyMode,
+  saveSelectedProvider,
+  saveSelectedModel,
+  getSelectedModel,
+  isPlatformKeyAvailable,
+  getPlatformBalance,
+  canRunSkill,
+} from '../lib/platformKeys';
+import { getApiKey, hasStoredKey, saveApiKey } from '../lib/apiKeyStorage';
+import { Link } from 'react-router-dom';
+
+// ═══════════════════════════════════════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════════════════════════════════════
+
+export interface ProviderConfigProps {
+  /** Currently selected provider */
+  selectedProvider: ApiProvider;
+  /** Callback when provider changes */
+  onProviderChange: (provider: ApiProvider) => void;
+  /** Currently selected model ID */
+  selectedModel: string;
+  /** Callback when model changes */
+  onModelChange: (modelId: string) => void;
+  /** Current key mode */
+  keyMode: KeyMode;
+  /** Callback when key mode changes */
+  onKeyModeChange: (mode: KeyMode) => void;
+  /** API key value (for personal mode) */
+  apiKey: string;
+  /** Callback when API key changes */
+  onApiKeyChange: (key: string) => void;
+  /** Whether the form is currently submitting */
+  isRunning?: boolean;
+  /** Compact mode for smaller layouts */
+  compact?: boolean;
+  /** Show model selector */
+  showModelSelector?: boolean;
+}
+
+export interface ProviderConfigState {
+  provider: ApiProvider;
+  model: string;
+  keyMode: KeyMode;
+  apiKey: string;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// HOOK: useProviderConfig
+// ═══════════════════════════════════════════════════════════════════════════
+
+export function useProviderConfig(): {
+  state: ProviderConfigState;
+  setProvider: (provider: ApiProvider) => void;
+  setModel: (modelId: string) => void;
+  setKeyMode: (mode: KeyMode) => void;
+  setApiKey: (key: string) => void;
+  canRun: boolean;
+  runStatus: ReturnType<typeof canRunSkill>;
+} {
+  const stored = getStoredKeyMode();
+
+  const [provider, setProviderState] = useState<ApiProvider>(stored.provider);
+  const [model, setModelState] = useState<string>(stored.models[stored.provider] || getDefaultModel(stored.provider)?.id || '');
+  const [keyMode, setKeyModeState] = useState<KeyMode>(stored.mode);
+  const [apiKey, setApiKeyState] = useState<string>('');
+
+  // Load stored API key on mount
+  useEffect(() => {
+    const storedKey = getApiKey(provider);
+    if (storedKey) {
+      setApiKeyState(storedKey);
+    }
+  }, [provider]);
+
+  const setProvider = (newProvider: ApiProvider) => {
+    setProviderState(newProvider);
+    saveSelectedProvider(newProvider);
+    // Update model to default for new provider
+    const defaultModel = getDefaultModel(newProvider);
+    if (defaultModel) {
+      setModelState(defaultModel.id);
+      saveSelectedModel(newProvider, defaultModel.id);
+    }
+    // Load stored API key for new provider
+    const storedKey = getApiKey(newProvider);
+    setApiKeyState(storedKey || '');
+  };
+
+  const setModel = (modelId: string) => {
+    setModelState(modelId);
+    saveSelectedModel(provider, modelId);
+  };
+
+  const setKeyMode = (mode: KeyMode) => {
+    setKeyModeState(mode);
+    saveKeyMode(mode);
+  };
+
+  const setApiKey = (key: string) => {
+    setApiKeyState(key);
+    if (key) {
+      saveApiKey(provider, key);
+    }
+  };
+
+  const runStatus = canRunSkill(provider);
+
+  return {
+    state: { provider, model, keyMode, apiKey },
+    setProvider,
+    setModel,
+    setKeyMode,
+    setApiKey,
+    canRun: runStatus.canRun || !!apiKey,
+    runStatus,
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PROVIDER CONFIG COMPONENT
+// ═══════════════════════════════════════════════════════════════════════════
+
+const PROVIDER_INFO: Record<ApiProvider, { name: string; color: string; description: string }> = {
+  gemini: {
+    name: 'Google Gemini',
+    color: 'text-blue-500',
+    description: 'Fast and efficient, great for most tasks',
+  },
+  claude: {
+    name: 'Anthropic Claude',
+    color: 'text-purple-500',
+    description: 'Excellent for complex reasoning and writing',
+  },
+  chatgpt: {
+    name: 'OpenAI ChatGPT',
+    color: 'text-green-500',
+    description: 'Versatile with strong general capabilities',
+  },
+};
+
+export const ProviderConfig: React.FC<ProviderConfigProps> = ({
+  selectedProvider,
+  onProviderChange,
+  selectedModel,
+  onModelChange,
+  keyMode,
+  onKeyModeChange,
+  apiKey,
+  onApiKeyChange,
+  isRunning = false,
+  compact = false,
+  showModelSelector = true,
+}) => {
+  const [showKey, setShowKey] = useState(false);
+  const [showProviderDropdown, setShowProviderDropdown] = useState(false);
+
+  const models = getModelsForProvider(selectedProvider);
+  const currentModel = models.find(m => m.id === selectedModel) || models[0];
+  const providerInfo = PROVIDER_INFO[selectedProvider];
+
+  const platformAvailable = isPlatformKeyAvailable(selectedProvider);
+  const platformBalance = getPlatformBalance(selectedProvider);
+  const hasPersonalKey = hasStoredKey(selectedProvider);
+
+  const runStatus = canRunSkill(selectedProvider);
+
+  return (
+    <div className={`space-y-${compact ? '3' : '4'}`}>
+      {/* Key Mode Toggle */}
+      <div>
+        <label className="text-sm font-medium mb-2 block">API Key Mode</label>
+        <div className="flex gap-2">
+          <button
+            onClick={() => onKeyModeChange('platform')}
+            disabled={isRunning}
+            className={`flex-1 px-3 py-2 rounded-lg border text-sm font-medium transition-all ${
+              keyMode === 'platform'
+                ? 'border-primary bg-primary/10 text-primary'
+                : 'border-border hover:border-muted-foreground/50'
+            } ${!platformAvailable ? 'opacity-50' : ''}`}
+          >
+            <div className="flex items-center justify-center gap-2">
+              <Sparkles className="h-4 w-4" />
+              <span>Platform Key</span>
+            </div>
+            {platformAvailable && (
+              <div className="text-xs text-muted-foreground mt-1">
+                ${(platformBalance / 100).toFixed(2)} credits
+              </div>
+            )}
+            {!platformAvailable && (
+              <div className="text-xs text-muted-foreground mt-1">
+                Not configured
+              </div>
+            )}
+          </button>
+          <button
+            onClick={() => onKeyModeChange('personal')}
+            disabled={isRunning}
+            className={`flex-1 px-3 py-2 rounded-lg border text-sm font-medium transition-all ${
+              keyMode === 'personal'
+                ? 'border-primary bg-primary/10 text-primary'
+                : 'border-border hover:border-muted-foreground/50'
+            }`}
+          >
+            <div className="flex items-center justify-center gap-2">
+              <Key className="h-4 w-4" />
+              <span>My Key</span>
+            </div>
+            <div className="text-xs text-muted-foreground mt-1">
+              {hasPersonalKey ? 'Configured' : 'Not set'}
+            </div>
+          </button>
+        </div>
+      </div>
+
+      {/* Provider Selection */}
+      <div>
+        <label className="text-sm font-medium mb-2 block">AI Provider</label>
+        <div className="relative">
+          <button
+            onClick={() => setShowProviderDropdown(!showProviderDropdown)}
+            disabled={isRunning}
+            className="w-full px-3 py-2 rounded-lg border bg-background text-left flex items-center justify-between hover:border-muted-foreground/50 transition-colors"
+          >
+            <div className="flex items-center gap-2">
+              <span className={`font-medium ${providerInfo.color}`}>
+                {providerInfo.name}
+              </span>
+            </div>
+            <ChevronDown className={`h-4 w-4 transition-transform ${showProviderDropdown ? 'rotate-180' : ''}`} />
+          </button>
+
+          {showProviderDropdown && (
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setShowProviderDropdown(false)} />
+              <div className="absolute top-full left-0 right-0 mt-1 rounded-lg border bg-card shadow-lg z-50">
+                {(['gemini', 'claude', 'chatgpt'] as ApiProvider[]).map((provider) => {
+                  const info = PROVIDER_INFO[provider];
+                  const isAvailable = keyMode === 'platform'
+                    ? isPlatformKeyAvailable(provider)
+                    : hasStoredKey(provider);
+
+                  return (
+                    <button
+                      key={provider}
+                      onClick={() => {
+                        onProviderChange(provider);
+                        setShowProviderDropdown(false);
+                      }}
+                      className={`w-full px-3 py-2 text-left hover:bg-muted transition-colors first:rounded-t-lg last:rounded-b-lg ${
+                        selectedProvider === provider ? 'bg-muted' : ''
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className={`font-medium ${info.color}`}>{info.name}</span>
+                        {isAvailable && (
+                          <CheckCircle2 className="h-4 w-4 text-green-500" />
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground">{info.description}</p>
+                    </button>
+                  );
+                })}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Model Selection */}
+      {showModelSelector && (
+        <div>
+          <label className="text-sm font-medium mb-2 block">Model</label>
+          <div className="grid grid-cols-1 gap-2">
+            {models.map((model) => (
+              <button
+                key={model.id}
+                onClick={() => onModelChange(model.id)}
+                disabled={isRunning}
+                className={`px-3 py-2 rounded-lg border text-left transition-all ${
+                  selectedModel === model.id
+                    ? 'border-primary bg-primary/10'
+                    : 'border-border hover:border-muted-foreground/50'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-sm">{model.name}</span>
+                    {model.qualityTier === 'premium' && (
+                      <Crown className="h-3.5 w-3.5 text-yellow-500" />
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    {model.speedTier === 'fast' && (
+                      <span className="flex items-center gap-1">
+                        <Zap className="h-3 w-3 text-yellow-500" />
+                        Fast
+                      </span>
+                    )}
+                    {model.speedTier === 'slow' && (
+                      <span className="flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        Slower
+                      </span>
+                    )}
+                    <span>${model.costPer1kTokens.toFixed(3)}/1k</span>
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground mt-0.5">{model.description}</p>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* API Key Input (Personal Mode Only) */}
+      {keyMode === 'personal' && (
+        <div>
+          <label className="text-sm font-medium mb-2 block flex items-center justify-between">
+            <span>{providerInfo.name} API Key</span>
+            <Link
+              to="/api-keys"
+              className="text-xs text-primary hover:underline flex items-center gap-1"
+            >
+              How to get a key
+              <ExternalLink className="h-3 w-3" />
+            </Link>
+          </label>
+          <div className="relative">
+            <Input
+              type={showKey ? 'text' : 'password'}
+              value={apiKey}
+              onChange={(e) => onApiKeyChange(e.target.value)}
+              placeholder={`Enter your ${providerInfo.name} API key...`}
+              disabled={isRunning}
+              className="pr-10"
+            />
+            <button
+              type="button"
+              onClick={() => setShowKey(!showKey)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            >
+              {showKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
+          </div>
+          {!apiKey && !hasPersonalKey && (
+            <p className="text-xs text-amber-500 mt-1 flex items-center gap-1">
+              <AlertCircle className="h-3 w-3" />
+              API key required to run skills
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Status Message */}
+      {!runStatus.canRun && (
+        <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3">
+          <div className="flex items-start gap-2">
+            <AlertCircle className="h-4 w-4 text-amber-500 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium text-amber-500">{runStatus.reason}</p>
+              {runStatus.suggestion && (
+                <p className="text-xs text-muted-foreground mt-1">{runStatus.suggestion}</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Platform Mode Info */}
+      {keyMode === 'platform' && platformAvailable && (
+        <div className="rounded-lg border border-green-500/30 bg-green-500/10 p-3">
+          <div className="flex items-start gap-2">
+            <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium text-green-500">Platform key active</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Usage will be billed to platform credits. ${(platformBalance / 100).toFixed(2)} available.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// COMPACT PROVIDER SELECTOR (for inline use)
+// ═══════════════════════════════════════════════════════════════════════════
+
+export interface CompactProviderSelectorProps {
+  provider: ApiProvider;
+  onProviderChange: (provider: ApiProvider) => void;
+  model: string;
+  onModelChange: (modelId: string) => void;
+  disabled?: boolean;
+}
+
+export const CompactProviderSelector: React.FC<CompactProviderSelectorProps> = ({
+  provider,
+  onProviderChange,
+  model,
+  onModelChange,
+  disabled = false,
+}) => {
+  const models = getModelsForProvider(provider);
+  const providerInfo = PROVIDER_INFO[provider];
+
+  return (
+    <div className="flex items-center gap-2">
+      <select
+        value={provider}
+        onChange={(e) => onProviderChange(e.target.value as ApiProvider)}
+        disabled={disabled}
+        className="text-sm border rounded-md px-2 py-1 bg-background"
+      >
+        <option value="gemini">Gemini</option>
+        <option value="claude">Claude</option>
+        <option value="chatgpt">ChatGPT</option>
+      </select>
+      <select
+        value={model}
+        onChange={(e) => onModelChange(e.target.value)}
+        disabled={disabled}
+        className="text-sm border rounded-md px-2 py-1 bg-background"
+      >
+        {models.map((m) => (
+          <option key={m.id} value={m.id}>
+            {m.name}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+};
+
+export default ProviderConfig;

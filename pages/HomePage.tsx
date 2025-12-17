@@ -14,7 +14,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useWorkspaces } from '../hooks/useStorage';
 import { Button } from '../components/ui/Button';
 import {
@@ -42,9 +42,72 @@ import {
   FileText,
   Settings,
   Layers,
+  Star,
+  FileCheck,
+  MessageSquare,
+  DollarSign,
+  Linkedin,
 } from 'lucide-react';
 import { getUserProfile } from './UserProfilePage';
 import { ROLE_DEFINITIONS } from '../lib/skillLibrary';
+
+// Featured skills for quick access - curated top 6 most useful
+const FEATURED_SKILLS = [
+  {
+    id: 'resume-customizer',
+    name: 'Resume Customizer',
+    description: 'Tailor your resume for specific job applications',
+    icon: FileText,
+    color: 'amber',
+    category: 'Job Search',
+    isBuiltin: true,
+  },
+  {
+    id: 'cover-letter-generator',
+    name: 'Cover Letter Generator',
+    description: 'Create personalized cover letters in minutes',
+    icon: MessageSquare,
+    color: 'rose',
+    category: 'Job Search',
+    isBuiltin: true,
+  },
+  {
+    id: 'interview-prep',
+    name: 'Interview Prep',
+    description: 'Get ready with role-specific questions & answers',
+    icon: Users,
+    color: 'violet',
+    category: 'Interview',
+    isBuiltin: true,
+  },
+  {
+    id: 'ats-optimization-checker',
+    name: 'ATS Optimizer',
+    description: 'Ensure your resume passes ATS filters',
+    icon: FileCheck,
+    color: 'green',
+    category: 'Job Search',
+    isBuiltin: true,
+  },
+  {
+    id: 'linkedin-optimizer-pro',
+    name: 'LinkedIn Optimizer',
+    description: 'Optimize your profile for recruiter searches',
+    icon: Linkedin,
+    color: 'sky',
+    category: 'Networking',
+    isBuiltin: true,
+  },
+  {
+    id: 'salary-negotiation-master',
+    name: 'Salary Negotiator',
+    description: 'Scripts and strategies for better offers',
+    icon: DollarSign,
+    color: 'yellow',
+    category: 'Negotiation',
+    isBuiltin: true,
+  },
+];
 
 // Featured roles to display on homepage
 const FEATURED_ROLES = [
@@ -235,6 +298,88 @@ const HomePage: React.FC = () => {
       </section>
 
       <div className="container mx-auto max-w-7xl px-4 py-12">
+        {/* ═══════════════════════════════════════════════════════════════════════════
+            FEATURED SKILLS - Quick Launch
+        ═══════════════════════════════════════════════════════════════════════════ */}
+        <section className="mb-12">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <Star className="h-5 w-5 text-yellow-500" />
+                <h2 className="text-2xl font-bold">Top Skills</h2>
+              </div>
+              <p className="text-muted-foreground text-sm">
+                Most popular skills - click to run instantly
+              </p>
+            </div>
+            <Link to="/library">
+              <Button variant="ghost" size="sm">
+                View all
+                <ChevronRight className="ml-1 h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+            {FEATURED_SKILLS.map((skill) => {
+              const Icon = skill.icon;
+              return (
+                <Link
+                  key={skill.id}
+                  to={`/skill/${skill.id}`}
+                  className="group"
+                >
+                  <div className={`rounded-xl border bg-card p-4 h-full hover:border-${skill.color}-500/50 hover:shadow-md transition-all`}>
+                    <div className={`h-10 w-10 rounded-lg bg-${skill.color}-500/20 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform`}>
+                      <Icon className={`h-5 w-5 text-${skill.color}-400`} />
+                    </div>
+                    <h3 className="font-semibold text-sm mb-1 group-hover:text-primary transition-colors">
+                      {skill.name}
+                    </h3>
+                    <p className="text-xs text-muted-foreground line-clamp-2">
+                      {skill.description}
+                    </p>
+                    <div className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
+                      <Play className="h-3 w-3" />
+                      <span>Run now</span>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+
+          {/* Quick category chips */}
+          <div className="mt-4 flex flex-wrap gap-2">
+            <span className="text-xs text-muted-foreground mr-2 self-center">Filter by:</span>
+            <Link to="/library?useCase=job-search">
+              <span className="px-3 py-1 rounded-full bg-blue-500/10 text-blue-500 text-xs font-medium hover:bg-blue-500/20 transition-colors cursor-pointer">
+                Job Search
+              </span>
+            </Link>
+            <Link to="/library?useCase=interview-prep">
+              <span className="px-3 py-1 rounded-full bg-violet-500/10 text-violet-500 text-xs font-medium hover:bg-violet-500/20 transition-colors cursor-pointer">
+                Interview Prep
+              </span>
+            </Link>
+            <Link to="/library?useCase=career-growth">
+              <span className="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-500 text-xs font-medium hover:bg-emerald-500/20 transition-colors cursor-pointer">
+                Career Growth
+              </span>
+            </Link>
+            <Link to="/library?useCase=daily-work">
+              <span className="px-3 py-1 rounded-full bg-orange-500/10 text-orange-500 text-xs font-medium hover:bg-orange-500/20 transition-colors cursor-pointer">
+                Daily Work
+              </span>
+            </Link>
+            <Link to="/library?useCase=networking">
+              <span className="px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-500 text-xs font-medium hover:bg-cyan-500/20 transition-colors cursor-pointer">
+                Networking
+              </span>
+            </Link>
+          </div>
+        </section>
+
         {/* ═══════════════════════════════════════════════════════════════════════════
             PROFILE SETUP BANNER
         ═══════════════════════════════════════════════════════════════════════════ */}
