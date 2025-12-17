@@ -772,14 +772,11 @@ const SkillRunnerPage: React.FC = () => {
         isExecuting={isLoading}
       />
 
-      {/* AI Configuration */}
+      {/* AI Status - All configuration at /account */}
       <ProviderConfigStatus
         providerState={providerState}
         availableModels={availableModels}
         canRun={canRun}
-        onProviderChange={setProvider}
-        onModelChange={setModel}
-        isRunning={isLoading}
       />
 
       {/* Form Inputs */}

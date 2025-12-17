@@ -42,10 +42,14 @@ import {
   getAdminEmails,
   setAdminEmails,
   TIER_CONFIGS,
+  MODEL_PRICING,
+  estimateSkillCost,
+  estimateWorkflowCost,
   type UserTier,
   type UserCredits,
 } from '../lib/billing';
 import { saveApiKey, getApiKey, hasStoredKey } from '../lib/apiKeyStorage';
+import { getModelsForProvider, type ApiProvider } from '../lib/platformKeys';
 import { cn } from '../lib/theme';
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -350,63 +354,31 @@ const AccountPage: React.FC = () => {
               )}
             </div>
 
-            {/* Universal API Keys */}
+            {/* Platform Keys (Server-side) Info */}
             <div>
-              <h3 className="font-medium mb-3 flex items-center gap-2">
-                API Keys
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowKeys(!showKeys)}
-                >
-                  {showKeys ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </Button>
-              </h3>
+              <h3 className="font-medium mb-3">Platform Keys (for Production)</h3>
               <p className="text-sm text-muted-foreground mb-3">
-                These keys are stored locally in your browser. For production, configure platform keys server-side.
+                To enable platform-managed API keys where users don't need their own keys:
               </p>
 
-              <div className="space-y-3">
+              <div className="rounded-lg border bg-muted/30 p-4 text-sm space-y-3">
                 <div>
-                  <label className="text-sm font-medium mb-1 block">Google Gemini</label>
-                  <div className="flex gap-2">
-                    <Input
-                      type={showKeys ? 'text' : 'password'}
-                      value={geminiKey}
-                      onChange={(e) => setGeminiKey(e.target.value)}
-                      placeholder="AIza..."
-                      className="flex-1"
-                    />
-                    <Button onClick={() => handleSaveKey('gemini', geminiKey)}>Save</Button>
-                  </div>
+                  <p className="font-medium mb-1">1. Store keys server-side</p>
+                  <code className="text-xs bg-muted px-2 py-1 rounded block overflow-x-auto">
+                    supabase secrets set GEMINI_API_KEY=your-key
+                  </code>
                 </div>
-
                 <div>
-                  <label className="text-sm font-medium mb-1 block">Anthropic Claude</label>
-                  <div className="flex gap-2">
-                    <Input
-                      type={showKeys ? 'text' : 'password'}
-                      value={claudeKey}
-                      onChange={(e) => setClaudeKey(e.target.value)}
-                      placeholder="sk-ant-..."
-                      className="flex-1"
-                    />
-                    <Button onClick={() => handleSaveKey('claude', claudeKey)}>Save</Button>
-                  </div>
+                  <p className="font-medium mb-1">2. Create an Edge Function proxy</p>
+                  <p className="text-muted-foreground">
+                    The proxy validates user auth, checks credits, makes API calls, and records usage.
+                  </p>
                 </div>
-
                 <div>
-                  <label className="text-sm font-medium mb-1 block">OpenAI ChatGPT</label>
-                  <div className="flex gap-2">
-                    <Input
-                      type={showKeys ? 'text' : 'password'}
-                      value={chatgptKey}
-                      onChange={(e) => setChatgptKey(e.target.value)}
-                      placeholder="sk-..."
-                      className="flex-1"
-                    />
-                    <Button onClick={() => handleSaveKey('chatgpt', chatgptKey)}>Save</Button>
-                  </div>
+                  <p className="font-medium mb-1">3. Enable in admin settings</p>
+                  <p className="text-muted-foreground">
+                    Users will see "Platform Key" option and usage will deduct from their credits.
+                  </p>
                 </div>
               </div>
 
@@ -414,10 +386,10 @@ const AccountPage: React.FC = () => {
                 <div className="flex items-start gap-2">
                   <AlertCircle className="h-4 w-4 text-amber-500 mt-0.5" />
                   <div className="text-sm">
-                    <p className="font-medium text-amber-600">Security Note</p>
+                    <p className="font-medium text-amber-600">Current Mode: Browser-only</p>
                     <p className="text-muted-foreground">
-                      For production deployment, API keys should be stored server-side using Supabase Edge Functions
-                      or environment variables. See <Link to="/docs/platform-keys" className="text-primary hover:underline">documentation</Link>.
+                      API keys in the "API Key Setup" section are stored locally in each user's browser.
+                      For shared/managed keys, implement the server-side proxy as described above.
                     </p>
                   </div>
                 </div>
@@ -426,6 +398,220 @@ const AccountPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* API Key Setup Section - Always Visible */}
+      <div className="rounded-xl border bg-card p-6 mb-8">
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Key className="h-5 w-5" />
+          API Key Setup
+        </h2>
+        <p className="text-sm text-muted-foreground mb-4">
+          Configure your API keys once here. All skills and workflows will use these keys automatically.
+        </p>
+
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 mb-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowKeys(!showKeys)}
+            >
+              {showKeys ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              <span className="ml-1">{showKeys ? 'Hide Keys' : 'Show Keys'}</span>
+            </Button>
+          </div>
+
+          {/* Gemini */}
+          <div className="rounded-lg border p-4">
+            <div className="flex items-center justify-between mb-2">
+              <label className="font-medium flex items-center gap-2">
+                <span className="h-3 w-3 rounded-full bg-blue-500" />
+                Google Gemini
+              </label>
+              {hasStoredKey('gemini') && (
+                <span className="text-xs bg-green-500/20 text-green-600 px-2 py-0.5 rounded-full flex items-center gap-1">
+                  <Check className="h-3 w-3" /> Configured
+                </span>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <Input
+                type={showKeys ? 'text' : 'password'}
+                value={geminiKey}
+                onChange={(e) => setGeminiKey(e.target.value)}
+                placeholder="AIza..."
+                className="flex-1"
+              />
+              <Button onClick={() => handleSaveKey('gemini', geminiKey)}>Save</Button>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              Get key from <a href="https://aistudio.google.com/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Google AI Studio</a>
+            </p>
+          </div>
+
+          {/* Claude */}
+          <div className="rounded-lg border p-4">
+            <div className="flex items-center justify-between mb-2">
+              <label className="font-medium flex items-center gap-2">
+                <span className="h-3 w-3 rounded-full bg-purple-500" />
+                Anthropic Claude
+              </label>
+              {hasStoredKey('claude') && (
+                <span className="text-xs bg-green-500/20 text-green-600 px-2 py-0.5 rounded-full flex items-center gap-1">
+                  <Check className="h-3 w-3" /> Configured
+                </span>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <Input
+                type={showKeys ? 'text' : 'password'}
+                value={claudeKey}
+                onChange={(e) => setClaudeKey(e.target.value)}
+                placeholder="sk-ant-..."
+                className="flex-1"
+              />
+              <Button onClick={() => handleSaveKey('claude', claudeKey)}>Save</Button>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              Get key from <a href="https://console.anthropic.com/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Anthropic Console</a>
+            </p>
+          </div>
+
+          {/* ChatGPT */}
+          <div className="rounded-lg border p-4">
+            <div className="flex items-center justify-between mb-2">
+              <label className="font-medium flex items-center gap-2">
+                <span className="h-3 w-3 rounded-full bg-green-500" />
+                OpenAI ChatGPT
+              </label>
+              {hasStoredKey('chatgpt') && (
+                <span className="text-xs bg-green-500/20 text-green-600 px-2 py-0.5 rounded-full flex items-center gap-1">
+                  <Check className="h-3 w-3" /> Configured
+                </span>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <Input
+                type={showKeys ? 'text' : 'password'}
+                value={chatgptKey}
+                onChange={(e) => setChatgptKey(e.target.value)}
+                placeholder="sk-..."
+                className="flex-1"
+              />
+              <Button onClick={() => handleSaveKey('chatgpt', chatgptKey)}>Save</Button>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              Get key from <a href="https://platform.openai.com/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">OpenAI Platform</a>
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-4 p-3 rounded-lg bg-blue-500/10 border border-blue-500/30">
+          <div className="flex items-start gap-2">
+            <Info className="h-4 w-4 text-blue-500 mt-0.5" />
+            <div className="text-sm">
+              <p className="text-muted-foreground">
+                Keys are stored securely in your browser's local storage. You only need to configure each provider once -
+                all skills and workflows will automatically use your saved keys.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Model Costs Section */}
+      <div className="rounded-xl border bg-card p-6 mb-8">
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <CreditCard className="h-5 w-5" />
+          Model Costs
+        </h2>
+        <p className="text-sm text-muted-foreground mb-4">
+          Estimated costs per skill run and workflow. Actual costs depend on input/output length.
+        </p>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b">
+                <th className="text-left py-2 px-2 font-medium">Provider</th>
+                <th className="text-left py-2 px-2 font-medium">Model</th>
+                <th className="text-right py-2 px-2 font-medium">Skill Run</th>
+                <th className="text-right py-2 px-2 font-medium">Workflow (5 steps)</th>
+                <th className="text-right py-2 px-2 font-medium">Skills per $1</th>
+              </tr>
+            </thead>
+            <tbody>
+              {/* Gemini Models */}
+              {getModelsForProvider('gemini').map((model) => {
+                const skillCost = estimateSkillCost(model.id, 'standard');
+                const workflowCost = estimateWorkflowCost(model.id, 'medium');
+                const skillsPerDollar = Math.floor(100 / skillCost.totalCost);
+                return (
+                  <tr key={model.id} className="border-b border-muted/50">
+                    <td className="py-2 px-2">
+                      <span className="flex items-center gap-2">
+                        <span className="h-2 w-2 rounded-full bg-blue-500" />
+                        Gemini
+                      </span>
+                    </td>
+                    <td className="py-2 px-2">{model.name}</td>
+                    <td className="py-2 px-2 text-right font-mono">${(skillCost.totalCost / 100).toFixed(4)}</td>
+                    <td className="py-2 px-2 text-right font-mono">${(workflowCost.totalCost / 100).toFixed(4)}</td>
+                    <td className="py-2 px-2 text-right text-green-600 font-medium">{skillsPerDollar}</td>
+                  </tr>
+                );
+              })}
+              {/* Claude Models */}
+              {getModelsForProvider('claude').map((model) => {
+                const skillCost = estimateSkillCost(model.id, 'standard');
+                const workflowCost = estimateWorkflowCost(model.id, 'medium');
+                const skillsPerDollar = Math.floor(100 / skillCost.totalCost);
+                return (
+                  <tr key={model.id} className="border-b border-muted/50">
+                    <td className="py-2 px-2">
+                      <span className="flex items-center gap-2">
+                        <span className="h-2 w-2 rounded-full bg-purple-500" />
+                        Claude
+                      </span>
+                    </td>
+                    <td className="py-2 px-2">{model.name}</td>
+                    <td className="py-2 px-2 text-right font-mono">${(skillCost.totalCost / 100).toFixed(4)}</td>
+                    <td className="py-2 px-2 text-right font-mono">${(workflowCost.totalCost / 100).toFixed(4)}</td>
+                    <td className="py-2 px-2 text-right text-green-600 font-medium">{skillsPerDollar}</td>
+                  </tr>
+                );
+              })}
+              {/* ChatGPT Models */}
+              {getModelsForProvider('chatgpt').map((model) => {
+                const skillCost = estimateSkillCost(model.id, 'standard');
+                const workflowCost = estimateWorkflowCost(model.id, 'medium');
+                const skillsPerDollar = Math.floor(100 / skillCost.totalCost);
+                return (
+                  <tr key={model.id} className="border-b border-muted/50">
+                    <td className="py-2 px-2">
+                      <span className="flex items-center gap-2">
+                        <span className="h-2 w-2 rounded-full bg-green-500" />
+                        ChatGPT
+                      </span>
+                    </td>
+                    <td className="py-2 px-2">{model.name}</td>
+                    <td className="py-2 px-2 text-right font-mono">${(skillCost.totalCost / 100).toFixed(4)}</td>
+                    <td className="py-2 px-2 text-right font-mono">${(workflowCost.totalCost / 100).toFixed(4)}</td>
+                    <td className="py-2 px-2 text-right text-green-600 font-medium">{skillsPerDollar}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="mt-4 p-3 rounded-lg bg-muted/50 text-sm text-muted-foreground">
+          <p>
+            💡 <strong>Tip:</strong> Gemini 2.0 Flash offers the best value for most tasks.
+            Use Claude Sonnet or GPT-4o for complex writing that needs premium quality.
+          </p>
+        </div>
+      </div>
 
       {/* Pricing Tiers */}
       <div className="mb-8">
