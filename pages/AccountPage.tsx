@@ -63,6 +63,7 @@ import {
   CHATGPT_MODELS,
 } from '../lib/platformKeys';
 import { useProviderConfig } from '../components/ProviderConfig';
+import { checkPlatformStatus, type PlatformStatus } from '../lib/platformProxy';
 import { cn } from '../lib/theme';
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -175,6 +176,15 @@ const AIConfigurationSection: React.FC = () => {
 
   const [showKey, setShowKey] = useState(false);
   const [localApiKey, setLocalApiKey] = useState(providerState.apiKey);
+  const [platformStatus, setPlatformStatus] = useState<PlatformStatus | null>(null);
+  const [checkingPlatform, setCheckingPlatform] = useState(true);
+
+  // Check platform key availability on mount
+  useEffect(() => {
+    checkPlatformStatus()
+      .then(setPlatformStatus)
+      .finally(() => setCheckingPlatform(false));
+  }, []);
 
   // Sync local key with provider state
   useEffect(() => {
@@ -189,8 +199,11 @@ const AIConfigurationSection: React.FC = () => {
   const providerInfo = PROVIDER_INFO[providerState.provider];
   const currentModel = availableModels.find(m => m.id === providerState.model) || availableModels[0];
 
-  // Platform key availability (would come from server in production)
-  const platformKeyAvailable = false; // Set to true when platform keys are configured
+  // Check if platform key is available for current provider
+  const platformKeyAvailable = platformStatus?.available ?? false;
+  const currentProviderHasPlatformKey = platformStatus?.providers?.[
+    providerState.provider === 'chatgpt' ? 'openai' : providerState.provider
+  ] ?? false;
 
   return (
     <div className="rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-purple-500/5 p-6 mb-8">
@@ -250,7 +263,7 @@ const AIConfigurationSection: React.FC = () => {
           {/* Platform Key Option */}
           <button
             onClick={() => platformKeyAvailable && setKeyMode('platform')}
-            disabled={!platformKeyAvailable}
+            disabled={!platformKeyAvailable || checkingPlatform}
             className={cn(
               'p-4 rounded-xl border-2 text-left transition-all relative',
               providerState.keyMode === 'platform'
@@ -278,15 +291,45 @@ const AIConfigurationSection: React.FC = () => {
             <p className="text-xs text-muted-foreground">
               No setup required. Usage deducted from your credits.
             </p>
-            {!platformKeyAvailable && (
+            {platformKeyAvailable && platformStatus && (
+              <div className="mt-2 flex gap-2">
+                {platformStatus.providers.gemini && (
+                  <span className="text-xs bg-blue-500/20 text-blue-600 px-2 py-0.5 rounded">Gemini</span>
+                )}
+                {platformStatus.providers.claude && (
+                  <span className="text-xs bg-purple-500/20 text-purple-600 px-2 py-0.5 rounded">Claude</span>
+                )}
+                {platformStatus.providers.openai && (
+                  <span className="text-xs bg-green-500/20 text-green-600 px-2 py-0.5 rounded">ChatGPT</span>
+                )}
+              </div>
+            )}
+            {!platformKeyAvailable && !checkingPlatform && (
               <div className="absolute inset-0 flex items-center justify-center bg-background/80 rounded-xl">
                 <span className="text-xs font-medium text-muted-foreground px-3 py-1 bg-muted rounded-full">
-                  Coming Soon
+                  Not Configured
+                </span>
+              </div>
+            )}
+            {checkingPlatform && (
+              <div className="absolute inset-0 flex items-center justify-center bg-background/80 rounded-xl">
+                <span className="text-xs font-medium text-muted-foreground px-3 py-1 bg-muted rounded-full">
+                  Checking...
                 </span>
               </div>
             )}
           </button>
         </div>
+
+        {/* Admin hint for platform key setup */}
+        {!platformKeyAvailable && !checkingPlatform && (
+          <p className="text-xs text-muted-foreground mt-2">
+            <strong>Admin:</strong> To enable Platform Keys, see{' '}
+            <a href="/docs/PLATFORM_KEYS_SETUP.md" className="text-primary hover:underline">
+              Platform Keys Setup Guide
+            </a>
+          </p>
+        )}
       </div>
 
       {/* Step 2: Provider Selection */}

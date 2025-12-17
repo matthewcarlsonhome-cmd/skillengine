@@ -63,9 +63,17 @@ MODEL_PRICING = {
 - `ProviderConfigStatus` component shows ready/setup-needed state
 
 ### Billing Model
-- Users bring their own API keys (BYOK)
-- Platform key option planned (server-side proxy)
+- **Personal Key (BYOK)**: Users bring their own API keys, pay provider directly
+- **Platform Key**: Server-side proxy via Supabase Edge Functions
 - Credits system with tiers (free/starter/pro/power/team)
+
+### Platform Keys Setup (Admin)
+See `/docs/PLATFORM_KEYS_SETUP.md` for complete instructions:
+1. Create database tables for credits/usage
+2. Store API keys as Supabase secrets
+3. Deploy `ai-proxy` Edge Function
+4. Deploy `platform-status` Edge Function
+5. Enable via `VITE_PLATFORM_KEYS_ENABLED=true`
 
 ### Cost Calculation
 ```typescript
