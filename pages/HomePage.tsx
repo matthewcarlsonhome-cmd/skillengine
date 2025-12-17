@@ -326,52 +326,84 @@ const HomePage: React.FC = () => {
 
       <div className="container mx-auto max-w-7xl px-4 py-12">
         {/* ═══════════════════════════════════════════════════════════════════════════
-            GETTING STARTED SECTION
+            GETTING STARTED SECTION - Primary CTA for new users
         ═══════════════════════════════════════════════════════════════════════════ */}
         <section className="mb-12">
+          {/* Prominent Setup Banner for unconfigured users */}
+          {!setupStatus.isConfigured && (
+            <div className="mb-6 rounded-xl border-2 border-amber-500/50 bg-amber-500/5 p-6">
+              <div className="flex flex-col md:flex-row md:items-center gap-4">
+                <div className="h-14 w-14 rounded-xl bg-amber-500/20 flex items-center justify-center shrink-0">
+                  <Key className="h-7 w-7 text-amber-500" />
+                </div>
+                <div className="flex-1">
+                  <h2 className="text-xl font-bold mb-1">Set Up Your API Key to Get Started</h2>
+                  <p className="text-muted-foreground">
+                    Configure your AI provider key once - then run any of the 270+ skills instantly.
+                    Takes less than 2 minutes.
+                  </p>
+                </div>
+                <Link to="/account">
+                  <Button size="lg" className="bg-amber-500 hover:bg-amber-600 text-white whitespace-nowrap">
+                    <Settings className="h-4 w-4 mr-2" />
+                    Go to Setup
+                  </Button>
+                </Link>
+              </div>
+              <div className="mt-4 pt-4 border-t border-amber-500/20 grid grid-cols-3 gap-4 text-sm">
+                <div className="text-center">
+                  <div className="font-semibold text-amber-600">Step 1</div>
+                  <div className="text-muted-foreground">Get an API key (free tier available)</div>
+                </div>
+                <div className="text-center">
+                  <div className="font-semibold text-amber-600">Step 2</div>
+                  <div className="text-muted-foreground">Paste it in Account Settings</div>
+                </div>
+                <div className="text-center">
+                  <div className="font-semibold text-amber-600">Step 3</div>
+                  <div className="text-muted-foreground">Run unlimited skills!</div>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="grid md:grid-cols-2 gap-6">
             {/* Setup Checklist */}
             <div className="rounded-xl border bg-card p-6">
               <div className="flex items-center gap-2 mb-4">
                 <Settings className="h-5 w-5 text-primary" />
-                <h2 className="text-lg font-semibold">Quick Setup</h2>
+                <h2 className="text-lg font-semibold">Setup Status</h2>
                 {setupStatus.isConfigured && (
                   <span className="ml-auto text-xs bg-green-500/20 text-green-600 px-2 py-0.5 rounded-full">
-                    Ready to use
+                    ✓ Ready to run skills
                   </span>
                 )}
               </div>
-              <p className="text-sm text-muted-foreground mb-4">
-                Complete these steps once to run any skill:
-              </p>
               <div className="space-y-3">
                 {/* API Key Setup */}
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
                   {setupStatus.hasApiKey ? (
                     <CheckCircle2 className="h-5 w-5 text-green-500 shrink-0" />
                   ) : (
-                    <Circle className="h-5 w-5 text-muted-foreground shrink-0" />
+                    <Circle className="h-5 w-5 text-amber-500 shrink-0" />
                   )}
                   <div className="flex-1">
-                    <div className={`text-sm font-medium ${setupStatus.hasApiKey ? 'text-green-600' : ''}`}>
-                      Configure API Key
+                    <div className={`text-sm font-medium ${setupStatus.hasApiKey ? 'text-green-600' : 'text-amber-600'}`}>
+                      {setupStatus.hasApiKey ? 'API Key Configured' : 'API Key Required'}
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      {setupStatus.hasApiKey ? 'API key configured' : 'Required to run AI skills'}
+                      {setupStatus.hasApiKey ? 'Ready to run all skills' : 'Configure in Account Settings'}
                     </div>
                   </div>
-                  {!setupStatus.hasApiKey && (
-                    <Link to="/account">
-                      <Button size="sm" variant="outline">
-                        <Key className="h-3 w-3 mr-1" />
-                        Setup
-                      </Button>
-                    </Link>
-                  )}
+                  <Link to="/account">
+                    <Button size="sm" variant={setupStatus.hasApiKey ? 'ghost' : 'default'}>
+                      {setupStatus.hasApiKey ? 'Change' : 'Setup'}
+                    </Button>
+                  </Link>
                 </div>
 
                 {/* Profile Setup */}
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
                   {setupStatus.hasProfile ? (
                     <CheckCircle2 className="h-5 w-5 text-green-500 shrink-0" />
                   ) : (
@@ -379,44 +411,44 @@ const HomePage: React.FC = () => {
                   )}
                   <div className="flex-1">
                     <div className={`text-sm font-medium ${setupStatus.hasProfile ? 'text-green-600' : ''}`}>
-                      Add Your Resume
+                      {setupStatus.hasProfile ? 'Profile Added' : 'Add Your Resume'}
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      {setupStatus.hasProfile ? 'Profile saved' : 'Optional - personalizes all outputs'}
+                      {setupStatus.hasProfile ? 'Skills will personalize output' : 'Optional - personalizes results'}
                     </div>
                   </div>
-                  {!setupStatus.hasProfile && (
-                    <Link to="/profile">
-                      <Button size="sm" variant="ghost">
-                        Add
-                      </Button>
-                    </Link>
-                  )}
+                  <Link to="/profile">
+                    <Button size="sm" variant="ghost">
+                      {setupStatus.hasProfile ? 'Edit' : 'Add'}
+                    </Button>
+                  </Link>
                 </div>
 
                 {/* Admin indicator */}
                 {setupStatus.isAdminUser && (
-                  <div className="flex items-center gap-3 pt-2 border-t">
+                  <div className="flex items-center gap-3 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
                     <CheckCircle2 className="h-5 w-5 text-yellow-500 shrink-0" />
                     <div className="flex-1">
                       <div className="text-sm font-medium text-yellow-600">Admin Access</div>
                       <div className="text-xs text-muted-foreground">All models unlocked</div>
                     </div>
+                    <Link to="/account">
+                      <Button size="sm" variant="ghost">Settings</Button>
+                    </Link>
                   </div>
                 )}
               </div>
 
-              {!setupStatus.hasApiKey && (
-                <div className="mt-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                  <div className="flex items-start gap-2">
-                    <HelpCircle className="h-4 w-4 text-amber-500 mt-0.5 shrink-0" />
-                    <div className="text-xs text-muted-foreground">
-                      <span className="font-medium text-amber-600">Need an API key?</span>{' '}
-                      Go to <Link to="/account" className="text-primary hover:underline">Account Settings</Link> to configure your keys for Gemini, Claude, or ChatGPT.
-                    </div>
-                  </div>
+              {/* Model costs teaser */}
+              <div className="mt-4 pt-4 border-t">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">View model pricing</span>
+                  <Link to="/account" className="text-primary hover:underline flex items-center gap-1">
+                    See costs
+                    <ChevronRight className="h-3 w-3" />
+                  </Link>
                 </div>
-              )}
+              </div>
             </div>
 
             {/* Find Your Skills Quiz */}

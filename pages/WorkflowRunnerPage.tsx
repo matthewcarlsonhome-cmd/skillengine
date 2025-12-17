@@ -1003,14 +1003,11 @@ const WorkflowRunnerPage: React.FC = () => {
 
         {/* Right Column: Form & Results */}
         <div className="lg:col-span-2 space-y-6">
-          {/* AI Configuration */}
+          {/* AI Status - All configuration at /account */}
           <ProviderConfigStatus
             providerState={providerState}
             availableModels={availableModels}
             canRun={canRun}
-            onProviderChange={setProvider}
-            onModelChange={setModel}
-            isRunning={isRunning}
           />
 
           {/* Test Data Banner */}
