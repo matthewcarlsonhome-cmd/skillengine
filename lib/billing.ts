@@ -355,6 +355,66 @@ export function getMaxOutputTokens(tier: UserTier, modelId: string): number {
 // ═══════════════════════════════════════════════════════════════════════════
 
 const CREDITS_STORAGE_KEY = 'skillengine_user_credits';
+const ADMIN_EMAILS_KEY = 'skillengine_admin_emails';
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ADMIN DETECTION
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Check if current user is an admin (has full access to all models)
+ */
+export function isAdmin(userEmail?: string | null): boolean {
+  // Check localStorage for admin emails list
+  try {
+    const adminEmails = localStorage.getItem(ADMIN_EMAILS_KEY);
+    if (adminEmails && userEmail) {
+      const emails = JSON.parse(adminEmails) as string[];
+      return emails.includes(userEmail.toLowerCase());
+    }
+  } catch {
+    // Ignore
+  }
+
+  // Check for admin tier
+  const credits = getUserCredits();
+  return credits.tier === 'custom' || credits.tier === 'team';
+}
+
+/**
+ * Set admin emails (for initial setup)
+ */
+export function setAdminEmails(emails: string[]): void {
+  localStorage.setItem(ADMIN_EMAILS_KEY, JSON.stringify(emails.map(e => e.toLowerCase())));
+}
+
+/**
+ * Add an admin email
+ */
+export function addAdminEmail(email: string): void {
+  try {
+    const existing = localStorage.getItem(ADMIN_EMAILS_KEY);
+    const emails = existing ? JSON.parse(existing) : [];
+    if (!emails.includes(email.toLowerCase())) {
+      emails.push(email.toLowerCase());
+      localStorage.setItem(ADMIN_EMAILS_KEY, JSON.stringify(emails));
+    }
+  } catch {
+    localStorage.setItem(ADMIN_EMAILS_KEY, JSON.stringify([email.toLowerCase()]));
+  }
+}
+
+/**
+ * Get list of admin emails
+ */
+export function getAdminEmails(): string[] {
+  try {
+    const adminEmails = localStorage.getItem(ADMIN_EMAILS_KEY);
+    return adminEmails ? JSON.parse(adminEmails) : [];
+  } catch {
+    return [];
+  }
+}
 
 export function getUserCredits(): UserCredits {
   try {

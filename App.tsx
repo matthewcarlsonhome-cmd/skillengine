@@ -132,6 +132,7 @@ import SettingsPage from './pages/SettingsPage';                     // App sett
 import PricingPage from './pages/PricingPage';                       // Pricing information
 import AdminPage from './pages/AdminPage';                           // Admin control panel
 import DevPlaygroundPage from './pages/DevPlaygroundPage';           // Developer test playground
+import AccountPage from './pages/AccountPage';                       // User account & credits
 
 /**
  * Main App Component
@@ -258,6 +259,7 @@ function App() {
                     <Route path="/api-keys" element={<ApiKeyInstructionsPage />} />
                     <Route path="/settings" element={<SettingsPage />} />
                     <Route path="/pricing" element={<PricingPage />} />
+                    <Route path="/account" element={<AccountPage />} />
                     <Route path="/admin" element={<AdminPage />} />
                     <Route path="/dev/playground" element={<DevPlaygroundPage />} />
                   </Routes>
