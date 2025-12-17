@@ -22,11 +22,14 @@ skillengine/
 
 ## Critical Files for API Key & Billing
 
-### 1. API Key Setup Flow
-- **`pages/AccountPage.tsx`** - Central API key configuration (lines 398-516)
-  - Users configure Gemini/Claude/ChatGPT keys here
+### 1. AI Configuration Flow (Unified Setup)
+- **`pages/AccountPage.tsx`** - Central AI configuration (AIConfigurationSection component)
+  - **Step 1**: Key Mode toggle (Platform Key vs Personal/BYOK)
+  - **Step 2**: Provider selection (Gemini/Claude/ChatGPT)
+  - **Step 3**: Model selection with cost per skill shown
+  - **Step 4**: API Key input (only for Personal mode)
   - Keys stored in browser localStorage
-  - Shows model costs table
+  - Shows model costs table below configuration
 
 ### 2. Model Pricing (`lib/billing.ts`)
 ```typescript

@@ -4,7 +4,8 @@
  * Features:
  * - View current tier and credits
  * - Upgrade tier options
- * - Admin setup for universal API keys
+ * - Unified AI Configuration (key mode, provider, model)
+ * - Admin setup for platform keys
  * - Usage history
  */
 
@@ -28,9 +29,13 @@ import {
   Plus,
   Trash2,
   RefreshCw,
+  Globe,
+  User,
+  Sparkles,
 } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
+import { Select } from '../components/ui/Select';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
 import {
@@ -49,7 +54,15 @@ import {
   type UserCredits,
 } from '../lib/billing';
 import { saveApiKey, getApiKey, hasStoredKey } from '../lib/apiKeyStorage';
-import { getModelsForProvider, type ApiProvider } from '../lib/platformKeys';
+import {
+  getModelsForProvider,
+  type ApiProvider,
+  type ModelOption,
+  GEMINI_MODELS,
+  CLAUDE_MODELS,
+  CHATGPT_MODELS,
+} from '../lib/platformKeys';
+import { useProviderConfig } from '../components/ProviderConfig';
 import { cn } from '../lib/theme';
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -124,6 +137,308 @@ const TierCard: React.FC<TierCardProps> = ({ tier, isCurrentTier, onSelect }) =>
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
+// AI CONFIGURATION SECTION COMPONENT
+// ═══════════════════════════════════════════════════════════════════════════
+
+const PROVIDER_INFO: Record<ApiProvider, { name: string; color: string; keyUrl: string; keyPlaceholder: string }> = {
+  gemini: {
+    name: 'Google Gemini',
+    color: 'bg-blue-500',
+    keyUrl: 'https://aistudio.google.com/',
+    keyPlaceholder: 'AIza...',
+  },
+  claude: {
+    name: 'Anthropic Claude',
+    color: 'bg-purple-500',
+    keyUrl: 'https://console.anthropic.com/',
+    keyPlaceholder: 'sk-ant-...',
+  },
+  chatgpt: {
+    name: 'OpenAI ChatGPT',
+    color: 'bg-green-500',
+    keyUrl: 'https://platform.openai.com/',
+    keyPlaceholder: 'sk-...',
+  },
+};
+
+const AIConfigurationSection: React.FC = () => {
+  const { addToast } = useToast();
+  const {
+    state: providerState,
+    setProvider,
+    setModel,
+    setKeyMode,
+    setApiKey,
+    availableModels,
+    canRun,
+  } = useProviderConfig();
+
+  const [showKey, setShowKey] = useState(false);
+  const [localApiKey, setLocalApiKey] = useState(providerState.apiKey);
+
+  // Sync local key with provider state
+  useEffect(() => {
+    setLocalApiKey(providerState.apiKey);
+  }, [providerState.apiKey, providerState.provider]);
+
+  const handleSaveKey = () => {
+    setApiKey(localApiKey);
+    addToast(`${PROVIDER_INFO[providerState.provider].name} API key saved`, 'success');
+  };
+
+  const providerInfo = PROVIDER_INFO[providerState.provider];
+  const currentModel = availableModels.find(m => m.id === providerState.model) || availableModels[0];
+
+  // Platform key availability (would come from server in production)
+  const platformKeyAvailable = false; // Set to true when platform keys are configured
+
+  return (
+    <div className="rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-purple-500/5 p-6 mb-8">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="h-12 w-12 rounded-xl bg-primary/20 flex items-center justify-center">
+          <Sparkles className="h-6 w-6 text-primary" />
+        </div>
+        <div>
+          <h2 className="text-xl font-bold">AI Configuration</h2>
+          <p className="text-sm text-muted-foreground">
+            Configure once, use everywhere across all skills and workflows
+          </p>
+        </div>
+        {canRun && (
+          <span className="ml-auto text-xs bg-green-500/20 text-green-600 px-3 py-1 rounded-full flex items-center gap-1">
+            <Check className="h-3 w-3" /> Ready to Run
+          </span>
+        )}
+      </div>
+
+      {/* Step 1: Key Mode Selection */}
+      <div className="mb-6">
+        <label className="block text-sm font-semibold mb-3">
+          Step 1: Choose Key Mode
+        </label>
+        <div className="grid grid-cols-2 gap-4">
+          {/* Personal Key Option */}
+          <button
+            onClick={() => setKeyMode('personal')}
+            className={cn(
+              'p-4 rounded-xl border-2 text-left transition-all',
+              providerState.keyMode === 'personal'
+                ? 'border-primary bg-primary/10'
+                : 'border-border hover:border-muted-foreground/50'
+            )}
+          >
+            <div className="flex items-center gap-3 mb-2">
+              <div className={cn(
+                'h-10 w-10 rounded-lg flex items-center justify-center',
+                providerState.keyMode === 'personal' ? 'bg-primary/20' : 'bg-muted'
+              )}>
+                <User className="h-5 w-5" />
+              </div>
+              <div>
+                <div className="font-semibold">My Own Key</div>
+                <div className="text-xs text-muted-foreground">BYOK - Bring Your Own Key</div>
+              </div>
+              {providerState.keyMode === 'personal' && (
+                <Check className="h-5 w-5 text-primary ml-auto" />
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Use your personal API key. No usage limits, pay directly to provider.
+            </p>
+          </button>
+
+          {/* Platform Key Option */}
+          <button
+            onClick={() => platformKeyAvailable && setKeyMode('platform')}
+            disabled={!platformKeyAvailable}
+            className={cn(
+              'p-4 rounded-xl border-2 text-left transition-all relative',
+              providerState.keyMode === 'platform'
+                ? 'border-primary bg-primary/10'
+                : platformKeyAvailable
+                  ? 'border-border hover:border-muted-foreground/50'
+                  : 'border-border opacity-60 cursor-not-allowed'
+            )}
+          >
+            <div className="flex items-center gap-3 mb-2">
+              <div className={cn(
+                'h-10 w-10 rounded-lg flex items-center justify-center',
+                providerState.keyMode === 'platform' ? 'bg-primary/20' : 'bg-muted'
+              )}>
+                <Globe className="h-5 w-5" />
+              </div>
+              <div>
+                <div className="font-semibold">Platform Key</div>
+                <div className="text-xs text-muted-foreground">Use shared platform API</div>
+              </div>
+              {providerState.keyMode === 'platform' && (
+                <Check className="h-5 w-5 text-primary ml-auto" />
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              No setup required. Usage deducted from your credits.
+            </p>
+            {!platformKeyAvailable && (
+              <div className="absolute inset-0 flex items-center justify-center bg-background/80 rounded-xl">
+                <span className="text-xs font-medium text-muted-foreground px-3 py-1 bg-muted rounded-full">
+                  Coming Soon
+                </span>
+              </div>
+            )}
+          </button>
+        </div>
+      </div>
+
+      {/* Step 2: Provider Selection */}
+      <div className="mb-6">
+        <label className="block text-sm font-semibold mb-3">
+          Step 2: Select AI Provider
+        </label>
+        <div className="grid grid-cols-3 gap-3">
+          {(['gemini', 'claude', 'chatgpt'] as ApiProvider[]).map((provider) => {
+            const info = PROVIDER_INFO[provider];
+            const isSelected = providerState.provider === provider;
+            const hasKey = hasStoredKey(provider);
+            return (
+              <button
+                key={provider}
+                onClick={() => setProvider(provider)}
+                className={cn(
+                  'p-4 rounded-xl border-2 text-left transition-all',
+                  isSelected
+                    ? 'border-primary bg-primary/10'
+                    : 'border-border hover:border-muted-foreground/50'
+                )}
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <span className={cn('h-3 w-3 rounded-full', info.color)} />
+                  <span className="font-medium text-sm">{info.name}</span>
+                </div>
+                {hasKey && providerState.keyMode === 'personal' && (
+                  <span className="text-xs text-green-600 flex items-center gap-1">
+                    <Check className="h-3 w-3" /> Key saved
+                  </span>
+                )}
+                {!hasKey && providerState.keyMode === 'personal' && (
+                  <span className="text-xs text-amber-600">Needs key</span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Step 3: Model Selection */}
+      <div className="mb-6">
+        <label className="block text-sm font-semibold mb-3">
+          Step 3: Select Model
+        </label>
+        <Select
+          value={providerState.model}
+          onChange={(e) => setModel(e.target.value)}
+          className="w-full"
+        >
+          {availableModels.map((model) => {
+            const skillCost = estimateSkillCost(model.id, 'standard');
+            return (
+              <option key={model.id} value={model.id}>
+                {model.name} - ~${(skillCost.totalCost / 100).toFixed(4)}/skill
+              </option>
+            );
+          })}
+        </Select>
+        {currentModel && (
+          <p className="text-xs text-muted-foreground mt-2">
+            {currentModel.description}
+          </p>
+        )}
+      </div>
+
+      {/* Step 4: API Key (only for personal mode) */}
+      {providerState.keyMode === 'personal' && (
+        <div className="mb-6">
+          <label className="block text-sm font-semibold mb-3">
+            Step 4: Enter Your {providerInfo.name} API Key
+          </label>
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <Input
+                type={showKey ? 'text' : 'password'}
+                value={localApiKey}
+                onChange={(e) => setLocalApiKey(e.target.value)}
+                placeholder={providerInfo.keyPlaceholder}
+                className="pr-10"
+              />
+              <button
+                onClick={() => setShowKey(!showKey)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                {showKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+            <Button onClick={handleSaveKey} disabled={!localApiKey}>
+              Save Key
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground mt-2">
+            Get your key from{' '}
+            <a
+              href={providerInfo.keyUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              {providerInfo.keyUrl.replace('https://', '')}
+            </a>
+          </p>
+        </div>
+      )}
+
+      {/* Status Summary */}
+      <div className={cn(
+        'p-4 rounded-lg border',
+        canRun ? 'bg-green-500/10 border-green-500/30' : 'bg-amber-500/10 border-amber-500/30'
+      )}>
+        <div className="flex items-center gap-3">
+          {canRun ? (
+            <>
+              <Check className="h-5 w-5 text-green-500" />
+              <div>
+                <div className="font-medium text-green-600">Ready to Run Skills!</div>
+                <div className="text-sm text-muted-foreground">
+                  Using {providerInfo.name} • {currentModel?.name || 'Default model'}
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              <AlertCircle className="h-5 w-5 text-amber-500" />
+              <div>
+                <div className="font-medium text-amber-600">Setup Required</div>
+                <div className="text-sm text-muted-foreground">
+                  Enter your {providerInfo.name} API key above to start using skills
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Info box */}
+      <div className="mt-4 p-3 rounded-lg bg-blue-500/10 border border-blue-500/30">
+        <div className="flex items-start gap-2">
+          <Info className="h-4 w-4 text-blue-500 mt-0.5" />
+          <div className="text-sm text-muted-foreground">
+            Your selection is saved automatically and applies to all skills and workflows.
+            Keys are stored securely in your browser's local storage.
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
 // MAIN COMPONENT
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -136,21 +451,8 @@ const AccountPage: React.FC = () => {
   const [newAdminEmail, setNewAdminEmail] = useState('');
   const [showAdminSection, setShowAdminSection] = useState(false);
 
-  // API Key states
-  const [geminiKey, setGeminiKey] = useState('');
-  const [claudeKey, setClaudeKey] = useState('');
-  const [chatgptKey, setChatgptKey] = useState('');
-  const [showKeys, setShowKeys] = useState(false);
-
   const userEmail = appUser?.email || user?.email;
   const userIsAdmin = isAdmin(userEmail);
-
-  // Load stored keys
-  useEffect(() => {
-    setGeminiKey(getApiKey('gemini') || '');
-    setClaudeKey(getApiKey('claude') || '');
-    setChatgptKey(getApiKey('chatgpt') || '');
-  }, []);
 
   // Refresh credits
   const refreshCredits = () => {
@@ -180,12 +482,6 @@ const AccountPage: React.FC = () => {
     setAdminEmails(updated);
     setAdminEmailsState(updated);
     addToast(`Removed ${email} from admins`, 'success');
-  };
-
-  // Handle save API key
-  const handleSaveKey = (provider: 'gemini' | 'claude' | 'chatgpt', key: string) => {
-    saveApiKey(provider, key);
-    addToast(`${provider.charAt(0).toUpperCase() + provider.slice(1)} API key saved`, 'success');
   };
 
   const tierConfig = TIER_CONFIGS[credits.tier];
@@ -399,125 +695,10 @@ const AccountPage: React.FC = () => {
         </div>
       )}
 
-      {/* API Key Setup Section - Always Visible */}
-      <div className="rounded-xl border bg-card p-6 mb-8">
-        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-          <Key className="h-5 w-5" />
-          API Key Setup
-        </h2>
-        <p className="text-sm text-muted-foreground mb-4">
-          Configure your API keys once here. All skills and workflows will use these keys automatically.
-        </p>
-
-        <div className="space-y-4">
-          <div className="flex items-center gap-2 mb-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowKeys(!showKeys)}
-            >
-              {showKeys ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              <span className="ml-1">{showKeys ? 'Hide Keys' : 'Show Keys'}</span>
-            </Button>
-          </div>
-
-          {/* Gemini */}
-          <div className="rounded-lg border p-4">
-            <div className="flex items-center justify-between mb-2">
-              <label className="font-medium flex items-center gap-2">
-                <span className="h-3 w-3 rounded-full bg-blue-500" />
-                Google Gemini
-              </label>
-              {hasStoredKey('gemini') && (
-                <span className="text-xs bg-green-500/20 text-green-600 px-2 py-0.5 rounded-full flex items-center gap-1">
-                  <Check className="h-3 w-3" /> Configured
-                </span>
-              )}
-            </div>
-            <div className="flex gap-2">
-              <Input
-                type={showKeys ? 'text' : 'password'}
-                value={geminiKey}
-                onChange={(e) => setGeminiKey(e.target.value)}
-                placeholder="AIza..."
-                className="flex-1"
-              />
-              <Button onClick={() => handleSaveKey('gemini', geminiKey)}>Save</Button>
-            </div>
-            <p className="text-xs text-muted-foreground mt-2">
-              Get key from <a href="https://aistudio.google.com/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Google AI Studio</a>
-            </p>
-          </div>
-
-          {/* Claude */}
-          <div className="rounded-lg border p-4">
-            <div className="flex items-center justify-between mb-2">
-              <label className="font-medium flex items-center gap-2">
-                <span className="h-3 w-3 rounded-full bg-purple-500" />
-                Anthropic Claude
-              </label>
-              {hasStoredKey('claude') && (
-                <span className="text-xs bg-green-500/20 text-green-600 px-2 py-0.5 rounded-full flex items-center gap-1">
-                  <Check className="h-3 w-3" /> Configured
-                </span>
-              )}
-            </div>
-            <div className="flex gap-2">
-              <Input
-                type={showKeys ? 'text' : 'password'}
-                value={claudeKey}
-                onChange={(e) => setClaudeKey(e.target.value)}
-                placeholder="sk-ant-..."
-                className="flex-1"
-              />
-              <Button onClick={() => handleSaveKey('claude', claudeKey)}>Save</Button>
-            </div>
-            <p className="text-xs text-muted-foreground mt-2">
-              Get key from <a href="https://console.anthropic.com/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Anthropic Console</a>
-            </p>
-          </div>
-
-          {/* ChatGPT */}
-          <div className="rounded-lg border p-4">
-            <div className="flex items-center justify-between mb-2">
-              <label className="font-medium flex items-center gap-2">
-                <span className="h-3 w-3 rounded-full bg-green-500" />
-                OpenAI ChatGPT
-              </label>
-              {hasStoredKey('chatgpt') && (
-                <span className="text-xs bg-green-500/20 text-green-600 px-2 py-0.5 rounded-full flex items-center gap-1">
-                  <Check className="h-3 w-3" /> Configured
-                </span>
-              )}
-            </div>
-            <div className="flex gap-2">
-              <Input
-                type={showKeys ? 'text' : 'password'}
-                value={chatgptKey}
-                onChange={(e) => setChatgptKey(e.target.value)}
-                placeholder="sk-..."
-                className="flex-1"
-              />
-              <Button onClick={() => handleSaveKey('chatgpt', chatgptKey)}>Save</Button>
-            </div>
-            <p className="text-xs text-muted-foreground mt-2">
-              Get key from <a href="https://platform.openai.com/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">OpenAI Platform</a>
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-4 p-3 rounded-lg bg-blue-500/10 border border-blue-500/30">
-          <div className="flex items-start gap-2">
-            <Info className="h-4 w-4 text-blue-500 mt-0.5" />
-            <div className="text-sm">
-              <p className="text-muted-foreground">
-                Keys are stored securely in your browser's local storage. You only need to configure each provider once -
-                all skills and workflows will automatically use your saved keys.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* ═══════════════════════════════════════════════════════════════════════════
+          AI CONFIGURATION - Unified Setup Section
+      ═══════════════════════════════════════════════════════════════════════════ */}
+      <AIConfigurationSection />
 
       {/* Model Costs Section */}
       <div className="rounded-xl border bg-card p-6 mb-8">
