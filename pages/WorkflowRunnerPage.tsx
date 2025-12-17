@@ -68,7 +68,7 @@ import { runSkillStream as runClaudeSkillStream } from '../lib/claude';
 import { runSkillStream as runChatGPTSkillStream, ChatGPTModelType } from '../lib/chatgpt';
 import type { ApiProviderType } from '../types';
 import { TestDataBanner } from '../components/TestOutputButton';
-import { ProviderConfig, useProviderConfig } from '../components/ProviderConfig';
+import { ProviderConfigStatus, useProviderConfig } from '../components/ProviderConfig';
 import { recordUsage, createUsageRecordFromExecution } from '../lib/usageLedger';
 import { useAuth } from '../hooks/useAuth';
 
@@ -1003,26 +1003,15 @@ const WorkflowRunnerPage: React.FC = () => {
 
         {/* Right Column: Form & Results */}
         <div className="lg:col-span-2 space-y-6">
-          {/* API Configuration */}
-          <div className="rounded-xl border bg-card p-6">
-            <h3 className="text-lg font-semibold mb-4">Configuration</h3>
-            <ProviderConfig
-              selectedProvider={providerState.provider}
-              onProviderChange={setProvider}
-              selectedModel={providerState.model}
-              onModelChange={setModel}
-              keyMode={providerState.keyMode}
-              onKeyModeChange={setKeyMode}
-              apiKey={providerState.apiKey}
-              onApiKeyChange={setApiKey}
-              isRunning={isRunning}
-              showModelSelector={true}
-              availableModels={availableModels}
-              userTier={providerState.tier}
-              userCredits={providerState.credits}
-              isUserAdmin={providerState.isAdmin}
-            />
-          </div>
+          {/* AI Configuration */}
+          <ProviderConfigStatus
+            providerState={providerState}
+            availableModels={availableModels}
+            canRun={canRun}
+            onProviderChange={setProvider}
+            onModelChange={setModel}
+            isRunning={isRunning}
+          />
 
           {/* Test Data Banner */}
           <TestDataBanner

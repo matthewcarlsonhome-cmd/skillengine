@@ -40,7 +40,7 @@ import { TestDataPanel } from '../components/TestDataPanel';
 import { FormattedOutput, Citations } from '../components/FormattedOutput';
 import { ErrorBanner } from '../components/ui/ErrorBanner';
 import { SkeletonRunnerPage } from '../components/ui/Skeleton';
-import { ProviderConfig, useProviderConfig } from '../components/ProviderConfig';
+import { ProviderConfigStatus, useProviderConfig } from '../components/ProviderConfig';
 import {
   Sparkles,
   AlertTriangle,
@@ -190,6 +190,7 @@ const SkillRunnerPage: React.FC = () => {
     setApiKey,
     canRun,
     runStatus,
+    availableModels,
   } = useProviderConfig();
 
   const skill: Skill | undefined = useMemo(
@@ -771,23 +772,15 @@ const SkillRunnerPage: React.FC = () => {
         isExecuting={isLoading}
       />
 
-      {/* Configuration Panel */}
-      <ConfigPanel title="Run Configuration">
-        <div className="md:col-span-2">
-          <ProviderConfig
-            selectedProvider={providerState.provider}
-            onProviderChange={setProvider}
-            selectedModel={providerState.model}
-            onModelChange={setModel}
-            keyMode={providerState.keyMode}
-            onKeyModeChange={setKeyMode}
-            apiKey={providerState.apiKey}
-            onApiKeyChange={setApiKey}
-            isRunning={isLoading}
-            showModelSelector={true}
-          />
-        </div>
-      </ConfigPanel>
+      {/* AI Configuration */}
+      <ProviderConfigStatus
+        providerState={providerState}
+        availableModels={availableModels}
+        canRun={canRun}
+        onProviderChange={setProvider}
+        onModelChange={setModel}
+        isRunning={isLoading}
+      />
 
       {/* Form Inputs */}
       <div className="space-y-6">
