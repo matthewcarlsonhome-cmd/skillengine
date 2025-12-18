@@ -28,10 +28,10 @@ import { Input } from './ui/Input';
 import { Select } from './ui/Select';
 import { Checkbox } from './ui/Checkbox';
 import { cn } from '../lib/theme';
-import type {
-  EmailRecipient,
-  SegmentationFilter,
-  SkillUsageBreakdown,
+import {
+  DEFAULT_SEGMENTATION_FILTER,
+  type EmailRecipient,
+  type SegmentationFilter,
 } from '../lib/emailSegmentation/types';
 import { SKILLS } from '../lib/skills';
 
@@ -44,33 +44,26 @@ interface EmailSegmentationPanelProps {
   filteredRecipients: EmailRecipient[];
   selectedRecipientIds: Set<string>;
   filter: SegmentationFilter;
-  filterDescription: string;
-  filterValidation: { valid: boolean; errors: string[] };
   isLoading: boolean;
-  error: string | null;
+
+  // Stats object (alternative to individual props)
+  stats?: {
+    totalCount: number;
+    filteredCount: number;
+    selectedCount: number;
+    optedInCount: number;
+  };
 
   // Filter handlers
   onFilterChange: (updates: Partial<SegmentationFilter>) => void;
-  onFilterReset: () => void;
 
   // Selection handlers
-  onToggleRecipient: (userId: string) => void;
+  onSelectRecipient: (userId: string) => void;
   onSelectAll: () => void;
   onDeselectAll: () => void;
-  onSelectFiltered: () => void;
 
   // Actions
   onRefresh: () => void;
-  onComposeEmail: () => void;
-
-  // Stats
-  totalCount: number;
-  filteredCount: number;
-  selectedCount: number;
-  optedInCount: number;
-
-  // Optional: user stats lookup
-  getUserTopSkills?: (userId: string) => SkillUsageBreakdown[];
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -99,8 +92,7 @@ const RecipientRow: React.FC<{
   recipient: EmailRecipient;
   isSelected: boolean;
   onToggle: () => void;
-  topSkills?: SkillUsageBreakdown[];
-}> = ({ recipient, isSelected, onToggle, topSkills }) => (
+}> = ({ recipient, isSelected, onToggle }) => (
   <div
     className={cn(
       'flex items-center gap-3 p-3 rounded-lg border transition-colors cursor-pointer',
@@ -153,19 +145,6 @@ const RecipientRow: React.FC<{
         )}
       </div>
 
-      {topSkills && topSkills.length > 0 && (
-        <div className="flex items-center gap-1 mt-1">
-          <span className="text-xs text-muted-foreground">Top skills:</span>
-          {topSkills.slice(0, 3).map(skill => (
-            <span
-              key={skill.skillId}
-              className="text-xs bg-muted px-1.5 py-0.5 rounded"
-            >
-              {skill.skillName}
-            </span>
-          ))}
-        </div>
-      )}
     </div>
 
     {recipient.matchedSkills && recipient.matchedSkills.length > 0 && (
@@ -187,26 +166,22 @@ export const EmailSegmentationPanel: React.FC<EmailSegmentationPanelProps> = ({
   filteredRecipients,
   selectedRecipientIds,
   filter,
-  filterDescription,
-  filterValidation,
   isLoading,
-  error,
+  stats,
   onFilterChange,
-  onFilterReset,
-  onToggleRecipient,
+  onSelectRecipient,
   onSelectAll,
   onDeselectAll,
-  onSelectFiltered,
   onRefresh,
-  onComposeEmail,
-  totalCount,
-  filteredCount,
-  selectedCount,
-  optedInCount,
-  getUserTopSkills,
 }) => {
   const [showFilters, setShowFilters] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Derive stats from props or stats object
+  const totalCount = stats?.totalCount ?? recipients.length;
+  const filteredCount = stats?.filteredCount ?? filteredRecipients.length;
+  const selectedCount = stats?.selectedCount ?? selectedRecipientIds.size;
+  const optedInCount = stats?.optedInCount ?? recipients.filter(r => r.marketingEmailOptIn).length;
 
   // Get available skills for filter dropdown
   const availableSkills = useMemo(() => {
@@ -267,11 +242,6 @@ export const EmailSegmentationPanel: React.FC<EmailSegmentationPanelProps> = ({
             <h3 className="font-semibold">Segmentation Filters</h3>
           </div>
           <div className="flex items-center gap-2">
-            {filterDescription && (
-              <span className="text-xs text-muted-foreground hidden md:block">
-                {filterDescription}
-              </span>
-            )}
             {showFilters ? (
               <ChevronUp className="h-5 w-5 text-muted-foreground" />
             ) : (
@@ -282,13 +252,6 @@ export const EmailSegmentationPanel: React.FC<EmailSegmentationPanelProps> = ({
 
         {showFilters && (
           <div className="border-t p-4 space-y-4">
-            {/* Validation errors */}
-            {!filterValidation.valid && (
-              <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-600 text-sm">
-                {filterValidation.errors.join(', ')}
-              </div>
-            )}
-
             {/* Opt-in Filter */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -446,7 +409,7 @@ export const EmailSegmentationPanel: React.FC<EmailSegmentationPanelProps> = ({
 
             {/* Filter Actions */}
             <div className="flex items-center justify-between pt-2 border-t">
-              <Button variant="outline" size="sm" onClick={onFilterReset}>
+              <Button variant="outline" size="sm" onClick={() => onFilterChange(DEFAULT_SEGMENTATION_FILTER)}>
                 Reset Filters
               </Button>
               <div className="flex items-center gap-2">
@@ -464,13 +427,6 @@ export const EmailSegmentationPanel: React.FC<EmailSegmentationPanelProps> = ({
           </div>
         )}
       </div>
-
-      {/* Error Display */}
-      {error && (
-        <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/30 text-red-600">
-          {error}
-        </div>
-      )}
 
       {/* Recipients List */}
       <div className="rounded-xl border bg-card">
@@ -491,8 +447,8 @@ export const EmailSegmentationPanel: React.FC<EmailSegmentationPanelProps> = ({
               />
             </div>
 
-            <Button variant="outline" size="sm" onClick={onSelectFiltered}>
-              Select Filtered
+            <Button variant="outline" size="sm" onClick={onSelectAll}>
+              Select All
             </Button>
             <Button variant="outline" size="sm" onClick={onDeselectAll}>
               Deselect All
@@ -518,32 +474,20 @@ export const EmailSegmentationPanel: React.FC<EmailSegmentationPanelProps> = ({
                 key={recipient.userId}
                 recipient={recipient}
                 isSelected={selectedRecipientIds.has(recipient.userId)}
-                onToggle={() => onToggleRecipient(recipient.userId)}
-                topSkills={getUserTopSkills?.(recipient.userId)}
+                onToggle={() => onSelectRecipient(recipient.userId)}
               />
             ))
           )}
         </div>
       </div>
 
-      {/* Action Footer */}
-      <div className="flex items-center justify-between p-4 rounded-xl border bg-card">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Info className="h-4 w-4" />
-          <span>
-            {selectedCount} recipient{selectedCount !== 1 ? 's' : ''} selected
-            {selectedCount > 0 && ` (${selectedCount} will receive the email)`}
-          </span>
-        </div>
-
-        <Button
-          onClick={onComposeEmail}
-          disabled={selectedCount === 0}
-          className="min-w-[160px]"
-        >
-          <Mail className="h-4 w-4 mr-2" />
-          Compose Email
-        </Button>
+      {/* Selection Summary */}
+      <div className="flex items-center gap-2 p-4 rounded-xl border bg-card text-sm text-muted-foreground">
+        <Info className="h-4 w-4" />
+        <span>
+          {selectedCount} recipient{selectedCount !== 1 ? 's' : ''} selected
+          {selectedCount > 0 && ' — Use the "Compose Email" button above to send'}
+        </span>
       </div>
     </div>
   );

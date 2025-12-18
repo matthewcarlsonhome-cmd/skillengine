@@ -257,15 +257,19 @@ const Header: React.FC = () => {
                         </div>
                       </Link>
 
-                      {/* Admin */}
-                      <div className="border-t my-2" />
-                      <p className="px-3 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Admin</p>
-                      <Link to="/admin" onClick={() => setShowToolsMenu(false)}>
-                        <div className="flex items-center gap-3 px-3 py-2 rounded hover:bg-muted transition-colors">
-                          <Shield className="h-4 w-4 text-amber-500" />
-                          <span className="text-sm">Control Panel</span>
-                        </div>
-                      </Link>
+                      {/* Admin - Only visible to logged-in admins */}
+                      {isAdmin && (
+                        <>
+                          <div className="border-t my-2" />
+                          <p className="px-3 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Admin</p>
+                          <Link to="/admin" onClick={() => setShowToolsMenu(false)}>
+                            <div className="flex items-center gap-3 px-3 py-2 rounded hover:bg-muted transition-colors">
+                              <Shield className="h-4 w-4 text-amber-500" />
+                              <span className="text-sm">Control Panel</span>
+                            </div>
+                          </Link>
+                        </>
+                      )}
                     </div>
                   </div>
                 </>
@@ -356,15 +360,16 @@ const Header: React.FC = () => {
                             <Settings className="h-4 w-4" />
                             Settings
                           </Link>
-                          <Link
-                            to="/admin"
-                            onClick={() => setShowUserMenu(false)}
-                            className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded hover:bg-muted transition-colors"
-                          >
-                            <Shield className="h-4 w-4 text-amber-500" />
-                            Admin Panel
-                            {isAdmin && <span className="ml-auto text-xs text-amber-500">Admin</span>}
-                          </Link>
+                          {isAdmin && (
+                            <Link
+                              to="/admin"
+                              onClick={() => setShowUserMenu(false)}
+                              className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded hover:bg-muted transition-colors"
+                            >
+                              <Shield className="h-4 w-4 text-amber-500" />
+                              Admin Panel
+                            </Link>
+                          )}
                           <div className="border-t my-1" />
                           <button
                             onClick={handleSignOut}
@@ -582,15 +587,19 @@ const Header: React.FC = () => {
               </Button>
             </Link>
 
-            {/* Admin */}
-            <div className="border-t my-2" />
-            <p className="px-3 py-1 text-xs font-semibold text-muted-foreground uppercase">Admin</p>
-            <Link to="/admin">
-              <Button variant={isActive('/admin') ? 'secondary' : 'ghost'} className="w-full justify-start gap-2">
-                <Shield className="h-4 w-4 text-amber-500" />
-                Control Panel
-              </Button>
-            </Link>
+            {/* Admin - Only visible to logged-in admins */}
+            {isAdmin && (
+              <>
+                <div className="border-t my-2" />
+                <p className="px-3 py-1 text-xs font-semibold text-muted-foreground uppercase">Admin</p>
+                <Link to="/admin">
+                  <Button variant={isActive('/admin') ? 'secondary' : 'ghost'} className="w-full justify-start gap-2">
+                    <Shield className="h-4 w-4 text-amber-500" />
+                    Control Panel
+                  </Button>
+                </Link>
+              </>
+            )}
           </nav>
         </div>
       )}
