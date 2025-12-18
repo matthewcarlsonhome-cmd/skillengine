@@ -8,7 +8,7 @@
  * - Skill usage analytics
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Shield,
@@ -33,6 +33,8 @@ import {
   Play,
   Loader2,
   Key,
+  Target,
+  Send,
 } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
@@ -68,8 +70,14 @@ import { getApiKey, saveApiKey as savePersonalApiKey } from '../lib/apiKeyStorag
 import { runSkillStream as runGeminiStream } from '../lib/gemini';
 import { runSkillStream as runClaudeStream } from '../lib/claude';
 import { runSkillStream as runChatGPTStream, type ChatGPTModelType } from '../lib/chatgpt';
+import { EmailSegmentationPanel } from '../components/EmailSegmentationPanel';
+import { EmailComposer } from '../components/EmailComposer';
+import { useEmailSegments } from '../hooks/useEmailSegments';
+import { useSkillUsageStats } from '../hooks/useSkillUsageStats';
+import { sendEmail } from '../lib/emailSegmentation';
+import type { EmailSendRequest } from '../lib/emailSegmentation/types';
 
-type TabId = 'overview' | 'emails' | 'roles' | 'usage' | 'api-test' | 'settings';
+type TabId = 'overview' | 'emails' | 'email-targeting' | 'roles' | 'usage' | 'api-test' | 'settings';
 
 const ROLE_ICONS: Record<UserRole, React.FC<{ className?: string }>> = {
   free: Users,
@@ -104,6 +112,14 @@ const AdminPage: React.FC = () => {
   const [usageRecords, setUsageRecords] = useState<SkillUsageRecord[]>(getSkillUsageRecords());
   const [adminEmailList, setAdminEmailList] = useState<string>(getAdminEmails().join('\n'));
   const [editingRole, setEditingRole] = useState<UserRole | null>(null);
+
+  // Email targeting state
+  const [showEmailComposer, setShowEmailComposer] = useState(false);
+  const [emailSending, setEmailSending] = useState(false);
+
+  // Email segmentation hooks
+  const emailSegments = useEmailSegments();
+  const skillUsageStats = useSkillUsageStats();
 
   useEffect(() => {
     // If admin setup is complete and user is not admin, redirect
@@ -188,9 +204,43 @@ const AdminPage: React.FC = () => {
     }, 500);
   };
 
+  // Email targeting handlers
+  const handleSendEmail = async (request: EmailSendRequest) => {
+    setEmailSending(true);
+    try {
+      const adminUserId = currentUser?.id || user?.id || 'unknown';
+      const adminEmail = currentUser?.email || user?.email || 'unknown';
+
+      const response = await sendEmail(request, adminUserId, adminEmail);
+
+      if (response.success) {
+        addToast(`Email sent to ${response.recipientCount} recipients`, 'success');
+        setShowEmailComposer(false);
+        emailSegments.deselectAll();
+      } else {
+        addToast(response.error || 'Failed to send email', 'error');
+      }
+
+      return response;
+    } catch (e) {
+      const error = e instanceof Error ? e.message : 'An error occurred';
+      addToast(error, 'error');
+      return { success: false, error, recipientCount: 0 };
+    } finally {
+      setEmailSending(false);
+    }
+  };
+
+  const selectedRecipients = useMemo(() => {
+    return emailSegments.filteredRecipients.filter(
+      r => emailSegments.selectedRecipientIds.has(r.userId)
+    );
+  }, [emailSegments.filteredRecipients, emailSegments.selectedRecipientIds]);
+
   const tabs: { id: TabId; label: string; icon: React.FC<{ className?: string }> }[] = [
     { id: 'overview', label: 'Overview', icon: BarChart3 },
     { id: 'emails', label: 'Email List', icon: Mail },
+    { id: 'email-targeting', label: 'Email Targeting', icon: Target },
     { id: 'roles', label: 'Role Config', icon: Crown },
     { id: 'usage', label: 'Skill Usage', icon: BarChart3 },
     { id: 'api-test', label: 'API Test', icon: Key },
@@ -457,6 +507,51 @@ const AdminPage: React.FC = () => {
                 )}
               </div>
             </div>
+          </div>
+        )}
+
+        {/* Email Targeting Tab */}
+        {activeTab === 'email-targeting' && (
+          <div className="space-y-6">
+            {showEmailComposer ? (
+              <EmailComposer
+                recipients={selectedRecipients}
+                onSend={handleSendEmail}
+                onCancel={() => setShowEmailComposer(false)}
+                isLoading={emailSending}
+              />
+            ) : (
+              <>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-xl font-semibold">Email Targeting</h2>
+                    <p className="text-sm text-muted-foreground">
+                      Segment users by skills, usage, and preferences to send targeted emails
+                    </p>
+                  </div>
+                  {emailSegments.selectedRecipientIds.size > 0 && (
+                    <Button onClick={() => setShowEmailComposer(true)}>
+                      <Send className="h-4 w-4 mr-2" />
+                      Compose Email ({emailSegments.selectedRecipientIds.size})
+                    </Button>
+                  )}
+                </div>
+
+                <EmailSegmentationPanel
+                  recipients={emailSegments.recipients}
+                  filteredRecipients={emailSegments.filteredRecipients}
+                  selectedRecipientIds={emailSegments.selectedRecipientIds}
+                  filter={emailSegments.filter}
+                  isLoading={emailSegments.isLoading}
+                  stats={emailSegments.stats}
+                  onFilterChange={emailSegments.updateFilter}
+                  onSelectRecipient={emailSegments.toggleRecipient}
+                  onSelectAll={emailSegments.selectAll}
+                  onDeselectAll={emailSegments.deselectAll}
+                  onRefresh={emailSegments.refresh}
+                />
+              </>
+            )}
           </div>
         )}
 
