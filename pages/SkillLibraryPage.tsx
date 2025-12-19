@@ -7,6 +7,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { useDebounce } from '../hooks/useDebounce';
 import {
   Search,
   Filter,
@@ -184,11 +185,18 @@ const SkillLibraryPage: React.FC = () => {
     levels: false,
   });
 
+  // Debounce search for performance
+  const debouncedSearch = useDebounce(filters.search, 150);
+  const debouncedFilters = useMemo(() => ({
+    ...filters,
+    search: debouncedSearch,
+  }), [filters, debouncedSearch]);
+
   // Get all skills and apply filters
   const allSkills = useMemo(() => getAllLibrarySkills(), []);
   const filteredSkills = useMemo(
-    () => sortSkills(filterSkills(allSkills, filters), sortBy),
-    [allSkills, filters, sortBy]
+    () => sortSkills(filterSkills(allSkills, debouncedFilters), sortBy),
+    [allSkills, debouncedFilters, sortBy]
   );
 
   // Get counts for sidebar

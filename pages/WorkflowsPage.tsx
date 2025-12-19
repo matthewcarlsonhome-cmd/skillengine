@@ -7,6 +7,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDebounce } from '../hooks/useDebounce';
 import {
   Search,
   ChevronDown,
@@ -123,12 +124,13 @@ const WorkflowsPage: React.FC = () => {
 
   // State
   const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearchQuery = useDebounce(searchQuery, 150);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     categories: true,
   });
 
-  // Filter workflows
+  // Filter workflows (using debounced search for performance)
   const filteredWorkflows = useMemo(() => {
     let workflows = WORKFLOW_LIST;
 
@@ -141,8 +143,8 @@ const WorkflowsPage: React.FC = () => {
     }
 
     // Filter by search
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
+    if (debouncedSearchQuery) {
+      const query = debouncedSearchQuery.toLowerCase();
       workflows = workflows.filter(
         (w) =>
           w.name.toLowerCase().includes(query) ||
@@ -152,7 +154,7 @@ const WorkflowsPage: React.FC = () => {
     }
 
     return workflows;
-  }, [selectedCategory, searchQuery]);
+  }, [selectedCategory, debouncedSearchQuery]);
 
   // Get workflow count per category
   const getWorkflowCount = (categoryId: string) => {

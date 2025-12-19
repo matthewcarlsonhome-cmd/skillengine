@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { useDebounce } from '../hooks/useDebounce';
 import { SKILLS } from '../lib/skills';
 import {
   getAllLibrarySkills,
@@ -66,19 +67,20 @@ const BrowseSkillsPage: React.FC = () => {
 
   // Search and filter state
   const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearchQuery = useDebounce(searchQuery, 150);
   const [selectedCategories, setSelectedCategories] = useState<SkillCategory[]>([]);
   const [selectedUseCases, setSelectedUseCases] = useState<SkillUseCase[]>([]);
   const [sortBy, setSortBy] = useState<LibrarySortOption>('name');
   const [showFilters, setShowFilters] = useState(false);
   const [viewMode, setViewMode] = useState<'library' | 'static'>('library');
 
-  // Build filters
+  // Build filters (using debounced search for performance)
   const filters: LibraryFilters = useMemo(() => ({
     ...DEFAULT_FILTERS,
-    search: searchQuery,
+    search: debouncedSearchQuery,
     categories: selectedCategories,
     useCases: selectedUseCases,
-  }), [searchQuery, selectedCategories, selectedUseCases]);
+  }), [debouncedSearchQuery, selectedCategories, selectedUseCases]);
 
   // Filter and sort library skills
   const filteredSkills = useMemo(() => {

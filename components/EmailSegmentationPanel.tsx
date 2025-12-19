@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
+import { useDebounce } from '../hooks/useDebounce';
 import {
   Filter,
   Users,
@@ -176,6 +177,7 @@ export const EmailSegmentationPanel: React.FC<EmailSegmentationPanelProps> = ({
 }) => {
   const [showFilters, setShowFilters] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearchQuery = useDebounce(searchQuery, 150);
 
   // Derive stats from props or stats object
   const totalCount = stats?.totalCount ?? recipients.length;
@@ -191,16 +193,16 @@ export const EmailSegmentationPanel: React.FC<EmailSegmentationPanelProps> = ({
     }));
   }, []);
 
-  // Filter recipients by search query
+  // Filter recipients by search query (using debounced value for performance)
   const displayedRecipients = useMemo(() => {
-    if (!searchQuery.trim()) return filteredRecipients;
+    if (!debouncedSearchQuery.trim()) return filteredRecipients;
 
-    const query = searchQuery.toLowerCase();
+    const query = debouncedSearchQuery.toLowerCase();
     return filteredRecipients.filter(r =>
       r.email.toLowerCase().includes(query) ||
       r.displayName?.toLowerCase().includes(query)
     );
-  }, [filteredRecipients, searchQuery]);
+  }, [filteredRecipients, debouncedSearchQuery]);
 
   return (
     <div className="space-y-6">

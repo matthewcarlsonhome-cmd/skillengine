@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDebounce } from '../hooks/useDebounce';
 import {
   LayoutDashboard,
   Sparkles,
@@ -44,6 +45,7 @@ const CommandPalette: React.FC = () => {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search, 100);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -251,7 +253,7 @@ const CommandPalette: React.FC = () => {
   ];
 
   const filteredCommands = commands.filter((cmd) => {
-    const searchLower = search.toLowerCase();
+    const searchLower = debouncedSearch.toLowerCase();
     return (
       cmd.name.toLowerCase().includes(searchLower) ||
       cmd.description.toLowerCase().includes(searchLower) ||

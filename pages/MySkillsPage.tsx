@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDebounce } from '../hooks/useDebounce';
 import { db } from '../lib/storage/indexeddb';
 import type { DynamicSkill } from '../lib/storage/types';
 import { useToast } from '../hooks/useToast';
@@ -26,6 +27,7 @@ const MySkillsPage: React.FC = () => {
   const [skills, setSkills] = useState<DynamicSkill[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearchQuery = useDebounce(searchQuery, 150);
 
   useEffect(() => {
     loadSkills();
@@ -66,11 +68,12 @@ const MySkillsPage: React.FC = () => {
     navigate(`/workspace/${skill.workspaceId}/skill/${skill.id}`);
   };
 
+  // Filter skills using debounced search for performance
   const filteredSkills = skills.filter(
     skill =>
-      skill.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      skill.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      skill.category.toLowerCase().includes(searchQuery.toLowerCase())
+      skill.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
+      skill.description.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
+      skill.category.toLowerCase().includes(debouncedSearchQuery.toLowerCase())
   );
 
   // Group skills by workspace/source
