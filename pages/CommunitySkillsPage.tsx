@@ -1,6 +1,7 @@
 // Community Skills Page - Browse and discover shared skills
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useDebounce } from '../hooks/useDebounce';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
 import {
@@ -49,6 +50,7 @@ const CommunitySkillsPage: React.FC = () => {
   const [allSkills, setAllSkills] = useState<CommunitySkill[]>([]); // Store all skills for role extraction
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearchQuery = useDebounce(searchQuery, 150);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
   const [availableRoles, setAvailableRoles] = useState<string[]>([]);
@@ -63,10 +65,10 @@ const CommunitySkillsPage: React.FC = () => {
     loadAllSkills();
   }, []);
 
-  // Filter skills when filters change
+  // Filter skills when filters change (using debounced search)
   useEffect(() => {
     filterSkills();
-  }, [selectedCategory, roleFilter, allSkills]);
+  }, [selectedCategory, roleFilter, allSkills, debouncedSearchQuery]);
 
   const loadAllSkills = async () => {
     setLoading(true);
@@ -99,8 +101,8 @@ const CommunitySkillsPage: React.FC = () => {
       filtered = filtered.filter(s => s.role_title === roleFilter);
     }
 
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
+    if (debouncedSearchQuery) {
+      const query = debouncedSearchQuery.toLowerCase();
       filtered = filtered.filter(s =>
         s.name.toLowerCase().includes(query) ||
         (s.description && s.description.toLowerCase().includes(query))

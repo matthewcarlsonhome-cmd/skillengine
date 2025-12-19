@@ -1,6 +1,7 @@
 // Job Application Tracker - Track job applications, status, and follow-ups
 
 import React, { useState, useEffect } from 'react';
+import { useDebounce } from '../hooks/useDebounce';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Textarea } from '../components/ui/Textarea';
@@ -62,6 +63,7 @@ const JobTrackerPage: React.FC = () => {
   const { addToast } = useToast();
   const [applications, setApplications] = useState<JobApplication[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearchQuery = useDebounce(searchQuery, 150);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -190,13 +192,13 @@ const JobTrackerPage: React.FC = () => {
     addToast(`Status updated to ${STATUS_CONFIG[status].label}`, 'success');
   };
 
-  // Filter applications
+  // Filter applications (using debounced search for performance)
   const filteredApplications = applications
     .filter((app) => {
       const matchesSearch =
-        app.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        app.position.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        app.location.toLowerCase().includes(searchQuery.toLowerCase());
+        app.company.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
+        app.position.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
+        app.location.toLowerCase().includes(debouncedSearchQuery.toLowerCase());
       const matchesStatus = statusFilter === 'all' || app.status === statusFilter;
       return matchesSearch && matchesStatus;
     })
