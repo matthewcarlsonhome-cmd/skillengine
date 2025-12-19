@@ -15,6 +15,10 @@ import {
   getLastUpdated,
 } from '../lib/apiKeyStorage';
 import {
+  getEmailPreference,
+  updateMarketingOptIn,
+} from '../lib/emailSegmentation/storage';
+import {
   Settings,
   Key,
   Palette,
@@ -32,6 +36,8 @@ import {
   AlertTriangle,
   Download,
   Upload,
+  Mail,
+  Bell,
 } from 'lucide-react';
 import { db } from '../lib/storage/indexeddb';
 import { downloadBundleAsJson } from '../lib/skillExport';
@@ -58,6 +64,10 @@ const SettingsPage: React.FC = () => {
   const [skillCount, setSkillCount] = useState(0);
   const [outputCount, setOutputCount] = useState(0);
 
+  // Email preferences
+  const [marketingOptIn, setMarketingOptIn] = useState(false);
+  const [optInLoading, setOptInLoading] = useState(false);
+
   useEffect(() => {
     loadSettings();
   }, []);
@@ -71,6 +81,18 @@ const SettingsPage: React.FC = () => {
     setHasClaudeKey(!!claude);
     setHasChatgptKey(!!chatgpt);
     setLastUpdated(getLastUpdated());
+
+    // Load email preferences
+    if (user?.id) {
+      try {
+        const emailPref = await getEmailPreference(user.id);
+        if (emailPref) {
+          setMarketingOptIn(emailPref.marketingEmailOptIn);
+        }
+      } catch (e) {
+        console.error('Failed to load email preferences:', e);
+      }
+    }
 
     // Load data counts
     try {
@@ -136,6 +158,30 @@ const SettingsPage: React.FC = () => {
       setHasClaudeKey(false);
       setHasChatgptKey(false);
       addToast('All API keys removed', 'success');
+    }
+  };
+
+  const handleToggleMarketingOptIn = async () => {
+    if (!user?.id || !user?.email) {
+      addToast('Please sign in to manage email preferences', 'error');
+      return;
+    }
+
+    setOptInLoading(true);
+    try {
+      const newValue = !marketingOptIn;
+      await updateMarketingOptIn(user.id, user.email, newValue);
+      setMarketingOptIn(newValue);
+      addToast(
+        newValue
+          ? 'You are now subscribed to product updates'
+          : 'You have unsubscribed from product updates',
+        'success'
+      );
+    } catch (e) {
+      addToast('Failed to update email preferences', 'error');
+    } finally {
+      setOptInLoading(false);
     }
   };
 
@@ -436,6 +482,54 @@ const SettingsPage: React.FC = () => {
                   Signed in with Google
                 </p>
               </div>
+            </div>
+          </section>
+        )}
+
+        {/* Email Preferences Section */}
+        {isConfigured && user && (
+          <section className="border rounded-xl p-6">
+            <div className="flex items-center gap-2 mb-6">
+              <Mail className="h-5 w-5 text-primary" />
+              <h2 className="text-xl font-semibold">Email Preferences</h2>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <Bell className="h-5 w-5 text-muted-foreground mt-0.5" />
+                  <div>
+                    <p className="font-medium">Product Updates & Tips</p>
+                    <p className="text-sm text-muted-foreground">
+                      Receive occasional emails about new features, skill recommendations, and career tips.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={handleToggleMarketingOptIn}
+                  disabled={optInLoading}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
+                    marketingOptIn ? 'bg-primary' : 'bg-muted-foreground/30'
+                  } ${optInLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      marketingOptIn ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+
+              <p className="text-xs text-muted-foreground">
+                {marketingOptIn ? (
+                  <span className="flex items-center gap-1 text-green-600">
+                    <Check className="h-3 w-3" />
+                    You're subscribed to product updates
+                  </span>
+                ) : (
+                  'You can opt in at any time to receive product updates.'
+                )}
+              </p>
             </div>
           </section>
         )}

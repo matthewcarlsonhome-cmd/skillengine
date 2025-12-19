@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Moon, Sun, Briefcase, Users, LogIn, LogOut, Loader2, ChevronDown, LayoutDashboard, Package, Menu, X, Settings, FileSpreadsheet, MessageSquare, Calculator, Mail, Building2, Trophy, Target, BarChart3, Bot, Bell, Lock, TrendingUp, Calendar, User, Wand2, Download, Shield, BookOpen, Layers } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme.tsx';
@@ -17,10 +17,56 @@ const Header: React.FC = () => {
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  const toolsMenuRef = useRef<HTMLDivElement>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+
   // Close mobile menu on route change
   useEffect(() => {
     setMobileMenuOpen(false);
+    setShowToolsMenu(false);
+    setShowUserMenu(false);
   }, [location.pathname]);
+
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileMenuOpen]);
+
+  // Close menus on Escape key
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      setShowToolsMenu(false);
+      setShowUserMenu(false);
+      setMobileMenuOpen(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [handleKeyDown]);
+
+  // Click outside to close menus
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (toolsMenuRef.current && !toolsMenuRef.current.contains(e.target as Node)) {
+        setShowToolsMenu(false);
+      }
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setShowUserMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const toggleTheme = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
@@ -48,6 +94,8 @@ const Header: React.FC = () => {
       addToast('Failed to sign out', 'error');
     }
   };
+
+  const closeMobileMenu = () => setMobileMenuOpen(false);
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -92,24 +140,26 @@ const Header: React.FC = () => {
             </Link>
 
             {/* More Dropdown - Consolidated menu for secondary features */}
-            <div className="relative">
+            <div className="relative" ref={toolsMenuRef}>
               <Button
                 variant="ghost"
                 size="sm"
                 className="gap-2"
                 onClick={() => setShowToolsMenu(!showToolsMenu)}
+                aria-expanded={showToolsMenu}
+                aria-haspopup="true"
+                aria-label="More navigation options"
               >
                 More
-                <ChevronDown className="h-3 w-3" />
+                <ChevronDown className={`h-3 w-3 transition-transform ${showToolsMenu ? 'rotate-180' : ''}`} />
               </Button>
 
               {showToolsMenu && (
-                <>
-                  <div
-                    className="fixed inset-0 z-40"
-                    onClick={() => setShowToolsMenu(false)}
-                  />
-                  <div className="absolute left-0 mt-2 w-80 rounded-lg border bg-card shadow-lg z-50 max-h-[80vh] overflow-y-auto">
+                <nav
+                  className="absolute left-0 mt-2 w-80 rounded-lg border bg-card shadow-lg z-50 max-h-[80vh] overflow-y-auto"
+                  role="menu"
+                  aria-label="More options menu"
+                >
                     <div className="p-2">
                       {/* Create & Customize */}
                       <p className="px-3 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Create & Customize</p>
@@ -271,8 +321,7 @@ const Header: React.FC = () => {
                         </>
                       )}
                     </div>
-                  </div>
-                </>
+                </nav>
               )}
             </div>
 
@@ -296,7 +345,9 @@ const Header: React.FC = () => {
             size="icon"
             className="md:hidden"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label="Toggle menu"
+            aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+            aria-expanded={mobileMenuOpen}
+            aria-controls="mobile-menu"
           >
             {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
@@ -307,34 +358,36 @@ const Header: React.FC = () => {
               {loading ? (
                 <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
               ) : user ? (
-                <div className="relative">
+                <div className="relative" ref={userMenuRef}>
                   <button
                     onClick={() => setShowUserMenu(!showUserMenu)}
                     className="flex items-center gap-2 p-1 rounded-lg hover:bg-muted transition-colors"
+                    aria-expanded={showUserMenu}
+                    aria-haspopup="true"
+                    aria-label="User menu"
                   >
                     {user.user_metadata?.avatar_url ? (
                       <img
                         src={user.user_metadata.avatar_url}
-                        alt=""
+                        alt={`${user.user_metadata?.full_name || 'User'} avatar`}
                         className="h-8 w-8 rounded-full"
                       />
                     ) : (
                       <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center">
-                        <span className="text-sm font-medium">
+                        <span className="text-sm font-medium" aria-hidden="true">
                           {(user.user_metadata?.full_name || user.email || 'U')[0].toUpperCase()}
                         </span>
                       </div>
                     )}
-                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                    <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
                   </button>
 
                   {showUserMenu && (
-                    <>
-                      <div
-                        className="fixed inset-0 z-40"
-                        onClick={() => setShowUserMenu(false)}
-                      />
-                      <div className="absolute right-0 mt-2 w-56 rounded-lg border bg-card shadow-lg z-50">
+                    <div
+                      className="absolute right-0 mt-2 w-56 rounded-lg border bg-card shadow-lg z-50"
+                      role="menu"
+                      aria-label="User options"
+                    >
                         <div className="p-3 border-b">
                           <p className="font-medium text-sm truncate">
                             {user.user_metadata?.full_name || 'User'}
@@ -374,13 +427,13 @@ const Header: React.FC = () => {
                           <button
                             onClick={handleSignOut}
                             className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded hover:bg-muted transition-colors text-left"
+                            role="menuitem"
                           >
                             <LogOut className="h-4 w-4" />
                             Sign out
                           </button>
                         </div>
-                      </div>
-                    </>
+                    </div>
                   )}
                 </div>
               ) : (
@@ -410,10 +463,24 @@ const Header: React.FC = () => {
         </div>
       </div>
 
-      {/* Mobile Navigation Menu */}
+      {/* Mobile Navigation Menu - Fixed Overlay */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t bg-background/95 backdrop-blur max-h-[80vh] overflow-y-auto">
-          <nav className="container mx-auto max-w-7xl px-4 py-4 flex flex-col gap-1">
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-black/50 z-40 md:hidden"
+            onClick={closeMobileMenu}
+            aria-hidden="true"
+          />
+          {/* Menu Panel */}
+          <div
+            ref={mobileMenuRef}
+            className="fixed top-16 right-0 bottom-0 w-[85%] max-w-sm bg-background border-l shadow-xl z-50 md:hidden overflow-y-auto"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Mobile navigation menu"
+          >
+            <nav className="p-4 flex flex-col gap-1" aria-label="Mobile navigation">
             {/* Core Navigation */}
             <Link to="/dashboard">
               <Button
@@ -592,7 +659,7 @@ const Header: React.FC = () => {
               <>
                 <div className="border-t my-2" />
                 <p className="px-3 py-1 text-xs font-semibold text-muted-foreground uppercase">Admin</p>
-                <Link to="/admin">
+                <Link to="/admin" onClick={closeMobileMenu}>
                   <Button variant={isActive('/admin') ? 'secondary' : 'ghost'} className="w-full justify-start gap-2">
                     <Shield className="h-4 w-4 text-amber-500" />
                     Control Panel
@@ -600,8 +667,9 @@ const Header: React.FC = () => {
                 </Link>
               </>
             )}
-          </nav>
-        </div>
+            </nav>
+          </div>
+        </>
       )}
     </header>
   );
