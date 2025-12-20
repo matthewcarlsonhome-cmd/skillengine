@@ -204,7 +204,7 @@ const HomePage: React.FC = () => {
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                 <Link to="/account">
-                  <Button size="lg" className="bg-amber-500 hover:bg-amber-600 text-white px-8">
+                  <Button size="lg" variant="ghost" className="bg-amber-500 hover:bg-amber-600 text-white px-8">
                     <Key className="h-5 w-5 mr-2" />
                     Set Up API Key
                   </Button>
@@ -306,7 +306,7 @@ const HomePage: React.FC = () => {
                   </li>
                 </ul>
                 <Link to="/library?useCase=job-search">
-                  <Button size="lg" className="w-full bg-blue-500 hover:bg-blue-600 text-white">
+                  <Button size="lg" variant="ghost" className="w-full bg-blue-500 hover:bg-blue-600 text-white">
                     Start Job Search
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
@@ -347,7 +347,7 @@ const HomePage: React.FC = () => {
                   </li>
                 </ul>
                 <Link to="/library">
-                  <Button size="lg" className="w-full bg-purple-500 hover:bg-purple-600 text-white">
+                  <Button size="lg" variant="ghost" className="w-full bg-purple-500 hover:bg-purple-600 text-white">
                     Browse Skill Library
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
@@ -407,7 +407,7 @@ const HomePage: React.FC = () => {
                   </p>
                 </div>
                 <Link to="/account">
-                  <Button size="lg" className="bg-amber-500 hover:bg-amber-600 text-white whitespace-nowrap">
+                  <Button size="lg" variant="ghost" className="bg-amber-500 hover:bg-amber-600 text-white whitespace-nowrap">
                     <Settings className="h-4 w-4 mr-2" />
                     Go to Setup
                   </Button>
@@ -894,7 +894,7 @@ const HomePage: React.FC = () => {
                 </div>
                 <div className="flex flex-wrap gap-3">
                   <Link to="/workflows">
-                    <Button size="lg" className="bg-indigo-500 hover:bg-indigo-600 text-white">
+                    <Button size="lg" variant="ghost" className="bg-indigo-500 hover:bg-indigo-600 text-white">
                       <Layers className="mr-2 h-5 w-5" />
                       View All Workflows
                     </Button>
@@ -999,7 +999,7 @@ const HomePage: React.FC = () => {
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Link to="/library">
-                <Button size="lg" className="bg-purple-500 hover:bg-purple-600 text-white">
+                <Button size="lg" variant="ghost" className="bg-purple-500 hover:bg-purple-600 text-white">
                   <Library className="mr-2 h-5 w-5" />
                   Browse Skill Library
                 </Button>
