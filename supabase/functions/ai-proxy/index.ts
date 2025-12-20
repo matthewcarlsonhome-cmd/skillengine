@@ -6,6 +6,7 @@
  *
  * Features:
  * - Validates user authentication
+ * - Rate limiting to prevent abuse
  * - Checks user credits before making calls
  * - Routes requests to Gemini, Claude, or ChatGPT
  * - Deducts credits based on actual token usage
@@ -19,6 +20,13 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import {
+  rateLimitMiddleware,
+  getRateLimitHeaders,
+  checkRateLimit,
+  getIdentifier,
+  RATE_LIMITS,
+} from '../_shared/rateLimit.ts';
 
 // CORS headers for browser requests
 const corsHeaders = {
@@ -96,6 +104,18 @@ serve(async (req) => {
         JSON.stringify({ error: 'Invalid authentication' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
+    }
+
+    // 1.5. Check rate limits
+    const rateLimitResponse = rateLimitMiddleware(req, user.id, 'ai-proxy', corsHeaders);
+    if (rateLimitResponse) {
+      return rateLimitResponse;
+    }
+
+    // Also check burst rate limit
+    const burstLimitResponse = rateLimitMiddleware(req, user.id, 'ai-proxy-burst', corsHeaders);
+    if (burstLimitResponse) {
+      return burstLimitResponse;
     }
 
     // 2. Parse request body
@@ -264,7 +284,9 @@ async function callGemini(
   maxTokens: number = 4096,
   temperature: number = 0.7
 ): Promise<Response> {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+  // Use header-based authentication instead of query parameter
+  // to prevent API key exposure in logs and referrer headers
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
 
   const contents = [];
   if (systemPrompt) {
@@ -275,7 +297,10 @@ async function callGemini(
 
   return fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'x-goog-api-key': apiKey,
+    },
     body: JSON.stringify({
       contents,
       generationConfig: {

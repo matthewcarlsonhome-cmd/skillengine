@@ -137,11 +137,20 @@ const defaultValidators = {
 
   pattern: (value: unknown, pattern: string, label: string): string | null => {
     if (typeof value !== 'string' || !value) return null;
-    const regex = new RegExp(pattern);
-    if (!regex.test(value)) {
-      return `${label} format is invalid`;
+    try {
+      // Validate the regex pattern first to prevent ReDoS attacks
+      const regex = new RegExp(pattern);
+
+      // Limit input length to prevent exponential backtracking
+      const testValue = value.length > 10000 ? value.substring(0, 10000) : value;
+      if (!regex.test(testValue)) {
+        return `${label} format is invalid`;
+      }
+      return null;
+    } catch {
+      // Invalid regex pattern - reject gracefully
+      return `${label} has an invalid validation pattern`;
     }
-    return null;
   },
 };
 

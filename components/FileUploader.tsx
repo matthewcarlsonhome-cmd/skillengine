@@ -10,10 +10,33 @@ interface FileUploaderProps {
   onClear: () => void;
 }
 
+// Maximum file size: 10MB
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
+
 const FileUploader: React.FC<FileUploaderProps> = ({ title, filename, onFileUpload, onClear }) => {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
+
+    // Security: Validate file size to prevent memory exhaustion
+    if (file.size > MAX_FILE_SIZE) {
+      alert(`File is too large. Maximum size is ${MAX_FILE_SIZE / (1024 * 1024)}MB.`);
+      event.target.value = '';
+      return;
+    }
+
+    // Security: Validate file type by checking both extension and MIME
+    const allowedTypes = ['text/plain', 'text/markdown', 'text/x-markdown'];
+    const allowedExtensions = ['.txt', '.md'];
+    const hasValidExtension = allowedExtensions.some(ext =>
+      file.name.toLowerCase().endsWith(ext)
+    );
+
+    if (!hasValidExtension || (!allowedTypes.includes(file.type) && file.type !== '')) {
+      alert('Invalid file type. Please upload a .txt or .md file.');
+      event.target.value = '';
+      return;
+    }
 
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -21,6 +44,9 @@ const FileUploader: React.FC<FileUploaderProps> = ({ title, filename, onFileUplo
       if (typeof text === 'string') {
         onFileUpload(text, file.name);
       }
+    };
+    reader.onerror = () => {
+      alert('Error reading file. Please try again.');
     };
     reader.readAsText(file);
     event.target.value = ''; // Reset file input

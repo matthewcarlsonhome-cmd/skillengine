@@ -1,16 +1,16 @@
 /**
  * HomePage.tsx - Main Landing Page
  *
- * Redesigned to serve two audiences:
- * 1. Job Seekers - Resume, interview prep, job search automation
- * 2. Working Professionals - Role-specific skills for daily work automation
+ * Redesigned for clarity and new user onboarding:
+ * 1. Clear "What is SkillEngine?" welcome section
+ * 2. Visual "How It Works" guide with 3 simple steps
+ * 3. Two-path hero for Job Seekers vs Working Professionals
+ * 4. Featured skills with quick access
  *
- * Key Features:
- * - Two-path hero showing clear value for both audiences
- * - Platform stats banner showing scope (100+ skills, 20+ roles)
- * - Featured Skill Library section with role categories
- * - Clear paths to custom skill creation and pre-built templates
- * - Emphasis on exportability for use in any LLM
+ * Key Goals:
+ * - Make the site's purpose immediately clear to new visitors
+ * - Guide new users through setup in a friendly, non-overwhelming way
+ * - Show examples of what skills produce
  */
 
 import React, { useState, useEffect } from 'react';
@@ -51,6 +51,10 @@ import {
   HelpCircle,
   Circle,
   Compass,
+  Lightbulb,
+  MousePointerClick,
+  FileOutput,
+  Bot,
 } from 'lucide-react';
 import { getUserProfile } from './UserProfilePage';
 import { ROLE_DEFINITIONS } from '../lib/skillLibrary';
@@ -189,69 +193,231 @@ const HomePage: React.FC = () => {
   return (
     <div className="min-h-screen">
       {/* ═══════════════════════════════════════════════════════════════════════════
-          PRIMARY CTA - Setup Flow for New Users (show above hero if not configured)
+          WELCOME SECTION - What is SkillEngine? (For new visitors)
       ═══════════════════════════════════════════════════════════════════════════ */}
-      {!setupStatus.isConfigured && (
-        <section className="bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-amber-500/10 border-b-2 border-amber-500/30">
-          <div className="container mx-auto max-w-5xl px-4 py-8">
-            <div className="text-center">
-              <h2 className="text-2xl sm:text-3xl font-bold mb-3">
-                Get Started in 2 Minutes
-              </h2>
-              <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-                Configure your API key once, then run any of our 270+ AI skills instantly.
-                Free tiers available from all providers.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                <Link to="/account">
-                  <Button size="lg" className="bg-amber-500 hover:bg-amber-600 text-white px-8">
-                    <Key className="h-5 w-5 mr-2" />
-                    Set Up API Key
-                  </Button>
-                </Link>
-                <Link to="/discover">
-                  <Button size="lg" variant="outline">
-                    <Compass className="h-5 w-5 mr-2" />
-                    Take Quiz First
-                  </Button>
-                </Link>
-              </div>
-              <div className="mt-6 flex flex-wrap justify-center gap-6 text-sm text-muted-foreground">
-                <span className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-green-500" />
-                  Free tier on all providers
-                </span>
-                <span className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-green-500" />
-                  ~$0.001 per skill run (Gemini Flash)
-                </span>
-                <span className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-green-500" />
-                  No subscription required
-                </span>
+      <section className="relative overflow-hidden bg-gradient-to-b from-primary/5 via-background to-background border-b">
+        <div className="container mx-auto max-w-6xl px-4 py-12 sm:py-16">
+          <div className="text-center mb-10">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
+              <Sparkles className="h-4 w-4" />
+              <span>Welcome to SkillEngine</span>
+            </div>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight mb-4">
+              What is SkillEngine?
+            </h1>
+            <p className="max-w-3xl mx-auto text-lg sm:text-xl text-muted-foreground leading-relaxed">
+              <strong className="text-foreground">SkillEngine is a library of 270+ pre-built AI prompts</strong> designed by industry experts.
+              Each "Skill" is a carefully crafted prompt that turns AI into a specialist—whether you need help with
+              resume writing, financial analysis, marketing copy, or technical documentation.
+            </p>
+          </div>
+
+          {/* Visual explanation of what a "Skill" is */}
+          <div className="max-w-4xl mx-auto mb-10">
+            <div className="rounded-2xl border-2 border-dashed border-primary/30 bg-card p-6 sm:p-8">
+              <div className="flex flex-col md:flex-row gap-6 items-center">
+                {/* Input side */}
+                <div className="flex-1 text-center md:text-left">
+                  <div className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground mb-2">
+                    <Lightbulb className="h-4 w-4" />
+                    YOU PROVIDE
+                  </div>
+                  <div className="rounded-lg bg-muted/50 p-4 text-sm">
+                    <p className="font-medium mb-1">Your information:</p>
+                    <ul className="text-muted-foreground space-y-1">
+                      <li>• Job description or context</li>
+                      <li>• Your resume or background</li>
+                      <li>• Specific requirements</li>
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Arrow */}
+                <div className="flex flex-col items-center gap-2">
+                  <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center">
+                    <Bot className="h-6 w-6 text-primary" />
+                  </div>
+                  <span className="text-xs font-medium text-primary">AI Skill</span>
+                </div>
+
+                {/* Output side */}
+                <div className="flex-1 text-center md:text-left">
+                  <div className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground mb-2">
+                    <FileOutput className="h-4 w-4" />
+                    YOU GET
+                  </div>
+                  <div className="rounded-lg bg-green-500/10 border border-green-500/20 p-4 text-sm">
+                    <p className="font-medium mb-1 text-green-600">Expert-quality output:</p>
+                    <ul className="text-muted-foreground space-y-1">
+                      <li>• Tailored cover letters</li>
+                      <li>• Professional documents</li>
+                      <li>• Strategic analysis</li>
+                    </ul>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-        </section>
-      )}
+
+          {/* Key benefits */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-4xl mx-auto">
+            <div className="flex items-center gap-3 p-4 rounded-xl bg-card border">
+              <div className="h-10 w-10 rounded-lg bg-blue-500/20 flex items-center justify-center shrink-0">
+                <Clock className="h-5 w-5 text-blue-500" />
+              </div>
+              <div>
+                <div className="font-semibold text-sm">Save Hours</div>
+                <div className="text-xs text-muted-foreground">What took hours now takes minutes</div>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 p-4 rounded-xl bg-card border">
+              <div className="h-10 w-10 rounded-lg bg-purple-500/20 flex items-center justify-center shrink-0">
+                <Star className="h-5 w-5 text-purple-500" />
+              </div>
+              <div>
+                <div className="font-semibold text-sm">Expert Quality</div>
+                <div className="text-xs text-muted-foreground">Prompts crafted by professionals</div>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 p-4 rounded-xl bg-card border">
+              <div className="h-10 w-10 rounded-lg bg-green-500/20 flex items-center justify-center shrink-0">
+                <Download className="h-5 w-5 text-green-500" />
+              </div>
+              <div>
+                <div className="font-semibold text-sm">Use Anywhere</div>
+                <div className="text-xs text-muted-foreground">Export to ChatGPT, Claude, etc.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* ═══════════════════════════════════════════════════════════════════════════
-          HERO SECTION - Two-Path Approach
+          HOW IT WORKS - 3 Simple Steps
+      ═══════════════════════════════════════════════════════════════════════════ */}
+      <section className="bg-muted/30 border-b">
+        <div className="container mx-auto max-w-6xl px-4 py-12 sm:py-16">
+          <div className="text-center mb-10">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-3">How It Works</h2>
+            <p className="text-muted-foreground max-w-xl mx-auto">
+              Get started in under 2 minutes. It's that simple.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            {/* Step 1 */}
+            <div className="relative">
+              <div className="absolute -top-3 -left-3 h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm">
+                1
+              </div>
+              <div className="rounded-xl border-2 border-primary/20 bg-card p-6 h-full">
+                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
+                  <Key className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="font-bold text-lg mb-2">Connect Your AI</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Add your API key from Google (Gemini), Anthropic (Claude), or OpenAI (ChatGPT).
+                  All have free tiers available.
+                </p>
+                <div className="text-xs text-muted-foreground flex items-center gap-1">
+                  <Clock className="h-3 w-3" />
+                  <span>~2 minutes, one-time setup</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 2 */}
+            <div className="relative">
+              <div className="absolute -top-3 -left-3 h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm">
+                2
+              </div>
+              <div className="rounded-xl border-2 border-primary/20 bg-card p-6 h-full">
+                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
+                  <Library className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="font-bold text-lg mb-2">Pick a Skill</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Browse 270+ skills organized by profession and use case. Each skill is a specialized AI prompt ready to use.
+                </p>
+                <div className="text-xs text-muted-foreground flex items-center gap-1">
+                  <Target className="h-3 w-3" />
+                  <span>20+ professions covered</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 3 */}
+            <div className="relative">
+              <div className="absolute -top-3 -left-3 h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm">
+                3
+              </div>
+              <div className="rounded-xl border-2 border-primary/20 bg-card p-6 h-full">
+                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
+                  <Play className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="font-bold text-lg mb-2">Run & Get Results</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Fill in your details, click Run, and get expert-quality output instantly. Copy, download, or refine as needed.
+                </p>
+                <div className="text-xs text-muted-foreground flex items-center gap-1">
+                  <Zap className="h-3 w-3" />
+                  <span>Results in seconds</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* CTA after how it works */}
+          <div className="mt-10 text-center">
+            {!setupStatus.isConfigured ? (
+              <div className="inline-flex flex-col sm:flex-row gap-4 items-center">
+                <Link to="/account">
+                  <Button size="lg" className="px-8">
+                    <Key className="h-5 w-5 mr-2" />
+                    Set Up Now (Free)
+                  </Button>
+                </Link>
+                <span className="text-sm text-muted-foreground">or</span>
+                <Link to="/library">
+                  <Button size="lg" variant="outline">
+                    <Library className="h-5 w-5 mr-2" />
+                    Browse Skills First
+                  </Button>
+                </Link>
+              </div>
+            ) : (
+              <Link to="/library">
+                <Button size="lg" className="px-8">
+                  <Play className="h-5 w-5 mr-2" />
+                  Start Running Skills
+                </Button>
+              </Link>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════════════════════════
+          HERO SECTION - Two-Path Approach (Who is this for?)
       ═══════════════════════════════════════════════════════════════════════════ */}
       <section className="relative overflow-hidden bg-gradient-to-b from-background via-background to-muted/30">
-        <div className="container mx-auto max-w-7xl px-4 py-16 sm:py-20">
-          {/* Main Headline */}
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
-              <Sparkles className="h-4 w-4" />
-              <span>270+ Expert-Level AI Skills</span>
-            </div>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight mb-4">
+        <div className="container mx-auto max-w-7xl px-4 py-12 sm:py-16">
+          {/* Section Header */}
+          <div className="text-center mb-10">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-3">Who Is This For?</h2>
+            <p className="text-muted-foreground max-w-xl mx-auto">
+              Whether you're job hunting or optimizing your daily work, we have skills built for you.
+            </p>
+          </div>
+
+          {/* Main Headline - moved down */}
+          <div className="text-center mb-8">
+            <h3 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-4">
               AI Skills for{' '}
               <span className="bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">
                 Professionals
               </span>
-            </h1>
+            </h3>
             <p className="max-w-3xl mx-auto text-xl text-muted-foreground">
               Automate hours of work with production-ready AI prompts. Pre-built for 20+ professions
               or custom-generated from any job description.
@@ -306,7 +472,7 @@ const HomePage: React.FC = () => {
                   </li>
                 </ul>
                 <Link to="/library?useCase=job-search">
-                  <Button size="lg" className="w-full bg-blue-500 hover:bg-blue-600 text-white">
+                  <Button size="lg" variant="ghost" className="w-full bg-blue-500 hover:bg-blue-600 text-white">
                     Start Job Search
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
@@ -347,7 +513,7 @@ const HomePage: React.FC = () => {
                   </li>
                 </ul>
                 <Link to="/library">
-                  <Button size="lg" className="w-full bg-purple-500 hover:bg-purple-600 text-white">
+                  <Button size="lg" variant="ghost" className="w-full bg-purple-500 hover:bg-purple-600 text-white">
                     Browse Skill Library
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
@@ -407,7 +573,7 @@ const HomePage: React.FC = () => {
                   </p>
                 </div>
                 <Link to="/account">
-                  <Button size="lg" className="bg-amber-500 hover:bg-amber-600 text-white whitespace-nowrap">
+                  <Button size="lg" variant="ghost" className="bg-amber-500 hover:bg-amber-600 text-white whitespace-nowrap">
                     <Settings className="h-4 w-4 mr-2" />
                     Go to Setup
                   </Button>
@@ -894,7 +1060,7 @@ const HomePage: React.FC = () => {
                 </div>
                 <div className="flex flex-wrap gap-3">
                   <Link to="/workflows">
-                    <Button size="lg" className="bg-indigo-500 hover:bg-indigo-600 text-white">
+                    <Button size="lg" variant="ghost" className="bg-indigo-500 hover:bg-indigo-600 text-white">
                       <Layers className="mr-2 h-5 w-5" />
                       View All Workflows
                     </Button>
@@ -999,7 +1165,7 @@ const HomePage: React.FC = () => {
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Link to="/library">
-                <Button size="lg" className="bg-purple-500 hover:bg-purple-600 text-white">
+                <Button size="lg" variant="ghost" className="bg-purple-500 hover:bg-purple-600 text-white">
                   <Library className="mr-2 h-5 w-5" />
                   Browse Skill Library
                 </Button>

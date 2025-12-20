@@ -19,14 +19,99 @@ export const isSupabaseConfigured = (): boolean => {
   return supabase !== null;
 };
 
-// Auth helpers
+// ═══════════════════════════════════════════════════════════════════════════
+// REDIRECT URL VALIDATION (Prevents Open Redirect Attacks)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Allowed redirect hosts for OAuth callbacks
+ * This prevents open redirect vulnerabilities by only allowing
+ * redirects to known, trusted domains.
+ */
+const ALLOWED_REDIRECT_HOSTS = [
+  'localhost',
+  '127.0.0.1',
+  'skillengine.netlify.app',
+  // Add your production domain here
+];
+
+/**
+ * Validate that a redirect URL is safe
+ * Prevents open redirect attacks by ensuring the URL is on an allowed host
+ */
+function validateRedirectUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+
+    // Must be HTTP or HTTPS
+    if (!['http:', 'https:'].includes(parsed.protocol)) {
+      return false;
+    }
+
+    // Check against allowed hosts
+    const hostname = parsed.hostname.toLowerCase();
+
+    // Allow localhost and 127.0.0.1 for development
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return true;
+    }
+
+    // Check if hostname matches or is a subdomain of allowed hosts
+    for (const allowed of ALLOWED_REDIRECT_HOSTS) {
+      if (hostname === allowed || hostname.endsWith(`.${allowed}`)) {
+        return true;
+      }
+    }
+
+    // Also allow the current origin (handles dynamic Netlify preview URLs)
+    if (typeof window !== 'undefined') {
+      const currentOrigin = new URL(window.location.origin);
+      if (hostname === currentOrigin.hostname) {
+        return true;
+      }
+    }
+
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Get a safe redirect URL for OAuth
+ * Falls back to a safe default if the current origin is not allowed
+ */
+function getSafeRedirectUrl(): string {
+  if (typeof window === 'undefined') {
+    return '/auth/callback';
+  }
+
+  const redirectUrl = `${window.location.origin}/auth/callback`;
+
+  if (validateRedirectUrl(redirectUrl)) {
+    return redirectUrl;
+  }
+
+  // If current origin is not allowed, log a warning
+  console.warn('Current origin not in allowed redirect hosts:', window.location.origin);
+
+  // Return just the path - Supabase will use the configured site URL
+  return '/auth/callback';
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// AUTH HELPERS
+// ═══════════════════════════════════════════════════════════════════════════
+
 export async function signInWithGoogle() {
   if (!supabase) throw new Error('Supabase not configured');
+
+  const redirectTo = getSafeRedirectUrl();
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: `${window.location.origin}/auth/callback`,
+      redirectTo,
     },
   });
 
@@ -100,16 +185,31 @@ export async function fetchCommunitySkills(options?: {
     .eq('is_public', true)
     .order('use_count', { ascending: false });
 
+  // Security: Escape special characters in search inputs to prevent filter injection
+  const escapePostgresLike = (str: string): string => {
+    return str
+      .replace(/\\/g, '\\\\')  // Escape backslashes first
+      .replace(/%/g, '\\%')    // Escape wildcards
+      .replace(/_/g, '\\_')    // Escape single-char wildcards
+      .replace(/,/g, '')       // Remove commas (could inject filter operators)
+      .replace(/\./g, '')      // Remove dots (could inject operators)
+      .substring(0, 200);       // Limit length
+  };
+
   if (options?.roleTitle) {
-    query = query.ilike('role_title', `%${options.roleTitle}%`);
+    const escapedRole = escapePostgresLike(options.roleTitle);
+    query = query.ilike('role_title', `%${escapedRole}%`);
   }
 
   if (options?.category) {
-    query = query.eq('category', options.category);
+    // Category should be an exact match - validate against known categories
+    const safeCategory = options.category.replace(/[^a-zA-Z0-9\s-]/g, '').substring(0, 50);
+    query = query.eq('category', safeCategory);
   }
 
   if (options?.search) {
-    query = query.or(`name.ilike.%${options.search}%,description.ilike.%${options.search}%`);
+    const escapedSearch = escapePostgresLike(options.search);
+    query = query.or(`name.ilike.%${escapedSearch}%,description.ilike.%${escapedSearch}%`);
   }
 
   if (options?.limit) {

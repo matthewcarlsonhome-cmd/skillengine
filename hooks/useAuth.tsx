@@ -1,7 +1,7 @@
 // Auth hook for Supabase authentication
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import type { User, Session } from '@supabase/supabase-js';
-import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { supabase, isSupabaseConfigured, signInWithGoogle as supabaseSignInWithGoogle } from '../lib/supabase';
 import { handleUserSignIn, getCurrentAppUser, isAdminEmail } from '../lib/admin';
 import type { AppUser } from '../lib/storage/types';
 
@@ -87,18 +87,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signInWithGoogle = async () => {
-    if (!supabase) {
-      throw new Error('Supabase not configured');
-    }
-
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}`,
-      },
-    });
-
-    if (error) throw error;
+    // Use the validated signInWithGoogle from lib/supabase.ts
+    // which includes redirect URL validation to prevent open redirects
+    await supabaseSignInWithGoogle();
   };
 
   const signOut = async () => {
