@@ -5,11 +5,12 @@
  * Users can either use platform-provided keys (with usage tracking)
  * or bring their own keys (BYOK mode).
  *
- * SECURITY NOTE: Platform keys should be loaded from environment variables
- * or a secure backend. Never expose raw keys in client-side code.
+ * SECURITY NOTE: Platform keys are never exposed to the client.
+ * All platform key operations go through secure Edge Functions.
  */
 
 import { getApiKey, hasStoredKey } from './apiKeyStorage';
+import { supabase, getSession } from './supabase';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -371,12 +372,12 @@ export function resolveApiKey(
 
   // Check mode preference
   if (stored.mode === 'platform') {
-    // TODO: In production, fetch platform key from secure backend
-    // For now, platform keys require admin setup
+    // Platform keys are handled via the AI Proxy Edge Function.
+    // The key is never exposed to the client - use callAIProxy() instead.
+    // This function returns a marker indicating platform mode is active.
     if (isPlatformKeyAvailable(provider)) {
-      // Platform key would come from secure backend call
       return {
-        key: '', // Placeholder - actual key from backend
+        key: '__PLATFORM_KEY__', // Marker - use callAIProxy() for actual API calls
         source: 'platform',
         provider,
         model,
@@ -476,4 +477,241 @@ export function adminDisablePlatformKey(provider: ApiProvider): void {
   savePlatformConfig({
     [`${provider}Enabled`]: false,
   });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// BACKEND INTEGRATION (Secure Platform Key Operations)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Cache for platform status to avoid repeated API calls
+ */
+interface PlatformStatusCache {
+  data: PlatformStatusResponse | null;
+  timestamp: number;
+  ttl: number; // Time to live in milliseconds
+}
+
+interface PlatformStatusResponse {
+  available: boolean;
+  providers: {
+    gemini: boolean;
+    claude: boolean;
+    openai: boolean;
+  };
+}
+
+const platformStatusCache: PlatformStatusCache = {
+  data: null,
+  timestamp: 0,
+  ttl: 60000, // Cache for 1 minute
+};
+
+/**
+ * Fetch platform key availability from the backend
+ * This calls the platform-status Edge Function to check which providers
+ * have platform keys configured (without exposing the keys).
+ */
+export async function fetchPlatformStatus(): Promise<PlatformStatusResponse> {
+  // Check cache first
+  const now = Date.now();
+  if (platformStatusCache.data && now - platformStatusCache.timestamp < platformStatusCache.ttl) {
+    return platformStatusCache.data;
+  }
+
+  if (!supabase) {
+    return { available: false, providers: { gemini: false, claude: false, openai: false } };
+  }
+
+  try {
+    const { data, error } = await supabase.functions.invoke('platform-status');
+
+    if (error) {
+      console.error('Failed to fetch platform status:', error);
+      return { available: false, providers: { gemini: false, claude: false, openai: false } };
+    }
+
+    const response: PlatformStatusResponse = {
+      available: data?.available ?? false,
+      providers: {
+        gemini: data?.providers?.gemini ?? false,
+        claude: data?.providers?.claude ?? false,
+        openai: data?.providers?.openai ?? false,
+      },
+    };
+
+    // Update cache
+    platformStatusCache.data = response;
+    platformStatusCache.timestamp = now;
+
+    // Sync with local config
+    if (response.available) {
+      savePlatformConfig({
+        geminiEnabled: response.providers.gemini,
+        claudeEnabled: response.providers.claude,
+        chatgptEnabled: response.providers.openai,
+      });
+    }
+
+    return response;
+  } catch (err) {
+    console.error('Platform status fetch error:', err);
+    return { available: false, providers: { gemini: false, claude: false, openai: false } };
+  }
+}
+
+/**
+ * Map internal provider names to Edge Function provider names
+ */
+function mapProviderName(provider: ApiProvider): 'gemini' | 'claude' | 'openai' {
+  return provider === 'chatgpt' ? 'openai' : provider;
+}
+
+/**
+ * Check if platform key is available for a provider (async version)
+ * Uses the backend to verify availability
+ */
+export async function checkPlatformKeyAvailable(provider: ApiProvider): Promise<boolean> {
+  const status = await fetchPlatformStatus();
+  const mappedProvider = mapProviderName(provider);
+  return status.providers[mappedProvider] ?? false;
+}
+
+/**
+ * AI Proxy Response from Edge Function
+ */
+export interface AIProxyResponse {
+  output: string;
+  usage: {
+    inputTokens: number;
+    outputTokens: number;
+    costCents: number;
+  };
+  model: string;
+}
+
+/**
+ * Call the AI Proxy Edge Function to use platform keys
+ * This is the secure way to use platform-provided API keys.
+ * The actual keys never leave the server.
+ */
+export async function callAIProxy(options: {
+  model: string;
+  prompt: string;
+  systemPrompt?: string;
+  maxTokens?: number;
+  temperature?: number;
+}): Promise<AIProxyResponse> {
+  if (!supabase) {
+    throw new Error('Supabase not configured');
+  }
+
+  const session = await getSession();
+  if (!session) {
+    throw new Error('Must be signed in to use platform keys');
+  }
+
+  const { data, error } = await supabase.functions.invoke('ai-proxy', {
+    body: {
+      model: options.model,
+      prompt: options.prompt,
+      systemPrompt: options.systemPrompt,
+      maxTokens: options.maxTokens ?? 4096,
+      temperature: options.temperature ?? 0.7,
+    },
+  });
+
+  if (error) {
+    // Handle specific error types
+    if (error.message?.includes('Insufficient credits')) {
+      throw new Error('Insufficient platform credits. Please add credits or switch to personal key mode.');
+    }
+    if (error.message?.includes('Invalid authentication')) {
+      throw new Error('Authentication expired. Please sign in again.');
+    }
+    throw new Error(`AI Proxy error: ${error.message}`);
+  }
+
+  if (!data?.output) {
+    throw new Error('Invalid response from AI Proxy');
+  }
+
+  return {
+    output: data.output,
+    usage: {
+      inputTokens: data.usage?.inputTokens ?? 0,
+      outputTokens: data.usage?.outputTokens ?? 0,
+      costCents: data.usage?.costCents ?? 0,
+    },
+    model: data.model ?? options.model,
+  };
+}
+
+/**
+ * Check if the current user can use platform keys
+ * Requires authentication and available platform keys
+ */
+export async function canUsePlatformKeys(provider: ApiProvider): Promise<{
+  canUse: boolean;
+  reason?: string;
+}> {
+  if (!supabase) {
+    return { canUse: false, reason: 'Supabase not configured' };
+  }
+
+  const session = await getSession();
+  if (!session) {
+    return { canUse: false, reason: 'Sign in required to use platform keys' };
+  }
+
+  const isAvailable = await checkPlatformKeyAvailable(provider);
+  if (!isAvailable) {
+    return { canUse: false, reason: `Platform key not available for ${provider}` };
+  }
+
+  return { canUse: true };
+}
+
+/**
+ * Get current user's platform credit balance
+ */
+export async function getUserCreditBalance(): Promise<number> {
+  if (!supabase) {
+    return 0;
+  }
+
+  const session = await getSession();
+  if (!session) {
+    return 0;
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('user_credits')
+      .select('balance')
+      .eq('user_id', session.user.id)
+      .single();
+
+    if (error) {
+      console.error('Failed to fetch credit balance:', error);
+      return 0;
+    }
+
+    return data?.balance ?? 0;
+  } catch (err) {
+    console.error('Credit balance fetch error:', err);
+    return 0;
+  }
+}
+
+/**
+ * Initialize platform key system
+ * Call this on app startup to check platform availability
+ */
+export async function initializePlatformKeys(): Promise<void> {
+  try {
+    await fetchPlatformStatus();
+  } catch (err) {
+    console.warn('Failed to initialize platform keys:', err);
+  }
 }
