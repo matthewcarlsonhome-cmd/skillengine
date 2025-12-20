@@ -36016,11 +36016,77 @@ Create an executive-ready variance explanation with actionable insights.`,
           temperature: 0.3,
         },
       },
+      {
+        name: 'GTM Tech Stack Audit',
+        description: 'Evaluate your sales and marketing technology stack for gaps, redundancies, and integration opportunities.',
+        longDescription: 'Comprehensive audit of your go-to-market technology ecosystem. Identifies tool overlap, integration gaps, data flow issues, and optimization opportunities across CRM, marketing automation, sales engagement, and analytics platforms.',
+        category: 'analysis',
+        estimatedTimeSaved: '6-8 hours per stack review',
+        theme: {
+          primary: 'text-purple-400',
+          secondary: 'bg-purple-900/20',
+          gradient: 'from-purple-500/20 to-transparent',
+          iconName: 'Layers',
+        },
+        inputs: [
+          { id: 'currentStack', label: 'Current Tech Stack', type: 'textarea', placeholder: 'List all GTM tools (CRM, MAP, SEP, Analytics, BI, etc.) with brief descriptions...', validation: { required: true, minLength: 100 } },
+          { id: 'monthlySpend', label: 'Monthly Tech Spend', type: 'text', placeholder: 'e.g., $15,000/month', validation: { required: true } },
+          { id: 'teamSize', label: 'Revenue Team Size', type: 'text', placeholder: 'e.g., 25 sales + 10 marketing + 5 ops', validation: { required: true } },
+          { id: 'painPoints', label: 'Current Pain Points', type: 'textarea', placeholder: 'Data silos, manual processes, reporting gaps, adoption issues...', validation: { required: true, minLength: 50 } },
+          { id: 'objectives', label: 'Stack Optimization Goals', type: 'textarea', placeholder: 'Reduce costs, improve data quality, automate handoffs, better reporting...', validation: { required: true, minLength: 30 } },
+        ],
+        prompts: {
+          systemInstruction: `You are a Revenue Operations Technology Consultant with 12+ years of experience implementing GTM tech stacks at high-growth B2B companies. You have evaluated and optimized 200+ technology ecosystems and certified in Salesforce, HubSpot, Marketo, Outreach, Gong, and 6sense.
+
+**YOUR EXPERTISE:**
+- GTM tech stack architecture and integration design
+- Vendor evaluation and contract negotiation
+- Data flow optimization and governance
+- Change management and adoption strategies
+- Total cost of ownership analysis
+
+**AUDIT FRAMEWORK:**
+| Category | Evaluation Criteria |
+|----------|---------------------|
+| CRM | Data quality, adoption, customization |
+| MAP | Lead scoring, campaign attribution, integration |
+| SEP | Activity capture, sequence effectiveness |
+| Analytics | Data accuracy, report coverage, insights |
+| Integration | Data sync, latency, error rates |
+
+**OUTPUT SECTIONS:**
+1. Tech Stack Health Score (0-100)
+2. Tool-by-Tool Assessment
+3. Integration Gap Analysis
+4. Redundancy & Consolidation Opportunities
+5. Priority Recommendations with ROI Estimates
+6. Implementation Roadmap`,
+          userPromptTemplate: `Audit this GTM technology stack:
+
+**Current Stack:**
+{{currentStack}}
+
+**Monthly Spend:** {{monthlySpend}}
+**Team Size:** {{teamSize}}
+
+**Pain Points:**
+{{painPoints}}
+
+**Optimization Goals:**
+{{objectives}}
+
+Provide a comprehensive tech stack audit with prioritized recommendations.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'claude',
+          useWebSearch: false,
+          maxTokens: 8192,
+          temperature: 0.3,
+        },
+      },
     ],
   },
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // 22. AI SOLUTIONS ARCHITECT
   // ═══════════════════════════════════════════════════════════════════════════
   {
     id: 'ai-solutions-architect',
@@ -40538,6 +40604,70 @@ Generate a comprehensive save play with stakeholder-specific messaging and actio
           temperature: 0.4,
         },
       },
+      {
+        name: 'Voice of Customer Synthesizer',
+        description: 'Aggregate customer feedback from multiple sources into actionable product and process insights.',
+        longDescription: 'Consolidates feedback from NPS surveys, support tickets, sales calls, QBR notes, and churn interviews into thematic insights with prioritized recommendations for Product, Engineering, and CS leadership.',
+        category: 'analysis',
+        estimatedTimeSaved: '5-8 hours per synthesis report',
+        theme: {
+          primary: 'text-teal-400',
+          secondary: 'bg-teal-900/20',
+          gradient: 'from-teal-500/20 to-transparent',
+          iconName: 'MessageCircle',
+        },
+        inputs: [
+          { id: 'feedbackSources', label: 'Feedback Sources', type: 'textarea', placeholder: 'Paste feedback from NPS comments, support tickets, sales notes, churn interviews...', validation: { required: true, minLength: 100 } },
+          { id: 'timePeriod', label: 'Time Period', type: 'text', placeholder: 'e.g., Q4 2024 or Last 90 days', validation: { required: true } },
+          { id: 'customerSegment', label: 'Customer Segment', type: 'select', options: ['All Customers', 'Enterprise', 'Mid-Market', 'SMB', 'Churned Customers', 'New Customers'], validation: { required: true } },
+          { id: 'productAreas', label: 'Product Areas of Interest', type: 'textarea', placeholder: 'Which features or areas to focus on? (leave blank for all)', validation: { required: false } },
+          { id: 'knownIssues', label: 'Known Issues to Track', type: 'textarea', placeholder: 'Any specific pain points you want to quantify?', validation: { required: false } },
+        ],
+        prompts: {
+          systemInstruction: `You are a Voice of Customer Program Leader with 10+ years of experience synthesizing customer feedback at enterprise SaaS companies. You've built VoC programs that directly influenced product roadmaps worth $100M+ in development investment.
+
+**YOUR METHODOLOGY:**
+1. Theme Extraction: Identify recurring patterns across sources
+2. Sentiment Analysis: Categorize as positive, negative, or neutral
+3. Impact Scoring: Prioritize by frequency and business impact
+4. Actionability: Connect insights to specific recommendations
+
+**ANALYSIS FRAMEWORK:**
+| Theme | Frequency | Sentiment | Impact | Owner | Recommendation |
+
+**OUTPUT SECTIONS:**
+1. Executive Summary
+2. Key Themes & Patterns
+3. Sentiment Distribution
+4. Critical Issues (Immediate Action)
+5. Product Feedback Summary
+6. Process Improvement Opportunities
+7. Competitive Intelligence (if mentioned)
+8. Recommended Actions by Team`,
+          userPromptTemplate: `Synthesize voice of customer insights:
+
+**Time Period:** {{timePeriod}}
+**Segment:** {{customerSegment}}
+
+**Feedback Data:**
+{{feedbackSources}}
+
+**Product Focus Areas:**
+{{productAreas}}
+
+**Known Issues:**
+{{knownIssues}}
+
+Generate a comprehensive VoC synthesis with actionable insights for Product, CS, and leadership.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'claude',
+          useWebSearch: false,
+          maxTokens: 8192,
+          temperature: 0.3,
+        },
+      },
     ],
   },
 
@@ -40686,6 +40816,78 @@ Create appropriate communications for each audience.`,
           recommendedModel: 'claude',
           useWebSearch: false,
           maxTokens: 10240,
+          temperature: 0.3,
+        },
+      },
+      {
+        name: 'Vendor Security Assessment',
+        description: 'Evaluate third-party vendor security posture with standardized questionnaire analysis and risk scoring.',
+        longDescription: 'Analyzes vendor security questionnaires (SIG, CAIQ, custom) against your security requirements, identifies gaps, calculates risk scores, and generates approval recommendations with required mitigations.',
+        category: 'analysis',
+        estimatedTimeSaved: '4-6 hours per vendor review',
+        theme: {
+          primary: 'text-blue-400',
+          secondary: 'bg-blue-900/20',
+          gradient: 'from-blue-500/20 to-transparent',
+          iconName: 'ClipboardCheck',
+        },
+        inputs: [
+          { id: 'vendorName', label: 'Vendor Name', type: 'text', placeholder: 'e.g., Acme SaaS Inc.', validation: { required: true } },
+          { id: 'vendorCategory', label: 'Vendor Category', type: 'select', options: ['Cloud/SaaS', 'Data Processor', 'IT Services', 'Professional Services', 'Marketing/Analytics', 'Payment/Financial', 'Physical Security'], validation: { required: true } },
+          { id: 'dataAccess', label: 'Data Access Level', type: 'select', options: ['No Data Access', 'Public Data Only', 'Internal Data', 'Confidential/PII', 'Regulated Data (PHI/PCI)'], validation: { required: true } },
+          { id: 'questionnaireResponses', label: 'Security Questionnaire Responses', type: 'textarea', placeholder: 'Paste vendor security questionnaire responses or key findings...', validation: { required: true, minLength: 200 } },
+          { id: 'certifications', label: 'Vendor Certifications', type: 'textarea', placeholder: 'SOC2, ISO 27001, HIPAA BAA, PCI-DSS, etc.', validation: { required: false } },
+          { id: 'companyRequirements', label: 'Your Security Requirements', type: 'textarea', placeholder: 'Key requirements: encryption standards, access controls, incident response SLAs...', validation: { required: true, minLength: 50 } },
+        ],
+        prompts: {
+          systemInstruction: `You are a Third-Party Risk Management Expert with 15+ years of experience evaluating vendor security at Fortune 500 companies. You've assessed 1,000+ vendors and developed risk frameworks used across industries.
+
+**YOUR EXPERTISE:**
+- Third-party risk management frameworks (NIST, ISO 27001, FAIR)
+- Security questionnaire analysis (SIG, CAIQ, HECVAT)
+- Contract security requirements and SLAs
+- Vendor risk quantification and scoring
+
+**ASSESSMENT FRAMEWORK:**
+| Domain | Weight | Key Controls |
+|--------|--------|--------------|
+| Data Security | 25% | Encryption, DLP, classification |
+| Access Control | 20% | IAM, MFA, least privilege |
+| Incident Response | 15% | Detection, notification, recovery |
+| Compliance | 15% | Certifications, audits, attestations |
+| Business Continuity | 15% | DR, backup, availability |
+| Governance | 10% | Policies, training, ownership |
+
+**OUTPUT SECTIONS:**
+1. Vendor Risk Summary Card
+2. Domain-by-Domain Assessment
+3. Gap Analysis
+4. Risk Score (1-100)
+5. Approval Recommendation
+6. Required Mitigations
+7. Contract Security Addendum Requirements`,
+          userPromptTemplate: `Assess vendor security:
+
+**Vendor:** {{vendorName}}
+**Category:** {{vendorCategory}}
+**Data Access:** {{dataAccess}}
+
+**Certifications:**
+{{certifications}}
+
+**Questionnaire Responses:**
+{{questionnaireResponses}}
+
+**Your Requirements:**
+{{companyRequirements}}
+
+Generate a comprehensive vendor security assessment with risk score and approval recommendation.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'claude',
+          useWebSearch: false,
+          maxTokens: 8192,
           temperature: 0.3,
         },
       },
@@ -40848,6 +41050,84 @@ Generate a complete automation flow specification.`,
           temperature: 0.4,
         },
       },
+      {
+        name: 'Data Enrichment Pipeline Designer',
+        description: 'Design lead enrichment workflows with scoring models, data hygiene rules, and integration specs.',
+        longDescription: 'Creates comprehensive data enrichment pipeline specifications including vendor selection, enrichment waterfall logic, data quality rules, scoring model design, and integration architecture for Clearbit, ZoomInfo, Apollo, and similar platforms.',
+        category: 'analysis',
+        estimatedTimeSaved: '8-12 hours per pipeline',
+        theme: {
+          primary: 'text-cyan-400',
+          secondary: 'bg-cyan-900/20',
+          gradient: 'from-cyan-500/20 to-transparent',
+          iconName: 'Database',
+        },
+        inputs: [
+          { id: 'enrichmentGoals', label: 'Enrichment Goals', type: 'textarea', placeholder: 'What data points do you need? Firmographics, technographics, intent...', validation: { required: true, minLength: 30 } },
+          { id: 'currentSources', label: 'Current Data Sources', type: 'textarea', placeholder: 'CRM, form fills, purchased lists, existing vendors...', validation: { required: true, minLength: 30 } },
+          { id: 'dataQualityIssues', label: 'Current Data Quality Issues', type: 'textarea', placeholder: 'Duplicates, outdated records, missing fields, inconsistent formats...', validation: { required: true, minLength: 30 } },
+          { id: 'scoringCriteria', label: 'Lead Scoring Criteria', type: 'textarea', placeholder: 'What makes a lead qualified? Firmographic and behavioral signals...', validation: { required: true, minLength: 40 } },
+          { id: 'techStack', label: 'MarTech Stack', type: 'textarea', placeholder: 'CRM, MAP, enrichment vendors, data warehouse...', validation: { required: true, minLength: 30 } },
+          { id: 'budget', label: 'Monthly Enrichment Budget', type: 'select', options: ['< $500', '$500-$2,000', '$2,000-$5,000', '$5,000-$10,000', '$10,000+'], validation: { required: true } },
+          { id: 'volumeEstimate', label: 'Monthly Lead Volume', type: 'select', options: ['< 1,000', '1,000-5,000', '5,000-20,000', '20,000-100,000', '100,000+'], validation: { required: true } },
+        ],
+        prompts: {
+          systemInstruction: `You are a Marketing Data Operations Expert who has built enrichment pipelines processing 10M+ records across enterprise SaaS companies. You've evaluated every major enrichment vendor and know their strengths, weaknesses, and pricing models.
+
+**ENRICHMENT FRAMEWORK:**
+| Layer | Purpose | Typical Vendors |
+|-------|---------|-----------------|
+| Firmographic | Company data | Clearbit, ZoomInfo, D&B |
+| Technographic | Tech stack | BuiltWith, HG Insights |
+| Intent | Buying signals | Bombora, G2, TrustRadius |
+| Contact | Direct reach | Apollo, Lusha, Seamless |
+
+**DATA QUALITY PRINCIPLES:**
+1. Single source of truth for each field
+2. Waterfall enrichment (try vendor A, then B, then C)
+3. Match confidence thresholds
+4. Regular decay audits
+5. Standardization at ingestion
+
+**OUTPUT SECTIONS:**
+1. Enrichment Architecture Overview
+2. Vendor Evaluation & Selection
+3. Waterfall Logic Design
+4. Data Quality Rules
+5. Lead Scoring Model
+6. Integration Specifications
+7. Monitoring & Maintenance Plan
+8. Cost Optimization Strategies`,
+          userPromptTemplate: `Design a data enrichment pipeline:
+
+**Goals:**
+{{enrichmentGoals}}
+
+**Budget:** {{budget}}
+**Monthly Volume:** {{volumeEstimate}}
+
+**Current Sources:**
+{{currentSources}}
+
+**Data Quality Issues:**
+{{dataQualityIssues}}
+
+**Scoring Criteria:**
+{{scoringCriteria}}
+
+**Tech Stack:**
+{{techStack}}
+
+Generate a comprehensive enrichment pipeline design with vendor recommendations and integration specs.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'claude',
+          useWebSearch: false,
+          maxTokens: 10240,
+          temperature: 0.3,
+        },
+      },
     ],
   },
 
@@ -41002,6 +41282,80 @@ Generate structured insights and recommendations.`,
           temperature: 0.3,
         },
       },
+      {
+        name: 'Assumption Testing Protocol',
+        description: 'Design rapid experiments to validate or invalidate key product assumptions with minimal investment.',
+        longDescription: 'Creates structured assumption testing plans including hypothesis frameworks, experiment designs, success criteria, and learning synthesis templates. Based on Lean Startup and Continuous Discovery practices.',
+        category: 'generation',
+        estimatedTimeSaved: '3-5 hours per experiment',
+        theme: {
+          primary: 'text-amber-400',
+          secondary: 'bg-amber-900/20',
+          gradient: 'from-amber-500/20 to-transparent',
+          iconName: 'TestTube',
+        },
+        inputs: [
+          { id: 'assumption', label: 'Key Assumption to Test', type: 'textarea', placeholder: 'What assumption, if wrong, would kill this idea?', validation: { required: true, minLength: 30 } },
+          { id: 'context', label: 'Product/Feature Context', type: 'textarea', placeholder: 'Describe the product or feature this assumption relates to...', validation: { required: true, minLength: 30 } },
+          { id: 'riskLevel', label: 'Risk Level', type: 'select', options: ['Critical - Must validate before any investment', 'High - Should validate before significant investment', 'Medium - Can validate in parallel with development', 'Low - Nice to know'], validation: { required: true } },
+          { id: 'constraints', label: 'Time/Resource Constraints', type: 'textarea', placeholder: 'Budget, timeline, team availability...', validation: { required: true, minLength: 20 } },
+          { id: 'existingEvidence', label: 'Existing Evidence', type: 'textarea', placeholder: 'What do you already know? Data, research, intuition...', validation: { required: false } },
+          { id: 'experimentType', label: 'Preferred Experiment Type', type: 'select', options: ['Concierge/Wizard of Oz', 'Smoke Test / Landing Page', 'Prototype Testing', 'Data Analysis', 'Competitive Analysis', 'Open to Suggestions'], validation: { required: true } },
+        ],
+        prompts: {
+          systemInstruction: `You are a Product Validation Expert who has designed 500+ assumption tests at companies from early-stage startups to Fortune 500 enterprises. You're known for designing the simplest possible experiment that yields actionable learning.
+
+**ASSUMPTION TESTING PRINCIPLES:**
+| Principle | Application |
+|-----------|-------------|
+| Riskiest First | Test assumptions that could kill the idea |
+| Minimum Investment | Smallest test that yields learning |
+| Binary Outcomes | Design for clear pass/fail criteria |
+| Time-boxed | Set hard deadlines for decisions |
+
+**EXPERIMENT TYPES:**
+1. **Concierge** - Manually deliver the value proposition
+2. **Wizard of Oz** - Fake automation, real human behind the scenes
+3. **Smoke Test** - Gauge interest before building
+4. **Prototype** - Test usability and desirability
+5. **Data Analysis** - Mine existing data for signals
+6. **Comparative** - Learn from adjacent solutions
+
+**OUTPUT SECTIONS:**
+1. Assumption Framing
+2. Hypothesis Statement (If/Then/Because)
+3. Experiment Design
+4. Success Criteria & Thresholds
+5. Data Collection Plan
+6. Timeline & Resources
+7. Decision Framework
+8. Learning Synthesis Template`,
+          userPromptTemplate: `Design an assumption test for:
+
+**Assumption:** {{assumption}}
+
+**Risk Level:** {{riskLevel}}
+**Preferred Experiment Type:** {{experimentType}}
+
+**Context:**
+{{context}}
+
+**Constraints:**
+{{constraints}}
+
+**Existing Evidence:**
+{{existingEvidence}}
+
+Generate a complete assumption testing protocol with experiment design and success criteria.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'claude',
+          useWebSearch: false,
+          maxTokens: 8192,
+          temperature: 0.4,
+        },
+      },
     ],
   },
 
@@ -41009,7 +41363,7 @@ Generate structured insights and recommendations.`,
   // 27. DATA ANALYST / ANALYTICS ENGINEER
   // ═══════════════════════════════════════════════════════════════════════════
   {
-    id: 'data-analyst',
+    id: 'analytics-engineer',
     name: 'Data Analyst / Analytics Engineer',
     description: 'Produce insight packs, validate dashboards, enforce data quality SLAs, and build self-serve analytics.',
     icon: 'BarChart2',
@@ -41151,6 +41505,80 @@ Generate a comprehensive data quality monitoring framework.`,
           useWebSearch: false,
           maxTokens: 8192,
           temperature: 0.2,
+        },
+      },
+      {
+        name: 'Self-Serve Analytics Enabler',
+        description: 'Design and document self-serve analytics solutions that empower business users to find their own insights.',
+        longDescription: 'Creates comprehensive self-serve analytics frameworks including data catalog entries, semantic layer definitions, dashboard templates, and user training materials that enable non-technical stakeholders to explore data independently.',
+        category: 'generation',
+        estimatedTimeSaved: '10-15 hours per initiative',
+        theme: {
+          primary: 'text-emerald-400',
+          secondary: 'bg-emerald-900/20',
+          gradient: 'from-emerald-500/20 to-transparent',
+          iconName: 'Users',
+        },
+        inputs: [
+          { id: 'businessDomain', label: 'Business Domain', type: 'text', placeholder: 'e.g., Sales Analytics, Marketing Performance, Customer Success', validation: { required: true } },
+          { id: 'targetUsers', label: 'Target Users', type: 'textarea', placeholder: 'Who will use this? Role, technical level, key questions they ask...', validation: { required: true, minLength: 30 } },
+          { id: 'dataSources', label: 'Available Data Sources', type: 'textarea', placeholder: 'Tables, datasets, APIs available for analysis...', validation: { required: true, minLength: 30 } },
+          { id: 'keyMetrics', label: 'Key Metrics & Dimensions', type: 'textarea', placeholder: 'What metrics matter? How do users slice/filter data?', validation: { required: true, minLength: 40 } },
+          { id: 'existingTools', label: 'Existing BI Tools', type: 'select', options: ['Looker', 'Tableau', 'Power BI', 'Metabase', 'Mode', 'Sigma', 'Other'], validation: { required: true } },
+          { id: 'currentChallenges', label: 'Current Challenges', type: 'textarea', placeholder: 'Why can\'t users self-serve today? Data literacy, access, complexity...', validation: { required: true, minLength: 30 } },
+        ],
+        prompts: {
+          systemInstruction: `You are a Self-Serve Analytics Architect with 10+ years of experience building data democratization programs at data-driven companies. You've enabled thousands of non-technical users to find insights independently.
+
+**SELF-SERVE PRINCIPLES:**
+| Principle | Implementation |
+|-----------|---------------|
+| Discoverability | Users can find relevant data without asking |
+| Understandability | Metrics have clear definitions and context |
+| Trust | Data quality and freshness is visible |
+| Guardrails | Users can't accidentally see wrong data |
+
+**ENABLEMENT COMPONENTS:**
+1. **Data Catalog** - Searchable inventory with descriptions
+2. **Semantic Layer** - Business-friendly metric definitions
+3. **Dashboard Templates** - Starting points for common questions
+4. **Documentation** - How-to guides and FAQs
+5. **Training** - Workshops and certification paths
+
+**OUTPUT SECTIONS:**
+1. Self-Serve Analytics Strategy
+2. Data Catalog Entries
+3. Semantic Layer Definitions
+4. Dashboard Template Designs
+5. User Training Curriculum
+6. Governance & Access Model
+7. Success Metrics & Adoption Plan
+8. Change Management Recommendations`,
+          userPromptTemplate: `Design a self-serve analytics solution for:
+
+**Domain:** {{businessDomain}}
+**BI Tool:** {{existingTools}}
+
+**Target Users:**
+{{targetUsers}}
+
+**Data Sources:**
+{{dataSources}}
+
+**Key Metrics:**
+{{keyMetrics}}
+
+**Current Challenges:**
+{{currentChallenges}}
+
+Generate a comprehensive self-serve analytics enablement plan.`,
+          outputFormat: 'markdown',
+        },
+        config: {
+          recommendedModel: 'claude',
+          useWebSearch: false,
+          maxTokens: 10240,
+          temperature: 0.4,
         },
       },
     ],
