@@ -19,14 +19,99 @@ export const isSupabaseConfigured = (): boolean => {
   return supabase !== null;
 };
 
-// Auth helpers
+// ═══════════════════════════════════════════════════════════════════════════
+// REDIRECT URL VALIDATION (Prevents Open Redirect Attacks)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Allowed redirect hosts for OAuth callbacks
+ * This prevents open redirect vulnerabilities by only allowing
+ * redirects to known, trusted domains.
+ */
+const ALLOWED_REDIRECT_HOSTS = [
+  'localhost',
+  '127.0.0.1',
+  'skillengine.netlify.app',
+  // Add your production domain here
+];
+
+/**
+ * Validate that a redirect URL is safe
+ * Prevents open redirect attacks by ensuring the URL is on an allowed host
+ */
+function validateRedirectUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+
+    // Must be HTTP or HTTPS
+    if (!['http:', 'https:'].includes(parsed.protocol)) {
+      return false;
+    }
+
+    // Check against allowed hosts
+    const hostname = parsed.hostname.toLowerCase();
+
+    // Allow localhost and 127.0.0.1 for development
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return true;
+    }
+
+    // Check if hostname matches or is a subdomain of allowed hosts
+    for (const allowed of ALLOWED_REDIRECT_HOSTS) {
+      if (hostname === allowed || hostname.endsWith(`.${allowed}`)) {
+        return true;
+      }
+    }
+
+    // Also allow the current origin (handles dynamic Netlify preview URLs)
+    if (typeof window !== 'undefined') {
+      const currentOrigin = new URL(window.location.origin);
+      if (hostname === currentOrigin.hostname) {
+        return true;
+      }
+    }
+
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Get a safe redirect URL for OAuth
+ * Falls back to a safe default if the current origin is not allowed
+ */
+function getSafeRedirectUrl(): string {
+  if (typeof window === 'undefined') {
+    return '/auth/callback';
+  }
+
+  const redirectUrl = `${window.location.origin}/auth/callback`;
+
+  if (validateRedirectUrl(redirectUrl)) {
+    return redirectUrl;
+  }
+
+  // If current origin is not allowed, log a warning
+  console.warn('Current origin not in allowed redirect hosts:', window.location.origin);
+
+  // Return just the path - Supabase will use the configured site URL
+  return '/auth/callback';
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// AUTH HELPERS
+// ═══════════════════════════════════════════════════════════════════════════
+
 export async function signInWithGoogle() {
   if (!supabase) throw new Error('Supabase not configured');
+
+  const redirectTo = getSafeRedirectUrl();
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: `${window.location.origin}/auth/callback`,
+      redirectTo,
     },
   });
 

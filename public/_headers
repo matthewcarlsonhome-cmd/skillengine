@@ -1,0 +1,42 @@
+# Security Headers for SkillEngine
+# These headers are applied to all pages served by Netlify
+
+/*
+  # Prevent clickjacking attacks
+  X-Frame-Options: DENY
+
+  # Prevent MIME type sniffing
+  X-Content-Type-Options: nosniff
+
+  # Enable XSS filter in older browsers
+  X-XSS-Protection: 1; mode=block
+
+  # Control referrer information
+  Referrer-Policy: strict-origin-when-cross-origin
+
+  # Prevent browser features we don't need
+  Permissions-Policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()
+
+  # Content Security Policy
+  # This is a strict policy that allows:
+  # - Scripts from self and inline (needed for Vite/React)
+  # - Styles from self, inline, and Google Fonts
+  # - Fonts from self and Google Fonts
+  # - Images from self, data URIs, and HTTPS sources
+  # - Connections to Supabase, AI APIs, and self
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co https://generativelanguage.googleapis.com https://api.anthropic.com https://api.openai.com wss://*.supabase.co; frame-ancestors 'none'; form-action 'self'; base-uri 'self'; upgrade-insecure-requests
+
+  # Strict Transport Security (HTTPS only)
+  Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+
+# Cache static assets
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Don't cache HTML files
+/*.html
+  Cache-Control: no-cache, no-store, must-revalidate
+
+# Don't cache the index
+/
+  Cache-Control: no-cache, no-store, must-revalidate

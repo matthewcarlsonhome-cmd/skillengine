@@ -7,9 +7,15 @@
  *
  * No authentication required - this is a public endpoint that just
  * reports which providers are available (not the keys themselves).
+ *
+ * Rate limited to prevent enumeration attacks.
  */
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import {
+  rateLimitMiddleware,
+  getIdentifier,
+} from '../_shared/rateLimit.ts';
 
 // CORS headers for browser requests
 const corsHeaders = {
@@ -24,6 +30,12 @@ serve(async (req) => {
   }
 
   try {
+    // Check rate limits (no user ID for this public endpoint)
+    const rateLimitResponse = rateLimitMiddleware(req, undefined, 'platform-status', corsHeaders);
+    if (rateLimitResponse) {
+      return rateLimitResponse;
+    }
+
     // Check which API keys are configured
     const geminiKey = Deno.env.get('GEMINI_API_KEY');
     const claudeKey = Deno.env.get('CLAUDE_API_KEY');
