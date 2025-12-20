@@ -284,7 +284,9 @@ async function callGemini(
   maxTokens: number = 4096,
   temperature: number = 0.7
 ): Promise<Response> {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+  // Use header-based authentication instead of query parameter
+  // to prevent API key exposure in logs and referrer headers
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
 
   const contents = [];
   if (systemPrompt) {
@@ -295,7 +297,10 @@ async function callGemini(
 
   return fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'x-goog-api-key': apiKey,
+    },
     body: JSON.stringify({
       contents,
       generationConfig: {

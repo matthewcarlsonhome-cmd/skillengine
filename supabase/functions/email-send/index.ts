@@ -21,6 +21,7 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { rateLimitMiddleware } from '../_shared/rateLimit.ts';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -52,10 +53,23 @@ interface RecipientEmail {
 // CORS HEADERS
 // ═══════════════════════════════════════════════════════════════════════════
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+// CORS headers - restrict to known origins
+const ALLOWED_ORIGINS = [
+  'https://skillengine.netlify.app',
+  'http://localhost:5173',
+  'http://localhost:3000',
+];
+
+function getCorsHeaders(origin: string | null): Record<string, string> {
+  const allowedOrigin = origin && ALLOWED_ORIGINS.includes(origin)
+    ? origin
+    : ALLOWED_ORIGINS[0];
+  return {
+    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  };
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // EMAIL PROVIDERS
@@ -184,23 +198,20 @@ async function sendViaMailgun(
   return { success: true };
 }
 
-// Mock/development email sender (logs to console)
+// Mock/development email sender (logs sanitized info only)
 async function sendViaMock(
   to: string[],
   subject: string,
-  body: string,
+  _body: string,
   _bodyHtml: string,
-  fromName: string,
+  _fromName: string,
   _fromEmail: string,
-  replyTo?: string
+  _replyTo?: string
 ): Promise<{ success: boolean; error?: string }> {
-  console.log('=== MOCK EMAIL SEND ===');
-  console.log(`From: ${fromName}`);
-  console.log(`Reply-To: ${replyTo || 'N/A'}`);
-  console.log(`To: ${to.join(', ')}`);
-  console.log(`Subject: ${subject}`);
-  console.log(`Body:\n${body.substring(0, 500)}${body.length > 500 ? '...' : ''}`);
-  console.log('=======================');
+  // Only log non-sensitive metadata in development
+  // Never log actual email addresses, content, or PII
+  console.log('[MOCK EMAIL] Sending email campaign');
+  console.log(`[MOCK EMAIL] Recipients: ${to.length}, Subject length: ${subject.length} chars`);
 
   // Simulate network delay
   await new Promise(resolve => setTimeout(resolve, 500));
@@ -248,12 +259,60 @@ function markdownToHtml(markdown: string): string {
 // ═══════════════════════════════════════════════════════════════════════════
 
 serve(async (req: Request) => {
+  const origin = req.headers.get('origin');
+  const corsHeaders = getCorsHeaders(origin);
+
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
 
   try {
+    // ══════════════════════════════════════════════════════════════════════════
+    // SECURITY: Authorization check MUST happen before processing request
+    // ══════════════════════════════════════════════════════════════════════════
+    const authHeader = req.headers.get('authorization');
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: 'Authorization required',
+        } as EmailSendResponse),
+        {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
+    }
+
+    // Initialize Supabase client
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Verify the user's JWT token
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: 'Invalid authorization token',
+        } as EmailSendResponse),
+        {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
+    }
+
+    // Check rate limits
+    const rateLimitResponse = rateLimitMiddleware(req, user.id, 'email-send', corsHeaders);
+    if (rateLimitResponse) {
+      return rateLimitResponse;
+    }
+
     // Parse request
     const request: EmailSendRequest = await req.json();
     const { subject, body, bodyHtml, recipientIds, fromName, replyTo } = request;
@@ -271,11 +330,6 @@ serve(async (req: Request) => {
         }
       );
     }
-
-    // Initialize Supabase client
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
 
     // Get recipient emails
     const { data: recipients, error: recipientError } = await supabase
@@ -374,23 +428,15 @@ serve(async (req: Request) => {
       sent_at: new Date().toISOString(),
     });
 
-    // Log audit
-    const authHeader = req.headers.get('authorization');
-    if (authHeader) {
-      const { data: { user } } = await supabase.auth.getUser(
-        authHeader.replace('Bearer ', '')
-      );
-      if (user) {
-        await supabase.from('admin_audit_logs').insert({
-          admin_user_id: user.id,
-          admin_email: user.email,
-          action_type: 'email_send',
-          action_details: { subject, campaignId },
-          target_user_ids: recipientIds,
-          recipient_count: emails.length,
-        });
-      }
-    }
+    // Log audit - user is already authenticated at this point
+    await supabase.from('admin_audit_logs').insert({
+      admin_user_id: user.id,
+      admin_email: user.email,
+      action_type: 'email_send',
+      action_details: { subject, campaignId },
+      target_user_ids: recipientIds,
+      recipient_count: emails.length,
+    });
 
     return new Response(
       JSON.stringify({

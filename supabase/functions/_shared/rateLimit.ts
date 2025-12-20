@@ -45,6 +45,11 @@ export const RATE_LIMITS: Record<string, RateLimitConfig> = {
     windowSeconds: 300, // 10 attempts per 5 minutes
     endpoint: 'auth',
   },
+  'email-send': {
+    maxRequests: 10,
+    windowSeconds: 3600, // 10 email campaigns per hour (prevents spam abuse)
+    endpoint: 'email-send',
+  },
 };
 
 export interface RateLimitResult {

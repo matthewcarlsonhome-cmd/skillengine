@@ -185,16 +185,31 @@ export async function fetchCommunitySkills(options?: {
     .eq('is_public', true)
     .order('use_count', { ascending: false });
 
+  // Security: Escape special characters in search inputs to prevent filter injection
+  const escapePostgresLike = (str: string): string => {
+    return str
+      .replace(/\\/g, '\\\\')  // Escape backslashes first
+      .replace(/%/g, '\\%')    // Escape wildcards
+      .replace(/_/g, '\\_')    // Escape single-char wildcards
+      .replace(/,/g, '')       // Remove commas (could inject filter operators)
+      .replace(/\./g, '')      // Remove dots (could inject operators)
+      .substring(0, 200);       // Limit length
+  };
+
   if (options?.roleTitle) {
-    query = query.ilike('role_title', `%${options.roleTitle}%`);
+    const escapedRole = escapePostgresLike(options.roleTitle);
+    query = query.ilike('role_title', `%${escapedRole}%`);
   }
 
   if (options?.category) {
-    query = query.eq('category', options.category);
+    // Category should be an exact match - validate against known categories
+    const safeCategory = options.category.replace(/[^a-zA-Z0-9\s-]/g, '').substring(0, 50);
+    query = query.eq('category', safeCategory);
   }
 
   if (options?.search) {
-    query = query.or(`name.ilike.%${options.search}%,description.ilike.%${options.search}%`);
+    const escapedSearch = escapePostgresLike(options.search);
+    query = query.or(`name.ilike.%${escapedSearch}%,description.ilike.%${escapedSearch}%`);
   }
 
   if (options?.limit) {
