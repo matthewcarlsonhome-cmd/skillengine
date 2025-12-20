@@ -38,11 +38,11 @@ describe('API Validation Schemas', () => {
     it('accepts valid API key objects', () => {
       const result = ApiKeySchema.parse({
         provider: 'gemini',
-        key: 'AIzaSyD1234567890abcdefgh',
+        key: 'test_fake_key_1234567890abcdefgh',
       });
 
       expect(result.provider).toBe('gemini');
-      expect(result.key).toBe('AIzaSyD1234567890abcdefgh');
+      expect(result.key).toBe('test_fake_key_1234567890abcdefgh');
     });
 
     it('rejects keys that are too short', () => {
@@ -58,7 +58,7 @@ describe('API Validation Schemas', () => {
       expect(() =>
         ApiKeySchema.parse({
           provider: 'invalid',
-          key: 'AIzaSyD1234567890abcdefgh',
+          key: 'test_fake_key_1234567890abcdefgh',
         })
       ).toThrow();
     });
