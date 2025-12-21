@@ -52,6 +52,7 @@ import { TestDataPanel } from '../components/TestDataPanel';
 import { ProviderConfigStatus, useProviderConfig } from '../components/ProviderConfig';
 import { ReadyToRunChecklist } from '../components/ReadyToRunChecklist';
 import { ExecutionSummary } from '../components/ExecutionSummary';
+import { SkillGrading } from '../components/SkillGrading';
 import { checkPlatformStatus, type PlatformStatus } from '../lib/platformProxy';
 import { calculateCost } from '../lib/billing';
 
@@ -100,6 +101,10 @@ const LibrarySkillRunnerPage: React.FC = () => {
 
   // Test data applied tracking
   const [testDataApplied, setTestDataApplied] = useState(false);
+
+  // Grading state
+  const [showGrading, setShowGrading] = useState(false);
+  const [executionIdForGrading, setExecutionIdForGrading] = useState<string>('');
 
   // Load skill from sessionStorage or URL parameter
   useEffect(() => {
@@ -321,6 +326,10 @@ const LibrarySkillRunnerPage: React.FC = () => {
       setExecutionTokens({ input: estimatedInputTokens, output: estimatedOutputTokens });
       setExecutionCost(costEstimate.totalCost / 100);
       setExecutionComplete(true);
+
+      // Enable grading
+      setExecutionIdForGrading(crypto.randomUUID());
+      setShowGrading(true);
 
       setProgress(100);
     } catch (e) {
@@ -839,6 +848,21 @@ const LibrarySkillRunnerPage: React.FC = () => {
               onSave={() => setShowSaveDialog(true)}
               onRunAgain={handleRun}
               isSaved={outputSaved}
+            />
+          )}
+
+          {/* Skill Grading */}
+          {showGrading && executionComplete && output && !error && librarySkill && (
+            <SkillGrading
+              skillId={librarySkill.id}
+              executionId={executionIdForGrading}
+              userId="current-user"
+              executedAt={new Date().toISOString()}
+              onGradeSubmitted={() => {
+                // Grade submitted successfully
+              }}
+              onDismiss={() => setShowGrading(false)}
+              compact={false}
             />
           )}
         </div>

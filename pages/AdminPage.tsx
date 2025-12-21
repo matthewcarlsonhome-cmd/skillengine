@@ -774,6 +774,18 @@ const AdminPage: React.FC = () => {
               </Button>
             </div>
 
+            {/* Skill Improvement Dashboard */}
+            <div className="rounded-xl border bg-card p-6">
+              <h3 className="text-lg font-semibold mb-2">Skill Improvement</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Review AI-proposed skill improvements based on user feedback.
+              </p>
+              <Button onClick={() => navigate('/admin/improvements')}>
+                <BarChart3 className="h-4 w-4 mr-2" />
+                Open Improvement Dashboard
+              </Button>
+            </div>
+
             {/* Future: More settings */}
             <div className="rounded-xl border bg-card p-6">
               <h3 className="text-lg font-semibold mb-2">Feature Flags</h3>
