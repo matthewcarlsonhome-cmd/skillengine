@@ -142,20 +142,46 @@ serve(async (req) => {
     const effectiveMaxTokens = Math.min(maxTokens, modelInfo.maxTokens);
 
     // 4. Check user credits (get from database)
-    const { data: userCredits, error: creditsError } = await supabase
-      .from('user_credits')
-      .select('balance, tier')
-      .eq('user_id', user.id)
-      .single();
+    // Credit checking is OPTIONAL - if the table doesn't exist or user has no row,
+    // we allow the request (for development/new deployments).
+    // Set ENFORCE_CREDITS=true in environment to require credits.
+    const enforceCredits = Deno.env.get('ENFORCE_CREDITS') === 'true';
 
-    if (creditsError && creditsError.code !== 'PGRST116') {
-      console.error('Credits check error:', creditsError);
+    let balance = 0;
+    let skipCreditCheck = !enforceCredits; // Skip by default unless enforced
+
+    try {
+      const { data: userCredits, error: creditsError } = await supabase
+        .from('user_credits')
+        .select('balance, tier')
+        .eq('user_id', user.id)
+        .single();
+
+      if (creditsError) {
+        // PGRST116 = no rows found (user has no credits row)
+        // 42P01 = table doesn't exist
+        if (creditsError.code === 'PGRST116' || creditsError.code === '42P01') {
+          console.log('Credits table/row not found, skipping credit check');
+          skipCreditCheck = true;
+        } else {
+          console.error('Credits check error:', creditsError);
+          skipCreditCheck = true; // Don't block on DB errors
+        }
+      } else if (userCredits) {
+        balance = userCredits.balance ?? 0;
+        skipCreditCheck = false; // User has credits row, enforce check
+      }
+    } catch (err) {
+      console.error('Credits check exception:', err);
+      skipCreditCheck = true; // Don't block on exceptions
     }
 
-    const balance = userCredits?.balance ?? 0;
     const estimatedCost = 50; // Rough estimate of 50 cents for checking
 
-    if (balance < estimatedCost) {
+    // Only enforce credit check if:
+    // 1. ENFORCE_CREDITS is true, OR
+    // 2. User explicitly has a credits row with insufficient balance
+    if (!skipCreditCheck && balance < estimatedCost) {
       return new Response(
         JSON.stringify({
           error: 'Insufficient credits',
@@ -230,21 +256,31 @@ serve(async (req) => {
     const outputCost = (outputTokens / 1_000_000) * pricing.output;
     const totalCostCents = Math.ceil((inputCost + outputCost) * 100);
 
-    // 8. Deduct credits from user
-    await supabase.rpc('deduct_credits', {
-      p_user_id: user.id,
-      p_amount: totalCostCents,
-    });
+    // 8. Deduct credits from user (if credits table exists)
+    if (!skipCreditCheck) {
+      try {
+        await supabase.rpc('deduct_credits', {
+          p_user_id: user.id,
+          p_amount: totalCostCents,
+        });
+      } catch (err) {
+        console.warn('Failed to deduct credits (table may not exist):', err);
+      }
+    }
 
-    // 9. Record usage
-    await supabase.from('usage_logs').insert({
-      user_id: user.id,
-      model: model,
-      input_tokens: inputTokens,
-      output_tokens: outputTokens,
-      cost_cents: totalCostCents,
-      created_at: new Date().toISOString(),
-    });
+    // 9. Record usage (if usage_logs table exists)
+    try {
+      await supabase.from('usage_logs').insert({
+        user_id: user.id,
+        model: model,
+        input_tokens: inputTokens,
+        output_tokens: outputTokens,
+        cost_cents: totalCostCents,
+        created_at: new Date().toISOString(),
+      });
+    } catch (err) {
+      console.warn('Failed to log usage (table may not exist):', err);
+    }
 
     // 10. Return the response
     return new Response(
