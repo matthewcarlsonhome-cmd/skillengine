@@ -2476,6 +2476,8 @@ export const AI_IMPLEMENTATION_WORKFLOW: Workflow = {
 import { ENTERPRISE_WORKFLOWS } from './enterprise';
 // Import governance & operations workflows
 import { GOVERNANCE_OPS_WORKFLOWS } from './governanceOps';
+// Import professional workflows
+import { PROFESSIONAL_WORKFLOWS } from './professional';
 
 export const WORKFLOWS: Record<string, Workflow> = {
   'ai-implementation': AI_IMPLEMENTATION_WORKFLOW,
@@ -2497,6 +2499,8 @@ export const WORKFLOWS: Record<string, Workflow> = {
   ...ENTERPRISE_WORKFLOWS,
   // Governance & operations workflows (new)
   ...GOVERNANCE_OPS_WORKFLOWS,
+  // Professional workflows (marketing, project management, business analysis)
+  ...PROFESSIONAL_WORKFLOWS,
 };
 
 export const WORKFLOW_LIST: Workflow[] = Object.values(WORKFLOWS);

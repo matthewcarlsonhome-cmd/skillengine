@@ -21,6 +21,7 @@ import type {
 } from './types';
 import { ROLE_TEMPLATES } from '../roleTemplates';
 import type { DynamicFormInput } from '../storage/types';
+import { ALL_PROFESSIONAL_SKILLS } from '../skills/professional';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // STATIC SKILL MAPPINGS
@@ -612,14 +613,86 @@ export const SKILL_COLLECTIONS: SkillCollection[] = [
 let _allSkills: LibrarySkill[] | null = null;
 
 /**
- * Get all skills from all sources (builtin + role templates)
+ * Convert professional skills to LibrarySkill format
+ */
+function extractProfessionalSkills(): LibrarySkill[] {
+  return ALL_PROFESSIONAL_SKILLS.map((skill, index) => {
+    // Determine role based on skill characteristics
+    const roleMapping: Record<string, { id: string; name: string }> = {
+      'Campaign': { id: 'marketing-manager', name: 'Marketing Manager' },
+      'Brand': { id: 'marketing-manager', name: 'Marketing Manager' },
+      'Market': { id: 'marketing-manager', name: 'Marketing Manager' },
+      'Content': { id: 'marketing-manager', name: 'Marketing Manager' },
+      'SEO': { id: 'digital-marketing', name: 'Digital Marketing' },
+      'PPC': { id: 'digital-marketing', name: 'Digital Marketing' },
+      'Social': { id: 'digital-marketing', name: 'Digital Marketing' },
+      'Email': { id: 'digital-marketing', name: 'Digital Marketing' },
+      'Analytics': { id: 'digital-marketing', name: 'Digital Marketing' },
+      'Conversion': { id: 'digital-marketing', name: 'Digital Marketing' },
+      'Project': { id: 'project-manager', name: 'Project Manager' },
+      'Sprint': { id: 'project-manager', name: 'Project Manager' },
+      'Risk': { id: 'project-manager', name: 'Project Manager' },
+      'Stakeholder': { id: 'project-manager', name: 'Project Manager' },
+      'Status': { id: 'project-manager', name: 'Project Manager' },
+      'Resource': { id: 'project-manager', name: 'Project Manager' },
+      'BRD': { id: 'business-analyst', name: 'Business Analyst' },
+      'Requirements': { id: 'business-analyst', name: 'Business Analyst' },
+      'Process': { id: 'business-analyst', name: 'Business Analyst' },
+      'Gap': { id: 'business-analyst', name: 'Business Analyst' },
+      'Data': { id: 'business-analyst', name: 'Business Analyst' },
+      'User': { id: 'business-analyst', name: 'Business Analyst' },
+    };
+
+    // Find role based on skill name
+    let roleInfo = { id: 'professional', name: 'Professional' };
+    for (const [keyword, info] of Object.entries(roleMapping)) {
+      if (skill.name.includes(keyword)) {
+        roleInfo = info;
+        break;
+      }
+    }
+
+    const skillId = `professional-${skill.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+
+    return {
+      id: skillId,
+      name: skill.name,
+      description: skill.description,
+      longDescription: skill.longDescription || skill.description,
+      source: 'role-template' as const,
+      category: (skill.category || 'generation') as SkillCategory,
+      tags: {
+        category: (skill.category || 'generation') as SkillCategory,
+        useCases: ['daily-work' as SkillUseCase],
+        level: 'intermediate' as SkillLevel,
+        roles: [roleInfo.id],
+      },
+      theme: skill.theme,
+      role: roleInfo,
+      prompts: skill.prompts,
+      executionConfig: {
+        model: 'claude-sonnet-4-20250514',
+        maxTokens: 4096,
+        temperature: 0.7,
+      },
+      inputs: skill.inputs as DynamicFormInput[],
+      estimatedTime: skill.estimatedTimeSaved || '10-15 minutes',
+      popularity: 50 + index,
+      rating: 4.5,
+    };
+  });
+}
+
+/**
+ * Get all skills from all sources (builtin + role templates + professional)
  * Community skills are loaded separately from Supabase
  */
 export function getAllLibrarySkills(): LibrarySkill[] {
   if (!_allSkills) {
     const builtinSkills = createBuiltinSkillEntries();
     const templateSkills = extractAllDynamicSkills();
-    _allSkills = [...builtinSkills, ...templateSkills];
+    const professionalSkills = extractProfessionalSkills();
+    _allSkills = [...builtinSkills, ...templateSkills, ...professionalSkills];
   }
   return _allSkills;
 }
