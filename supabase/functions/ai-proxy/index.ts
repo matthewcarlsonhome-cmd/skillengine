@@ -20,13 +20,88 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import {
-  rateLimitMiddleware,
-  getRateLimitHeaders,
-  checkRateLimit,
-  getIdentifier,
-  RATE_LIMITS,
-} from '../_shared/rateLimit.ts';
+
+// ═══════════════════════════════════════════════════════════════════════════
+// RATE LIMITING (inlined to avoid _shared import issues)
+// ═══════════════════════════════════════════════════════════════════════════
+
+interface RateLimitConfig {
+  maxRequests: number;
+  windowSeconds: number;
+  endpoint: string;
+}
+
+const RATE_LIMITS: Record<string, RateLimitConfig> = {
+  'ai-proxy': { maxRequests: 30, windowSeconds: 60, endpoint: 'ai-proxy' },
+  'ai-proxy-burst': { maxRequests: 5, windowSeconds: 10, endpoint: 'ai-proxy-burst' },
+};
+
+interface RateLimitResult {
+  allowed: boolean;
+  remaining: number;
+  resetAt: Date;
+  retryAfter?: number;
+}
+
+const rateLimitStore = new Map<string, { count: number; windowStart: number }>();
+
+function checkRateLimit(identifier: string, config: RateLimitConfig): RateLimitResult {
+  const now = Date.now();
+  const windowMs = config.windowSeconds * 1000;
+  const key = `${config.endpoint}:${identifier}`;
+
+  let entry = rateLimitStore.get(key);
+  if (!entry || now - entry.windowStart >= windowMs) {
+    entry = { count: 0, windowStart: now };
+    rateLimitStore.set(key, entry);
+  }
+
+  const windowEnd = entry.windowStart + windowMs;
+  const resetAt = new Date(windowEnd);
+
+  if (entry.count >= config.maxRequests) {
+    return {
+      allowed: false,
+      remaining: 0,
+      resetAt,
+      retryAfter: Math.ceil((windowEnd - now) / 1000),
+    };
+  }
+
+  entry.count++;
+  rateLimitStore.set(key, entry);
+  return { allowed: true, remaining: config.maxRequests - entry.count, resetAt };
+}
+
+function getIdentifier(req: Request, userId?: string): string {
+  if (userId) return `user:${userId}`;
+  const forwardedFor = req.headers.get('x-forwarded-for');
+  if (forwardedFor) return `ip:${forwardedFor.split(',')[0].trim()}`;
+  const realIp = req.headers.get('x-real-ip');
+  if (realIp) return `ip:${realIp}`;
+  return `anon:unknown`;
+}
+
+function rateLimitMiddleware(
+  req: Request,
+  userId: string | undefined,
+  endpoint: string,
+  corsHeaders: Record<string, string>
+): Response | null {
+  const config = RATE_LIMITS[endpoint];
+  if (!config) return null;
+
+  const identifier = getIdentifier(req, userId);
+  const result = checkRateLimit(identifier, config);
+
+  if (!result.allowed) {
+    return new Response(
+      JSON.stringify({ error: 'Rate limit exceeded', retryAfter: result.retryAfter }),
+      { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+  return null;
+}
 
 // CORS headers for browser requests
 const corsHeaders = {
