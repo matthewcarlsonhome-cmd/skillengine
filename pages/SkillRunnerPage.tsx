@@ -17,7 +17,7 @@ import { Skill, FormInput as FormInputType, ApiProviderType } from '../types';
 import { runSkillStream as runGeminiSkillStream } from '../lib/gemini';
 import { runSkillStream as runClaudeSkillStream } from '../lib/claude';
 import { runSkillStream as runChatGPTSkillStream, ChatGPTModelType } from '../lib/chatgpt';
-import { callAIProxy } from '../lib/platformKeys';
+import { callAIProxy, streamAIProxy } from '../lib/platformKeys';
 import { useToast } from '../hooks/useToast';
 import { useAppContext } from '../hooks/useAppContext';
 import { useAuth } from '../hooks/useAuth';
@@ -386,7 +386,7 @@ const SkillRunnerPage: React.FC = () => {
       let fullResponseText = '';
       const currentApiKey = apiKey;
 
-      // Platform key mode uses the AI proxy
+      // Platform key mode uses the AI proxy with streaming
       if (keyMode === 'platform') {
         // Map provider and model to proxy model ID
         let proxyModel: string;
@@ -398,7 +398,8 @@ const SkillRunnerPage: React.FC = () => {
           proxyModel = model as string; // gpt-4o-mini, gpt-4o, etc.
         }
 
-        const response = await callAIProxy({
+        // Use streaming for real-time response
+        const stream = streamAIProxy({
           model: proxyModel,
           prompt: promptData.userPrompt,
           systemPrompt: promptData.systemInstruction,
@@ -406,9 +407,11 @@ const SkillRunnerPage: React.FC = () => {
           temperature: 0.7,
         });
 
-        timing.trackChunk(response.output.length);
-        fullResponseText = response.output;
-        setOutput(fullResponseText);
+        for await (const chunk of stream) {
+          timing.trackChunk(chunk.length);
+          fullResponseText += chunk;
+          setOutput(fullResponseText);
+        }
       } else if (provider === 'gemini') {
         const result = await runGeminiSkillStream(currentApiKey, promptData, skill.useGoogleSearch);
         const stream = result && result.stream ? result.stream : result;

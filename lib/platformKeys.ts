@@ -648,6 +648,131 @@ export async function callAIProxy(options: {
 }
 
 /**
+ * Stream AI response through platform-managed API keys.
+ * Returns an async generator that yields content chunks in real-time.
+ */
+export async function* streamAIProxy(options: {
+  model: string;
+  prompt: string;
+  systemPrompt?: string;
+  maxTokens?: number;
+  temperature?: number;
+}): AsyncGenerator<string, void, unknown> {
+  if (!supabase) {
+    throw new Error('Supabase not configured');
+  }
+
+  const session = await getSession();
+  if (!session) {
+    throw new Error('Must be signed in to use platform keys');
+  }
+
+  // Use direct fetch for streaming (supabase.functions.invoke doesn't support streaming)
+  const supabaseUrl = supabase.supabaseUrl;
+  const response = await fetch(`${supabaseUrl}/functions/v1/ai-proxy`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${session.access_token}`,
+    },
+    body: JSON.stringify({
+      model: options.model,
+      prompt: options.prompt,
+      systemPrompt: options.systemPrompt,
+      maxTokens: options.maxTokens ?? 4096,
+      temperature: options.temperature ?? 0.7,
+      stream: true,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+    if (response.status === 402) {
+      throw new Error('Insufficient platform credits. Please add credits or switch to personal key mode.');
+    }
+    if (response.status === 401) {
+      throw new Error('Authentication expired. Please sign in again.');
+    }
+    throw new Error(errorData.error || `AI Proxy error: ${response.status}`);
+  }
+
+  // Check if we got a streaming response
+  const contentType = response.headers.get('content-type') || '';
+  if (!contentType.includes('text/event-stream')) {
+    // Non-streaming fallback
+    const data = await response.json();
+    yield data.output || '';
+    return;
+  }
+
+  // Process SSE stream
+  const reader = response.body?.getReader();
+  if (!reader) {
+    throw new Error('Response body is not readable');
+  }
+
+  const decoder = new TextDecoder();
+  let buffer = '';
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+
+      // Keep the last incomplete line in buffer
+      buffer = lines.pop() || '';
+
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          const jsonStr = line.slice(6).trim();
+          if (jsonStr === '[DONE]') continue;
+
+          try {
+            const data = JSON.parse(jsonStr);
+
+            // Handle OpenAI format
+            const openaiContent = data.choices?.[0]?.delta?.content;
+            if (openaiContent) {
+              yield openaiContent;
+              continue;
+            }
+
+            // Handle Claude format
+            if (data.type === 'content_block_delta' && data.delta?.text) {
+              yield data.delta.text;
+              continue;
+            }
+          } catch {
+            // Ignore JSON parse errors for partial chunks
+          }
+        }
+      }
+    }
+
+    // Process any remaining buffer
+    if (buffer.startsWith('data: ')) {
+      const jsonStr = buffer.slice(6).trim();
+      if (jsonStr && jsonStr !== '[DONE]') {
+        try {
+          const data = JSON.parse(jsonStr);
+          const content = data.choices?.[0]?.delta?.content || data.delta?.text;
+          if (content) {
+            yield content;
+          }
+        } catch {
+          // Ignore
+        }
+      }
+    }
+  } finally {
+    reader.releaseLock();
+  }
+}
+
+/**
  * Check if the current user can use platform keys
  * Requires authentication and available platform keys
  */

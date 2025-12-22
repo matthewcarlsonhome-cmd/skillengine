@@ -72,6 +72,7 @@ import { ProviderConfigStatus, useProviderConfig } from '../components/ProviderC
 import { ReadyToRunChecklist } from '../components/ReadyToRunChecklist';
 import { ExecutionSummary } from '../components/ExecutionSummary';
 import { checkPlatformStatus, type PlatformStatus } from '../lib/platformProxy';
+import { streamAIProxy } from '../lib/platformKeys';
 import { calculateCost } from '../lib/billing';
 import { recordUsage, createUsageRecordFromExecution } from '../lib/usageLedger';
 import { useAuth } from '../hooks/useAuth';
@@ -313,8 +314,30 @@ const WorkflowRunnerPage: React.FC = () => {
 
       const { provider, model, keyMode, apiKey } = providerState;
       const currentApiKey = apiKey;
-      if (!currentApiKey && keyMode === 'platform') {
-        throw new Error('Platform key mode requires server-side proxy (not yet implemented). Please use personal key mode.');
+
+      // Handle platform key mode with streaming
+      if (keyMode === 'platform') {
+        let proxyModel: string;
+        if (provider === 'gemini') {
+          proxyModel = 'gemini-2.0-flash';
+        } else if (provider === 'claude') {
+          proxyModel = model as string;
+        } else {
+          proxyModel = model as string;
+        }
+
+        const stream = streamAIProxy({
+          model: proxyModel,
+          prompt: promptData.userPrompt,
+          systemPrompt: promptData.systemInstruction,
+          maxTokens: 4096,
+          temperature: 0.7,
+        });
+
+        for await (const chunk of stream) {
+          fullResponse += chunk;
+        }
+        return fullResponse;
       }
 
       if (provider === 'gemini') {
@@ -415,8 +438,30 @@ const WorkflowRunnerPage: React.FC = () => {
 
       const { provider, model, keyMode, apiKey } = providerState;
       const currentApiKey = apiKey;
-      if (!currentApiKey && keyMode === 'platform') {
-        throw new Error('Platform key mode requires server-side proxy (not yet implemented). Please use personal key mode.');
+
+      // Handle platform key mode with streaming
+      if (keyMode === 'platform') {
+        let proxyModel: string;
+        if (provider === 'gemini') {
+          proxyModel = 'gemini-2.0-flash';
+        } else if (provider === 'claude') {
+          proxyModel = model as string;
+        } else {
+          proxyModel = model as string;
+        }
+
+        const stream = streamAIProxy({
+          model: proxyModel,
+          prompt: userPrompt,
+          systemPrompt: systemPrompt,
+          maxTokens: 4096,
+          temperature: 0.7,
+        });
+
+        for await (const chunk of stream) {
+          fullResponse += chunk;
+        }
+        return fullResponse;
       }
 
       if (provider === 'gemini') {

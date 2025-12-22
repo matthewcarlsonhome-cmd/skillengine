@@ -27,6 +27,7 @@ export interface ProxyRequest {
   systemPrompt?: string;
   maxTokens?: number;
   temperature?: number;
+  stream?: boolean;
 }
 
 export interface ProxyResponse {
@@ -197,12 +198,146 @@ export async function callProxyAPI(request: ProxyRequest): Promise<ProxyResponse
 
 /**
  * Stream AI response through the platform proxy
- * (For future implementation with streaming support)
+ * Returns SSE stream from the Edge Function for real-time responses
  */
 export async function* streamProxyAPI(request: ProxyRequest): AsyncGenerator<string, void, unknown> {
-  // For now, use non-streaming and yield the full response
-  const response = await callProxyAPI(request);
-  yield response.output;
+  const supabaseUrl = getSupabaseUrl();
+  if (!supabaseUrl) {
+    throw new Error('Supabase URL not configured');
+  }
+
+  // Get the current session for auth
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) {
+    throw new Error('You must be logged in to use Platform Keys');
+  }
+
+  const response = await fetch(`${supabaseUrl}/functions/v1/ai-proxy`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${session.access_token}`,
+    },
+    body: JSON.stringify({ ...request, stream: true }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+    if (response.status === 402) {
+      throw new Error(`Insufficient credits. Balance: ${errorData.balance ?? 0} cents. Required: ${errorData.required ?? 0} cents.`);
+    }
+    throw new Error(errorData.error || `Proxy call failed: ${response.status}`);
+  }
+
+  // Check if we got a streaming response
+  const contentType = response.headers.get('content-type') || '';
+  if (!contentType.includes('text/event-stream')) {
+    // Non-streaming response (fallback)
+    const data = await response.json();
+    yield data.output;
+    return;
+  }
+
+  // Process SSE stream
+  const reader = response.body?.getReader();
+  if (!reader) {
+    throw new Error('Response body is not readable');
+  }
+
+  const decoder = new TextDecoder();
+  let buffer = '';
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+
+      // Keep the last incomplete line in buffer
+      buffer = lines.pop() || '';
+
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          const jsonStr = line.slice(6).trim();
+          if (jsonStr === '[DONE]') continue;
+
+          try {
+            const data = JSON.parse(jsonStr);
+
+            // Handle OpenAI format
+            const openaiContent = data.choices?.[0]?.delta?.content;
+            if (openaiContent) {
+              yield openaiContent;
+              continue;
+            }
+
+            // Handle Claude format
+            if (data.type === 'content_block_delta' && data.delta?.text) {
+              yield data.delta.text;
+              continue;
+            }
+          } catch {
+            // Ignore JSON parse errors for partial chunks
+          }
+        }
+      }
+    }
+
+    // Process any remaining buffer
+    if (buffer.startsWith('data: ')) {
+      const jsonStr = buffer.slice(6).trim();
+      if (jsonStr && jsonStr !== '[DONE]') {
+        try {
+          const data = JSON.parse(jsonStr);
+          const content = data.choices?.[0]?.delta?.content || data.delta?.text;
+          if (content) {
+            yield content;
+          }
+        } catch {
+          // Ignore
+        }
+      }
+    }
+  } finally {
+    reader.releaseLock();
+  }
+}
+
+/**
+ * Get raw streaming Response from platform proxy
+ * Used when you need direct access to the SSE stream
+ */
+export async function streamProxyAPIRaw(request: ProxyRequest): Promise<Response> {
+  const supabaseUrl = getSupabaseUrl();
+  if (!supabaseUrl) {
+    throw new Error('Supabase URL not configured');
+  }
+
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) {
+    throw new Error('You must be logged in to use Platform Keys');
+  }
+
+  const response = await fetch(`${supabaseUrl}/functions/v1/ai-proxy`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${session.access_token}`,
+    },
+    body: JSON.stringify({ ...request, stream: true }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+    if (response.status === 402) {
+      throw new Error(`Insufficient credits. Balance: ${errorData.balance ?? 0} cents.`);
+    }
+    throw new Error(errorData.error || `Proxy call failed: ${response.status}`);
+  }
+
+  return response;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
