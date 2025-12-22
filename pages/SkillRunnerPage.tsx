@@ -61,6 +61,7 @@ import { recordUsage, createUsageRecordFromExecution } from '../lib/usageLedger'
 import { typography, cards, cn } from '../lib/theme';
 import { ReadyToRunChecklist } from '../components/ReadyToRunChecklist';
 import { ExecutionSummary } from '../components/ExecutionSummary';
+import { SkillGrading } from '../components/SkillGrading';
 import { InlineProviderSelector } from '../components/InlineProviderSelector';
 import { checkPlatformStatus, type PlatformStatus } from '../lib/platformProxy';
 import { hasStoredKey } from '../lib/apiKeyStorage';
@@ -231,6 +232,10 @@ const SkillRunnerPage: React.FC = () => {
   const [executionDuration, setExecutionDuration] = useState<number | undefined>();
   const [executionTokens, setExecutionTokens] = useState<{ input: number; output: number } | undefined>();
   const [executionCost, setExecutionCost] = useState<number | undefined>();
+
+  // Grading state
+  const [showGrading, setShowGrading] = useState(false);
+  const [executionIdForGrading, setExecutionIdForGrading] = useState<string>('');
 
   // Test data applied tracking
   const [testDataApplied, setTestDataApplied] = useState(false);
@@ -537,6 +542,10 @@ const SkillRunnerPage: React.FC = () => {
       setExecutionTokens({ input: estimatedInputTokens, output: estimatedOutputTokens });
       setExecutionCost(costEstimate.totalCost / 100); // Convert cents to dollars
       setExecutionComplete(true);
+
+      // Enable grading
+      setExecutionIdForGrading(crypto.randomUUID());
+      setShowGrading(true);
     } catch (e: any) {
       timing.failRequest(e);
       setError(e.message || 'An unknown error occurred.');
@@ -956,6 +965,21 @@ const SkillRunnerPage: React.FC = () => {
           }}
           onRunAgain={handleRunSkill}
           isSaved={outputSaved}
+        />
+      )}
+
+      {/* Skill Grading */}
+      {showGrading && executionComplete && output && !error && skill && (
+        <SkillGrading
+          skillId={skill.id}
+          executionId={executionIdForGrading}
+          userId="current-user"
+          executedAt={new Date().toISOString()}
+          onGradeSubmitted={() => {
+            // Grade submitted successfully
+          }}
+          onDismiss={() => setShowGrading(false)}
+          compact={false}
         />
       )}
 

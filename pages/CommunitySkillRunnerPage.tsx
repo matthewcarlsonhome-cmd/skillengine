@@ -39,6 +39,7 @@ import {
   Check,
 } from 'lucide-react';
 import { TestDataPanel } from '../components/TestDataPanel';
+import { SkillGrading } from '../components/SkillGrading';
 
 // Theme palette for display
 const THEME = {
@@ -73,6 +74,10 @@ const CommunitySkillRunnerPage: React.FC = () => {
   const [saveTitle, setSaveTitle] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [outputSaved, setOutputSaved] = useState(false);
+
+  // Grading state
+  const [showGrading, setShowGrading] = useState(false);
+  const [executionIdForGrading, setExecutionIdForGrading] = useState<string>('');
 
   // Load skill from sessionStorage
   useEffect(() => {
@@ -233,6 +238,10 @@ const CommunitySkillRunnerPage: React.FC = () => {
       }
 
       setProgress(100);
+
+      // Enable grading
+      setExecutionIdForGrading(crypto.randomUUID());
+      setShowGrading(true);
     } catch (e) {
       const message = e instanceof Error ? e.message : 'An unknown error occurred';
       setError(message);
@@ -809,6 +818,21 @@ const CommunitySkillRunnerPage: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Skill Grading */}
+      {showGrading && output && !error && communitySkill && !isRunning && (
+        <SkillGrading
+          skillId={communitySkill.id}
+          executionId={executionIdForGrading}
+          userId="current-user"
+          executedAt={new Date().toISOString()}
+          onGradeSubmitted={() => {
+            // Grade submitted successfully
+          }}
+          onDismiss={() => setShowGrading(false)}
+          compact={false}
+        />
+      )}
 
       {/* Save Output Dialog */}
       {showSaveDialog && (
