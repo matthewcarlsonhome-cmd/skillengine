@@ -36,6 +36,7 @@ import {
   Users
 } from 'lucide-react';
 import { TestDataPanel } from '../components/TestDataPanel';
+import { SkillGrading } from '../components/SkillGrading';
 
 const DynamicSkillRunnerPage: React.FC = () => {
   const { workspaceId, skillId } = useParams<{ workspaceId: string; skillId: string }>();
@@ -57,6 +58,10 @@ const DynamicSkillRunnerPage: React.FC = () => {
   const [startTime, setStartTime] = useState<number | null>(null);
   const [showPrompts, setShowPrompts] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
+
+  // Grading state
+  const [showGrading, setShowGrading] = useState(false);
+  const [executionIdForGrading, setExecutionIdForGrading] = useState<string>('');
 
   // Load skill and workspace
   useEffect(() => {
@@ -181,6 +186,10 @@ const DynamicSkillRunnerPage: React.FC = () => {
       await db.saveExecution(execution);
 
       setProgress(100);
+
+      // Enable grading
+      setExecutionIdForGrading(crypto.randomUUID());
+      setShowGrading(true);
     } catch (e) {
       const message = e instanceof Error ? e.message : 'An unknown error occurred';
       setError(message);
@@ -673,6 +682,21 @@ const DynamicSkillRunnerPage: React.FC = () => {
                 )}
               </div>
             </div>
+          )}
+
+          {/* Skill Grading */}
+          {showGrading && output && !error && skill && !isRunning && (
+            <SkillGrading
+              skillId={skill.id}
+              executionId={executionIdForGrading}
+              userId="current-user"
+              executedAt={new Date().toISOString()}
+              onGradeSubmitted={() => {
+                // Grade submitted successfully
+              }}
+              onDismiss={() => setShowGrading(false)}
+              compact={false}
+            />
           )}
         </div>
       </div>
