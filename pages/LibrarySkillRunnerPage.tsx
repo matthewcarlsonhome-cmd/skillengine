@@ -296,6 +296,7 @@ const LibrarySkillRunnerPage: React.FC = () => {
         provider: providerState.provider,
         claudeModel: providerState.model as 'haiku' | 'sonnet' | 'opus',
         chatgptModel: providerState.model as ChatGPTModelType,
+        keyMode: providerState.keyMode,
       })) {
         fullOutput += chunk;
         setOutput(fullOutput);

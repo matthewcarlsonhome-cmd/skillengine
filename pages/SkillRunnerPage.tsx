@@ -17,6 +17,7 @@ import { Skill, FormInput as FormInputType, ApiProviderType } from '../types';
 import { runSkillStream as runGeminiSkillStream } from '../lib/gemini';
 import { runSkillStream as runClaudeSkillStream } from '../lib/claude';
 import { runSkillStream as runChatGPTSkillStream, ChatGPTModelType } from '../lib/chatgpt';
+import { callAIProxy } from '../lib/platformKeys';
 import { useToast } from '../hooks/useToast';
 import { useAppContext } from '../hooks/useAppContext';
 import { useAuth } from '../hooks/useAuth';
@@ -378,15 +379,32 @@ const SkillRunnerPage: React.FC = () => {
     try {
       const promptData = skill.generatePrompt(formState);
       let fullResponseText = '';
-
-      // Note: For platform key mode, API calls would go through a proxy
-      // For now, personal key mode is required for actual execution
       const currentApiKey = apiKey;
-      if (!currentApiKey && keyMode === 'platform') {
-        throw new Error('Platform key mode requires server-side proxy (not yet implemented). Please use personal key mode.');
-      }
 
-      if (provider === 'gemini') {
+      // Platform key mode uses the AI proxy
+      if (keyMode === 'platform') {
+        // Map provider and model to proxy model ID
+        let proxyModel: string;
+        if (provider === 'gemini') {
+          proxyModel = 'gemini-2.0-flash';
+        } else if (provider === 'claude') {
+          proxyModel = model as string; // haiku, sonnet, opus
+        } else {
+          proxyModel = model as string; // gpt-4o-mini, gpt-4o, etc.
+        }
+
+        const response = await callAIProxy({
+          model: proxyModel,
+          prompt: promptData.userPrompt,
+          systemPrompt: promptData.systemInstruction,
+          maxTokens: 4096,
+          temperature: 0.7,
+        });
+
+        timing.trackChunk(response.output.length);
+        fullResponseText = response.output;
+        setOutput(fullResponseText);
+      } else if (provider === 'gemini') {
         const result = await runGeminiSkillStream(currentApiKey, promptData, skill.useGoogleSearch);
         const stream = result && result.stream ? result.stream : result;
         if (!stream || typeof stream[Symbol.asyncIterator] !== 'function') {

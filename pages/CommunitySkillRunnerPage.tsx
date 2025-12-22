@@ -205,6 +205,7 @@ const CommunitySkillRunnerPage: React.FC = () => {
         provider: selectedApi as 'gemini' | 'claude' | 'chatgpt',
         claudeModel,
         chatgptModel,
+        keyMode: 'personal', // Community runner uses personal keys only
       })) {
         fullOutput += chunk;
         setOutput(fullOutput);

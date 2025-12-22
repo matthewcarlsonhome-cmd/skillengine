@@ -157,6 +157,7 @@ const DynamicSkillRunnerPage: React.FC = () => {
         apiKey,
         provider: selectedApi as 'gemini' | 'claude' | 'chatgpt',
         chatgptModel,
+        keyMode: 'personal', // Dynamic runner uses personal keys
       })) {
         fullOutput += chunk;
         setOutput(fullOutput);
