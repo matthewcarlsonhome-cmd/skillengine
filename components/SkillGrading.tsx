@@ -26,8 +26,8 @@ import {
 import { Button } from './ui/Button';
 import { Textarea } from './ui/Textarea';
 import { cn } from '../lib/theme';
-import type { QualityDimension, SkillGrade } from '../lib/selfImprovement/types';
-import { recordGrade } from '../lib/selfImprovement';
+import type { QualityDimension } from '../lib/selfImprovement/types';
+import { submitGrade, hashInputs, getSkillVersion } from '../lib/selfImprovement/supabaseGrading';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -36,18 +36,14 @@ import { recordGrade } from '../lib/selfImprovement';
 export interface SkillGradingProps {
   /** Skill ID being graded */
   skillId: string;
-  /** Skill version ID (optional, will use active version if not provided) */
-  skillVersionId?: string;
-  /** Unique execution ID */
+  /** Skill version (optional, will fetch from registry if not provided) */
+  skillVersion?: number;
+  /** Unique execution ID (for deduplication) */
   executionId: string;
-  /** User ID */
-  userId: string;
-  /** Hash of inputs for deduplication */
-  inputsHash?: string;
-  /** When skill was executed */
-  executedAt: string;
+  /** Original inputs (used for deduplication hash) */
+  inputs?: Record<string, unknown>;
   /** Callback when grading is complete */
-  onGradeSubmitted?: (grade: SkillGrade) => void;
+  onGradeSubmitted?: (success: boolean) => void;
   /** Callback to dismiss the grading UI */
   onDismiss?: () => void;
   /** Whether to show in compact mode */
@@ -208,16 +204,22 @@ const QuickFeedback: React.FC<QuickFeedbackProps> = ({ onQuickGrade, selected })
 
 export const SkillGrading: React.FC<SkillGradingProps> = ({
   skillId,
-  skillVersionId = 'v1',
+  skillVersion,
   executionId,
-  userId,
-  inputsHash = '',
-  executedAt,
+  inputs,
   onGradeSubmitted,
   onDismiss,
   compact = false,
   className = '',
 }) => {
+  // Get skill version from registry if not provided
+  const [resolvedVersion, setResolvedVersion] = React.useState<number>(skillVersion || 1);
+
+  React.useEffect(() => {
+    if (!skillVersion) {
+      getSkillVersion(skillId).then(setResolvedVersion);
+    }
+  }, [skillId, skillVersion]);
   // State
   const [overallScore, setOverallScore] = useState(0);
   const [dimensionScores, setDimensionScores] = useState<Record<QualityDimension, number>>(
@@ -244,32 +246,32 @@ export const SkillGrading: React.FC<SkillGradingProps> = ({
       // Auto-submit quick grade
       try {
         setIsSubmitting(true);
-        const grade = await recordGrade({
+        const result = await submitGrade({
           skillId,
-          skillVersionId,
-          userId,
-          executionId,
-          inputsHash,
+          skillVersion: resolvedVersion,
           overallScore: score,
-          dimensionScores: [],
           wasOutputUsed: positive,
-          executedAt,
+          inputsHash: inputs ? hashInputs(inputs) : executionId,
         });
 
-        setSubmitted(true);
-        onGradeSubmitted?.(grade);
+        if (result.success) {
+          setSubmitted(true);
+          onGradeSubmitted?.(true);
 
-        // Auto-dismiss after 2 seconds
-        setTimeout(() => {
-          onDismiss?.();
-        }, 2000);
+          // Auto-dismiss after 2 seconds
+          setTimeout(() => {
+            onDismiss?.();
+          }, 2000);
+        } else {
+          console.error('Failed to submit quick grade:', result.error);
+        }
       } catch (error) {
         console.error('Failed to submit quick grade:', error);
       } finally {
         setIsSubmitting(false);
       }
     },
-    [skillId, skillVersionId, userId, executionId, inputsHash, executedAt, onGradeSubmitted, onDismiss]
+    [skillId, resolvedVersion, executionId, inputs, onGradeSubmitted, onDismiss]
   );
 
   // Handle dimension score change
@@ -284,30 +286,35 @@ export const SkillGrading: React.FC<SkillGradingProps> = ({
     try {
       setIsSubmitting(true);
 
-      const grade = await recordGrade({
+      const result = await submitGrade({
         skillId,
-        skillVersionId,
-        userId,
-        executionId,
-        inputsHash,
+        skillVersion: resolvedVersion,
         overallScore,
-        dimensionScores: Object.entries(dimensionScores).map(([dimension, score]) => ({
-          dimension: dimension as QualityDimension,
-          score,
-        })),
+        dimensionScores: {
+          relevance: dimensionScores.relevance,
+          accuracy: dimensionScores.accuracy,
+          completeness: dimensionScores.completeness,
+          clarity: dimensionScores.clarity,
+          actionability: dimensionScores.actionability,
+          professionalism: dimensionScores.professionalism,
+        },
         feedback: feedback.trim() || undefined,
         improvementSuggestion: improvementSuggestion.trim() || undefined,
         wasOutputUsed: wasOutputUsed ?? false,
-        executedAt,
+        inputsHash: inputs ? hashInputs(inputs) : executionId,
       });
 
-      setSubmitted(true);
-      onGradeSubmitted?.(grade);
+      if (result.success) {
+        setSubmitted(true);
+        onGradeSubmitted?.(true);
 
-      // Auto-dismiss after delay
-      setTimeout(() => {
-        onDismiss?.();
-      }, 2000);
+        // Auto-dismiss after delay
+        setTimeout(() => {
+          onDismiss?.();
+        }, 2000);
+      } else {
+        console.error('Failed to submit grade:', result.error);
+      }
     } catch (error) {
       console.error('Failed to submit grade:', error);
     } finally {
