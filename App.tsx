@@ -135,7 +135,7 @@ import PricingPage from './pages/PricingPage';                       // Pricing 
 import AdminPage from './pages/AdminPage';                           // Admin control panel
 import DevPlaygroundPage from './pages/DevPlaygroundPage';           // Developer test playground
 import AccountPage from './pages/AccountPage';                       // User account & credits
-import ImprovementDashboardPage from './pages/ImprovementDashboardPage'; // Skill improvement review
+import AdminImprovementsPage from './pages/AdminImprovementsPage'; // Skill improvement review
 
 /**
  * Main App Component
@@ -266,7 +266,7 @@ function App() {
                     <Route path="/pricing" element={<PricingPage />} />
                     <Route path="/account" element={<AccountPage />} />
                     <Route path="/admin" element={<AdminPage />} />
-                    <Route path="/admin/improvements" element={<ImprovementDashboardPage />} />
+                    <Route path="/admin/improvements" element={<AdminImprovementsPage />} />
                     <Route path="/dev/playground" element={<DevPlaygroundPage />} />
                   </Routes>
                 </main>

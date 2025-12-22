@@ -20,13 +20,88 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import {
-  rateLimitMiddleware,
-  getRateLimitHeaders,
-  checkRateLimit,
-  getIdentifier,
-  RATE_LIMITS,
-} from '../_shared/rateLimit.ts';
+
+// ═══════════════════════════════════════════════════════════════════════════
+// RATE LIMITING (inlined to avoid _shared import issues)
+// ═══════════════════════════════════════════════════════════════════════════
+
+interface RateLimitConfig {
+  maxRequests: number;
+  windowSeconds: number;
+  endpoint: string;
+}
+
+const RATE_LIMITS: Record<string, RateLimitConfig> = {
+  'ai-proxy': { maxRequests: 30, windowSeconds: 60, endpoint: 'ai-proxy' },
+  'ai-proxy-burst': { maxRequests: 5, windowSeconds: 10, endpoint: 'ai-proxy-burst' },
+};
+
+interface RateLimitResult {
+  allowed: boolean;
+  remaining: number;
+  resetAt: Date;
+  retryAfter?: number;
+}
+
+const rateLimitStore = new Map<string, { count: number; windowStart: number }>();
+
+function checkRateLimit(identifier: string, config: RateLimitConfig): RateLimitResult {
+  const now = Date.now();
+  const windowMs = config.windowSeconds * 1000;
+  const key = `${config.endpoint}:${identifier}`;
+
+  let entry = rateLimitStore.get(key);
+  if (!entry || now - entry.windowStart >= windowMs) {
+    entry = { count: 0, windowStart: now };
+    rateLimitStore.set(key, entry);
+  }
+
+  const windowEnd = entry.windowStart + windowMs;
+  const resetAt = new Date(windowEnd);
+
+  if (entry.count >= config.maxRequests) {
+    return {
+      allowed: false,
+      remaining: 0,
+      resetAt,
+      retryAfter: Math.ceil((windowEnd - now) / 1000),
+    };
+  }
+
+  entry.count++;
+  rateLimitStore.set(key, entry);
+  return { allowed: true, remaining: config.maxRequests - entry.count, resetAt };
+}
+
+function getIdentifier(req: Request, userId?: string): string {
+  if (userId) return `user:${userId}`;
+  const forwardedFor = req.headers.get('x-forwarded-for');
+  if (forwardedFor) return `ip:${forwardedFor.split(',')[0].trim()}`;
+  const realIp = req.headers.get('x-real-ip');
+  if (realIp) return `ip:${realIp}`;
+  return `anon:unknown`;
+}
+
+function rateLimitMiddleware(
+  req: Request,
+  userId: string | undefined,
+  endpoint: string,
+  corsHeaders: Record<string, string>
+): Response | null {
+  const config = RATE_LIMITS[endpoint];
+  if (!config) return null;
+
+  const identifier = getIdentifier(req, userId);
+  const result = checkRateLimit(identifier, config);
+
+  if (!result.allowed) {
+    return new Response(
+      JSON.stringify({ error: 'Rate limit exceeded', retryAfter: result.retryAfter }),
+      { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+  return null;
+}
 
 // CORS headers for browser requests
 const corsHeaders = {
@@ -64,6 +139,14 @@ interface RequestBody {
   temperature?: number;
   stream?: boolean;
 }
+
+// Streaming headers for SSE
+const streamHeaders = {
+  ...corsHeaders,
+  'Content-Type': 'text/event-stream',
+  'Cache-Control': 'no-cache',
+  'Connection': 'keep-alive',
+};
 
 interface UsageRecord {
   userId: string;
@@ -213,7 +296,42 @@ serve(async (req) => {
       );
     }
 
-    // 6. Make the API call based on provider
+    // 6. Handle streaming vs non-streaming
+    if (stream && modelInfo.provider === 'openai') {
+      // ═══════════════════════════════════════════════════════════════════
+      // STREAMING MODE (OpenAI only for now)
+      // ═══════════════════════════════════════════════════════════════════
+      return handleOpenAIStream(
+        apiKey,
+        modelInfo.apiModel,
+        prompt,
+        systemPrompt,
+        effectiveMaxTokens,
+        temperature,
+        user.id,
+        model,
+        skipCreditCheck,
+        supabase
+      );
+    } else if (stream && modelInfo.provider === 'claude') {
+      // Claude streaming
+      return handleClaudeStream(
+        apiKey,
+        modelInfo.apiModel,
+        prompt,
+        systemPrompt,
+        effectiveMaxTokens,
+        temperature,
+        user.id,
+        model,
+        skipCreditCheck,
+        supabase
+      );
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // NON-STREAMING MODE
+    // ═══════════════════════════════════════════════════════════════════════
     let response: Response;
     let inputTokens = 0;
     let outputTokens = 0;
@@ -398,5 +516,271 @@ async function callOpenAI(
       max_tokens: maxTokens,
       temperature,
     }),
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// STREAMING HANDLERS
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Handle OpenAI streaming response
+ * Forwards SSE chunks directly to client and tracks usage
+ */
+async function handleOpenAIStream(
+  apiKey: string,
+  apiModel: string,
+  prompt: string,
+  systemPrompt: string | undefined,
+  maxTokens: number,
+  temperature: number,
+  userId: string,
+  requestModel: string,
+  skipCreditCheck: boolean,
+  supabase: ReturnType<typeof createClient>
+): Promise<Response> {
+  const messages = [];
+  if (systemPrompt) {
+    messages.push({ role: 'system', content: systemPrompt });
+  }
+  messages.push({ role: 'user', content: prompt });
+
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: apiModel,
+      messages,
+      max_tokens: maxTokens,
+      temperature,
+      stream: true,
+      stream_options: { include_usage: true },
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    return new Response(
+      JSON.stringify({ error: `OpenAI API error: ${error}` }),
+      { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+
+  // Track usage for billing after stream completes
+  let inputTokens = 0;
+  let outputTokens = 0;
+
+  // Create a transform stream that forwards chunks and tracks usage
+  const { readable, writable } = new TransformStream({
+    transform(chunk, controller) {
+      controller.enqueue(chunk);
+    },
+  });
+
+  // Process the stream in the background
+  (async () => {
+    const reader = response.body!.getReader();
+    const writer = writable.getWriter();
+    const decoder = new TextDecoder();
+
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        // Forward the chunk
+        await writer.write(value);
+
+        // Parse for usage info (comes in final chunk)
+        const text = decoder.decode(value, { stream: true });
+        const lines = text.split('\n');
+        for (const line of lines) {
+          if (line.startsWith('data: ') && !line.includes('[DONE]')) {
+            try {
+              const data = JSON.parse(line.slice(6));
+              if (data.usage) {
+                inputTokens = data.usage.prompt_tokens || 0;
+                outputTokens = data.usage.completion_tokens || 0;
+              }
+            } catch {
+              // Ignore parse errors
+            }
+          }
+        }
+      }
+    } finally {
+      await writer.close();
+
+      // Record usage after stream completes
+      if (inputTokens > 0 || outputTokens > 0) {
+        const pricing = MODEL_PRICING[apiModel] || { input: 10, output: 30 };
+        const inputCost = (inputTokens / 1_000_000) * pricing.input;
+        const outputCost = (outputTokens / 1_000_000) * pricing.output;
+        const totalCostCents = Math.ceil((inputCost + outputCost) * 100);
+
+        // Deduct credits
+        if (!skipCreditCheck) {
+          try {
+            await supabase.rpc('deduct_credits', {
+              p_user_id: userId,
+              p_amount: totalCostCents,
+            });
+          } catch (err) {
+            console.warn('Failed to deduct credits:', err);
+          }
+        }
+
+        // Log usage
+        try {
+          await supabase.from('usage_logs').insert({
+            user_id: userId,
+            model: requestModel,
+            input_tokens: inputTokens,
+            output_tokens: outputTokens,
+            cost_cents: totalCostCents,
+            created_at: new Date().toISOString(),
+          });
+        } catch (err) {
+          console.warn('Failed to log usage:', err);
+        }
+      }
+    }
+  })();
+
+  return new Response(readable, {
+    headers: streamHeaders,
+  });
+}
+
+/**
+ * Handle Claude streaming response
+ * Forwards SSE chunks directly to client and tracks usage
+ */
+async function handleClaudeStream(
+  apiKey: string,
+  apiModel: string,
+  prompt: string,
+  systemPrompt: string | undefined,
+  maxTokens: number,
+  temperature: number,
+  userId: string,
+  requestModel: string,
+  skipCreditCheck: boolean,
+  supabase: ReturnType<typeof createClient>
+): Promise<Response> {
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+    },
+    body: JSON.stringify({
+      model: apiModel,
+      max_tokens: maxTokens,
+      temperature,
+      stream: true,
+      system: systemPrompt || '',
+      messages: [{ role: 'user', content: prompt }],
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    return new Response(
+      JSON.stringify({ error: `Claude API error: ${error}` }),
+      { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+
+  // Track usage for billing after stream completes
+  let inputTokens = 0;
+  let outputTokens = 0;
+
+  // Create a transform stream that forwards chunks and tracks usage
+  const { readable, writable } = new TransformStream({
+    transform(chunk, controller) {
+      controller.enqueue(chunk);
+    },
+  });
+
+  // Process the stream in the background
+  (async () => {
+    const reader = response.body!.getReader();
+    const writer = writable.getWriter();
+    const decoder = new TextDecoder();
+
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        // Forward the chunk
+        await writer.write(value);
+
+        // Parse for usage info from Claude events
+        const text = decoder.decode(value, { stream: true });
+        const lines = text.split('\n');
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(line.slice(6));
+              // Claude sends usage in message_start and message_delta events
+              if (data.type === 'message_start' && data.message?.usage) {
+                inputTokens = data.message.usage.input_tokens || 0;
+              }
+              if (data.type === 'message_delta' && data.usage) {
+                outputTokens = data.usage.output_tokens || 0;
+              }
+            } catch {
+              // Ignore parse errors
+            }
+          }
+        }
+      }
+    } finally {
+      await writer.close();
+
+      // Record usage after stream completes
+      if (inputTokens > 0 || outputTokens > 0) {
+        const pricing = MODEL_PRICING[apiModel] || { input: 10, output: 30 };
+        const inputCost = (inputTokens / 1_000_000) * pricing.input;
+        const outputCost = (outputTokens / 1_000_000) * pricing.output;
+        const totalCostCents = Math.ceil((inputCost + outputCost) * 100);
+
+        // Deduct credits
+        if (!skipCreditCheck) {
+          try {
+            await supabase.rpc('deduct_credits', {
+              p_user_id: userId,
+              p_amount: totalCostCents,
+            });
+          } catch (err) {
+            console.warn('Failed to deduct credits:', err);
+          }
+        }
+
+        // Log usage
+        try {
+          await supabase.from('usage_logs').insert({
+            user_id: userId,
+            model: requestModel,
+            input_tokens: inputTokens,
+            output_tokens: outputTokens,
+            cost_cents: totalCostCents,
+            created_at: new Date().toISOString(),
+          });
+        } catch (err) {
+          console.warn('Failed to log usage:', err);
+        }
+      }
+    }
+  })();
+
+  return new Response(readable, {
+    headers: streamHeaders,
   });
 }
