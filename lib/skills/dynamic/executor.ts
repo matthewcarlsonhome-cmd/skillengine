@@ -2,6 +2,7 @@
 
 import type { DynamicSkill } from '../../storage/types';
 import type { ChatGPTModelType } from '../../chatgpt';
+import type { KeyMode } from '../../platformKeys';
 
 export interface ExecuteSkillOptions {
   skill: DynamicSkill;
@@ -10,6 +11,8 @@ export interface ExecuteSkillOptions {
   provider: 'gemini' | 'claude' | 'chatgpt';
   claudeModel?: 'haiku' | 'sonnet' | 'opus';
   chatgptModel?: ChatGPTModelType;
+  /** Key mode: 'platform' uses AI proxy, 'personal' uses direct API calls */
+  keyMode?: KeyMode;
 }
 
 // Claude model mapping - using -latest aliases for reliability
@@ -185,11 +188,56 @@ export async function* executeWithChatGPT(
   }
 }
 
+// Execute using platform AI proxy
+async function* executeWithPlatformProxy(
+  options: ExecuteSkillOptions
+): AsyncGenerator<string> {
+  const { skill, formInputs, provider, claudeModel = 'haiku', chatgptModel = 'gpt-4o-mini' } = options;
+
+  const { callAIProxy } = await import('../../platformKeys');
+
+  const systemPrompt = skill.prompts.systemInstruction;
+  const userPrompt = interpolateTemplate(skill.prompts.userPromptTemplate, formInputs);
+
+  // Map provider and model to proxy model ID
+  let proxyModel: string;
+  if (provider === 'gemini') {
+    proxyModel = 'gemini-2.0-flash';
+  } else if (provider === 'claude') {
+    proxyModel = claudeModel; // haiku, sonnet, opus
+  } else {
+    proxyModel = chatgptModel; // gpt-4o-mini, gpt-4o, etc.
+  }
+
+  // Call platform proxy (non-streaming for now)
+  const response = await callAIProxy({
+    model: proxyModel,
+    prompt: userPrompt,
+    systemPrompt,
+    maxTokens: skill.config.maxTokens,
+    temperature: skill.config.temperature,
+  });
+
+  // Yield the complete response
+  yield response.output;
+}
+
 // Main execution function
 export async function* executeDynamicSkill(
   options: ExecuteSkillOptions
 ): AsyncGenerator<string> {
-  const { provider } = options;
+  const { provider, keyMode = 'personal', apiKey } = options;
+
+  // If platform mode is selected, use the AI proxy
+  if (keyMode === 'platform') {
+    yield* executeWithPlatformProxy(options);
+    return;
+  }
+
+  // Personal mode - require API key
+  if (!apiKey) {
+    throw new Error(`No API key provided for ${provider}. Please configure your API key in Settings.`);
+  }
 
   if (provider === 'gemini') {
     yield* executeWithGemini(options);
