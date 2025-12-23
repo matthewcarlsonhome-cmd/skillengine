@@ -88,8 +88,8 @@ Response: { refundId: string, status: string, amount: number }`,
     defaultTestCaseId: 'system-design-default-1',
     description: 'Designing a real-time messaging system',
     inputPayload: {
-      systemName: 'Enterprise Real-Time Messaging Platform',
-      requirements: `Functional Requirements:
+      problem: `Design an Enterprise Real-Time Messaging Platform with:
+Functional Requirements:
 - Support 1-1 and group messaging (up to 500 members per group)
 - Real-time message delivery with <100ms latency
 - Message history and search
@@ -103,8 +103,13 @@ Non-Functional Requirements:
 - End-to-end encryption for all messages
 - GDPR and SOC2 compliance
 - Mobile and web clients`,
+      scale: `Users: 10 million DAU, 50 million registered
+Messages: 500 million messages/day, 50TB storage/year
+Peak load: 100K concurrent connections
+Growth: 20% MoM for next 18 months`,
+      focus: 'High Availability & Fault Tolerance',
       constraints: 'Budget: $50K/month infrastructure. Team: 5 backend engineers. Timeline: MVP in 3 months.',
-      existingSystems: 'We have an existing monolithic Django application for user management. PostgreSQL for user data. AWS infrastructure.',
+      context: 'Greenfield (new system)',
     },
   },
 
@@ -113,7 +118,7 @@ Non-Functional Requirements:
     defaultTestCaseId: 'tech-debt-default-1',
     description: 'Scanning e-commerce codebase for technical debt',
     inputPayload: {
-      codebaseDescription: `E-commerce platform built over 5 years:
+      codebaseInfo: `E-commerce platform built over 5 years:
 - 250K lines of code across 3 services
 - Node.js backend (v12, needs upgrade)
 - React frontend (class components, no hooks)
@@ -122,8 +127,14 @@ Non-Functional Requirements:
 - Deployment via FTP to EC2 instances
 - jQuery mixed with React in some pages
 - 15 npm packages with known vulnerabilities`,
+      architectureContext: `Monolithic architecture with 3 loosely coupled services:
+- Main API (handles 90% of traffic)
+- Payment service (Stripe integration)
+- Notification service (email/SMS)
+All services share a single MongoDB instance. No message queue. Direct HTTP calls between services.`,
       knownIssues: 'Frequent production outages during sales events. New features take 3x longer than estimated. Onboarding new developers takes 2+ months.',
-      assessmentScope: 'Full codebase assessment focusing on scalability, maintainability, and security',
+      assessmentScope: 'Full Assessment (architecture, code, security, performance)',
+      businessContext: 'Preparing for 10x traffic growth due to expansion into 3 new markets.',
     },
   },
 
@@ -132,20 +143,25 @@ Non-Functional Requirements:
     defaultTestCaseId: 'tech-debt-brief-default-1',
     description: 'Creating executive brief on technical debt impact',
     inputPayload: {
-      technicalFindings: `Critical Issues Found:
+      debtSummary: `Critical Issues Found:
 1. No automated testing - 40% of releases have bugs
-2. Outdated dependencies with 15 security vulnerabilities
+2. Outdated dependencies with 15 security vulnerabilities (3 critical)
 3. Monolithic architecture causing 2-hour deployments
 4. Database queries not optimized - 5s average response time
-5. No disaster recovery plan
+5. No disaster recovery plan - single point of failure`,
+      businessImpact: `Current Impact:
+- $50K/month in bug fixes and hotfixes
+- 3 production outages in last quarter ($200K revenue loss)
+- Customer churn up 15% due to performance issues
+- Developer velocity down 40% vs industry benchmark
 
-Business Impact:
-- $50K/month in bug fixes
-- 3 production outages in last quarter
-- Customer churn up 15% due to performance issues`,
-      audience: 'CEO, CFO, and Board of Directors',
-      businessContext: 'Company is preparing for Series B fundraising. Investors have asked about technical scalability.',
-      competingPriorities: 'Q4 feature roadmap includes 5 major features requested by enterprise customers',
+Future Risk:
+- Cannot scale for planned 10x growth
+- Security audit failures could block enterprise deals
+- Technical limitations blocking 3 major feature requests`,
+      audience: 'C-Suite (CEO, CFO, CTO)',
+      requestedOutcome: 'Budget Approval (requesting specific investment)',
+      competingPriorities: 'Q4 feature roadmap includes 5 major features requested by enterprise customers. Series B fundraising in 6 months.',
     },
   },
 
@@ -162,11 +178,14 @@ Business Impact:
 6. Fix 15 npm security vulnerabilities
 7. Add API rate limiting (DDoS vulnerable)
 8. Implement proper logging and monitoring
-9. Database index optimization
-10. Migrate from jQuery to React`,
-      teamCapacity: '2 senior engineers, 3 mid-level engineers. Can dedicate 30% of sprint to debt.',
-      businessConstraints: 'Black Friday in 8 weeks - must maintain stability. Q1 launch of mobile app depends on API stability.',
-      riskTolerance: 'Medium - willing to accept some short-term risk for long-term stability',
+9. Database query optimization
+10. Add Redis caching layer`,
+      teamCapacity: `Team: 5 engineers (3 senior, 2 mid-level)
+Availability: 60% capacity for debt work (40% feature work)
+Timeline: 6-month window before Series B
+Skills: Strong in Node.js, limited database expertise`,
+      priorityWeights: 'Security First (compliance and risk focused)',
+      constraints: 'Cannot have more than 1 day of downtime. Must maintain feature velocity for top 3 enterprise customers.',
     },
   },
 };
@@ -182,10 +201,18 @@ export const BUSINESS_ANALYST_TEST_DATA: Record<string, SkillDefaultTestData> = 
     description: 'Creating BRD for customer portal redesign',
     inputPayload: {
       projectName: 'Customer Self-Service Portal 2.0',
-      businessObjectives: 'Reduce support ticket volume by 40%, improve customer satisfaction score from 72 to 85, enable 24/7 self-service capabilities',
-      stakeholders: 'VP Customer Success (sponsor), Support Team Lead, IT Director, 3 Enterprise Customers (advisory)',
-      scope: 'In scope: Account management, billing history, support ticket creation, knowledge base. Out of scope: Live chat, phone support integration',
-      existingSystems: 'Current Zendesk integration, Salesforce CRM, Stripe billing, PostgreSQL customer database',
+      rawInput: `Meeting notes from stakeholder sessions:
+- VP Customer Success: "We need to reduce support ticket volume by at least 40%. Customers should be able to self-serve 24/7."
+- Support Team Lead: "Most tickets are about billing questions and account updates. If customers could do this themselves, we'd save 100 hours/week."
+- IT Director: "We have Zendesk, Salesforce, and Stripe. New portal must integrate with all three."
+- Enterprise Customer A: "We need role-based access so managers can see team usage but not billing."
+- Enterprise Customer B: "Mobile access is essential - our teams are often on the road."
+
+Scope discussion:
+- In scope: Account management, billing history, support ticket creation, knowledge base
+- Out of scope: Live chat, phone support integration (Phase 2)
+- Must integrate with existing Zendesk, Salesforce CRM, Stripe billing, PostgreSQL customer database`,
+      businessObjective: 'Reduce support ticket volume by 40% and improve customer satisfaction score from 72 to 85 by enabling 24/7 self-service capabilities',
     },
   },
 
@@ -194,11 +221,13 @@ export const BUSINESS_ANALYST_TEST_DATA: Record<string, SkillDefaultTestData> = 
     defaultTestCaseId: 'user-story-default-1',
     description: 'Writing user stories for checkout flow',
     inputPayload: {
-      featureDescription: 'Multi-step checkout process with address validation, payment method selection, order review, and confirmation',
-      userPersona: 'Sarah, 35, busy professional who shops on mobile during commute. Values speed and simplicity. Has saved payment methods.',
+      featureDescription: 'Multi-step checkout process with address validation, payment method selection, order review, and confirmation. Must support saved addresses, multiple payment methods, gift options, and order splitting for different shipping addresses.',
+      userPersonas: `Primary: Sarah, 35, busy professional who shops on mobile during commute. Values speed and simplicity. Has saved payment methods and addresses.
+Secondary: Mike, 55, occasional shopper who needs guidance through the process. Prefers desktop, wants to review everything carefully.
+Edge case: Corporate buyer who needs to split orders across cost centers with different billing.`,
+      storyCount: '8-10 stories',
       businessContext: 'Cart abandonment rate is 68%. Competitors offer 1-click checkout. Average checkout time is 4.5 minutes.',
       technicalConstraints: 'Must integrate with existing cart API, Stripe payments, and ShipStation for shipping rates. Mobile-first design required.',
-      storyCount: '8-10 stories',
     },
   },
 
@@ -208,14 +237,24 @@ export const BUSINESS_ANALYST_TEST_DATA: Record<string, SkillDefaultTestData> = 
     description: 'Analyzing employee onboarding process',
     inputPayload: {
       processName: 'New Employee Onboarding',
-      currentProcess: `Day 1: HR paperwork (2 hrs), IT equipment setup (3 hrs wait), Badge creation (1 hr)
-Days 2-5: Department orientation, system access requests (24-48hr each), compliance training
-Week 2: Role-specific training begins
-Week 3-4: Shadow existing employee
+      processSteps: `1. HR Paperwork (Day 1, 2 hours) - Forms, I-9, benefits enrollment
+2. IT Equipment Setup (Day 1, 3 hour wait) - Laptop imaging, account creation
+3. Badge Creation (Day 1, 1 hour) - Photo, badge printing, access provisioning
+4. Department Orientation (Days 2-5) - Team intros, culture training
+5. System Access Requests (Days 2-5, 24-48hr each) - 5-8 different systems
+6. Compliance Training (Week 1) - Security, harassment, safety
+7. Role-specific Training (Week 2) - Tools, processes, documentation
+8. Shadow Period (Weeks 3-4) - Work alongside experienced employee
 
-Pain points: IT equipment often not ready, system access delayed, no single source of information`,
-      metrics: 'Time to productivity: 45 days. New hire satisfaction: 65%. IT ticket volume per new hire: 12 tickets. Manager time spent: 15 hours per new hire.',
-      optimizationGoal: 'Reduce time to productivity to 21 days, improve satisfaction to 85%',
+Pain points: IT equipment often not ready, system access delayed, no single source of information, inconsistent experience across departments`,
+      volumeMetrics: `New hires per month: 25-30
+Time to productivity: 45 days
+New hire satisfaction (survey): 65%
+IT tickets per new hire: 12 tickets avg
+Manager time spent per new hire: 15 hours
+System access average wait time: 36 hours
+Equipment ready on Day 1: 60% of time`,
+      optimizationGoal: 'Reduce time to productivity by 50%',
     },
   },
 
@@ -224,15 +263,17 @@ Pain points: IT equipment often not ready, system access delayed, no single sour
     defaultTestCaseId: 'data-insights-default-1',
     description: 'Analyzing customer churn data',
     inputPayload: {
-      dataDescription: `12-month customer data with 50,000 records:
+      analysisObjective: 'Identify leading indicators of customer churn, segment high-risk customers, and quantify revenue impact to prioritize retention initiatives',
+      dataDescription: `12-month customer data with 50,000 records including:
 - Customer demographics (industry, company size, location)
 - Subscription tier and pricing
 - Feature usage (login frequency, features used, support tickets)
 - NPS scores and survey responses
-- Churn flag (15% annual churn rate)`,
-      analysisQuestions: '1. What are the leading indicators of churn? 2. Which customer segments have highest/lowest churn? 3. Is there a correlation between support tickets and churn? 4. What is the revenue impact of churn?',
+- Churn flag (15% annual churn rate)
+- Contract value and renewal dates
+- Support ticket history and resolution times`,
       audience: 'Customer Success leadership and Executive team',
-      format: 'Executive summary with detailed appendix',
+      analysisQuestions: '1. What are the leading indicators of churn? 2. Which customer segments have highest/lowest churn? 3. Is there a correlation between support tickets and churn? 4. What is the revenue impact of churn?',
     },
   },
 
@@ -241,11 +282,16 @@ Pain points: IT equipment often not ready, system access delayed, no single sour
     defaultTestCaseId: 'exec-comm-default-1',
     description: 'Creating executive update on digital transformation',
     inputPayload: {
-      topic: 'Digital Transformation Program - Q3 Status Update',
-      keyMessages: 'Program is 2 months behind schedule due to vendor delays. Budget is on track. Quick wins delivered: automated reporting (saving 20 hrs/week), new CRM live with 85% adoption. Risks: integration complexity, change resistance.',
-      audience: 'CEO, CFO, COO, Board of Directors',
-      tone: 'Transparent, solution-oriented, confident',
-      supportingData: 'Budget: $2.5M spent of $4M. Timeline: 60% complete. ROI projection: $8M over 3 years.',
+      commType: 'Status Update/Progress Report',
+      audience: 'C-Suite (CEO, CFO, CTO)',
+      keyMessage: `Digital Transformation Program - Q3 Status Update:
+- Program is 2 months behind schedule due to vendor delays
+- Budget is on track ($2.5M of $4M spent)
+- Quick wins delivered: automated reporting (saving 20 hrs/week), new CRM live with 85% adoption
+- Key risks: integration complexity, change resistance in sales team
+- Requesting decision on vendor replacement option`,
+      urgency: 'Standard (informational, regular update)',
+      supportingData: 'Timeline: 60% complete. ROI projection: $8M over 3 years. Risk mitigation options attached.',
     },
   },
 
@@ -254,13 +300,14 @@ Pain points: IT equipment often not ready, system access delayed, no single sour
     defaultTestCaseId: 'sql-builder-default-1',
     description: 'Building sales analytics query',
     inputPayload: {
-      dataRequest: 'Monthly revenue by product category, customer segment, and region for the last 12 months with YoY comparison',
+      dataRequest: 'Monthly revenue by product category, customer segment, and region for the last 12 months with YoY comparison. Include growth rates and contribution percentages.',
       tableStructure: `Tables:
 - orders (order_id, customer_id, order_date, total_amount, status)
 - order_items (order_id, product_id, quantity, unit_price)
 - products (product_id, name, category_id, cost)
 - categories (category_id, name)
 - customers (customer_id, name, segment, region)`,
+      database: 'PostgreSQL',
       complexity: 'Advanced - include CTEs and window functions',
       outputFormat: 'Pivot-style for Excel import',
     },
@@ -271,11 +318,10 @@ Pain points: IT equipment often not ready, system access delayed, no single sour
     defaultTestCaseId: 'gap-analysis-default-1',
     description: 'Gap analysis for market expansion',
     inputPayload: {
-      currentState: 'B2B SaaS serving 500 SMB customers in US. $5M ARR. 15 employees. Single product for project management.',
-      desiredState: 'Expand to Enterprise segment, launch in EU market, $20M ARR in 3 years, full product suite including resource management and reporting.',
+      currentState: 'B2B SaaS serving 500 SMB customers in US. $5M ARR. 15 employees. Single product for project management. No enterprise features. US-only data residency. Basic support (email only, business hours).',
+      futureState: 'Expand to Enterprise segment (companies 500+ employees), launch in EU market with GDPR compliance, $20M ARR in 3 years, full product suite including resource management and advanced reporting. 24/7 support. SOC 2 Type II certified.',
       scope: 'Product capabilities, sales/marketing, operations, compliance, technology',
-      constraints: 'Available investment: $10M Series A. Cannot hire more than 50 people in 18 months.',
-      resourceAvailability: 'Current team stretched thin. Key hires needed: VP Sales, EU GM, 5 enterprise AEs.',
+      constraints: 'Available investment: $10M Series A. Cannot hire more than 50 people in 18 months. Must maintain SMB business during transition.',
     },
   },
 
@@ -300,9 +346,16 @@ Evaluation Criteria:
 - Technical approach (40%)
 - Past performance (30%)
 - Price (20%)
-- Small business participation (10%)`,
-      companyCapabilities: 'FedRAMP Moderate authorized. 3 similar contracts completed. Team of 20 cloud engineers. Not a small business.',
-      strategicFit: 'Aligns with government practice growth strategy. Would be largest contract to date.',
+- Small business participation (10%)
+
+Submission deadline: 45 days
+Period of performance: 3 years`,
+      companyCapabilities: 'FedRAMP Moderate authorized (High in progress). 3 similar contracts completed ($2-4M each). Team of 20 cloud engineers. Not a small business but have SB teaming partners.',
+      resourceAvailability: `Available resources:
+- 2 Project Managers (1 PMP certified, 1 with DOT experience)
+- 8 Cloud Engineers (5 AWS certified, 3 Azure)
+- 1 Security Specialist (CISSP)
+- Note: Would need to hire 2 additional engineers for this contract`,
     },
   },
 
@@ -311,15 +364,28 @@ Evaluation Criteria:
     defaultTestCaseId: 'rfp-compliance-default-1',
     description: 'Creating RFP compliance matrix',
     inputPayload: {
-      rfpRequirements: `Section C - Technical Requirements:
+      requirements: `Section C - Technical Requirements:
 C.1 - Vendor must provide 99.99% uptime SLA
 C.2 - All data must be encrypted at rest (AES-256) and in transit (TLS 1.3)
 C.3 - System must support 10,000 concurrent users
 C.4 - Vendor must have SOC 2 Type II certification
 C.5 - 24/7 support with dedicated account manager
 C.6 - Implementation within 90 days of contract award
-C.7 - Training for up to 500 users included`,
-      productCapabilities: 'SaaS platform, 99.95% historical uptime, AES-256 encryption, SOC 2 Type II certified, scales to 50K users, typical implementation 60-90 days',
+C.7 - Training for up to 500 users included
+C.8 - Integration with existing Active Directory`,
+      proposalOutline: `1. Executive Summary
+2. Technical Approach
+3. Management Approach
+4. Past Performance
+5. Pricing
+6. Appendices (certifications, resumes)`,
+      capabilityEvidence: `Evidence available:
+- SOC 2 Type II report (dated 3 months ago)
+- Uptime report showing 99.97% over 12 months
+- Load test results showing 25K concurrent users
+- Case studies from 3 similar implementations
+- Training materials and curriculum
+- Integration documentation`,
       matrixFormat: 'Detailed with compliance status, evidence location, and gap remediation plan',
     },
   },
@@ -329,11 +395,17 @@ C.7 - Training for up to 500 users included`,
     defaultTestCaseId: 'rfp-response-default-1',
     description: 'Writing technical approach section',
     inputPayload: {
-      sectionTitle: 'Technical Approach - Cloud Migration Methodology',
-      requirements: 'Describe your approach to migrating 50 legacy applications to cloud, including assessment, planning, execution, and validation phases.',
-      companyDifferentiators: 'Proprietary migration assessment tool (MigrateIQ), 200+ successful migrations, average 40% cost reduction, automated testing framework',
+      requirements: 'Describe your approach to migrating 50 legacy applications to cloud, including assessment, planning, execution, and validation phases. Address risk mitigation and how you will ensure zero downtime for mission-critical systems.',
+      solutionContent: `Our approach leverages our proprietary MigrateIQ assessment tool and proven methodology:
+1. Discovery & Assessment (Weeks 1-4): Automated application dependency mapping, cloud readiness scoring
+2. Planning (Weeks 5-8): Migration waves, rollback procedures, success criteria
+3. Execution (Weeks 9-24): Phased migration with blue-green deployments
+4. Validation (Ongoing): Automated testing, performance benchmarking, security scanning
+
+For zero-downtime: Database replication, DNS-based traffic shifting, automated rollback triggers`,
+      winThemes: 'Proven methodology (200+ successful migrations), proprietary tooling (40% faster), risk mitigation focus (zero failed migrations)',
+      sectionType: 'Technical Approach',
       pageLimit: '10 pages',
-      constraints: 'Must reference past performance. Include risk mitigation. Address FedRAMP compliance.',
     },
   },
 
@@ -342,11 +414,21 @@ C.7 - Training for up to 500 users included`,
     defaultTestCaseId: 'proposal-summary-default-1',
     description: 'Writing proposal executive summary',
     inputPayload: {
-      proposalContext: 'Response to RFP for enterprise CRM implementation at Fortune 500 manufacturing company. $3M contract over 2 years.',
-      keyDifferentiators: '1. Manufacturing industry expertise (50+ implementations), 2. Proprietary integration framework, 3. 98% on-time delivery, 4. Included change management services',
-      clientPainPoints: 'Disconnected sales data across 15 business units, no pipeline visibility, lost deals due to slow quote process',
-      proposedSolution: 'Salesforce implementation with custom CPQ, unified reporting, mobile access for field sales',
-      competitiveAdvantage: 'Only vendor with manufacturing-specific accelerator. 3 similar implementations at competitors.',
+      opportunityOverview: 'Enterprise CRM implementation at Fortune 500 manufacturing company (Acme Manufacturing). $3M contract over 2 years. Competitive bid against 4 other vendors. Decision in 60 days.',
+      winThemes: `1. Manufacturing Industry Expertise - 50+ manufacturing implementations, understand unique challenges (CPQ complexity, dealer networks, field service)
+2. Proven Integration Framework - Reduce integration time by 40% with pre-built connectors for SAP, Oracle
+3. Delivery Excellence - 98% on-time delivery, dedicated manufacturing practice lead
+4. Change Management Included - Full adoption program at no additional cost`,
+      solutionHighlights: `- Salesforce Sales Cloud + CPQ implementation
+- Integration with existing SAP ERP (real-time inventory, pricing)
+- Custom dealer portal for 500+ dealer locations
+- Mobile app for 200 field sales reps
+- Analytics dashboards for 15 business units`,
+      proofPoints: `- Similar implementation at Global Industrial Corp: $4M, completed on time, 90% adoption in 6 months
+- Manufacturing CPQ expertise: 12 implementations with complex configuration rules
+- Reference customers: 3 Fortune 500 manufacturers willing to speak
+- Team: 8 manufacturing-certified consultants, led by 15-year industry veteran`,
+      pageLimit: '2 pages',
     },
   },
 };
@@ -361,11 +443,11 @@ export const MARKETING_SPECIALIST_TEST_DATA: Record<string, SkillDefaultTestData
     defaultTestCaseId: 'social-media-default-1',
     description: 'Creating product launch social campaign',
     inputPayload: {
-      campaign: 'Launch of AI-powered analytics dashboard for SMBs',
-      platforms: 'LinkedIn, Twitter/X, Instagram, Facebook',
+      platform: 'LinkedIn, Twitter/X, Instagram, Facebook',
+      contentGoal: 'Product Launch Announcement',
+      topic: 'Launch of AI-powered analytics dashboard for SMBs - no more spreadsheet chaos, insights in 60 seconds, affordable enterprise-grade analytics, free 14-day trial',
       brandVoice: 'Professional but approachable, data-driven, empowering small business owners',
-      keyMessages: '1. No more spreadsheet chaos, 2. Insights in 60 seconds, 3. Affordable enterprise-grade analytics, 4. Free 14-day trial',
-      variations: '3 variations per platform',
+      audience: 'Small business owners and marketing managers at companies with 10-100 employees who struggle with data analysis',
     },
   },
 
@@ -374,11 +456,11 @@ export const MARKETING_SPECIALIST_TEST_DATA: Record<string, SkillDefaultTestData
     defaultTestCaseId: 'email-campaign-default-1',
     description: 'Building onboarding email sequence',
     inputPayload: {
-      campaignGoal: 'Activate new trial users within 7 days',
-      audience: 'SaaS trial signups - marketing managers at mid-size companies',
-      sequenceLength: '7 emails over 14 days',
-      keyActions: 'Complete profile, connect data source, create first dashboard, invite team member, upgrade to paid',
-      framework: 'Jobs-to-be-done framework',
+      campaignType: 'Onboarding/Welcome Series',
+      emailCount: '7 emails',
+      product: 'SaaS analytics dashboard with trial-to-paid conversion focus. Key actions: complete profile, connect data source, create first dashboard, invite team member, upgrade to paid.',
+      audience: 'SaaS trial signups - marketing managers at mid-size companies who need data insights but lack technical skills',
+      brand: 'DataPulse Analytics',
     },
   },
 
@@ -387,18 +469,25 @@ export const MARKETING_SPECIALIST_TEST_DATA: Record<string, SkillDefaultTestData
     defaultTestCaseId: 'seo-content-default-1',
     description: 'Optimizing blog post for search',
     inputPayload: {
-      contentUrl: 'https://example.com/blog/marketing-automation-guide',
-      targetKeywords: 'marketing automation, marketing automation software, email automation',
-      currentContent: `Marketing Automation: A Complete Guide
+      content: `Marketing Automation: A Complete Guide
 
 Marketing automation helps businesses streamline their marketing efforts. In this guide, we cover everything you need to know about marketing automation.
 
 What is Marketing Automation?
-Marketing automation uses software to automate marketing tasks...
+Marketing automation uses software to automate marketing tasks. It helps marketers save time and improve efficiency. Common uses include email marketing, social media posting, and lead nurturing.
 
-[2000 word article continues]`,
-      competitorUrls: 'HubSpot, Mailchimp, and ActiveCampaign rank for these terms',
-      wordCountTarget: '3000 words',
+Benefits of Marketing Automation:
+1. Save time on repetitive tasks
+2. Improve lead nurturing
+3. Better customer segmentation
+4. Increased ROI on marketing spend
+5. More personalized customer experiences
+
+[Current article is 2000 words and ranks on page 3 for target keywords]`,
+      targetKeyword: 'marketing automation',
+      contentType: 'Blog Post / Article',
+      searchIntent: 'Informational',
+      competitorUrls: 'HubSpot, Mailchimp, and ActiveCampaign rank for these terms on page 1',
     },
   },
 
@@ -429,8 +518,9 @@ Meta Ads:
 - Clicks: 18,000
 - Conversions: 95
 - Revenue attributed: $28,500`,
+      channel: 'Cross-Channel / Multi-Platform',
+      campaignGoal: 'Lead Generation',
       goals: 'Target CAC: $250, Target ROAS: 3.0, MQL goal: 500',
-      benchmarks: 'Industry average CTR: 2.5%, Industry average conversion rate: 3%',
     },
   },
 
@@ -439,11 +529,11 @@ Meta Ads:
     defaultTestCaseId: 'content-calendar-default-1',
     description: 'Planning Q1 content calendar',
     inputPayload: {
-      businessGoals: 'Increase organic traffic by 50%, generate 200 MQLs from content, establish thought leadership in AI for HR',
-      contentPillars: 'AI in HR, Employee Experience, HR Analytics, Future of Work',
-      resources: '1 content manager, 2 freelance writers, $5K/month budget for promotion',
+      duration: 'Quarterly (3 months)',
       channels: 'Blog, LinkedIn, YouTube, Newsletter (15K subscribers)',
-      events: 'HR Tech Conference (March), Product launch (February), Annual report (January)',
+      business: 'HR tech SaaS company focused on AI-powered workforce analytics. Target audience: HR directors and CHROs at mid-size companies. Differentiated by AI capabilities and ease of use.',
+      goals: 'Increase organic traffic by 50%, generate 200 MQLs from content, establish thought leadership in AI for HR',
+      contentPillars: 'AI in HR, Employee Experience, HR Analytics, Future of Work',
     },
   },
 
@@ -452,11 +542,10 @@ Meta Ads:
     defaultTestCaseId: 'competitor-analysis-default-1',
     description: 'Analyzing competitor positioning',
     inputPayload: {
-      ourProduct: 'AI-powered customer feedback analysis platform for mid-market SaaS companies',
+      yourBusiness: 'AI-powered customer feedback analysis platform for mid-market SaaS companies. Key differentiators: AI-native, purpose-built for SaaS, integrates with product analytics, 10x faster insights.',
       competitors: 'Medallia, Qualtrics, SurveyMonkey, Typeform',
+      industry: 'B2B SaaS / Customer Experience Software',
       researchFocus: 'Pricing strategy, feature comparison, messaging and positioning, market share, recent product launches',
-      ourDifferentiators: 'AI-native, purpose-built for SaaS, integrates with product analytics, 10x faster insights',
-      targetMarket: 'B2B SaaS companies with 50-500 employees',
     },
   },
 
@@ -465,11 +554,11 @@ Meta Ads:
     defaultTestCaseId: 'ab-test-default-1',
     description: 'Designing pricing page A/B test',
     inputPayload: {
-      pageType: 'SaaS Pricing Page',
-      currentPerformance: 'Conversion rate: 2.3%, Average traffic: 10,000 visitors/month, Current pricing: 3 tiers ($29, $79, $199)',
-      hypothesis: 'Adding a fourth enterprise tier and social proof will increase both conversion rate and average deal size',
-      goals: 'Increase conversion rate to 3%, increase ARPU by 20%',
-      constraints: 'Cannot change actual prices. Must maintain mobile responsiveness. Test duration: 4 weeks minimum.',
+      testType: 'Page Layout / Design',
+      currentState: 'SaaS Pricing Page with 3 tiers ($29, $79, $199). Simple layout with feature comparison table. No social proof elements. Desktop and mobile responsive.',
+      metrics: 'Current conversion rate: 2.3%, Bounce rate: 45%, Average time on page: 2.5 minutes, Monthly traffic: 10,000 visitors',
+      audienceSize: '10,000 visitors/month',
+      hypothesis: 'Adding a fourth enterprise tier and social proof (customer logos, testimonials) will increase both conversion rate and average deal size',
     },
   },
 
@@ -478,12 +567,11 @@ Meta Ads:
     defaultTestCaseId: 'google-ads-default-1',
     description: 'Building Google Ads campaign for SaaS product',
     inputPayload: {
-      product: 'Project management software for creative agencies',
+      businessInfo: 'Project management software for creative agencies. Key features: visual project timelines, client collaboration, resource management, time tracking. Priced at $15/user/month.',
+      campaignGoals: 'Generate demo requests at $150 CAC, 100 demos/month target, focus on high-intent keywords',
+      targetAudience: 'Creative directors, agency owners, project managers at agencies with 10-100 employees in US, UK, Canada',
       budget: '$10,000/month',
-      targetAudience: 'Creative directors, agency owners, project managers at agencies with 10-100 employees',
-      goals: 'Generate demo requests at $150 CAC',
-      competitors: 'Monday.com, Asana, Basecamp, Teamwork',
-      landingPage: 'https://example.com/creative-agencies',
+      campaignType: 'Search + Display Remarketing',
     },
   },
 
@@ -492,12 +580,12 @@ Meta Ads:
     defaultTestCaseId: 'meta-ads-default-1',
     description: 'Building Meta retargeting campaign',
     inputPayload: {
-      objective: 'Retarget website visitors who viewed pricing but did not convert',
+      businessInfo: 'B2B SaaS project management tool targeting marketing teams. $29-199/month pricing. Main competitors: Monday.com, Asana, ClickUp.',
+      campaignObjective: 'Conversions (sign-ups)',
+      targetAudience: 'Retarget: Visited pricing page in last 30 days, did not sign up. US-based B2B decision makers, marketing managers, project managers.',
       budget: '$5,000/month',
-      targetAudience: 'Visited pricing page in last 30 days, did not sign up, US-based, B2B decision makers',
-      creativeAssets: 'Customer testimonial videos, product demo screenshots, case study graphics',
-      offer: '20% discount for annual plan, extended 30-day trial',
-      competitors: 'Similar campaigns from Notion, ClickUp, Airtable',
+      creativeCapabilities: 'Customer testimonial videos (3), product demo screenshots (10), case study graphics (5), team member faces available for ads',
+      funnelStage: 'Bottom Funnel (retargeting/conversion)',
     },
   },
 
@@ -506,12 +594,12 @@ Meta Ads:
     defaultTestCaseId: 'google-shopping-default-1',
     description: 'Building Google Shopping campaign for e-commerce',
     inputPayload: {
-      productCategory: 'Premium office furniture - standing desks and ergonomic chairs',
+      businessInfo: 'Premium office furniture e-commerce. Standing desks ($500-1500), ergonomic chairs ($400-1200). Premium positioning with 10-year warranty. Free shipping over $500.',
+      productCatalog: '150 SKUs across 4 categories: standing desks, ergonomic chairs, desk accessories, monitor arms. Price range $300-$2000. Average margin 40%.',
+      campaignGoals: 'Target ROAS 400%, scale to $50K/month in profitable spend, acquire new customers',
       budget: '$20,000/month',
-      targetRoas: '400%',
-      productFeed: '150 SKUs, price range $300-$2000, free shipping over $500',
-      competitivePosition: 'Premium positioning, higher price than Amazon but better quality and warranty',
-      seasonality: 'Peak in January (New Year resolutions) and August (back to school/office)',
+      targetMarkets: 'United States (primary), Canada (secondary)',
+      campaignType: 'Standard Shopping + Performance Max',
     },
   },
 
@@ -520,10 +608,12 @@ Meta Ads:
     defaultTestCaseId: 'local-inventory-default-1',
     description: 'Setting up Local Inventory Ads for retail chain',
     inputPayload: {
-      businessType: 'Sporting goods retailer with 25 locations',
-      productCategories: 'Running shoes, fitness equipment, outdoor gear',
-      inventorySystem: 'Retail Pro POS syncing inventory hourly',
-      storeLocations: '25 stores across California, Texas, and Florida',
+      businessInfo: 'Regional sporting goods retailer. 25 stores across California, Texas, and Florida. Average store size 15K sqft. Mix of national brands and private label.',
+      storeLocations: '25 stores: 12 in California, 8 in Texas, 5 in Florida. High-traffic mall and strip center locations.',
+      inventorySystem: 'Retail Pro POS syncing inventory hourly to Google Merchant Center via API integration',
+      campaignGoals: 'Drive 500 monthly store visits, 10% increase in omnichannel revenue, reduce inventory aging',
+      budget: '$15,000/month',
+      fulfillmentOptions: 'In-store pickup, same-day delivery (metro areas), ship from store',
       storeVisitTracking: 'Yes, using Google store visit conversions',
     },
   },
@@ -533,12 +623,11 @@ Meta Ads:
     defaultTestCaseId: 'linkedin-ads-default-1',
     description: 'Building LinkedIn ABM campaign',
     inputPayload: {
-      objective: 'Account-Based Marketing campaign targeting enterprise IT buyers',
+      businessInfo: 'Enterprise cloud infrastructure company offering multi-cloud management platform. Average deal size $250K. 12-month sales cycle.',
+      campaignGoals: 'Generate 50 MQLs from target accounts, achieve 3% engagement rate, build awareness with buying committee',
+      targetAudience: '500 target accounts in Fortune 1000. Primary: CIO, CTO, VP of IT, Cloud Architects. Secondary: CFO, Procurement.',
       budget: '$15,000/month',
-      targetAccounts: '500 target accounts in Fortune 1000, IT decision makers (CIO, CTO, VP IT)',
-      contentAssets: 'Whitepaper: Enterprise Cloud Strategy 2025, Webinar recording, ROI calculator',
-      campaignType: 'Sponsored Content + Message Ads + Conversation Ads',
-      competitors: 'AWS, Azure, Google Cloud targeting same accounts',
+      campaignType: 'Sponsored Content + Message Ads',
     },
   },
 
@@ -547,12 +636,11 @@ Meta Ads:
     defaultTestCaseId: 'podcast-script-default-1',
     description: 'Creating podcast episode script',
     inputPayload: {
-      showFormat: 'Interview-style B2B marketing podcast, 45 minutes',
-      episode: 'Episode on "Building a Content Engine That Scales"',
-      guest: 'VP of Marketing at a $100M ARR SaaS company who grew organic traffic 10x in 2 years',
-      audience: 'Marketing leaders at growth-stage SaaS companies',
-      sponsorIntegration: 'Mid-roll sponsor: Marketing automation platform',
-      cta: 'Download our content strategy template',
+      topic: 'Building a Content Engine That Scales - Interview with VP of Marketing who grew organic traffic 10x in 2 years at a $100M ARR SaaS company',
+      format: 'Interview (with guest)',
+      audience: 'Marketing leaders at growth-stage SaaS companies (Series A-C) who are building content marketing programs',
+      duration: '45-60 minutes',
+      style: 'Educational / How-To',
     },
   },
 };
@@ -567,11 +655,11 @@ export const MARKETING_MANAGER_TEST_DATA: Record<string, SkillDefaultTestData> =
     defaultTestCaseId: 'marketing-strategy-default-1',
     description: 'Building annual marketing strategy',
     inputPayload: {
-      companyContext: 'B2B SaaS, $15M ARR, Series B funded, selling HR software to mid-market companies (100-1000 employees)',
-      businessGoals: 'Grow to $30M ARR, expand from SMB to mid-market, launch 2 new products',
+      product: 'AI-powered HR software platform with core modules for recruiting, onboarding, performance management, and people analytics. Key differentiators: AI features, ease of use, modern UX.',
+      targetMarket: 'Mid-market companies (100-1000 employees) with growing HR teams. Primary buyers: HR Directors and CHROs. Industries: Tech, Professional Services, Healthcare.',
       budget: '$3M annual marketing budget (20% of target ARR)',
-      currentChannels: 'Content marketing, Google Ads, LinkedIn, events (4 conferences)',
-      competitivePosition: 'Challenger brand against Workday and BambooHR. Differentiated on AI features and ease of use.',
+      timeline: 'Annual (12 months)',
+      goals: 'Grow from $15M to $30M ARR, expand from SMB to mid-market, launch 2 new products, increase brand awareness by 50%',
       businessType: 'B2B SaaS',
     },
   },
@@ -581,7 +669,7 @@ export const MARKETING_MANAGER_TEST_DATA: Record<string, SkillDefaultTestData> =
     defaultTestCaseId: 'marketing-intelligence-default-1',
     description: 'Monthly marketing performance review',
     inputPayload: {
-      periodData: `October 2024 Marketing Performance:
+      metrics: `October 2024 Marketing Performance:
 
 Pipeline Generated: $2.1M (target: $2.5M)
 MQLs: 450 (target: 500)
@@ -594,8 +682,9 @@ Channel Performance:
 - LinkedIn: 15% of MQLs, $320 CAC
 - Events: 10% of MQLs, $450 CAC
 - Other: 10% of MQLs`,
-      context: 'Q4 push for pipeline. Sales team at 85% of quota. Two competitors launched major campaigns.',
-      priorities: 'Identify quick wins to close gap. Reallocate budget if needed. Prepare recommendations for leadership.',
+      campaignType: 'Cross-Channel (multiple)',
+      goals: 'Target CAC: $200, Pipeline target: $2.5M/month, MQL target: 500/month, ROAS target: 5x',
+      timeframe: 'Monthly',
     },
   },
 
@@ -604,11 +693,11 @@ Channel Performance:
     defaultTestCaseId: 'content-marketing-default-1',
     description: 'Q1 content marketing calendar',
     inputPayload: {
-      contentPillars: 'HR Technology Trends, Employee Experience, People Analytics, Remote Work',
-      businessPriorities: 'Product launch in February, Annual HR Tech report in January, Customer conference in March',
-      resources: '1 content director, 2 writers, 1 designer, $10K monthly freelance budget',
+      business: 'HR tech SaaS company ($15M ARR) targeting mid-market companies. Content drives 40% of pipeline. SEO is primary acquisition channel.',
+      audience: 'HR Directors, CHROs, People Operations leaders at mid-market companies (100-1000 employees)',
+      topics: 'HR Technology Trends, Employee Experience, People Analytics, Remote Work, AI in HR',
+      timeframe: 'Quarterly (3 months)',
       channels: 'Blog (3x/week), LinkedIn (daily), Newsletter (weekly), YouTube (2x/month)',
-      context: 'Content drives 40% of our pipeline. SEO is primary acquisition channel.',
     },
   },
 };
@@ -623,12 +712,10 @@ export const CREATIVE_DIRECTOR_TEST_DATA: Record<string, SkillDefaultTestData> =
     defaultTestCaseId: 'creative-brief-default-1',
     description: 'Creating brief for brand campaign',
     inputPayload: {
-      projectName: 'Q1 Brand Awareness Campaign - "Work Smarter"',
-      businessObjective: 'Increase unaided brand awareness from 12% to 25% in target market',
-      targetAudience: 'HR leaders at mid-size companies (500-2000 employees) who are frustrated with legacy HR systems and open to modern solutions',
-      keyMessage: 'Modern HR software that makes work feel less like work',
-      deliverables: 'Hero video (60s, 30s, 15s cuts), print ads, digital banners, social content, OOH',
-      mandatories: 'Include product UI shots, customer testimonial elements, new brand colors',
+      project: 'Q1 Brand Awareness Campaign - "Work Smarter" - Hero video (60s, 30s, 15s cuts), print ads, digital banners, social content, OOH',
+      businessContext: 'HR tech SaaS company looking to increase unaided brand awareness from 12% to 25% in target market. Challenger brand against Workday and BambooHR.',
+      audienceInsight: 'HR leaders at mid-size companies (500-2000 employees) who are frustrated with legacy HR systems that feel like they were designed for IT, not people. They want modern tools that respect their time.',
+      brandStrategy: 'Modern HR software that makes work feel less like work. Position as the human-first alternative to complex enterprise systems.',
     },
   },
 
@@ -638,11 +725,9 @@ export const CREATIVE_DIRECTOR_TEST_DATA: Record<string, SkillDefaultTestData> =
     description: 'Developing brand identity system',
     inputPayload: {
       brandName: 'Elevate HR',
-      brandPositioning: 'The human-first HR platform that elevates the employee experience',
-      brandPersonality: 'Innovative, approachable, empowering, trustworthy, modern',
+      brandPurpose: 'To humanize the workplace by giving HR teams the tools to focus on people, not paperwork. We believe every employee deserves an exceptional work experience.',
+      positioning: 'The human-first HR platform that elevates the employee experience. Competitors: Workday (corporate, complex), BambooHR (casual, SMB), Gusto (friendly, payroll-focused).',
       targetAudience: 'HR professionals who believe people are a company\'s greatest asset',
-      competitors: 'Workday (corporate, complex), BambooHR (casual, SMB), Gusto (friendly, payroll-focused)',
-      touchpoints: 'Product UI, marketing website, sales materials, event booths, swag, office environment',
     },
   },
 
@@ -651,12 +736,9 @@ export const CREATIVE_DIRECTOR_TEST_DATA: Record<string, SkillDefaultTestData> =
     defaultTestCaseId: 'campaign-concept-default-1',
     description: 'Developing award-worthy campaign concept',
     inputPayload: {
-      brief: 'Launch campaign for AI-powered recruiting feature that reduces time-to-hire by 50%',
-      targetAudience: 'Talent acquisition leaders at fast-growing tech companies',
-      brand: 'Innovative, bold, human-centered HR tech company',
-      budget: '$500K production budget, $2M media spend',
-      awardTargets: 'Cannes Lions, One Show, Clio Awards',
-      constraints: 'Must work globally (no region-specific humor), must include product demo component',
+      brief: 'Launch campaign for AI-powered recruiting feature that reduces time-to-hire by 50%. Budget: $500K production, $2M media. Must work globally. Targeting Cannes Lions, One Show, Clio Awards.',
+      brandTruth: 'We believe hiring should be about finding the right person, not drowning in process. Our AI removes the tedious parts so recruiters can focus on human connection.',
+      audienceInsight: 'Talent acquisition leaders at fast-growing tech companies are burned out from processing hundreds of applications. They got into recruiting to find great people, not to be data entry clerks.',
     },
   },
 
@@ -666,9 +748,8 @@ export const CREATIVE_DIRECTOR_TEST_DATA: Record<string, SkillDefaultTestData> =
     description: 'Reviewing campaign creative work',
     inputPayload: {
       workDescription: 'Video ad for B2B software product. 30-second spot showing a stressed HR manager drowning in paperwork, then discovering our product and becoming calm and productive. Ends with product logo and tagline "HR Made Human."',
-      originalBrief: 'Show the transformation from chaos to clarity when using our HR platform. Target: HR managers. Tone: Empowering, modern.',
-      specificConcerns: 'Does the "drowning in paperwork" metaphor feel dated? Is the transformation believable? Does it differentiate from competitors?',
-      feedbackType: 'Constructive critique with specific recommendations',
+      brief: 'Show the transformation from chaos to clarity when using our HR platform. Target: HR managers at mid-size companies. Tone: Empowering, modern. Key message: Focus on people, not paperwork.',
+      stage: 'Rough Cut / Draft',
     },
   },
 };
@@ -683,11 +764,15 @@ export const PRODUCT_MANAGER_TEST_DATA: Record<string, SkillDefaultTestData> = {
     defaultTestCaseId: 'prd-default-1',
     description: 'Creating PRD for AI features',
     inputPayload: {
-      featureName: 'AI-Powered Resume Screening',
-      problemStatement: 'Recruiters spend 23 hours per week screening resumes. 88% of resumes received are unqualified. This creates bottlenecks and delays hiring.',
-      targetUsers: 'Recruiters and hiring managers at companies with 50+ open roles',
-      successMetrics: 'Reduce time-to-screen by 75%, maintain 95% qualified candidate pass-through rate, NPS > 50 from recruiters',
-      constraints: 'Must comply with EEOC guidelines, cannot use protected characteristics, must be explainable',
+      feature: 'AI-Powered Resume Screening',
+      problem: 'Recruiters spend 23 hours per week screening resumes. 88% of resumes received are unqualified. This creates bottlenecks, delays hiring by 2-3 weeks, and causes recruiter burnout.',
+      userResearch: `Key findings from 12 recruiter interviews:
+- Average time to screen one resume: 7 minutes
+- 65% of time spent on clearly unqualified candidates
+- Top request: "Just show me the good ones first"
+- Fear: Missing a great candidate in the pile
+Survey (n=200): 78% would pay extra for AI screening if it maintained quality`,
+      solution: 'AI-powered resume screening that automatically scores and ranks candidates based on job requirements. Shows explainable match scores with highlighted qualifications. Flags potential concerns. Learns from recruiter feedback.',
       audience: 'Engineering team, Design team, Legal review, Executive stakeholders',
     },
   },
@@ -697,15 +782,15 @@ export const PRODUCT_MANAGER_TEST_DATA: Record<string, SkillDefaultTestData> = {
     defaultTestCaseId: 'research-synthesis-default-1',
     description: 'Synthesizing user interview findings',
     inputPayload: {
-      researchObjective: 'Understand pain points in the employee onboarding experience',
-      rawFindings: `Interview 1 (HR Manager, 500-person company): "Onboarding is chaos. New hires don't know where to go for information. IT tickets take days."
+      researchData: `Interview 1 (HR Manager, 500-person company): "Onboarding is chaos. New hires don't know where to go for information. IT tickets take days."
 
 Interview 2 (New Hire, Week 2): "I still don't have access to half the systems I need. My manager has been too busy to meet with me."
 
 Interview 3 (Department Head): "I spend 20% of my time onboarding people. There's no standard process."
 
 Survey Results (n=150): 65% rate onboarding as "poor" or "very poor". Top issues: system access (78%), unclear expectations (65%), lack of manager time (54%).`,
-      productContext: 'We offer HR software with basic onboarding checklists. Considering major investment in onboarding module.',
+      researchGoal: 'Understand pain points in the employee onboarding experience to inform major product investment decision',
+      researchType: 'Discovery (understanding problems/needs)',
     },
   },
 
@@ -714,7 +799,7 @@ Survey Results (n=150): 65% rate onboarding as "poor" or "very poor". Top issues
     defaultTestCaseId: 'feature-prioritization-default-1',
     description: 'Prioritizing product roadmap features',
     inputPayload: {
-      featureList: `1. AI Resume Screening (Large - 3 months)
+      features: `1. AI Resume Screening (Large - 3 months)
 2. Advanced Reporting Dashboard (Medium - 6 weeks)
 3. Mobile App Redesign (Large - 4 months)
 4. Slack Integration (Small - 2 weeks)
@@ -722,9 +807,8 @@ Survey Results (n=150): 65% rate onboarding as "poor" or "very poor". Top issues
 6. SSO/SAML Support (Medium - 6 weeks)
 7. Custom Workflows Builder (Large - 5 months)
 8. API Rate Limit Increase (Small - 1 week)`,
-      strategicContext: 'Moving upmarket to enterprise. Current ARR $10M, target $25M in 2 years. Enterprise deals require SSO and advanced reporting.',
-      constraints: 'Engineering team: 12 developers. Q1 capacity: ~16 engineering weeks after maintenance.',
-      stakeholders: 'Sales (wants SSO urgently), CS (wants bulk import), CEO (wants AI features for differentiation)',
+      framework: 'RICE (Reach, Impact, Confidence, Effort)',
+      context: 'Moving upmarket to enterprise. Current ARR $10M, target $25M in 2 years. Enterprise deals require SSO and advanced reporting. Sales (wants SSO urgently), CS (wants bulk import), CEO (wants AI features for differentiation). Q1 engineering capacity: ~16 weeks.',
     },
   },
 
@@ -733,11 +817,10 @@ Survey Results (n=150): 65% rate onboarding as "poor" or "very poor". Top issues
     defaultTestCaseId: 'competitive-intel-default-1',
     description: 'Competitive analysis report',
     inputPayload: {
-      ourProduct: 'Mid-market HR platform with core HR, payroll, and benefits administration',
+      yourProduct: 'Mid-market HR platform with core HR, payroll, and benefits administration. $10M ARR, 500 customers.',
       competitors: 'Rippling, Gusto, Paylocity, Paycom',
-      researchFocus: 'Feature gaps, pricing comparison, win/loss patterns, product roadmap signals',
-      urgency: 'Q4 planning - need to inform 2025 roadmap decisions',
-      specificQuestions: '1. Where are we losing deals and why? 2. What features do competitors have that we lack? 3. What is their AI strategy?',
+      focus: 'Feature Comparison',
+      goal: 'Q4 planning - need to inform 2025 roadmap decisions. Specifically: Where are we losing deals? What features do competitors have that we lack? What is their AI strategy?',
     },
   },
 };
@@ -752,12 +835,14 @@ export const DATA_ANALYST_TEST_DATA: Record<string, SkillDefaultTestData> = {
     defaultTestCaseId: 'sql-query-default-1',
     description: 'Building customer cohort analysis query',
     inputPayload: {
-      analysisGoal: 'Analyze customer retention by signup cohort and identify which features drive retention',
-      tableSchema: `users (user_id, signup_date, plan_type, industry, company_size)
+      question: 'Analyze customer retention by signup cohort and identify which features drive retention',
+      schema: `users (user_id, signup_date, plan_type, industry, company_size)
 subscriptions (subscription_id, user_id, start_date, end_date, mrr, status)
 feature_usage (user_id, feature_name, usage_date, usage_count)
 events (user_id, event_name, event_date, properties)`,
-      outputRequirements: 'Monthly cohort retention rates, feature adoption correlation with retention, segmented by plan type',
+      sampleData: 'User 1001: signed up 2024-01-15, Professional plan, SaaS industry; Subscription active since signup, $299 MRR; Used dashboard feature 45 times in Jan',
+      dialect: 'PostgreSQL',
+      queryType: 'Aggregation with Window Functions',
       performance: 'Query will run on 5M+ rows, needs to complete in < 30 seconds',
     },
   },
@@ -767,15 +852,17 @@ events (user_id, event_name, event_date, properties)`,
     defaultTestCaseId: 'data-report-default-1',
     description: 'Creating executive KPI report',
     inputPayload: {
-      reportPurpose: 'Monthly board meeting - present key business metrics and insights',
-      metrics: `Revenue: $1.2M (up 15% MoM)
+      data: `Revenue: $1.2M (up 15% MoM)
 Customers: 850 (up 8% MoM)
 Churn: 3.2% (down from 4.1%)
 NPS: 42 (up from 38)
 CAC: $1,200 (down from $1,450)
 LTV: $18,000
 LTV:CAC: 15:1`,
+      question: 'What are the key business insights and trends for the monthly board meeting?',
+      context: 'Q4 planning season, board expects growth acceleration narrative, previous quarter missed targets by 5%',
       audience: 'Board of Directors and CEO',
+      analysisType: 'Executive Summary',
       urgency: 'Board meeting in 3 days',
     },
   },
@@ -785,10 +872,11 @@ LTV:CAC: 15:1`,
     defaultTestCaseId: 'bi-dashboard-default-1',
     description: 'Designing sales performance dashboard',
     inputPayload: {
-      dashboardPurpose: 'Real-time sales team performance tracking for VP of Sales',
-      keyMetrics: 'Pipeline value, conversion rates by stage, rep performance, forecast accuracy, activity metrics',
-      dataSource: 'Salesforce CRM via Fivetran to Snowflake',
-      users: 'VP Sales (executive view), Sales Managers (team view), Sales Reps (individual view)',
+      purpose: 'Real-time sales team performance tracking for VP of Sales',
+      audience: 'VP Sales (executive view), Sales Managers (team view), Sales Reps (individual view)',
+      data: 'Salesforce CRM via Fivetran to Snowflake - Opportunities, Activities, Accounts, Users tables',
+      kpis: 'Pipeline value, conversion rates by stage, rep performance, forecast accuracy, activity metrics',
+      tool: 'Looker',
       complexity: 'Advanced - include drill-downs, alerts, and predictive elements',
     },
   },
@@ -798,9 +886,10 @@ LTV:CAC: 15:1`,
     defaultTestCaseId: 'data-quality-default-1',
     description: 'Auditing CRM data quality',
     inputPayload: {
-      dataSource: 'Salesforce CRM - Accounts, Contacts, Opportunities',
-      knownIssues: 'Duplicate accounts suspected, missing contact emails, inconsistent industry coding',
-      businessImpact: 'Marketing campaigns have 20% bounce rate, sales territories incorrectly assigned',
+      dataProfile: 'Salesforce CRM - Accounts (50K records), Contacts (150K records), Opportunities (25K records)',
+      context: 'Duplicate accounts suspected, missing contact emails, inconsistent industry coding',
+      critical: 'Marketing campaigns have 20% bounce rate, sales territories incorrectly assigned',
+      dataType: 'CRM Master Data',
       regulations: 'GDPR compliance required for EU contacts',
     },
   },
@@ -810,8 +899,7 @@ LTV:CAC: 15:1`,
     defaultTestCaseId: 'ab-test-analyzer-default-1',
     description: 'Analyzing pricing page A/B test results',
     inputPayload: {
-      testDescription: 'Testing new pricing page design with simplified tiers vs. current 4-tier pricing',
-      results: `Control (Current):
+      testData: `Control (Current):
 - Visitors: 15,000
 - Conversions: 345
 - Revenue: $52,000
@@ -820,9 +908,11 @@ Variant (New):
 - Visitors: 15,200
 - Conversions: 402
 - Revenue: $58,500`,
+      hypothesis: 'Simplified 3-tier pricing will increase conversion rate by reducing decision paralysis',
       testDuration: '28 days',
       primaryMetric: 'Conversion rate',
       secondaryMetrics: 'Revenue per visitor, average deal size',
+      mde: '10% relative improvement (from 2.3% to 2.53% conversion)',
     },
   },
 
@@ -831,10 +921,11 @@ Variant (New):
     defaultTestCaseId: 'insight-pack-default-1',
     description: 'Creating weekly insights pack',
     inputPayload: {
-      dataScope: 'Product usage, customer health, revenue metrics for the past week',
-      keyFindings: 'Feature X adoption dropped 15%, Enterprise segment NPS up 8 points, 3 accounts showing churn signals',
+      analysisGoal: 'Weekly business insights pack highlighting key trends and anomalies',
+      dataSample: 'Feature X adoption dropped 15%, Enterprise segment NPS up 8 points, 3 accounts showing churn signals',
+      dataDescription: 'Product usage, customer health, revenue metrics for the past week across 850 active accounts',
       audience: 'Product, Customer Success, and Executive leadership',
-      format: 'Slide deck with key insights, supporting data, and recommended actions',
+      visualPreferences: 'Slide deck with key insights, supporting data, and recommended actions',
       guardrails: 'Focus on actionable insights. Max 10 slides. Include confidence levels.',
     },
   },
@@ -844,11 +935,12 @@ Variant (New):
     defaultTestCaseId: 'data-sla-default-1',
     description: 'Setting up data quality monitoring',
     inputPayload: {
-      dataPipeline: 'Salesforce → Fivetran → Snowflake → Looker',
-      criticalTables: 'dim_customers, dim_products, fact_orders, fact_usage_events',
-      slaRequirements: 'Data freshness: < 1 hour, Completeness: > 99%, Accuracy: > 99.9%',
+      dataSource: 'Salesforce → Fivetran → Snowflake → Looker pipeline',
+      dataSchema: 'dim_customers, dim_products, fact_orders, fact_usage_events',
+      businessCriticality: 'High - powers executive dashboards and sales compensation calculations',
+      knownIssues: 'Occasional Fivetran sync delays, NULL values in fact_usage_events.user_id',
       stakeholders: 'Data consumers in Sales, Marketing, Finance, and Product',
-      alerting: 'Slack alerts for SLA breaches, weekly summary report',
+      refreshFrequency: 'Hourly for facts, daily for dimensions',
     },
   },
 };
@@ -863,11 +955,12 @@ export const PROJECT_MANAGER_TEST_DATA: Record<string, SkillDefaultTestData> = {
     defaultTestCaseId: 'project-plan-default-1',
     description: 'Creating website redesign project plan',
     inputPayload: {
-      projectName: 'Corporate Website Redesign',
-      objectives: 'Modernize brand presence, improve conversion rate from 1.5% to 3%, enhance mobile experience',
-      scope: 'Full redesign of 50+ page corporate website including new CMS implementation',
+      project: 'Corporate Website Redesign - Modernize brand presence, improve conversion rate from 1.5% to 3%, enhance mobile experience',
+      deliverables: 'Full redesign of 50+ page corporate website including new CMS implementation, responsive design, SEO migration',
       timeline: 'Must launch before annual conference in 16 weeks',
-      resources: 'Project manager, 2 designers, 3 developers, content writer, SEO specialist',
+      team: 'Project manager, 2 designers, 3 developers, content writer, SEO specialist',
+      budget: '$150,000 total budget',
+      methodology: 'Agile/Scrum',
       complexity: 'High - multiple stakeholder groups, legacy content migration, SEO preservation',
     },
   },
@@ -877,9 +970,10 @@ export const PROJECT_MANAGER_TEST_DATA: Record<string, SkillDefaultTestData> = {
     defaultTestCaseId: 'risk-matrix-default-1',
     description: 'Creating risk assessment for ERP implementation',
     inputPayload: {
-      projectContext: 'NetSuite ERP implementation replacing legacy accounting system. $500K budget, 9-month timeline.',
+      project: 'NetSuite ERP implementation replacing legacy accounting system. $500K budget, 9-month timeline.',
       knownRisks: 'Data migration complexity, user adoption resistance, integration with existing CRM, vendor resource availability',
-      stakeholders: 'CFO (sponsor), Finance team, IT, Operations, Sales',
+      constraints: 'Go-live must align with fiscal year end, limited IT staff availability during Q4 close',
+      industry: 'Financial Services',
       riskAppetite: 'Low - critical business system, cannot afford extended downtime',
     },
   },
@@ -890,11 +984,13 @@ export const PROJECT_MANAGER_TEST_DATA: Record<string, SkillDefaultTestData> = {
     description: 'Creating executive project status report',
     inputPayload: {
       projectName: 'Cloud Migration Initiative',
-      currentStatus: 'Phase 2 of 4, 2 weeks behind schedule due to security compliance requirements',
-      accomplishments: 'Completed infrastructure setup, migrated 15 of 45 applications, achieved FedRAMP authorization',
-      upcomingMilestones: 'Database migration (Week 3), User acceptance testing (Week 5)',
-      issuesRisks: 'Vendor delays on integration component, potential budget overrun of 10%',
-      decisions: 'Need approval for $50K additional budget for security tooling',
+      reportingPeriod: 'Week ending December 20, 2024',
+      progress: 'Phase 2 of 4, 2 weeks behind schedule due to security compliance requirements. Completed infrastructure setup, migrated 15 of 45 applications.',
+      metrics: 'Budget: 65% spent, Schedule: 2 weeks behind, Quality: 0 critical defects, Scope: On track',
+      issues: 'Vendor delays on integration component, potential budget overrun of 10%',
+      nextSteps: 'Database migration (Week 3), User acceptance testing (Week 5)',
+      escalations: 'Need approval for $50K additional budget for security tooling',
+      audience: 'Steering Committee and Executive Sponsors',
     },
   },
 };
@@ -979,11 +1075,12 @@ export const SALES_REPRESENTATIVE_TEST_DATA: Record<string, SkillDefaultTestData
     defaultTestCaseId: 'outreach-sequence-default-1',
     description: 'Building outreach sequence for enterprise prospects',
     inputPayload: {
-      targetPersona: 'VP of Engineering at mid-market SaaS companies (200-1000 employees). Pain points: developer productivity, technical debt, hiring challenges.',
+      prospect: 'VP of Engineering at mid-market SaaS companies (200-1000 employees). Pain points: developer productivity, technical debt, hiring challenges.',
       product: 'Developer productivity platform that reduces code review time by 50% and automates documentation. $50K-200K ACV.',
+      icp: 'Mid-market SaaS companies, 200-1000 employees, Series B+, engineering teams of 20-100',
+      channel: 'Email, LinkedIn, Phone',
+      cta: 'Book a 15-minute demo to see how we reduced code review time by 50% for similar companies',
       sequenceLength: '8 touches over 21 days',
-      channels: 'Email, LinkedIn, Phone',
-      differentiators: 'Only solution with AI-powered code analysis, integrates with all major IDEs, deployed at 3 Fortune 500 companies',
     },
   },
 
@@ -992,14 +1089,11 @@ export const SALES_REPRESENTATIVE_TEST_DATA: Record<string, SkillDefaultTestData
     defaultTestCaseId: 'objection-playbook-default-1',
     description: 'Creating objection handling playbook',
     inputPayload: {
-      product: 'Enterprise cybersecurity platform - endpoint detection and response (EDR) with AI-powered threat hunting. $100K-500K deals.',
-      commonObjections: `1. "We already have CrowdStrike/SentinelOne"
-2. "Your price is 30% higher than competitors"
-3. "We don't have budget until next fiscal year"
-4. "Our IT team doesn't have bandwidth for another tool"
-5. "We need to see a POC before any commitment"`,
-      competitiveContext: 'Main competitors: CrowdStrike, SentinelOne, Microsoft Defender. Our edge: better AI detection, lower false positives, included MDR service.',
-      salesStage: 'Mid-funnel (discovery completed, entering evaluation)',
+      objection: 'We already have CrowdStrike and are not looking to switch security vendors right now.',
+      context: 'Mid-funnel (discovery completed, entering evaluation). CISO mentioned recent board pressure on security posture.',
+      product: 'Enterprise cybersecurity platform - endpoint detection and response (EDR) with AI-powered threat hunting.',
+      competitor: 'CrowdStrike, SentinelOne, Microsoft Defender. Our edge: better AI detection, lower false positives, included MDR service.',
+      dealSize: '$100K-500K annual deal',
     },
   },
 
@@ -1008,13 +1102,14 @@ export const SALES_REPRESENTATIVE_TEST_DATA: Record<string, SkillDefaultTestData
     defaultTestCaseId: 'sales-proposal-default-1',
     description: 'Generating enterprise software proposal',
     inputPayload: {
-      opportunity: 'Global manufacturing company evaluating our supply chain visibility platform. 15 distribution centers, $2B annual logistics spend.',
-      requirements: `Must-haves: Real-time shipment tracking, carrier performance analytics, exception management
+      client: 'Global manufacturing company with 15 distribution centers, $2B annual logistics spend. Decision by end of Q1, go-live needed by June.',
+      discovery: `Must-haves: Real-time shipment tracking, carrier performance analytics, exception management
 Nice-to-haves: Predictive ETAs, carbon footprint tracking, supplier portal
 Integration: SAP S/4HANA, existing TMS (Oracle)`,
+      solution: 'Supply chain visibility platform with real-time tracking, predictive analytics, and native SAP integration',
       pricing: '3-year deal, $450K ARR, implementation services $150K',
-      competitorContext: 'Also evaluating project44 and FourKites. We won on carrier network breadth and SAP integration.',
-      timeline: 'Decision by end of Q1, go-live needed by June',
+      competition: 'Also evaluating project44 and FourKites. We won on carrier network breadth and SAP integration.',
+      proposalType: 'Enterprise',
     },
   },
 
@@ -1024,9 +1119,10 @@ Integration: SAP S/4HANA, existing TMS (Oracle)`,
     description: 'Preparing for enterprise discovery call',
     inputPayload: {
       prospect: 'Regional healthcare system with 12 hospitals, 50+ clinics. $3B annual revenue. Recently announced digital transformation initiative.',
-      yourProduct: 'Patient engagement platform - appointment scheduling, telehealth, patient portal, care coordination. Focus on reducing no-shows and improving patient satisfaction.',
-      knownInfo: 'Inbound from website (downloaded ROI calculator). Contact is VP of Digital Health. Current patient portal is 8 years old, considering replacement.',
-      meetingContext: '30-minute intro call scheduled. CIO may join for last 10 minutes.',
+      source: 'Inbound from website (downloaded ROI calculator). Contact is VP of Digital Health.',
+      product: 'Patient engagement platform - appointment scheduling, telehealth, patient portal, care coordination. Focus on reducing no-shows and improving patient satisfaction.',
+      framework: 'MEDDIC',
+      callLength: '30 minutes (CIO may join for last 10 minutes)',
     },
   },
 
@@ -1035,10 +1131,12 @@ Integration: SAP S/4HANA, existing TMS (Oracle)`,
     defaultTestCaseId: 'account-research-default-1',
     description: 'Researching target enterprise account',
     inputPayload: {
-      targetAccount: 'Acme Financial Services - mid-size regional bank, $50B in assets, 200 branches across 5 states',
-      yourProduct: 'Digital account opening platform that reduces time-to-fund from 5 days to same-day. Includes identity verification, fraud detection, and compliance automation.',
-      researchGoals: 'Identify key decision makers, understand their digital banking strategy, find pain points and trigger events, competitive intelligence',
-      existingIntel: 'They posted a job for "Digital Transformation Lead" last month. Their mobile app has 2.3 stars in app store with complaints about account opening.',
+      company: 'Acme Financial Services',
+      companyInfo: 'Mid-size regional bank, $50B in assets, 200 branches across 5 states. Posted job for "Digital Transformation Lead" last month. Mobile app has 2.3 stars with complaints about account opening.',
+      contacts: 'Target: VP Digital Banking, CTO, Head of Retail Banking',
+      yourSolution: 'Digital account opening platform that reduces time-to-fund from 5 days to same-day. Includes identity verification, fraud detection, and compliance automation.',
+      objective: 'Identify key decision makers, understand their digital banking strategy, find pain points and trigger events',
+      dealSize: '$200K-400K ARR',
     },
   },
 
@@ -1048,9 +1146,10 @@ Integration: SAP S/4HANA, existing TMS (Oracle)`,
     description: 'Building ROI calculator for prospect',
     inputPayload: {
       product: 'AI-powered accounts payable automation. Automates invoice processing, approval workflows, and payment execution.',
-      prospectContext: 'Mid-market manufacturer processing 5,000 invoices/month. 3 FTEs in AP department. Current process: manual data entry, email-based approvals, checks for 60% of payments.',
-      valueDrivers: '1. Labor savings from automation, 2. Early payment discounts captured, 3. Reduced duplicate payments, 4. Faster close cycle, 5. Audit cost reduction',
-      pricingModel: '$3 per invoice processed + $500/month platform fee',
+      prospect: 'Mid-market manufacturer processing 5,000 invoices/month. 3 FTEs in AP department.',
+      identifiedNeeds: '1. Labor savings from automation, 2. Early payment discounts captured, 3. Reduced duplicate payments, 4. Faster close cycle, 5. Audit cost reduction',
+      dealSize: '$3 per invoice processed + $500/month platform fee (~$16K/month)',
+      competitiveLandscape: 'Competing against Tipalti and Bill.com. Differentiator is manufacturing-specific integrations.',
     },
   },
 
@@ -1059,14 +1158,12 @@ Integration: SAP S/4HANA, existing TMS (Oracle)`,
     defaultTestCaseId: 'deal-strategy-default-1',
     description: 'Planning strategy for complex enterprise deal',
     inputPayload: {
-      dealContext: `$800K ARR opportunity at Fortune 500 retailer for our workforce management platform.
-Stage: Technical validation complete, entering procurement
-Champion: VP Store Operations (strong supporter)
-Economic Buyer: COO (met once, seemed positive)
-Blockers: IT Security (concerns about cloud), Procurement (pushing for 40% discount)`,
-      timeline: 'They want to pilot in Q2, full rollout before holiday season. Our quarter ends in 6 weeks.',
-      competition: 'Incumbent is legacy on-prem solution. Also talking to Workday and UKG.',
-      currentRisks: 'Security review not scheduled yet. No executive sponsor meeting confirmed. Legal terms not discussed.',
+      account: 'Fortune 500 retailer evaluating workforce management platform. $800K ARR opportunity.',
+      currentStage: 'Technical validation complete, entering procurement. Our quarter ends in 6 weeks.',
+      stakeholders: 'Champion: VP Store Operations (strong supporter). Economic Buyer: COO (met once, positive). Blockers: IT Security (cloud concerns), Procurement (40% discount push).',
+      dealContext: 'They want to pilot in Q2, full rollout before holiday season. Incumbent is legacy on-prem solution.',
+      keyInsights: 'Security review not scheduled yet. No executive sponsor meeting confirmed. Legal terms not discussed. Also talking to Workday and UKG.',
+      proposalSummary: 'Full workforce management suite with predictive scheduling, labor forecasting, and mobile time tracking for all 500+ locations.',
     },
   },
 };
@@ -1083,10 +1180,11 @@ export const HR_PROFESSIONAL_TEST_DATA: Record<string, SkillDefaultTestData> = {
     inputPayload: {
       jobTitle: 'Senior Software Engineer - Platform Team',
       department: 'Engineering',
-      responsibilities: 'Design and build core platform services, mentor junior engineers, lead technical projects, participate in on-call rotation, contribute to architecture decisions',
+      level: 'Senior (IC4)',
       requirements: '5+ years software engineering experience, strong in Python or Go, experience with distributed systems, familiarity with cloud platforms (AWS/GCP)',
+      responsibilities: 'Design and build core platform services, mentor junior engineers, lead technical projects, participate in on-call rotation, contribute to architecture decisions',
+      companyInfo: 'Series C startup, 200 employees, remote-first, building B2B SaaS for financial services',
       compensation: '$180,000 - $220,000 base + equity + benefits',
-      companyContext: 'Series C startup, 200 employees, remote-first, building B2B SaaS for financial services',
     },
   },
 
@@ -1096,10 +1194,10 @@ export const HR_PROFESSIONAL_TEST_DATA: Record<string, SkillDefaultTestData> = {
     description: 'Designing interview process for product manager role',
     inputPayload: {
       role: 'Senior Product Manager - Growth',
-      keyCompetencies: 'Data-driven decision making, experimentation mindset, cross-functional leadership, customer empathy, strategic thinking',
+      level: 'Senior (L5)',
+      competencies: 'Data-driven decision making, experimentation mindset, cross-functional leadership, customer empathy, strategic thinking',
+      interviewType: 'Full Loop (5 stages)',
       teamContext: 'Growth team of 2 PMs, 8 engineers, 2 designers. Reports to VP Product. Focus on user acquisition and activation.',
-      interviewStages: 'Recruiter screen, Hiring manager, Technical PM interview, Cross-functional panel, Executive final',
-      specialConsiderations: 'We value diverse perspectives. Previous growth PM left due to burnout - need someone who can set boundaries.',
     },
   },
 
@@ -1110,15 +1208,14 @@ export const HR_PROFESSIONAL_TEST_DATA: Record<string, SkillDefaultTestData> = {
     inputPayload: {
       policyType: 'Remote & Hybrid Work Policy',
       companyContext: 'Tech company, 500 employees, headquarters in Austin TX, employees in 30 states. Moving from fully remote to hybrid model.',
-      requirements: `Must address:
+      jurisdiction: 'Multi-state (30 states), with specific compliance requirements for CA and NY',
+      specificRequirements: `Must address:
 - Who is eligible for remote vs hybrid vs in-office
 - Core collaboration hours
 - Home office requirements and stipend
 - In-office expectations for hybrid employees
 - Travel requirements for remote employees
 - Equipment and expense policies`,
-      compliance: 'Must comply with state-specific employment laws, especially CA and NY',
-      culture: 'We value flexibility and trust but also collaboration and connection',
     },
   },
 
@@ -1127,11 +1224,12 @@ export const HR_PROFESSIONAL_TEST_DATA: Record<string, SkillDefaultTestData> = {
     defaultTestCaseId: 'perf-review-default-1',
     description: 'Redesigning performance management system',
     inputPayload: {
-      currentState: 'Annual reviews only, forced ranking (20/70/10), manager-only feedback, no connection to compensation until year-end',
-      desiredOutcomes: 'More frequent feedback, growth-oriented culture, fair and transparent process, better manager-employee conversations',
-      companySize: '800 employees across 5 departments',
-      constraints: 'Must integrate with Workday HRIS. Cannot increase HR headcount. Managers already feel overloaded.',
-      timeline: 'Need to launch new system for next review cycle (Q2)',
+      employeeInfo: 'Sarah Chen, Senior Software Engineer, Platform Team, 2.5 years tenure',
+      reviewPeriod: 'H2 2024 (July - December)',
+      accomplishments: 'Led migration to Kubernetes reducing infrastructure costs 40%. Mentored 2 junior engineers. Shipped 3 major features on time.',
+      challenges: 'Initial delays on payment processing project due to unclear requirements. Communication gaps with product team.',
+      reviewType: 'Semi-annual performance review',
+      goals: 'Technical lead role by Q2 2025. Improve cross-team communication. Complete system design certification.',
     },
   },
 };
@@ -1146,7 +1244,6 @@ export const FINANCIAL_ANALYST_TEST_DATA: Record<string, SkillDefaultTestData> =
     defaultTestCaseId: 'financial-analysis-default-1',
     description: 'Analyzing quarterly financial performance',
     inputPayload: {
-      analysisType: 'Quarterly Performance Review',
       financialData: `Q3 2024 vs Q3 2023:
 Revenue: $45M vs $38M (+18%)
 Gross Margin: 68% vs 71% (-3pp)
@@ -1155,9 +1252,10 @@ EBITDA: $8M vs $9M (-11%)
 Cash: $25M vs $35M
 ARR: $180M vs $145M (+24%)
 Net Revenue Retention: 112%`,
-      context: 'SaaS company, Series C, targeting profitability by Q2 next year',
-      audience: 'Board of Directors, CEO, CFO',
-      focus: 'Explain gross margin compression and path to profitability',
+      company: 'Series C SaaS company targeting profitability by Q2 next year',
+      analysisType: 'Quarterly Performance Review',
+      focusAreas: 'Gross margin compression, path to profitability, operating expense efficiency',
+      benchmarks: 'SaaS Capital benchmarks for $150-200M ARR companies',
     },
   },
 
@@ -1166,16 +1264,16 @@ Net Revenue Retention: 112%`,
     defaultTestCaseId: 'budget-intel-default-1',
     description: 'Building annual budget model',
     inputPayload: {
-      budgetPeriod: 'FY2025 Annual Budget',
-      historicalData: `FY2024 Actuals:
-Revenue: $165M (plan was $180M, 92% attainment)
-Gross Margin: 69%
-S&M: $65M (39% of revenue)
-R&D: $45M (27% of revenue)
-G&A: $25M (15% of revenue)
-Headcount: 450 (plan was 500)`,
-      assumptions: 'Revenue growth target: 35%. Hiring to resume Q2. New product launch in Q3. Price increase of 5% on renewals.',
-      constraints: 'Must show path to breakeven by Q4. Board wants to see 2 scenarios (base and downside).',
+      budgetData: `FY2025 Targets:
+Revenue: $225M (35% growth)
+Gross Margin: 70%
+S&M: $80M (36% of revenue)
+R&D: $55M (24% of revenue)
+G&A: $28M (12% of revenue)`,
+      period: 'FY2025 Annual Budget',
+      businessContext: 'Revenue growth target: 35%. Hiring to resume Q2. New product launch in Q3. Price increase of 5% on renewals.',
+      priorPeriod: `FY2024 Actuals: Revenue $165M (92% attainment), GM 69%, Headcount 450`,
+      analysisDepth: 'Detailed with monthly breakdown and 2 scenarios (base and downside)',
     },
   },
 
@@ -1185,10 +1283,10 @@ Headcount: 450 (plan was 500)`,
     description: 'Building 3-statement financial model',
     inputPayload: {
       modelPurpose: 'Series B fundraise - investor-ready 3-statement model',
-      businessDescription: 'B2B SaaS, vertical software for restaurants. Current ARR $8M, 500 customers, $15K ACV.',
-      historicalData: '3 years of historical financials available. Revenue CAGR 80%. Gross margin improving from 60% to 72%.',
-      projectionPeriod: '5-year projections (2025-2029)',
-      keyMetrics: 'ARR, customer count, ACV, gross margin, CAC, LTV, burn rate, runway',
+      modelScope: 'B2B SaaS vertical software for restaurants. Current ARR $8M, 500 customers, $15K ACV. 5-year projections (2025-2029)',
+      assumptions: 'Revenue CAGR 80%. Gross margin improving from 60% to 72%. CAC payback 15 months. Net retention 115%.',
+      outputType: 'Full 3-Statement Model (P&L, Balance Sheet, Cash Flow)',
+      standards: 'GAAP-compliant with SaaS metrics overlay',
     },
   },
 
@@ -1197,16 +1295,16 @@ Headcount: 450 (plan was 500)`,
     defaultTestCaseId: 'valuation-default-1',
     description: 'Performing company valuation analysis',
     inputPayload: {
-      valuationType: 'Pre-money valuation for Series B',
-      companyMetrics: `Current ARR: $12M, growing 100% YoY
+      company: 'Restaurant tech SaaS company seeking Series B',
+      financials: `Current ARR: $12M, growing 100% YoY
 Gross Margin: 75%
 Net Revenue Retention: 125%
 CAC Payback: 18 months
 Burn: $800K/month
 Runway: 14 months`,
-      comparables: 'Toast, Lightspeed, Olo (restaurant tech sector)',
       purpose: 'Determine fair valuation range for $30M Series B raise',
-      methodology: 'Revenue multiples, comparable transactions, DCF sensitivity',
+      comparables: 'Toast, Lightspeed, Olo (restaurant tech sector)',
+      assumptions: 'Revenue multiples 15-25x for high-growth vertical SaaS. Comparable transactions in restaurant tech at 20x forward ARR.',
     },
   },
 
@@ -1223,10 +1321,10 @@ Stage breakdown:
 - Verbal Commit: $1M (90% probability)
 
 Q4 Quota: $5M
-Current Q4 Closed: $1.2M
-Days remaining: 45`,
-      historicalConversion: 'Discovery→Close: 15%, Eval→Close: 35%, Negotiation→Close: 65%',
-      concerns: 'Pipeline coverage is 3x but seems top-heavy. Several large deals slipping.',
+Current Q4 Closed: $1.2M`,
+      teamStructure: '8 AEs (6 ramped, 2 ramping), 2 Sales Managers, 1 VP Sales',
+      salesProcess: 'Discovery→Evaluation→Negotiation→Verbal Commit→Closed. Historical conversion: Discovery→Close 15%, Eval→Close 35%',
+      analysisTimeframe: 'Q4 2024, 45 days remaining',
     },
   },
 
@@ -1235,11 +1333,11 @@ Days remaining: 45`,
     defaultTestCaseId: 'sales-forecast-default-1',
     description: 'Building sales forecast model',
     inputPayload: {
+      currentPipeline: '$12M total pipeline, $4.5M weighted. 8 AEs, average quota $500K/quarter, average attainment 85%.',
+      historicalData: 'Q1 is historically weakest (80% of average quarter). January slow due to holidays. New product launching Feb 1.',
+      targets: '$4M target for Q1 2025',
       forecastPeriod: 'Q1 2025',
-      currentPipeline: '$12M total pipeline, $4.5M weighted',
-      teamCapacity: '8 AEs, average quota $500K/quarter, average attainment 85%',
-      historicalData: 'Q1 is historically weakest (80% of average quarter). January slow due to holidays.',
-      factors: 'New product launching Feb 1. 2 AEs ramping. Key competitor raised prices 20%.',
+      forecastType: 'Bottoms-up by AE with pipeline-based probability weighting',
     },
   },
 
@@ -1248,18 +1346,13 @@ Days remaining: 45`,
     defaultTestCaseId: 'win-loss-default-1',
     description: 'Analyzing Q3 win/loss patterns',
     inputPayload: {
-      period: 'Q3 2024',
-      winData: `Wins (45 deals, $2.8M):
-- Average deal size: $62K
-- Average sales cycle: 45 days
-- Top reasons: Product capabilities (60%), price (20%), support (20%)
-- Segments: Mid-market 70%, Enterprise 30%`,
-      lossData: `Losses (30 deals, $2.1M):
-- Average deal size: $70K
-- Average sales cycle: 65 days
-- Lost to: Competitor A (40%), No decision (35%), Competitor B (15%), Other (10%)
-- Top loss reasons: Missing features (45%), price (30%), implementation concerns (25%)`,
-      context: 'Win rate dropped from 62% to 60%. Concerned about enterprise segment.',
+      dealData: `Q3 2024 Results:
+Wins (45 deals, $2.8M): Avg deal $62K, 45-day cycle, Mid-market 70%/Enterprise 30%
+Losses (30 deals, $2.1M): Avg deal $70K, 65-day cycle
+Win rate dropped from 62% to 60%.`,
+      analysisScope: 'Q3 2024 closed deals with focus on enterprise segment concerns',
+      competitorInfo: 'Lost to: Competitor A (40%), No decision (35%), Competitor B (15%). Top loss reasons: Missing features (45%), price (30%), implementation concerns (25%)',
+      salesProcess: 'Discovery→Demo→Technical Validation→Negotiation→Close. Average 45 days for wins, 65 days for losses.',
     },
   },
 
@@ -1268,16 +1361,12 @@ Days remaining: 45`,
     defaultTestCaseId: 'bottleneck-finder-default-1',
     description: 'Finding revenue process inefficiencies',
     inputPayload: {
-      processScope: 'Lead-to-cash full cycle analysis',
-      currentMetrics: `Lead to MQL: 3 days average
-MQL to SQL: 5 days average
-SQL to Opportunity: 2 days average
-Opportunity to Close: 45 days average
-Close to Contract Signed: 8 days average
-Contract to Go-Live: 21 days average
-Go-Live to First Invoice: 5 days average`,
+      processDescription: `Lead-to-cash full cycle:
+Lead to MQL: 3 days → MQL to SQL: 5 days → SQL to Opportunity: 2 days → Opportunity to Close: 45 days → Close to Contract: 8 days → Contract to Go-Live: 21 days → Go-Live to Invoice: 5 days`,
       painPoints: 'Legal review takes too long. Deals often stall after technical win. Implementation backlog growing.',
-      benchmark: 'Industry average deal cycle is 35 days. Our target is 40 days.',
+      systems: 'Salesforce CRM, Marketo, DocuSign, Jira, NetSuite',
+      teamMetrics: 'Sales: 8 AEs, Legal: 1 contract manager, Impl: 4 consultants. Industry average cycle 35 days, our target 40 days.',
+      priority: 'Reduce overall deal cycle by 20% while maintaining quality',
     },
   },
 };
@@ -1295,9 +1384,10 @@ export const CONTENT_WRITER_TEST_DATA: Record<string, SkillDefaultTestData> = {
       topic: 'The Future of AI in Customer Service: Beyond Chatbots',
       audience: 'Customer service leaders at mid-market and enterprise companies',
       tone: 'Authoritative but accessible, forward-looking, backed by data',
-      keyPoints: '1. AI is augmenting agents, not replacing them. 2. Predictive service is the next frontier. 3. Personalization at scale is now possible. 4. Implementation challenges and how to overcome them.',
-      length: '2000-2500 words',
-      seoKeywords: 'AI customer service, customer service automation, AI chatbots, customer experience AI',
+      keyPoints: '1. AI is augmenting agents, not replacing them. 2. Predictive service is the next frontier. 3. Personalization at scale is now possible. 4. Implementation challenges.',
+      targetKeyword: 'AI customer service automation',
+      wordCount: '2000-2500',
+      contentGoal: 'Thought leadership to establish authority and drive demo requests',
     },
   },
 
@@ -1306,12 +1396,10 @@ export const CONTENT_WRITER_TEST_DATA: Record<string, SkillDefaultTestData> = {
     defaultTestCaseId: 'content-strategy-default-1',
     description: 'Creating content strategy for product launch',
     inputPayload: {
-      initiative: 'New AI analytics feature launch',
-      businessGoal: 'Generate 500 qualified leads in first 60 days, establish thought leadership in AI analytics space',
-      targetAudience: 'Data analysts and analytics managers at companies with 100-1000 employees',
-      channels: 'Blog, LinkedIn, email newsletter, webinar',
-      timeline: '8 weeks pre-launch through 4 weeks post-launch',
-      resources: '1 content writer, 1 designer, $5K promotion budget',
+      contentTopic: 'New AI analytics feature launch',
+      contentType: 'Product Launch Campaign',
+      businessGoals: 'Generate 500 qualified leads in first 60 days, establish thought leadership in AI analytics space',
+      audience: 'Data analysts and analytics managers at companies with 100-1000 employees',
     },
   },
 
@@ -1320,10 +1408,10 @@ export const CONTENT_WRITER_TEST_DATA: Record<string, SkillDefaultTestData> = {
     defaultTestCaseId: 'atomization-default-1',
     description: 'Repurposing whitepaper into multi-format content',
     inputPayload: {
-      sourceContent: 'Whitepaper: "The State of Marketing Analytics 2025" - 25 pages covering trends, benchmarks, and best practices in marketing measurement',
-      targetFormats: 'Blog series, LinkedIn posts, email sequence, infographics, podcast talking points',
-      distributionGoal: 'Maximize reach across owned channels over 8 weeks',
-      brandVoice: 'Data-driven, helpful, slightly provocative, avoids jargon',
+      originalContent: 'Whitepaper: "The State of Marketing Analytics 2025" - 25 pages covering trends, benchmarks, and best practices in marketing measurement',
+      contentType: 'Whitepaper / Research Report',
+      targetPlatforms: 'Blog, LinkedIn, email newsletter, infographics, podcast',
+      brandVoice: 'Professional, data-driven, authoritative yet accessible. B2B marketing audience.',
     },
   },
 
@@ -1334,8 +1422,8 @@ export const CONTENT_WRITER_TEST_DATA: Record<string, SkillDefaultTestData> = {
     inputPayload: {
       copyType: 'Product landing page',
       product: 'AI-powered proposal software that helps sales teams create winning proposals 10x faster',
-      targetAudience: 'Sales leaders and revenue ops at B2B companies frustrated with slow, inconsistent proposals',
-      formula: 'PAS (Problem-Agitation-Solution)',
+      audience: 'Sales leaders and revenue ops at B2B companies frustrated with slow, inconsistent proposals',
+      framework: 'PAS (Problem-Agitation-Solution)',
       desiredAction: 'Start free trial',
       constraints: 'Hero section needs headline + subhead + CTA. Keep benefit sections scannable.',
     },
@@ -1346,12 +1434,12 @@ export const CONTENT_WRITER_TEST_DATA: Record<string, SkillDefaultTestData> = {
     defaultTestCaseId: 'style-guide-default-1',
     description: 'Editing content to match brand style guide',
     inputPayload: {
-      contentToEdit: `Our software is the best solution for managing your company's data. We have been in business for over 10 years and have lots of customers who love us. Click here to learn more about our amazing product features. Our team of experts will help you every step of the way!!!`,
+      draftContent: `Our software is the best solution for managing your company's data. We have been in business for over 10 years and have lots of customers who love us. Click here to learn more about our amazing product features. Our team of experts will help you every step of the way!!!`,
+      contentType: 'Homepage Hero Section',
+      editingFocus: 'Voice, tone, and brand compliance',
       styleGuide: `Voice: Confident but not arrogant. Show, don't tell.
 Avoid: Superlatives (best, amazing), exclamation marks, "click here", passive voice
-Prefer: Specific proof points, active voice, customer benefit focus
-Formatting: Sentence case headlines, Oxford comma, em-dashes for emphasis`,
-      context: 'Homepage hero section for B2B data management platform',
+Prefer: Specific proof points, active voice, customer benefit focus`,
     },
   },
 
@@ -1361,10 +1449,10 @@ Formatting: Sentence case headlines, Oxford comma, em-dashes for emphasis`,
     description: 'Creating AI-optimized content for search',
     inputPayload: {
       topic: 'How to choose the right CRM for your small business',
-      targetQueries: 'best CRM for small business, CRM comparison, how to choose CRM, CRM features small business',
+      targetQueries: 'best CRM for small business, CRM comparison, how to choose CRM',
       contentType: 'Comprehensive guide',
-      competitorContent: 'Existing top results are listicles with 10-15 CRMs. Opportunity for more decision-focused content.',
-      aiOptimization: 'Optimize for both traditional SEO and AI-generated responses (ChatGPT, Perplexity, Google SGE)',
+      audience: 'Small business owners and operators evaluating CRM solutions',
+      expertise: 'CRM implementation consultants with 10+ years advising SMBs on sales technology',
     },
   },
 };
@@ -1379,15 +1467,14 @@ export const CUSTOMER_SUCCESS_MANAGER_TEST_DATA: Record<string, SkillDefaultTest
     defaultTestCaseId: 'health-score-default-1',
     description: 'Analyzing customer health score trends',
     inputPayload: {
-      accountName: 'TechCorp Industries',
-      healthMetrics: `Product Usage: 45% DAU/MAU (down from 62% last quarter)
+      customerData: `Product Usage: 45% DAU/MAU (down from 62% last quarter)
 Support Tickets: 8 this month (up from 3)
 NPS Response: Detractor (score 4, was Promoter at 9)
 Feature Adoption: Core features 85%, new features 15%
-Executive Engagement: No exec meeting in 6 months
-Contract: $150K ARR, renews in 4 months`,
-      recentEvents: 'Key champion (VP Ops) left 2 months ago. New VP started last month. They asked about downsizing during last call.',
-      goal: 'Develop intervention strategy to save this account',
+Executive Engagement: No exec meeting in 6 months`,
+      accountInfo: 'TechCorp Industries - $150K ARR, renews in 4 months',
+      recentActivity: 'Key champion (VP Ops) left 2 months ago. New VP started last month. They asked about downsizing during last call.',
+      industryBenchmarks: 'Industry average DAU/MAU 55%, NPS 35, support tickets 4/month per $100K ARR',
     },
   },
 
@@ -1398,10 +1485,10 @@ Contract: $150K ARR, renews in 4 months`,
     inputPayload: {
       accountName: 'Global Retail Corp',
       accountContext: '$500K ARR, 3-year customer, using platform for inventory management across 200 stores',
-      quarterHighlights: 'Achieved 99.2% inventory accuracy (up from 94%). Reduced stockouts by 35%. Completed API integration with their ERP.',
-      challengesFaced: 'Delayed training rollout due to customer resource constraints. Some stores still on old process.',
-      nextQuarterGoals: 'Complete rollout to remaining 50 stores. Launch demand forecasting module. Expand to 2 new regions.',
-      expansionOpportunity: 'They expressed interest in our workforce management module ($200K opportunity)',
+      metrics: 'Inventory accuracy: 99.2% (target 98%), Stockout reduction: 35%, API uptime: 99.9%, Active users: 450/500 licensed',
+      highlights: 'Achieved 99.2% inventory accuracy (up from 94%). Reduced stockouts by 35%. Completed API integration with their ERP.',
+      challenges: 'Delayed training rollout due to customer resource constraints. Some stores still on old process.',
+      expansionGoals: 'Complete rollout to remaining 50 stores. Launch demand forecasting module. Workforce management module ($200K opportunity).',
     },
   },
 
@@ -1410,11 +1497,11 @@ Contract: $150K ARR, renews in 4 months`,
     defaultTestCaseId: 'lifecycle-email-default-1',
     description: 'Creating customer lifecycle email templates',
     inputPayload: {
-      lifecycleStage: 'Onboarding - Day 30 check-in',
-      customerSegment: 'Mid-market (50-500 employees), self-serve onboarding',
-      productContext: 'Project management SaaS, customer has completed basic setup but low feature adoption',
-      goals: 'Drive activation of key features (timeline view, integrations), identify blockers, offer training',
+      emailType: 'Onboarding Check-in (Day 30)',
+      customerContext: 'Mid-market (50-500 employees), self-serve onboarding, Project management SaaS, completed basic setup but low feature adoption',
+      keyPoints: 'Drive activation of key features (timeline view, integrations), identify blockers, offer training',
       tone: 'Helpful and proactive, not pushy',
+      senderInfo: 'CSM name, title, direct calendar link, phone number',
     },
   },
 
@@ -1423,11 +1510,11 @@ Contract: $150K ARR, renews in 4 months`,
     defaultTestCaseId: 'renewal-playbook-default-1',
     description: 'Building renewal playbook for key account',
     inputPayload: {
-      accountProfile: '$300K ARR, 18-month customer, health score: yellow (72)',
-      renewalTimeline: 'Contract expires in 90 days',
+      accountInfo: '$300K ARR, 18-month customer, contract expires in 90 days',
       stakeholders: 'Economic buyer (CFO) - neutral, Champion (Dir of Ops) - supportive, Blocker (IT Director) - concerned about security',
-      risks: 'Competitor (Monday.com) ran a demo last month. CFO asking about cost reduction. IT has unresolved security tickets.',
-      opportunities: 'They want to expand to European team (+100 seats). New AI features align with their digital strategy.',
+      healthStatus: 'Yellow (72) - usage strong but engagement declining, IT has unresolved security tickets',
+      knownConcerns: 'Competitor (Monday.com) ran a demo last month. CFO asking about cost reduction.',
+      renewalGoal: 'Flat renewal minimum, target 10% uplift with European expansion (+100 seats)',
     },
   },
 
@@ -1436,19 +1523,14 @@ Contract: $150K ARR, renews in 4 months`,
     defaultTestCaseId: 'churn-risk-default-1',
     description: 'Assessing churn risk signals',
     inputPayload: {
-      accountData: `Account: FastGrow Startup
-ARR: $85K
-Contract: Renews in 5 months
-Health Score: 58 (Red)
-
-Warning Signals:
-- Login frequency dropped 60% over 3 months
-- 3 support escalations (2 unresolved)
-- Champion left company 6 weeks ago
-- Skipped last 2 scheduled CSM calls
-- Competitor job posting mentions our competitor by name`,
-      historicalContext: 'Started as enthusiastic early adopter. Expanded 2x in year 1. Flat in year 2.',
-      goal: 'Triage risk level and develop save strategy',
+      accountList: 'FastGrow Startup - $85K ARR, renews in 5 months, Health Score 58 (Red)',
+      behaviorChanges: `Login frequency dropped 60% over 3 months
+3 support escalations (2 unresolved)
+Champion left company 6 weeks ago
+Skipped last 2 scheduled CSM calls
+Competitor job posting mentions our competitor by name`,
+      industryContext: 'SaaS startup segment, typically higher churn (25% annually). Started as enthusiastic early adopter, expanded 2x in year 1.',
+      timeframe: '5 months until renewal, need intervention plan within 2 weeks',
     },
   },
 
@@ -1457,11 +1539,11 @@ Warning Signals:
     defaultTestCaseId: 'win-back-default-1',
     description: 'Creating win-back campaign for churned customer',
     inputPayload: {
-      formerCustomer: 'DataFlow Analytics - churned 8 months ago after 2 years',
+      customerInfo: 'DataFlow Analytics - was $120K ARR, 2-year customer. Champion (now CTO) was supportive. Left on good terms.',
       churnReason: 'Switched to competitor citing lower price and better reporting features',
-      relationshipHistory: 'Generally positive relationship. Champion (now CTO) was supportive. Left on good terms.',
       productUpdates: 'Since they left: Launched advanced reporting (addresses their concern), new AI features, 15% price reduction on enterprise tier',
-      contactStrategy: 'CTO still connected on LinkedIn. They are presenting at industry conference next month.',
+      campaignGoal: 'Re-engage CTO, demonstrate product improvements, offer competitive pricing to win back',
+      timeSinceChurn: '8 months - CTO still connected on LinkedIn, presenting at industry conference next month',
     },
   },
 
@@ -1470,11 +1552,11 @@ Warning Signals:
     defaultTestCaseId: 'escalation-brief-default-1',
     description: 'Creating executive escalation brief',
     inputPayload: {
-      accountName: 'MegaCorp Financial',
-      situation: '$750K ARR account threatening to churn. VP of Operations sent email stating they will not renew unless we address ongoing performance issues.',
-      impactAssessment: 'Logo loss would be significant - they are a reference customer and case study. Also $750K ARR hit.',
-      issuesSummary: 'Platform latency issues in their region (APAC) for past 6 weeks. 5 support tickets, 2 escalations. Engineering says fix is 4 weeks out.',
-      requestedAction: 'Need exec-to-exec call to rebuild trust. Requesting temporary SLA credits and dedicated engineering resource.',
+      accountDetails: 'MegaCorp Financial - $750K ARR, reference customer and case study',
+      riskSituation: 'VP of Operations sent email stating they will not renew unless we address ongoing performance issues. Platform latency in APAC for 6 weeks.',
+      stakeholderMap: 'VP Operations (decision maker, frustrated), CTO (neutral), CFO (unaware of issues), Our exec sponsor: VP CS',
+      attemptedActions: '5 support tickets opened, 2 escalations to engineering. CSM calls weekly. Engineering says fix is 4 weeks out.',
+      requestedSupport: 'Need exec-to-exec call to rebuild trust. Requesting temporary SLA credits and dedicated engineering resource.',
     },
   },
 
@@ -1483,13 +1565,10 @@ Warning Signals:
     defaultTestCaseId: 'whitespace-default-1',
     description: 'Analyzing expansion opportunities',
     inputPayload: {
-      accountProfile: `Enterprise customer, $400K ARR
-Current Products: Core Platform, Analytics Module
-Users: 500 licensed, 380 active
-Departments: Operations (primary), Finance (pilot)
-Contract: 2 years remaining`,
-      productCatalog: 'Core Platform, Analytics, Automation, AI Assistant, Mobile, API Premium, Professional Services',
-      knownNeeds: 'CFO mentioned automation interest on last call. IT wants better API access. Operations expanding to 3 new regions.',
+      accountProfile: 'Enterprise customer, $400K ARR, 2 years remaining on contract',
+      currentState: 'Current Products: Core Platform, Analytics Module. Users: 500 licensed, 380 active. Departments: Operations (primary), Finance (pilot)',
+      productPortfolio: 'Core Platform, Analytics, Automation, AI Assistant, Mobile, API Premium, Professional Services',
+      knownOpportunities: 'CFO mentioned automation interest on last call. IT wants better API access. Operations expanding to 3 new regions.',
       competitorPresence: 'Using Competitor X for automation workflows. Evaluating our solution vs. theirs.',
     },
   },
@@ -1504,8 +1583,9 @@ Contract: 2 years remaining`,
 3. GlobalRetail - New module ($150K ARR) - Strong need identified, procurement involved
 4. StartupXYZ - Expanding to new team ($25K ARR) - Verbal commitment, contract not started
 5. Enterprise Inc - Professional services ($80K ARR) - RFP stage, competing with consultancy`,
-      scoringCriteria: 'Likelihood to close, time to close, strategic value, resource required',
-      quarterTarget: '$200K expansion ARR, 45 days remaining',
+      scoringPriorities: 'Likelihood to close, time to close, strategic value, resource required',
+      resourceConstraints: '2 CSMs available for expansion motions, limited solutions engineering bandwidth',
+      timeHorizon: 'Q4 2024, 45 days remaining, $200K expansion ARR target',
     },
   },
 };
@@ -1520,16 +1600,18 @@ export const DEVOPS_ENGINEER_TEST_DATA: Record<string, SkillDefaultTestData> = {
     defaultTestCaseId: 'iac-default-1',
     description: 'Generating Terraform for AWS infrastructure',
     inputPayload: {
-      infrastructure: 'Production-ready Kubernetes cluster on AWS with auto-scaling, load balancing, and monitoring',
-      requirements: `- EKS cluster with 3 node groups (system, application, spot)
+      infrastructure: `Production-ready Kubernetes cluster with:
+- EKS cluster with 3 node groups (system, application, spot)
 - Application Load Balancer with WAF
 - RDS PostgreSQL (Multi-AZ)
 - ElastiCache Redis cluster
 - S3 buckets for assets and backups
 - CloudWatch dashboards and alarms`,
-      iacTool: 'Terraform',
-      compliance: 'Must follow AWS Well-Architected Framework. PCI-DSS compliance required.',
-      existingInfra: 'VPC and networking already provisioned. Using AWS Organizations with multiple accounts.',
+      tool: 'Terraform',
+      cloud: 'AWS',
+      environment: 'Production (VPC and networking already provisioned, using AWS Organizations)',
+      securityLevel: 'High - PCI-DSS compliance required, AWS Well-Architected Framework',
+      costOptimization: 'Use spot instances for non-critical workloads, reserved instances for baseline capacity',
     },
   },
 
@@ -1538,14 +1620,12 @@ export const DEVOPS_ENGINEER_TEST_DATA: Record<string, SkillDefaultTestData> = {
     defaultTestCaseId: 'cicd-default-1',
     description: 'Designing CI/CD pipeline for microservices',
     inputPayload: {
-      application: 'Node.js microservices architecture, 12 services, Docker containers, Kubernetes deployment',
-      requirements: `Build: lint, test, security scan, Docker build
-Environments: dev, staging, prod
-Deployment: Blue-green for prod, rolling for others
-Gates: Unit tests >80% coverage, 0 critical vulnerabilities, load test pass`,
+      projectType: 'Node.js microservices architecture, 12 services, Docker containers',
       platform: 'GitHub Actions',
-      integrations: 'SonarQube, Snyk, Datadog, Slack notifications',
-      constraints: 'Max build time 15 minutes. Self-hosted runners for production deploys.',
+      stages: 'Build (lint, test, security scan, Docker build), Test (unit >80%, integration), Deploy (dev, staging, prod)',
+      deployTarget: 'Kubernetes cluster (EKS)',
+      deployStrategy: 'Blue-green for prod, rolling for staging/dev',
+      securityScanning: 'SonarQube for code quality, Snyk for vulnerabilities, 0 critical vulns gate',
     },
   },
 
@@ -1554,11 +1634,12 @@ Gates: Unit tests >80% coverage, 0 critical vulnerabilities, load test pass`,
     defaultTestCaseId: 'runbook-default-1',
     description: 'Creating incident response runbook',
     inputPayload: {
-      incidentType: 'Database failover and recovery',
-      systemContext: 'Primary PostgreSQL RDS instance in us-east-1, synchronous replica in us-east-2, async replica for reporting',
-      stakeholders: 'On-call SRE, Database team, Application team leads, Customer Success (for communication)',
+      runbookType: 'Database Failover',
+      system: 'PostgreSQL RDS',
+      architecture: 'Primary in us-east-1, synchronous replica in us-east-2, async replica for reporting',
+      accessInfo: 'AWS Console and CLI access, PagerDuty for alerting, Runbook stored in Confluence',
+      escalationPath: 'On-call SRE → Database team → Application team leads → Customer Success (for communication)',
       slaRequirements: 'RTO: 15 minutes, RPO: 0 (synchronous replication)',
-      tooling: 'PagerDuty for alerting, Runbook stored in Confluence, AWS Console and CLI access',
     },
   },
 };
@@ -1577,8 +1658,7 @@ export const HEALTHCARE_PROFESSIONAL_TEST_DATA: Record<string, SkillDefaultTestD
       audience: 'Newly diagnosed Type 2 diabetics, ages 45-70, mix of education levels',
       format: 'Patient handout (2 pages) + teach-back questions',
       readingLevel: '6th grade reading level',
-      languages: 'English and Spanish versions needed',
-      keyMessages: 'Blood sugar monitoring, carb counting basics, importance of medication timing, when to call the doctor',
+      keyPoints: 'Blood sugar monitoring frequency, carb counting basics, medication timing importance, warning signs requiring immediate medical attention',
     },
   },
 
@@ -1587,10 +1667,10 @@ export const HEALTHCARE_PROFESSIONAL_TEST_DATA: Record<string, SkillDefaultTestD
     defaultTestCaseId: 'cdi-default-1',
     description: 'Improving clinical documentation for accurate coding',
     inputPayload: {
-      clinicalNote: `72 y/o male admitted for SOB. History of CHF, COPD, CKD stage 3. On admission, BNP elevated at 1200, creatinine 2.1 (baseline 1.8). Started on IV Lasix with good response. O2 sat improved from 88% to 94% on room air. Echo shows EF 35%.`,
-      documentationType: 'Inpatient progress note',
-      goal: 'Identify opportunities to improve specificity for accurate DRG assignment',
-      complianceContext: 'Medicare patient, need to support medical necessity and severity of illness',
+      noteContent: `72 y/o male admitted for SOB. History of CHF, COPD, CKD stage 3. On admission, BNP elevated at 1200, creatinine 2.1 (baseline 1.8). Started on IV Lasix with good response. O2 sat improved from 88% to 94% on room air. Echo shows EF 35%.`,
+      noteType: 'Inpatient Progress Note',
+      specialty: 'Internal Medicine / Cardiology',
+      improvements: 'Improve specificity for accurate DRG assignment, support medical necessity and severity of illness for Medicare',
     },
   },
 
@@ -1599,10 +1679,10 @@ export const HEALTHCARE_PROFESSIONAL_TEST_DATA: Record<string, SkillDefaultTestD
     defaultTestCaseId: 'care-plan-default-1',
     description: 'Creating care plan for post-surgical patient',
     inputPayload: {
-      patientProfile: '58 y/o female, BMI 32, Type 2 diabetes (A1c 7.8), hypertension, post total knee replacement (day 2)',
-      currentStatus: 'Pain controlled on oral meds. PT eval complete - able to ambulate 50ft with walker. Wound clean, no signs of infection.',
+      patientSummary: '58 y/o female, BMI 32, Type 2 diabetes (A1c 7.8), hypertension. Lives alone, 5 steps to enter home, limited family support.',
+      primaryDiagnosis: 'Post total knee replacement (day 2) - Pain controlled on oral meds, able to ambulate 50ft with walker, wound clean.',
+      careSetting: 'Acute Inpatient transitioning to Home with Home Health',
       careGoals: 'Safe discharge to home within 3 days. Independent ambulation with walker. Pain management transition to non-opioid.',
-      barriers: 'Lives alone, 5 steps to enter home, limited family support, transportation challenges for follow-up',
       teamMembers: 'Orthopedic surgeon, hospitalist, PT, OT, case manager, diabetes educator',
     },
   },
@@ -1619,11 +1699,11 @@ export const OPERATIONS_MANAGER_TEST_DATA: Record<string, SkillDefaultTestData> 
     description: 'Creating customer onboarding SOP',
     inputPayload: {
       processName: 'Enterprise Customer Onboarding',
-      processOwner: 'Customer Success Operations',
-      scope: 'All new enterprise customers (>$50K ARR) from contract signing through go-live',
-      currentChallenges: 'Inconsistent handoffs between sales and CS, missed implementation milestones, unclear RACI',
+      processDescription: 'All new enterprise customers (>$50K ARR) from contract signing through go-live',
+      currentSteps: 'Sales handoff → Kickoff call → Requirements gathering → Implementation → Training → Go-live',
       compliance: 'SOC 2 requirements for data handling, customer data classification',
-      systems: 'Salesforce (CRM), Gainsight (CS platform), Jira (project tracking), Slack',
+      department: 'Customer Success Operations',
+      riskLevel: 'High - revenue recognition tied to go-live, customer satisfaction at stake',
     },
   },
 
@@ -1632,11 +1712,12 @@ export const OPERATIONS_MANAGER_TEST_DATA: Record<string, SkillDefaultTestData> 
     defaultTestCaseId: 'capacity-default-1',
     description: 'Planning implementation team capacity',
     inputPayload: {
-      teamContext: '8 implementation consultants, 2 technical leads, 1 manager. Average project: 6 weeks, 40 hours consultant time.',
-      currentWorkload: '12 active projects, 8 in queue. 2 consultants at 120% utilization, 3 under 70%.',
-      forecastedDemand: 'Sales pipeline shows 15 new projects expected in Q1. 3 are complex (100+ hour estimates).',
+      teamInfo: '8 implementation consultants, 2 technical leads, 1 manager. Average project: 6 weeks, 40 hours consultant time.',
+      workload: '12 active projects, 8 in queue. 2 consultants at 120% utilization, 3 under 70%.',
       constraints: 'Q1 hiring freeze. 1 consultant on parental leave starting Feb. Holiday period in December.',
-      goal: 'Create capacity plan that maximizes throughput without burnout. Identify when to push back on sales.',
+      timeframe: 'Q1 2025 planning',
+      industry: 'B2B SaaS Implementation Services',
+      planningGoal: 'Maximize throughput without burnout. Identify when to push back on sales. 15 new projects expected from pipeline.',
     },
   },
 
@@ -1645,10 +1726,11 @@ export const OPERATIONS_MANAGER_TEST_DATA: Record<string, SkillDefaultTestData> 
     defaultTestCaseId: 'kpi-dashboard-default-1',
     description: 'Designing operations KPI dashboard',
     inputPayload: {
-      teamFunction: 'Customer Support Operations',
+      operationType: 'Customer Support Operations',
+      goals: 'Reduce support costs by 20% while maintaining CSAT above 90%. Increase self-service resolution.',
       currentMetrics: 'Tracking: ticket volume, first response time, resolution time, CSAT. Not tracking: cost per ticket, agent utilization, deflection rate.',
-      businessGoals: 'Reduce support costs by 20% while maintaining CSAT above 90%. Increase self-service resolution.',
-      dataSource: 'Zendesk for tickets, Salesforce for customer data, internal data warehouse',
+      industry: 'B2B SaaS',
+      maturity: 'Growing - established team but metrics framework needs optimization',
       audience: 'Support managers (daily), VP Operations (weekly), CEO (monthly)',
     },
   },
@@ -1664,12 +1746,12 @@ export const TEACHER_EDUCATOR_TEST_DATA: Record<string, SkillDefaultTestData> = 
     defaultTestCaseId: 'lesson-plan-default-1',
     description: 'Creating standards-aligned math lesson',
     inputPayload: {
-      subject: 'Mathematics - Algebraic Expressions',
+      topic: 'Algebraic Expressions - Adding and Subtracting',
+      subject: 'Mathematics',
       gradeLevel: '7th Grade',
       standards: 'CCSS.MATH.CONTENT.7.EE.A.1 - Apply properties of operations to add, subtract, factor, and expand linear expressions',
       duration: '50-minute class period',
       classContext: '28 students, mixed ability levels, 4 students with IEPs (extended time, preferential seating), 3 ELL students',
-      resources: 'Chromebooks (1:1), interactive whiteboard, manipulatives available',
     },
   },
 
@@ -1678,12 +1760,11 @@ export const TEACHER_EDUCATOR_TEST_DATA: Record<string, SkillDefaultTestData> = 
     defaultTestCaseId: 'assessment-default-1',
     description: 'Creating unit assessment for biology',
     inputPayload: {
-      subject: 'Biology - Cell Structure and Function',
-      gradeLevel: '9th Grade',
-      standards: 'NGSS HS-LS1-2: Develop and use a model to illustrate the hierarchical organization of interacting systems',
-      assessmentType: 'End of unit summative assessment',
-      coverage: 'Cell theory, organelle functions, prokaryotic vs eukaryotic cells, cell membrane structure, transport mechanisms',
-      accommodations: 'Need versions for: standard, extended time, read-aloud, simplified language for ELL',
+      assessmentType: 'Unit Test',
+      topic: 'Cell Structure and Function - Biology. NGSS HS-LS1-2: Develop and use a model to illustrate the hierarchical organization of interacting systems',
+      gradeLevel: 'High School (9-12)',
+      questionTypes: 'Multiple Choice, Short Answer, Diagram/Visual, Extended Response',
+      dokLevels: 'DOK 1 (recall), DOK 2 (application), DOK 3 (analysis)',
     },
   },
 
@@ -1692,11 +1773,10 @@ export const TEACHER_EDUCATOR_TEST_DATA: Record<string, SkillDefaultTestData> = 
     defaultTestCaseId: 'parent-comm-default-1',
     description: 'Writing parent communication about student progress',
     inputPayload: {
-      communicationType: 'Progress concern email',
-      studentContext: '8th grader, previously strong student, grades dropping in past 6 weeks. Missing assignments, disengaged in class. Parents unaware of issues.',
-      specificConcerns: 'Math grade dropped from A to C. 5 missing assignments. Seems distracted and tired in class.',
+      commType: 'Progress Concern Email',
+      studentInfo: '8th grader, previously strong student, grades dropping in past 6 weeks. Missing assignments, disengaged in class.',
+      content: 'Math grade dropped from A to C. 5 missing assignments. Seems distracted and tired in class. Requesting parent conference.',
       tone: 'Caring and collaborative, not accusatory. Want to partner with parents.',
-      nextSteps: 'Requesting parent conference, proposing tutoring support, suggesting possible check-in on social-emotional wellbeing',
     },
   },
 };
@@ -1711,17 +1791,18 @@ export const LEGAL_PROFESSIONAL_TEST_DATA: Record<string, SkillDefaultTestData> 
     defaultTestCaseId: 'contract-risk-default-1',
     description: 'Analyzing SaaS vendor contract risks',
     inputPayload: {
-      contractType: 'Enterprise SaaS Subscription Agreement',
-      contractContext: 'Evaluating contract from new HR software vendor. 3-year term, $500K total value. Vendor is Series B startup.',
-      keyTerms: `Term: 3 years, auto-renews for 1-year periods
+      contractText: `Term: 3 years, auto-renews for 1-year periods
 Termination: 90 days notice, termination for convenience with 12-month penalty
 Data: Vendor retains right to use aggregated/anonymized data
 SLA: 99.5% uptime, credits capped at 10% monthly fee
 Liability: Capped at 12 months fees
 Insurance: $1M cyber liability
 Indemnification: Mutual for IP infringement only`,
+      contractType: 'Enterprise SaaS Subscription Agreement',
+      perspective: 'Customer (Fortune 500 financial services company, heavy regulatory scrutiny)',
+      dealValue: '$500K total value over 3-year term',
       riskTolerance: 'Moderate - we need the solution but cannot accept significant data or business continuity risks',
-      companyContext: 'Fortune 500 financial services company. Heavy regulatory scrutiny. Previous vendor bankruptcy caused major issues.',
+      specificConcerns: 'Vendor is Series B startup - financial stability concerns. Previous vendor bankruptcy caused major issues.',
     },
   },
 
@@ -1730,12 +1811,11 @@ Indemnification: Mutual for IP infringement only`,
     defaultTestCaseId: 'legal-summary-default-1',
     description: 'Summarizing acquisition agreement for board',
     inputPayload: {
-      documentType: 'Asset Purchase Agreement - Summary for Board Review',
-      documentLength: '85-page agreement plus schedules',
+      document: 'Asset Purchase Agreement - 85-page agreement plus schedules. Seller has ongoing litigation, key employees have competing offers, IP assignment chain has gaps.',
+      documentType: 'Asset Purchase Agreement',
       audience: 'Board of Directors (mix of legal and non-legal backgrounds)',
-      keyAreas: 'Purchase price and structure, representations and warranties, indemnification, conditions to closing, employee matters, IP transfer',
       urgency: 'Board meeting in 48 hours. Need 2-page executive summary plus risk matrix.',
-      sensitiveIssues: 'Seller has ongoing litigation. Key employees have competing offers. IP assignment chain has gaps.',
+      focusAreas: 'Purchase price and structure, representations and warranties, indemnification, conditions to closing, employee matters, IP transfer',
     },
   },
 
@@ -1744,11 +1824,13 @@ Indemnification: Mutual for IP infringement only`,
     defaultTestCaseId: 'legal-memo-default-1',
     description: 'Drafting legal research memo on employment law',
     inputPayload: {
-      researchQuestion: 'Can we require employees to sign non-compete agreements as a condition of receiving equity grants?',
+      issue: 'Can we require employees to sign non-compete agreements as a condition of receiving equity grants?',
+      facts: 'Tech company implementing new equity program. Want to tie RSU grants to signing non-compete. Some employees already have equity without non-competes. Recently lost 3 engineers to competitor.',
       jurisdiction: 'California (primary), with employees also in Texas, New York, and remote in 15 other states',
-      factPattern: 'Tech company implementing new equity program. Want to tie RSU grants to signing non-compete. Some employees already have equity without non-competes.',
-      deadline: 'Need preliminary analysis for exec team meeting in 3 days',
-      additionalContext: 'Recently saw competitor hire 3 of our engineers who had access to proprietary algorithms.',
+      practiceArea: 'Employment Law / Executive Compensation',
+      memoType: 'Preliminary analysis for exec team meeting in 3 days',
+      audience: 'General Counsel, CEO, VP HR',
+      existingResearch: 'Aware that California restricts non-competes. Need multi-state analysis.',
     },
   },
 };
@@ -1763,15 +1845,12 @@ export const SUPPLY_CHAIN_MANAGER_TEST_DATA: Record<string, SkillDefaultTestData
     defaultTestCaseId: 'vendor-scorecard-default-1',
     description: 'Creating vendor evaluation scorecard',
     inputPayload: {
-      vendorCategory: 'Contract Manufacturing - Electronics Assembly',
-      evaluationPurpose: 'Selecting primary manufacturing partner for new product line. $10M annual spend expected.',
-      keyRequirements: `Quality: ISO 9001, IPC-A-610 Class 2 minimum
-Capacity: 50K units/month, scalable to 200K
-Location: Prefer North America or Mexico for supply chain resilience
-Lead time: 4-6 week standard, 2-week expedite capability
-Financial: Stable, >$50M revenue`,
-      vendors: '5 vendors have passed initial screening and submitted RFP responses',
-      weightingPriorities: 'Quality (30%), Cost (25%), Delivery reliability (20%), Technical capability (15%), Financial stability (10%)',
+      vendorType: 'Contract Manufacturing - Electronics Assembly',
+      priorities: 'Quality (30%), Cost (25%), Delivery reliability (20%), Technical capability (15%), Financial stability (10%)',
+      industryContext: 'Consumer electronics, ISO 9001/IPC-A-610 Class 2 required, North America/Mexico preferred',
+      evaluationType: 'RFP Evaluation - 5 vendors have passed initial screening',
+      compliance: 'ISO 9001 certified, IPC-A-610 Class 2 minimum, SOC 2 for data handling',
+      spendLevel: '$10M annual spend expected',
     },
   },
 
@@ -1780,13 +1859,14 @@ Financial: Stable, >$50M revenue`,
     defaultTestCaseId: 'supply-risk-default-1',
     description: 'Assessing supply chain risks',
     inputPayload: {
-      productLine: 'Consumer electronics - wireless earbuds',
-      supplyChainScope: `Tier 1: Contract manufacturer in Shenzhen
+      supplyChain: `Tier 1: Contract manufacturer in Shenzhen
 Tier 2: Battery cells (2 suppliers, both China), chipsets (1 supplier, Taiwan), plastics (3 suppliers, Vietnam/Malaysia)
 Logistics: Ocean freight to US West Coast, distributed from 2 DCs`,
-      currentConcerns: 'Taiwan tensions affecting chipset supply. Recent quality issues with one battery supplier. Shipping costs up 40% YoY.',
-      riskAppetite: 'Low tolerance for production disruption - we have major retail launch in Q4',
-      budget: '$500K available for risk mitigation investments',
+      industry: 'Consumer Electronics',
+      knownRisks: 'Taiwan tensions affecting chipset supply. Recent quality issues with one battery supplier. Shipping costs up 40% YoY.',
+      criticalProducts: 'Wireless earbuds - flagship product line, major retail launch in Q4',
+      riskAppetite: 'Low tolerance for production disruption',
+      timeHorizon: 'Q4 retail launch critical, $500K available for risk mitigation investments',
     },
   },
 
@@ -1795,14 +1875,15 @@ Logistics: Ocean freight to US West Coast, distributed from 2 DCs`,
     defaultTestCaseId: 'inventory-opt-default-1',
     description: 'Optimizing inventory strategy',
     inputPayload: {
-      businessContext: 'E-commerce company selling home goods. 5,000 SKUs, 3 warehouses (East, Central, West).',
-      currentState: `Inventory value: $15M
-Inventory turns: 4x annually (industry benchmark: 6x)
+      inventoryData: `Inventory turns: 4x annually (industry benchmark: 6x)
 Stockout rate: 8% (target: 2%)
 Overstock (>6 months supply): 15% of SKUs
 Carrying cost: 25% annually`,
-      demandProfile: 'Highly seasonal (60% of sales in Q4). Long tail of slow movers. Frequent new product introductions.',
-      constraints: 'Cash constrained - need to reduce inventory investment by $3M while maintaining service levels.',
+      challenges: 'Highly seasonal (60% of sales in Q4). Long tail of slow movers. Frequent new product introductions. Cash constrained.',
+      goals: 'Reduce inventory investment by $3M while maintaining service levels. Improve turns from 4x to 6x.',
+      industry: 'E-commerce / Home Goods',
+      inventoryValue: '$15M across 5,000 SKUs, 3 warehouses (East, Central, West)',
+      targetServiceLevel: '98% in-stock rate (currently 92%)',
     },
   },
 };
@@ -1818,10 +1899,9 @@ export const SEO_SPECIALIST_TEST_DATA: Record<string, SkillDefaultTestData> = {
     description: 'Conducting technical SEO audit',
     inputPayload: {
       websiteUrl: 'https://example-saas.com',
-      siteInfo: 'B2B SaaS website, ~500 pages, built on Next.js, blog on subdirectory (/blog)',
-      knownIssues: 'Core Web Vitals failing on mobile. Indexation dropped 20% after recent redesign. Some orphan pages.',
-      priorities: 'Recover lost indexation, improve page speed, fix crawl budget waste',
-      tools: 'Have access to: Google Search Console, Screaming Frog, Ahrefs, PageSpeed Insights',
+      crawlData: 'Full site (~500 pages, built on Next.js, blog on subdirectory /blog). GSC, Screaming Frog, Ahrefs data available. Competitor A: 95 Performance score, Competitor B: 88 Performance score.',
+      businessType: 'SaaS/B2B',
+      priority: 'Core Web Vitals',
     },
   },
 
@@ -1830,11 +1910,10 @@ export const SEO_SPECIALIST_TEST_DATA: Record<string, SkillDefaultTestData> = {
     defaultTestCaseId: 'keyword-research-default-1',
     description: 'Building keyword strategy for content hub',
     inputPayload: {
-      businessContext: 'Project management software company. Targeting marketing teams at mid-size companies.',
-      currentState: 'Ranking for brand terms only. No significant organic traffic for non-brand.',
-      contentGoal: 'Build topical authority around "marketing project management" and related themes',
-      competitors: 'Monday.com, Asana, Wrike all have strong content presence',
-      budget: 'Can produce 4 high-quality articles per month',
+      businessInfo: 'Project management software company. Targeting marketing teams at mid-size companies (100-1000 employees). Can produce 4 articles/month.',
+      seedKeywords: 'marketing project management, campaign management, marketing workflow, marketing team collaboration',
+      industry: 'B2B SaaS / Project Management',
+      contentGoal: 'Build content hub with long-form blog posts, comparison guides, and templates. Mix of informational and commercial intent.',
     },
   },
 
@@ -1843,11 +1922,10 @@ export const SEO_SPECIALIST_TEST_DATA: Record<string, SkillDefaultTestData> = {
     defaultTestCaseId: 'aeo-geo-default-1',
     description: 'Optimizing for AI and generative search',
     inputPayload: {
-      websiteUrl: 'https://example-fintech.com',
-      contentType: 'Financial advice and product comparison content',
-      currentPerformance: 'Strong traditional SEO rankings but not appearing in AI-generated answers or featured snippets',
-      targetQueries: 'Best savings accounts 2025, how to build credit score, investment app comparison',
-      competitorPresence: 'NerdWallet and Bankrate dominate AI answers in this space',
+      content: 'Financial advice and product comparison content. Strong traditional SEO rankings but not appearing in AI answers or voice search results. United States primary market.',
+      targetQuery: 'Best savings accounts 2025, how to build credit score, investment app comparison, what is the best bank for savings',
+      contentType: 'Comparison/Review Content',
+      industry: 'Fintech / Personal Finance',
     },
   },
 
@@ -1856,11 +1934,10 @@ export const SEO_SPECIALIST_TEST_DATA: Record<string, SkillDefaultTestData> = {
     defaultTestCaseId: 'schema-default-1',
     description: 'Generating schema markup for e-commerce',
     inputPayload: {
+      pageUrl: 'https://example-store.com/running-shoes/mens-ultraboost',
       pageType: 'Product page',
       pageContent: 'Selling running shoes. Page includes: product name, price ($129.99), reviews (4.5 stars, 342 reviews), sizes, colors, availability, brand, product images',
-      currentSchema: 'Basic Product schema only, missing reviews, offers, brand',
-      goals: 'Qualify for rich results, improve CTR, support Google Shopping',
-      platform: 'Shopify',
+      schemaTypes: 'Product, Offer, AggregateRating, Brand',
     },
   },
 
@@ -1869,11 +1946,9 @@ export const SEO_SPECIALIST_TEST_DATA: Record<string, SkillDefaultTestData> = {
     defaultTestCaseId: 'local-seo-default-1',
     description: 'Auditing local SEO for multi-location business',
     inputPayload: {
-      businessType: 'Dental practice with 12 locations across 3 cities (Austin, Dallas, Houston)',
-      currentState: 'Google Business Profiles exist but inconsistent. Reviews sparse. No local landing pages.',
-      competition: 'Strong local competitors with 500+ reviews and optimized profiles',
-      goals: 'Improve local pack rankings, increase appointment bookings from search',
-      challenges: 'Different services at different locations. Staff turnover makes GBP management difficult.',
+      businessInfo: 'Smile Dental Group with 12 locations across Austin, Dallas, and Houston, Texas. GBPs exist but inconsistent, reviews sparse.',
+      targetKeywords: 'dentist near me, dental implants [city], emergency dentist [city], teeth whitening [city]',
+      businessType: 'Multi-Location Service Business',
     },
   },
 
@@ -1883,10 +1958,9 @@ export const SEO_SPECIALIST_TEST_DATA: Record<string, SkillDefaultTestData> = {
     description: 'Creating SEO content brief',
     inputPayload: {
       targetKeyword: 'how to create a marketing budget',
-      searchIntent: 'Informational - marketers looking for guidance on budget creation process',
-      competitorAnalysis: 'Top 5 results are comprehensive guides (2000-4000 words) with templates and examples',
+      serpData: 'Top 5 results are comprehensive guides (2000-4000 words) with templates and examples. Informational intent.',
+      contentType: 'Ultimate guide with downloadable template',
       businessContext: 'We sell marketing planning software. Want to rank for this term and drive demo requests.',
-      contentFormat: 'Ultimate guide with downloadable template',
     },
   },
 
@@ -1895,11 +1969,9 @@ export const SEO_SPECIALIST_TEST_DATA: Record<string, SkillDefaultTestData> = {
     defaultTestCaseId: 'redirect-mapping-default-1',
     description: 'Creating redirect map for site migration',
     inputPayload: {
-      migrationContext: 'Migrating from old CMS to new platform. URL structure changing completely.',
-      scope: '850 pages need redirects. 200 pages being consolidated. 100 pages being removed.',
-      oldStructure: '/blog/category/post-title, /products/category/product-name',
-      newStructure: '/resources/post-title, /solutions/product-name',
-      priorities: 'Preserve link equity for top 50 pages (80% of organic traffic). Maintain rankings for money keywords.',
+      oldUrls: '/blog/category/post-title format - 850 pages total',
+      newUrls: '/resources/post-title, /solutions/product-name format',
+      migrationType: 'Full site migration - CMS change with URL restructure',
     },
   },
 
@@ -1908,11 +1980,11 @@ export const SEO_SPECIALIST_TEST_DATA: Record<string, SkillDefaultTestData> = {
     defaultTestCaseId: 'backlink-gap-default-1',
     description: 'Analyzing backlink gap vs competitors',
     inputPayload: {
-      yourDomain: 'example-hrtech.com',
-      competitors: 'bamboohr.com, gusto.com, rippling.com',
-      focusAreas: 'Identify high-value link opportunities competitors have that we do not',
-      currentProfile: 'DR 45, 2,500 referring domains, mostly from directories and guest posts',
-      linkBuildingBudget: '$5K/month for outreach and content',
+      yourDomain: 'example-hrtech.com (currently DR 45, 2,500 referring domains)',
+      competitorBacklinks: 'bamboohr.com (DR 75, 15K domains), gusto.com (DR 80, 25K domains), rippling.com (DR 70, 10K domains)',
+      industry: 'HR Tech / HRIS Software',
+      linkGoals: 'Identify high-value link opportunities competitors have that we do not. Improve from DR 45 to DR 60+.',
+      resources: '$5K/month for outreach and content. Prioritized opportunity list with outreach templates needed.',
     },
   },
 
@@ -1921,13 +1993,13 @@ export const SEO_SPECIALIST_TEST_DATA: Record<string, SkillDefaultTestData> = {
     defaultTestCaseId: 'meta-tag-default-1',
     description: 'Bulk optimizing meta tags',
     inputPayload: {
-      pageList: `Product pages (150): Currently using product name only as title
+      pageData: `Product pages (150): Currently using product name only as title
 Blog posts (200): Inconsistent format, many truncated
 Category pages (25): Generic "Category Name | Brand"
 Landing pages (15): Keyword stuffed, poor CTR`,
       brandName: 'TechFlow',
-      guidelines: 'Title max 60 chars, description 150-160 chars, include primary keyword naturally',
-      goals: 'Improve CTR from search results, maintain keyword targeting',
+      brandPosition: 'End of Title',
+      toneStyle: 'Professional, benefit-focused, action-oriented',
     },
   },
 
@@ -1936,11 +2008,10 @@ Landing pages (15): Keyword stuffed, poor CTR`,
     defaultTestCaseId: 'content-refresh-default-1',
     description: 'Identifying content refresh opportunities',
     inputPayload: {
-      contentInventory: '300 blog posts published over 5 years',
-      performanceData: '50 posts drive 80% of organic traffic. 100 posts get zero traffic. 150 posts declining.',
-      refreshCriteria: 'Outdated information, declining rankings, thin content, consolidation opportunities',
-      resources: 'Writer can refresh 8 posts per month',
-      prioritization: 'Focus on posts with highest traffic recovery potential',
+      contentData: '300 blog posts over 5 years. 50 posts = 80% traffic. 100 posts = zero traffic. 150 declining. Mix from 2019-2024.',
+      industry: 'B2B SaaS / Marketing Technology',
+      contentTypes: 'How-to guides, product comparisons, industry trends, case studies',
+      resources: '1 content writer, 1 editor. Goal: Revive declining content, consolidate zero-traffic pages, update outdated statistics.',
     },
   },
 
@@ -1949,11 +2020,9 @@ Landing pages (15): Keyword stuffed, poor CTR`,
     defaultTestCaseId: 'internal-link-default-1',
     description: 'Optimizing internal linking structure',
     inputPayload: {
-      siteStructure: '500 pages: 20 pillar pages, 150 blog posts, 50 product pages, 280 support docs',
-      currentIssues: 'Orphan pages (30+), over-linked homepage, pillar pages not linking to supporting content',
-      topPages: 'Want to boost rankings for 10 money pages through strategic internal linking',
-      crawlData: 'Screaming Frog export available showing current link distribution',
-      cmsCapabilities: 'Can add contextual links, sidebar related posts, breadcrumbs already implemented',
+      siteStructure: 'Hub and spoke model with pillar pages linking to cluster content. Orphan pages (30+), over-linked homepage, pillar pages not linking to supporting content.',
+      targetPages: '10 money pages to boost: /pricing, /features/*, /solutions/* - these drive conversions',
+      siteType: 'B2B SaaS (500 pages: 20 pillar, 150 blog, 50 product, 280 support docs)',
     },
   },
 
@@ -1962,11 +2031,9 @@ Landing pages (15): Keyword stuffed, poor CTR`,
     defaultTestCaseId: 'serp-analysis-default-1',
     description: 'Analyzing competitor SERP presence',
     inputPayload: {
-      targetKeywords: 'project management software, best project management tools, project management for teams',
-      competitors: 'monday.com, asana.com, clickup.com, notion.so',
-      analysisGoals: 'Understand why competitors rank, identify content gaps, find featured snippet opportunities',
-      currentRankings: 'Not ranking on page 1 for any target keywords',
-      serpFeatures: 'Want to understand which SERP features are available and how to win them',
+      targetKeyword: 'project management software',
+      serpData: 'monday.com (#1), asana.com (#2), clickup.com (#3), notion.so (#4). Featured snippets, PAA boxes present.',
+      businessValue: 'High intent commercial keyword, 50K monthly searches, primary conversion driver',
     },
   },
 };
@@ -1981,12 +2048,12 @@ export const TRAINER_TEST_DATA: Record<string, SkillDefaultTestData> = {
     defaultTestCaseId: 'training-pres-default-1',
     description: 'Building leadership training presentation',
     inputPayload: {
-      trainingTopic: 'Giving Effective Feedback: A Manager\'s Guide',
-      audience: '25 first-time managers, promoted from individual contributor roles in past 6 months',
-      duration: '3-hour workshop with breaks',
-      learningObjectives: '1. Understand the SBI (Situation-Behavior-Impact) feedback model, 2. Practice delivering constructive criticism, 3. Handle defensive reactions professionally, 4. Create a feedback-rich team culture',
-      format: 'Mix of presentation, discussion, role-play exercises, and action planning',
-      constraints: 'Remote delivery via Zoom. Need engaging activities to maintain attention.',
+      topic: 'Giving Effective Feedback: A Manager\'s Guide',
+      audience: 'Middle Management',
+      duration: '90-minute Deep Dive',
+      format: 'Interactive Workshop',
+      objectives: '1. Understand the SBI (Situation-Behavior-Impact) feedback model, 2. Practice delivering constructive criticism, 3. Handle defensive reactions professionally, 4. Create a feedback-rich team culture',
+      context: 'Remote delivery via Zoom for 25 first-time managers promoted from individual contributor roles. Need engaging activities to maintain attention.',
     },
   },
 
@@ -1995,12 +2062,12 @@ export const TRAINER_TEST_DATA: Record<string, SkillDefaultTestData> = {
     defaultTestCaseId: 'workshop-marketing-default-1',
     description: 'Creating marketing for public workshop',
     inputPayload: {
-      workshopTitle: 'AI for Business Leaders: Practical Applications & Strategy',
+      eventName: 'AI for Business Leaders: Practical Applications & Strategy',
+      eventType: 'Full-Day Training',
       targetAudience: 'C-suite and VP-level executives at mid-market companies. Decision makers evaluating AI investments.',
-      format: '1-day in-person workshop, $1,500 per attendee, includes lunch and networking',
-      capacityGoal: '30 attendees minimum, 50 maximum',
-      timeline: 'Workshop in 8 weeks, need to sell 20 seats in first 4 weeks',
-      differentiator: 'Hands-on with real AI tools, not theoretical. Led by former Fortune 500 CTO.',
+      eventDetails: '1-day in-person workshop, $1,500 per attendee, includes lunch and networking. 30 attendees minimum, 50 maximum capacity.',
+      uniqueValue: 'Hands-on with real AI tools, not theoretical. Led by former Fortune 500 CTO.',
+      timeline: '8+ weeks before event',
     },
   },
 
@@ -2009,11 +2076,10 @@ export const TRAINER_TEST_DATA: Record<string, SkillDefaultTestData> = {
     defaultTestCaseId: 'training-editor-default-1',
     description: 'Editing training materials for clarity',
     inputPayload: {
-      contentType: 'E-learning module script',
-      contentToEdit: `This module will help you to understand the various aspects of project management methodologies and their application in real-world scenarios. We will be covering Waterfall, Agile, and Hybrid approaches. It is important to note that there is no one-size-fits-all solution and the methodology you choose should be dependent on various factors including but not limited to team size, project complexity, stakeholder expectations, and organizational culture.`,
-      audience: 'Mid-level professionals taking self-paced online course',
-      guidelines: 'Keep sentences under 20 words. Use active voice. Write at 8th grade reading level. Make it conversational.',
-      goalDuration: 'Script should support 5-minute video segment',
+      content: `This module will help you to understand the various aspects of project management methodologies and their application in real-world scenarios. We will be covering Waterfall, Agile, and Hybrid approaches. It is important to note that there is no one-size-fits-all solution and the methodology you choose should be dependent on various factors including but not limited to team size, project complexity, stakeholder expectations, and organizational culture.`,
+      contentType: 'Video Script',
+      audience: 'Mid-Level Professionals',
+      editingFocus: 'Clarity & Readability',
     },
   },
 
@@ -2022,12 +2088,12 @@ export const TRAINER_TEST_DATA: Record<string, SkillDefaultTestData> = {
     defaultTestCaseId: 'curriculum-default-1',
     description: 'Designing multi-session training curriculum',
     inputPayload: {
-      programTitle: 'New Manager Development Program',
-      targetAudience: 'Newly promoted managers (0-12 months in role) across all departments',
-      duration: '12-week program, 2-hour sessions weekly',
-      learningGoals: 'Build core management skills: delegation, feedback, performance management, team building, conflict resolution, time management',
-      deliveryFormat: 'Cohort-based, hybrid (in-person kickoff, virtual sessions, in-person graduation)',
-      resources: 'Internal trainers available. Budget for external facilitator for 2 sessions. LMS for assignments.',
+      programName: 'New Manager Development Program',
+      programType: 'Workshop Series',
+      audience: 'Newly promoted managers (0-12 months in role) across all departments. Cohort-based delivery with hybrid format.',
+      outcomes: 'Build core management skills: delegation, feedback, performance management, team building, conflict resolution, time management',
+      contentAreas: 'Leadership fundamentals, giving/receiving feedback, delegation techniques, performance management, conflict resolution, time management best practices',
+      assessment: 'Skills Demonstration',
     },
   },
 
@@ -2036,11 +2102,11 @@ export const TRAINER_TEST_DATA: Record<string, SkillDefaultTestData> = {
     defaultTestCaseId: 'needs-assessment-default-1',
     description: 'Conducting training needs assessment',
     inputPayload: {
-      organizationContext: 'Fast-growing tech company, 500 employees, doubled in size last year. Seeing issues with manager effectiveness.',
-      assessmentScope: 'Management and leadership development needs across all people managers (85 total)',
-      symptoms: 'High turnover on certain teams, inconsistent performance reviews, employee survey shows "manager effectiveness" as bottom quartile',
-      existingTraining: 'Ad hoc lunch-and-learns, no formal management development program',
-      constraints: 'Need recommendations within 4 weeks. Limited L&D team (2 people).',
+      assessmentScope: 'Team/Department',
+      context: 'Fast-growing tech company, 500 employees, doubled in size last year. Seeing issues with manager effectiveness across all 85 people managers. Limited L&D team (2 people).',
+      currentSkills: 'Ad hoc lunch-and-learns, no formal management development program. Inconsistent performance reviews, employee survey shows "manager effectiveness" as bottom quartile.',
+      desiredState: 'Consistent, effective management practices across all teams. Reduced turnover on problem teams. Improved employee satisfaction scores for manager effectiveness.',
+      timeline: 'Short-term (3-6 months)',
     },
   },
 
@@ -2050,11 +2116,11 @@ export const TRAINER_TEST_DATA: Record<string, SkillDefaultTestData> = {
     description: 'Creating interactive training exercises',
     inputPayload: {
       topic: 'Active Listening Skills',
-      context: 'Part of a 2-hour communication skills workshop for customer service representatives',
-      groupSize: '20 participants',
-      timeAllocation: '30 minutes for activity + debrief',
-      format: 'In-person, classroom setting with movable furniture',
-      learningGoal: 'Participants should be able to demonstrate active listening techniques: paraphrasing, asking clarifying questions, non-verbal cues',
+      learningObjective: 'Participants should be able to demonstrate active listening techniques: paraphrasing, asking clarifying questions, non-verbal cues',
+      activityType: 'Pair Activity',
+      audience: 'Professional Staff',
+      duration: '25-40 minutes',
+      format: 'In-Person',
     },
   },
 };
@@ -2069,14 +2135,16 @@ export const CONSULTANT_TEST_DATA: Record<string, SkillDefaultTestData> = {
     defaultTestCaseId: 'strategy-deck-default-1',
     description: 'Building strategic recommendation deck',
     inputPayload: {
-      engagement: 'Market entry strategy for US healthcare company expanding to UK market',
-      client: 'Mid-size healthcare technology company, $200M revenue, strong US presence, no international operations',
-      keyFindings: `Market size: £15B UK digital health market growing 12% annually
+      objective: 'Market entry strategy for US healthcare company expanding to UK market',
+      context: 'Mid-size healthcare technology company, $200M revenue, strong US presence, no international operations',
+      findings: `Market size: £15B UK digital health market growing 12% annually
 Regulatory: NHS procurement complex, MHRA approval needed
 Competition: 3 established players, fragmented market otherwise
-Entry options analyzed: Direct entry, partnership, acquisition`,
-      recommendation: 'Recommend partnership strategy with established NHS supplier, followed by acquisition of UK-based competitor in 18-24 months',
-      audience: 'CEO and Board of Directors',
+Entry options analyzed: Direct entry, partnership, acquisition
+Recommendation: Partnership strategy with established NHS supplier, followed by acquisition in 18-24 months`,
+      deckType: 'Board Recommendation',
+      audience: 'Board of Directors',
+      length: '15-20 slides',
     },
   },
 
@@ -2085,12 +2153,11 @@ Entry options analyzed: Direct entry, partnership, acquisition`,
     defaultTestCaseId: 'proposal-default-1',
     description: 'Writing consulting engagement proposal',
     inputPayload: {
-      opportunity: 'Digital transformation assessment for regional bank',
-      clientContext: '$5B asset regional bank, 50 branches, legacy core banking system. CEO wants to compete with digital-first challengers.',
-      scopeDiscussed: '8-week assessment of current state, competitive analysis, roadmap development, business case for transformation',
-      competingFirms: 'Competing against Big 4 firm and boutique fintech consultancy',
-      differentiator: 'Our banking technology expertise, similar project delivered for comparable bank last year',
-      budget: 'Client budget: $400-500K. Our target: $450K.',
+      clientNeed: 'Digital transformation assessment for regional bank - CEO wants to compete with digital-first challengers',
+      clientContext: '$5B asset regional bank, 50 branches, legacy core banking system. Competing against Big 4 firm and boutique fintech consultancy.',
+      yourFirm: 'Banking technology expertise, similar project delivered for comparable bank last year. Target: $450K.',
+      proposalType: 'Strategy & Assessment',
+      timeline: '8-week assessment of current state, competitive analysis, roadmap development, business case for transformation',
     },
   },
 
@@ -2099,15 +2166,14 @@ Entry options analyzed: Direct entry, partnership, acquisition`,
     defaultTestCaseId: 'exec-memo-default-1',
     description: 'Writing executive recommendation memo',
     inputPayload: {
-      topic: 'Recommendation to Restructure Sales Organization',
-      context: 'Engaged to assess sales effectiveness. Found significant issues with territory alignment, comp structure, and sales/marketing coordination.',
-      keyAnalysis: `Current state: 45 reps, $50M quota, 72% attainment
+      question: 'Should we restructure the sales organization to improve effectiveness?',
+      recommendation: 'Restructure into pod model, realign territories, revise compensation, implement SLA with marketing. Must be implementable without major headcount changes. Q1 implementation target.',
+      evidence: `Current state: 45 reps, $50M quota, 72% attainment
 Territory overlap causing deal conflicts (15% of deals disputed)
 Comp plan rewards individual over team (no collaboration incentive)
 Marketing leads not followed up (40% SLA breach)`,
-      recommendation: 'Restructure into pod model, realign territories, revise compensation, implement SLA with marketing',
-      audience: 'CEO, CRO, CFO',
-      constraints: 'Must be implementable without major headcount changes. Q1 implementation target.',
+      audience: 'C-Suite',
+      length: '2-3 pages',
     },
   },
 
@@ -2116,12 +2182,10 @@ Marketing leads not followed up (40% SLA breach)`,
     defaultTestCaseId: 'workshop-guide-default-1',
     description: 'Creating workshop facilitator guide',
     inputPayload: {
-      workshopPurpose: 'Strategy alignment session - get executive team agreement on 3-year strategic priorities',
-      participants: '12 executives (CEO + direct reports), history of disagreement on priorities',
-      duration: 'Full-day session (9am-5pm) at offsite venue',
-      desiredOutcomes: 'Agreed top 5 strategic priorities, resource allocation principles, next steps with owners',
-      knownDynamics: 'CFO and CRO historically at odds. CEO tends to dominate. Some participants not vocal.',
-      prework: 'Participants submitted individual priority lists in advance (significant divergence observed)',
+      objective: 'Strategy alignment session - get executive team agreement on 3-year strategic priorities. Desired outcomes: Agreed top 5 strategic priorities, resource allocation principles, next steps with owners.',
+      participants: '12 executives (CEO + direct reports), history of disagreement on priorities. CFO and CRO historically at odds. CEO tends to dominate. Some participants not vocal.',
+      duration: 'Full-day (6-8 hours)',
+      workshopType: 'Strategy/Planning Session',
     },
   },
 
@@ -2130,12 +2194,12 @@ Marketing leads not followed up (40% SLA breach)`,
     defaultTestCaseId: 'business-case-default-1',
     description: 'Building business case for technology investment',
     inputPayload: {
-      initiative: 'Enterprise CRM implementation (Salesforce)',
-      currentState: 'Using spreadsheets and basic contact database. No pipeline visibility. Manual reporting.',
-      proposedInvestment: 'Salesforce Enterprise: $300K year 1 (licenses + implementation), $150K/year ongoing',
-      benefitHypotheses: '1. Increased sales productivity (15%), 2. Improved win rates (5pp), 3. Reduced admin time (10 hrs/rep/month), 4. Better forecasting',
-      stakeholders: 'CFO (skeptical of tech ROI), CRO (champion), CEO (wants data-driven decision)',
-      constraints: 'Payback period must be under 18 months. Need conservative assumptions.',
+      initiative: 'Enterprise CRM implementation (Salesforce). Currently using spreadsheets and basic contact database with no pipeline visibility.',
+      investment: 'Salesforce Enterprise: $300K year 1 (licenses + implementation), $150K/year ongoing',
+      benefits: '1. Increased sales productivity (15%), 2. Improved win rates (5pp), 3. Reduced admin time (10 hrs/rep/month), 4. Better forecasting',
+      assumptions: 'Payback period must be under 18 months. Need conservative assumptions. CFO skeptical of tech ROI, CRO is champion.',
+      timeframe: '3 years',
+      audience: 'C-Suite & Board',
     },
   },
 };
@@ -2150,13 +2214,13 @@ export const ENTREPRENEUR_TEST_DATA: Record<string, SkillDefaultTestData> = {
     defaultTestCaseId: 'pitch-deck-default-1',
     description: 'Building Series A pitch deck',
     inputPayload: {
-      company: 'AI-powered legal document automation for SMBs',
-      stage: 'Raising $8M Series A',
+      startup: 'AI-powered legal document automation for SMBs. Legal tech market, $25B TAM. SMB segment underserved.',
+      problem: 'SMBs spend thousands on legal documents and contracts, often using outdated templates or expensive lawyers for routine paperwork.',
+      solution: 'AI-powered platform that automates legal document creation, review, and management specifically designed for SMB workflows.',
       traction: '$1.2M ARR, 150 customers, 15% MoM growth, 120% NRR, $8K ACV',
       team: 'CEO (ex-Google PM), CTO (Stanford CS PhD), COO (ex-McKinsey). 12 FTEs total.',
-      market: 'Legal tech market, $25B TAM. SMB segment underserved.',
-      ask: '$8M for 18 months runway. Use: 60% engineering, 25% GTM, 15% G&A',
-      competition: 'DocuSign (enterprise focus), LegalZoom (consumer), several early-stage competitors',
+      raise: '$8M for 18 months runway. Use: 60% engineering, 25% GTM, 15% G&A',
+      stage: 'Series A',
     },
   },
 
@@ -2165,12 +2229,12 @@ export const ENTREPRENEUR_TEST_DATA: Record<string, SkillDefaultTestData> = {
     defaultTestCaseId: 'business-plan-default-1',
     description: 'Creating comprehensive business plan',
     inputPayload: {
-      businessConcept: 'Subscription meal kit service for people with dietary restrictions (celiac, diabetes, kidney disease)',
-      stage: 'Pre-launch, seeking $500K seed funding',
-      founders: '2 founders: one former healthcare dietitian, one operations/logistics background from Blue Apron',
-      targetMarket: '35M Americans with dietary restrictions. Initial focus: celiac/gluten-free market (3M people).',
-      goToMarket: 'D2C subscription, physician/dietitian referrals, health system partnerships',
-      funding: 'Seeking $500K to launch pilot in 3 metro areas, prove unit economics, then raise Series A',
+      business: 'Subscription meal kit service for people with dietary restrictions (celiac, diabetes, kidney disease). Pre-launch, seeking $500K seed funding.',
+      market: '35M Americans with dietary restrictions. Initial focus: celiac/gluten-free market (3M people).',
+      model: 'D2C subscription model, physician/dietitian referrals, health system partnerships. Monthly subscription boxes.',
+      operations: '2 founders: one former healthcare dietitian, one operations/logistics background from Blue Apron. Initial production in commercial kitchen, scaling to dedicated facility.',
+      financials: 'Seeking $500K to launch pilot in 3 metro areas, prove unit economics, then raise Series A. Target break-even at 5,000 subscribers.',
+      planType: 'Investor Business Plan',
     },
   },
 
@@ -2179,12 +2243,12 @@ export const ENTREPRENEUR_TEST_DATA: Record<string, SkillDefaultTestData> = {
     defaultTestCaseId: 'gtm-strategy-default-1',
     description: 'Building go-to-market strategy',
     inputPayload: {
-      product: 'B2B SaaS - AI meeting assistant that records, transcribes, and extracts action items',
-      targetCustomer: 'Initially: sales teams at tech companies (100-1000 employees). ICP: VP Sales, Sales Ops.',
-      currentState: 'Product ready, 10 beta customers (free), $0 revenue',
-      pricing: 'Considering: $15/user/month or $200/user/year',
-      budget: '$100K for first 6 months GTM',
-      goal: 'Reach $100K ARR in first 12 months',
+      product: 'B2B SaaS - AI meeting assistant that records, transcribes, and extracts action items. Considering: $15/user/month or $200/user/year.',
+      market: 'Initially: sales teams at tech companies (100-1000 employees). ICP: VP Sales, Sales Ops.',
+      competition: 'Otter.ai, Fireflies.ai, Gong for enterprise. Differentiation is better action item extraction and CRM integration.',
+      resources: '$100K for first 6 months GTM. Product ready, 10 beta customers (free), $0 revenue.',
+      gtmType: 'Product-Led Growth (PLG)',
+      timeline: 'Reach $100K ARR in first 12 months',
     },
   },
 
@@ -2194,14 +2258,14 @@ export const ENTREPRENEUR_TEST_DATA: Record<string, SkillDefaultTestData> = {
     description: 'Building startup financial model',
     inputPayload: {
       businessModel: 'B2B SaaS, subscription revenue, land-and-expand model',
-      currentMetrics: 'Pre-revenue, 5 pilot customers, expected $5K ACV at launch',
+      currentState: 'Pre-revenue, 5 pilot customers, expected $5K ACV at launch. 2 founders, planning to hire 1 engineer month 3, 1 salesperson month 6.',
       assumptions: `Customer acquisition: 10 new customers month 1, growing 20% MoM
 ACV: $5K year 1, expanding to $8K year 2
 Churn: 5% monthly initially, improving to 3%
-CAC: $2,000 (paid channels), $500 (organic)
-Team: 2 founders now, hiring 1 engineer month 3, 1 salesperson month 6`,
-      projectionPeriod: '3 years (36 months)',
-      purpose: 'Fundraising model for $1M seed round',
+CAC: $2,000 (paid channels), $500 (organic)`,
+      funding: '$1M seed round target',
+      modelType: 'Fundraising Model',
+      timeframe: '36 months (3 years)',
     },
   },
 
@@ -2210,16 +2274,15 @@ Team: 2 founders now, hiring 1 engineer month 3, 1 salesperson month 6`,
     defaultTestCaseId: 'investor-update-default-1',
     description: 'Writing monthly investor update',
     inputPayload: {
-      period: 'November 2024 Monthly Update',
-      highlights: 'Closed first enterprise deal ($50K ACV), launched v2.0 with AI features, hired VP Sales',
       metrics: `MRR: $45K (up from $32K)
 Customers: 28 (up from 22)
 Burn: $120K/month
 Runway: 14 months
 Pipeline: $300K (up from $180K)`,
-      challenges: 'Sales cycle longer than expected for enterprise (90+ days). One key engineer gave notice.',
-      asks: 'Looking for intros to: enterprise SaaS sales leaders, senior ML engineers',
-      nextMonth: 'Enterprise pilot go-lives, team offsite, beginning Series A prep',
+      wins: 'Closed first enterprise deal ($50K ACV), launched v2.0 with AI features, hired VP Sales. Next month: Enterprise pilot go-lives, team offsite, beginning Series A prep.',
+      challenges: 'Sales cycle longer than expected for enterprise (90+ days). One key engineer gave notice. Looking for intros to: enterprise SaaS sales leaders, senior ML engineers.',
+      frequency: 'Monthly',
+      stage: 'Seed',
     },
   },
 
@@ -2228,12 +2291,13 @@ Pipeline: $300K (up from $180K)`,
     defaultTestCaseId: 'dd-prep-default-1',
     description: 'Preparing for investor due diligence',
     inputPayload: {
-      round: 'Series A - $10M target',
-      leadInvestor: 'Top-tier SaaS-focused VC, have term sheet contingent on DD',
-      companyContext: '$2M ARR, 18 months old, 20 employees, burning $200K/month',
-      knownConcerns: 'Customer concentration (top 3 = 40% revenue), co-founder departed 6 months ago, pivot from original idea',
-      ddAreas: 'Financial, legal, technical, customer references, market/competitive',
-      timeline: '3 weeks to close, DD starting immediately',
+      startup: 'B2B SaaS company, $2M ARR, 18 months old, 20 employees, burning $200K/month. Top-tier SaaS-focused VC with term sheet contingent on DD.',
+      market: 'Enterprise software market, land-and-expand model targeting mid-market companies.',
+      financials: '$2M ARR, $200K/month burn, 14 months runway. Customer concentration concern: top 3 = 40% revenue.',
+      team: '20 employees total. Note: co-founder departed 6 months ago. DD areas include: Financial, legal, technical, customer references.',
+      risks: 'Customer concentration (top 3 = 40% revenue), co-founder departed 6 months ago, pivot from original idea. 3 weeks to close.',
+      stage: 'Series A',
+      investorType: 'Venture Capital (VC)',
     },
   },
 
@@ -2242,11 +2306,10 @@ Pipeline: $300K (up from $180K)`,
     defaultTestCaseId: 'market-analysis-default-1',
     description: 'Conducting market and competitor analysis',
     inputPayload: {
-      market: 'Employee engagement and recognition software',
-      purpose: 'Series A pitch preparation - need market sizing and competitive landscape',
-      knownCompetitors: 'Lattice, 15Five, Culture Amp, Bonusly, Motivosity',
-      ourPosition: 'Focus on frontline/deskless workers (60% of workforce, underserved by current solutions)',
-      neededInsights: 'TAM/SAM/SOM, competitor positioning, pricing benchmarks, market trends, gaps we can exploit',
+      businessDescription: 'Employee engagement and recognition software focused on frontline/deskless workers (60% of workforce, underserved by current solutions)',
+      targetMarket: 'Frontline and deskless workers in retail, manufacturing, healthcare, and logistics industries.',
+      competitors: 'Lattice, 15Five, Culture Amp, Bonusly, Motivosity',
+      analysisGoals: 'Series A pitch preparation - need TAM/SAM/SOM, competitor positioning, pricing benchmarks, market trends, gaps we can exploit',
     },
   },
 
@@ -2255,11 +2318,11 @@ Pipeline: $300K (up from $180K)`,
     defaultTestCaseId: 'scenario-model-default-1',
     description: 'Building financial scenario models',
     inputPayload: {
-      currentState: '$1M ARR, $150K MRR, 100 customers, $15K burn/month',
-      scenarioContext: 'Board wants to see 3 scenarios: aggressive growth (raise now), moderate (extend runway), conservative (path to profitability)',
-      keyVariables: 'Hiring pace, marketing spend, sales capacity, pricing changes',
-      constraints: 'Current cash: $2M. Cannot raise for 6+ months (market conditions).',
-      decisionPoints: 'Need to make hiring decisions for Q1. Board meeting in 2 weeks.',
+      businessModel: 'B2B SaaS, subscription revenue. Key variables: Hiring pace, marketing spend, sales capacity, pricing changes.',
+      currentTraction: '$1M ARR, $150K MRR, 100 customers, $15K burn/month',
+      fundingAmount: '$2M current cash. Cannot raise for 6+ months (market conditions). Need to make hiring decisions for Q1.',
+      marketContext: 'Board wants 3 scenarios: aggressive growth (raise now), moderate (extend runway), conservative (path to profitability).',
+      projectionPeriod: '24 months',
     },
   },
 
@@ -2268,12 +2331,12 @@ Pipeline: $300K (up from $180K)`,
     defaultTestCaseId: 'investor-outreach-default-1',
     description: 'Creating investor outreach campaign',
     inputPayload: {
-      round: 'Seed round, targeting $2M',
-      company: 'Climate tech - SaaS platform helping companies measure and reduce carbon footprint',
-      stage: 'Product launched, $100K ARR, 15 customers',
+      companyName: 'GreenTrack',
+      elevatorPitch: 'SaaS platform helping companies measure and reduce carbon footprint. Making sustainability tracking simple and actionable.',
+      traction: 'Product launched, $100K ARR, 15 customers',
+      fundingAsk: 'Seed round, targeting $2M. Want to close in 10 weeks.',
       targetInvestors: 'Climate-focused VCs, impact investors, angels with climate/enterprise background',
-      approach: 'Warm intros preferred but need cold outreach strategy too',
-      timeline: 'Want to close in 10 weeks',
+      uniqueHook: 'First platform to integrate real-time carbon tracking with automated compliance reporting. Warm intros preferred but need cold outreach strategy too.',
     },
   },
 
@@ -2282,12 +2345,13 @@ Pipeline: $300K (up from $180K)`,
     defaultTestCaseId: 'exec-summary-default-1',
     description: 'Creating investor one-pager',
     inputPayload: {
-      company: 'Developer productivity platform - AI code assistant for enterprise',
-      pitch: 'Enterprise-grade AI coding assistant that integrates with existing developer workflows, trained on company codebase',
+      companyName: 'CodePilot AI',
+      businessOverview: 'Enterprise-grade AI coding assistant that integrates with existing developer workflows, trained on company codebase.',
+      marketOpportunity: 'Developer productivity tools market, $20B TAM. Enterprise segment seeking AI solutions that work with their proprietary codebases.',
+      financialHighlights: 'Use of funds: Scale sales (hire 10 AEs), expand engineering (ML team), enterprise security features.',
       traction: '$500K ARR, 20 enterprise customers (pilot and paid), 3 Fortune 500 in pipeline',
       team: 'Founding team from Google Brain and Microsoft (VSCode team)',
-      raise: 'Series A, $15M at $60M pre',
-      use: 'Scale sales (hire 10 AEs), expand engineering (ML team), enterprise security features',
+      fundingAsk: 'Series A, $15M at $60M pre',
     },
   },
 };
@@ -2302,17 +2366,19 @@ export const REVENUE_OPERATIONS_MANAGER_TEST_DATA: Record<string, SkillDefaultTe
     defaultTestCaseId: 'pipeline-hygiene-default-1',
     description: 'Auditing and cleaning sales pipeline',
     inputPayload: {
-      pipelineSnapshot: `Total Pipeline: $25M
+      crmPlatform: 'Salesforce',
+      pipelineData: `Total Pipeline: $25M
 Stage Distribution:
 - Qualification: $8M (125 opps, avg age 45 days)
 - Discovery: $6M (80 opps, avg age 60 days)
 - Proposal: $5M (40 opps, avg age 75 days)
 - Negotiation: $4M (25 opps, avg age 90 days)
-- Verbal: $2M (10 opps, avg age 30 days)`,
-      hygieneIssues: 'No activity in 30+ days: 45 opps. Past close date: 30 opps. No next step: 60 opps. No decision maker: 25 opps.',
-      quarterlyGoal: '$8M closed, currently at $3M with 6 weeks left',
-      teamSize: '12 AEs, 3 managers',
-      cleanupPriority: 'Focus on closing gap to quota while maintaining realistic pipeline',
+- Verbal: $2M (10 opps, avg age 30 days)
+Hygiene Issues: No activity in 30+ days: 45 opps. Past close date: 30 opps. No next step: 60 opps. No decision maker: 25 opps.`,
+      salesProcess: 'MEDDIC qualification methodology with 5-stage pipeline. 12 AEs, 3 managers.',
+      stageDefinitions: 'Qualification → Discovery → Proposal → Negotiation → Verbal → Closed. Exit criteria defined for each stage.',
+      avgCycleLength: '75 days average. $8M quarterly goal, currently at $3M with 6 weeks left.',
+      forecastAccuracyTarget: '90% accuracy on commit forecast',
     },
   },
 
@@ -2321,15 +2387,15 @@ Stage Distribution:
     defaultTestCaseId: 'forecast-variance-default-1',
     description: 'Explaining forecast miss to leadership',
     inputPayload: {
-      period: 'Q3 2024',
-      forecast: 'Commit: $5M, Best Case: $6.5M, Pipeline: $8M',
-      actual: '$4.2M closed',
-      missAnalysis: `Slipped deals: 3 deals ($800K) pushed to Q4 due to customer budget cycles
+      forecastPeriod: 'Q3 2024',
+      forecastedRevenue: 'Commit: $5M, Best Case: $6.5M, Pipeline: $8M',
+      actualRevenue: '$4.2M closed',
+      dealChanges: `Slipped deals: 3 deals ($800K) pushed to Q4 due to customer budget cycles
 Lost deals: 2 deals ($400K) lost to competitor in final stages
 Reduced scope: 4 deals closed at lower value than forecasted ($300K delta)
-New business shortfall: 5 fewer new logos than planned`,
-      forecastProcess: 'Weekly calls with reps, stage-weighted pipeline, manager judgment overlay',
-      audience: 'CRO, CFO, CEO',
+New business shortfall: 5 fewer new logos than planned
+Forecast process: Weekly calls with reps, stage-weighted pipeline, manager judgment overlay`,
+      audienceLevel: 'C-Suite (CRO, CFO, CEO)',
     },
   },
 
@@ -2370,11 +2436,12 @@ export const AI_SOLUTIONS_ARCHITECT_TEST_DATA: Record<string, SkillDefaultTestDa
     defaultTestCaseId: 'prompt-packager-default-1',
     description: 'Creating governed prompt templates',
     inputPayload: {
-      useCase: 'Customer support email response generation',
-      businessContext: 'Fortune 500 financial services company, strict compliance requirements, customer-facing content',
-      requirements: 'Must be brand-consistent, compliant with financial regulations, include required disclosures',
-      guardrails: 'Cannot provide investment advice, must include compliance disclaimers, cannot discuss competitors',
-      approvalProcess: 'Legal review required for template changes. Compliance must sign off on guardrails.',
+      promptPurpose: 'Customer support email response generation for Fortune 500 financial services company',
+      basePrompt: 'You are a customer service assistant for a financial services company. Help customers with their inquiries while maintaining compliance.',
+      dataClassification: 'Confidential - PII',
+      outputConstraints: 'Must be brand-consistent, compliant with financial regulations, include required disclosures. Cannot provide investment advice, cannot discuss competitors.',
+      complianceFrameworks: 'SEC regulations, FINRA guidelines, internal compliance policies',
+      approvers: 'Legal review required for template changes. Compliance must sign off on guardrails.',
     },
   },
 
@@ -2383,13 +2450,12 @@ export const AI_SOLUTIONS_ARCHITECT_TEST_DATA: Record<string, SkillDefaultTestDa
     defaultTestCaseId: 'ai-vendor-eval-default-1',
     description: 'Evaluating AI vendors for enterprise deployment',
     inputPayload: {
-      useCase: 'Document processing and extraction for insurance claims',
-      requirements: `Functional: Process 10K documents/day, support PDFs and images, 95%+ accuracy
-Technical: On-premise or private cloud deployment, API integration, audit logging
-Security: SOC 2, data residency in US, no data retention by vendor`,
+      useCase: 'Document processing and extraction for insurance claims. Decision in 6 weeks, POC with shortlisted vendors.',
       vendors: 'AWS Textract, Google Document AI, Microsoft Azure Form Recognizer, ABBYY, Hyperscience',
-      budget: '$200K annual budget',
-      timeline: 'Decision in 6 weeks, POC with shortlisted vendors',
+      requirements: 'Functional: Process 10K documents/day, support PDFs and images, 95%+ accuracy. Technical: On-premise or private cloud deployment, API integration, audit logging.',
+      securityRequirements: 'SOC 2, data residency in US, no data retention by vendor',
+      complianceNeeds: 'Insurance industry regulations, data privacy requirements',
+      budgetRange: '$200K annual budget',
     },
   },
 
@@ -2398,7 +2464,11 @@ Security: SOC 2, data residency in US, no data retention by vendor`,
     defaultTestCaseId: 'ai-prioritization-default-1',
     description: 'Prioritizing AI use cases for roadmap',
     inputPayload: {
-      useCases: `1. Customer service chatbot
+      industry: 'Financial Services',
+      companySize: 'Enterprise (1000+ employees)',
+      aiMaturityLevel: 'Developing (some AI projects)',
+      strategicPriorities: 'Customer experience improvement, operational efficiency, cost reduction',
+      useCasesToEvaluate: `1. Customer service chatbot
 2. Document classification and routing
 3. Fraud detection enhancement
 4. Sales forecasting improvement
@@ -2406,9 +2476,8 @@ Security: SOC 2, data residency in US, no data retention by vendor`,
 6. Code review assistance
 7. Marketing content generation
 8. HR resume screening`,
-      evaluationCriteria: 'Business value, technical feasibility, data readiness, risk level, strategic alignment',
-      constraints: 'Limited AI/ML team (3 people). Budget: $500K for year 1. Need quick wins to build momentum.',
-      strategicPriorities: 'Customer experience improvement, operational efficiency, cost reduction',
+      budgetRange: '$500K for year 1',
+      timelineConstraints: 'Limited AI/ML team (3 people). Need quick wins to build momentum.',
     },
   },
 
@@ -2417,14 +2486,19 @@ Security: SOC 2, data residency in US, no data retention by vendor`,
     defaultTestCaseId: 'data-readiness-default-1',
     description: 'Assessing data readiness for AI project',
     inputPayload: {
-      aiProject: 'Customer churn prediction model',
-      dataAvailable: `Customer data: 3 years history, 500K customers
+      companyName: 'TechCorp Solutions',
+      industry: 'Technology / SaaS',
+      companySize: 'Mid-Market (201-1000 employees)',
+      currentDataPlatform: 'Snowflake data warehouse, dbt for transforms, Fivetran for ingestion',
+      plannedAIUseCases: 'Customer churn prediction model - need to predict churn 90 days in advance with >80% accuracy',
+      targetTimeline: '6-12 months',
+      dataBudget: '$100K-250K',
+      primaryDataSources: `Customer data: 3 years history, 500K customers
 Usage data: Product analytics from last 18 months
 Support data: Zendesk tickets (unstructured)
 Financial data: Billing and payment history
-Survey data: NPS and satisfaction surveys (quarterly)`,
-      dataQualityConcerns: 'Missing values in customer demographics (30%), inconsistent product naming, no data dictionary',
-      modelRequirements: 'Need to predict churn 90 days in advance with >80% accuracy',
+Survey data: NPS and satisfaction surveys (quarterly)
+Quality concerns: Missing values in customer demographics (30%), inconsistent product naming, no data dictionary`,
     },
   },
 
@@ -2433,11 +2507,16 @@ Survey data: NPS and satisfaction surveys (quarterly)`,
     defaultTestCaseId: 'ai-risk-default-1',
     description: 'Assessing AI implementation risks',
     inputPayload: {
-      aiSystem: 'Automated loan underwriting assistant',
-      systemDescription: 'AI system that provides loan approval recommendations to human underwriters. Factors in credit score, income, employment, debt ratios.',
-      riskCategories: 'Bias/fairness, regulatory compliance, model drift, explainability, security, business continuity',
-      regulatoryContext: 'Subject to ECOA, Fair Housing Act, FCRA. OCC and CFPB oversight.',
-      deploymentScope: 'Start with 10% of applications, human review of all decisions',
+      companyName: 'First National Bank',
+      industry: 'Financial Services / Banking',
+      companySize: 'Enterprise (1000+ employees)',
+      riskAppetite: 'Conservative',
+      aiUseCase: 'Automated loan underwriting assistant - AI provides loan approval recommendations to human underwriters. Factors in credit score, income, employment, debt ratios.',
+      technologyStack: 'Python ML models, AWS SageMaker, PostgreSQL database',
+      dataSources: 'Credit bureau data, internal customer data, employment verification systems',
+      targetUsers: 'Loan underwriters (50 users), start with 10% of applications, human review of all decisions',
+      decisionImpact: 'High - affects customer loan approvals and financial decisions',
+      applicableRegulations: 'ECOA, Fair Housing Act, FCRA. OCC and CFPB oversight.',
     },
   },
 
@@ -2446,11 +2525,18 @@ Survey data: NPS and satisfaction surveys (quarterly)`,
     defaultTestCaseId: 'ai-architecture-default-1',
     description: 'Designing AI integration architecture',
     inputPayload: {
-      aiCapability: 'Real-time product recommendations for e-commerce platform',
-      currentArchitecture: 'Monolithic e-commerce platform on AWS, PostgreSQL database, Redis cache, 50K DAU',
-      integrationPoints: 'Product catalog, user behavior events, shopping cart, checkout, email marketing',
-      requirements: '<100ms latency, handle traffic spikes (10x during sales), A/B testing capability',
-      constraints: 'Cannot modify core commerce platform significantly. Limited DevOps bandwidth.',
+      companyName: 'ShopMax E-commerce',
+      industry: 'Retail / E-commerce',
+      companySize: 'Mid-Market (201-1000 employees)',
+      currentTechStack: 'Monolithic e-commerce platform on AWS, PostgreSQL database, Redis cache',
+      useCaseDescription: 'Real-time product recommendations for e-commerce platform. Cannot modify core commerce platform significantly.',
+      predictionsPerDay: '50K-100K predictions/day',
+      latencyRequirement: '<100ms latency',
+      availabilityRequirement: '99.9% uptime, handle traffic spikes (10x during sales)',
+      sourceSystems: 'Product catalog, user behavior events, shopping cart',
+      targetSystems: 'Checkout page, email marketing, homepage recommendations',
+      cloudProvider: 'AWS',
+      budgetRange: '$50K-100K initial + ongoing compute costs',
     },
   },
 
@@ -2459,12 +2545,14 @@ Survey data: NPS and satisfaction surveys (quarterly)`,
     defaultTestCaseId: 'ai-cost-benefit-default-1',
     description: 'Calculating AI project ROI',
     inputPayload: {
-      aiProject: 'Intelligent document processing for accounts payable',
-      currentProcess: '5 FTEs processing 3,000 invoices/month manually. Error rate 3%. Processing time 15 min/invoice.',
-      proposedSolution: 'AI-powered invoice extraction with human-in-the-loop for exceptions',
-      costs: 'Software: $50K/year, Implementation: $100K one-time, Training: $20K, Ongoing support: $30K/year',
-      expectedBenefits: '80% automation rate, 0.5% error rate, 2 FTE reallocation possible',
-      timeframe: '3-year analysis',
+      companyName: 'GlobalCorp Manufacturing',
+      industry: 'Manufacturing',
+      annualRevenue: '$500M-1B',
+      discountRate: '10%',
+      aiUseCase: 'Intelligent document processing for accounts payable. Currently 5 FTEs processing 3,000 invoices/month manually. Error rate 3%. Processing time 15 min/invoice.',
+      projectScope: 'AI-powered invoice extraction with human-in-the-loop for exceptions. Expected 80% automation rate, 0.5% error rate, 2 FTE reallocation possible.',
+      expectedDuration: '3 years',
+      initialInvestment: 'Software: $50K/year, Implementation: $100K one-time, Training: $20K, Ongoing support: $30K/year',
     },
   },
 
@@ -2473,12 +2561,16 @@ Survey data: NPS and satisfaction surveys (quarterly)`,
     defaultTestCaseId: 'ai-change-mgmt-default-1',
     description: 'Creating AI change management plan',
     inputPayload: {
-      aiInitiative: 'AI-powered customer service assistant deployment',
-      impactedRoles: 'Customer service agents (150), supervisors (15), QA team (8)',
-      changeScope: 'AI will handle tier-1 inquiries, agents focus on complex issues, new workflows and KPIs',
-      concerns: 'Job security fears, resistance to new tools, skill gaps, union considerations',
-      timeline: 'Pilot in 2 months, full rollout in 6 months',
-      successMetrics: 'Adoption rate >90%, CSAT maintained, agent satisfaction stable',
+      companyName: 'ServiceFirst Corp',
+      industry: 'Customer Service / BPO',
+      employeeCount: '1000-5000',
+      geographicSpread: 'Multi-region (US East, US West, Philippines)',
+      organizationalCulture: 'Traditional, some resistance to change. Union considerations for hourly workers.',
+      aiUseCase: 'AI-powered customer service assistant - AI will handle tier-1 inquiries, agents focus on complex issues, new workflows and KPIs',
+      departmentsAffected: 'Customer Service, Quality Assurance, Training',
+      rolesImpacted: 'Customer service agents (150), supervisors (15), QA team (8)',
+      estimatedUsers: '173 direct users, pilot in 2 months, full rollout in 6 months',
+      goLiveDate: 'Pilot: 2 months, Full rollout: 6 months. Success metrics: Adoption rate >90%, CSAT maintained',
     },
   },
 
@@ -2487,12 +2579,17 @@ Survey data: NPS and satisfaction surveys (quarterly)`,
     defaultTestCaseId: 'ai-pilot-default-1',
     description: 'Designing AI pilot program',
     inputPayload: {
-      aiSolution: 'Generative AI for internal knowledge management and Q&A',
-      pilotScope: 'IT Help Desk team (25 people) using AI to answer employee questions about policies, procedures, systems',
-      duration: '8 weeks',
-      successCriteria: 'Reduce ticket resolution time by 20%, user satisfaction >80%, <5% hallucination rate',
-      riskMitigation: 'Human review of AI responses initially, clear escalation path, feedback mechanism',
-      resources: '1 AI engineer, 1 product manager, IT Help Desk lead, $25K pilot budget',
+      companyName: 'TechForward Inc',
+      industry: 'Technology',
+      companySize: 'Mid-Market (201-1000 employees)',
+      aiMaturityLevel: 'Developing (some AI projects)',
+      aiUseCase: 'Generative AI for internal knowledge management and Q&A - IT Help Desk using AI to answer employee questions about policies, procedures, systems',
+      businessObjectives: 'Reduce ticket resolution time by 20%, user satisfaction >80%, <5% hallucination rate',
+      technicalApproach: 'RAG-based system using company knowledge base, human review of AI responses initially, clear escalation path',
+      targetUsers: 'IT Help Desk team (25 people)',
+      geographicScope: 'Single location (HQ)',
+      pilotDuration: '8 weeks',
+      pilotBudget: '$25K - includes 1 AI engineer, 1 product manager, IT Help Desk lead',
     },
   },
 
@@ -2501,11 +2598,16 @@ Survey data: NPS and satisfaction surveys (quarterly)`,
     defaultTestCaseId: 'ai-monitoring-default-1',
     description: 'Specifying AI monitoring dashboard',
     inputPayload: {
-      aiSystem: 'Production ML model for credit scoring',
-      monitoringNeeds: 'Model performance (accuracy, precision, recall), data drift, prediction distribution, latency, error rates',
-      stakeholders: 'Data science team (technical metrics), Risk team (fairness metrics), Ops team (system health)',
-      alertingRequirements: 'Immediate alert on accuracy drop >5%, daily drift reports, weekly model health summary',
-      integration: 'Existing monitoring: Datadog for infra, custom dashboards in Looker',
+      companyName: 'CreditSmart Financial',
+      industry: 'Financial Services',
+      companySize: 'Enterprise (1000+ employees)',
+      aiUseCase: 'Production ML model for credit scoring',
+      modelTypes: 'Gradient Boosting classifier, feature store integration',
+      predictionVolume: '10K-50K predictions/day',
+      deploymentArchitecture: 'AWS SageMaker endpoints, real-time and batch scoring',
+      dashboardUsers: 'Data science team (technical metrics), Risk team (fairness metrics), Ops team (system health)',
+      slaRequirements: 'Immediate alert on accuracy drop >5%, daily drift reports, weekly model health summary',
+      cloudPlatform: 'AWS (existing monitoring: Datadog for infra, custom dashboards in Looker)',
     },
   },
 
@@ -2514,12 +2616,16 @@ Survey data: NPS and satisfaction surveys (quarterly)`,
     defaultTestCaseId: 'ai-compliance-default-1',
     description: 'Checking AI security and privacy compliance',
     inputPayload: {
-      aiSystem: 'Customer-facing AI chatbot for healthcare company',
-      dataProcessed: 'Customer names, account info, potentially PHI in conversation',
+      companyName: 'HealthFirst Medical Group',
+      industry: 'Healthcare',
+      companySize: 'Mid-Market (201-1000 employees)',
+      geographicPresence: 'United States (multi-state)',
+      aiUseCase: 'Customer-facing AI chatbot for patient inquiries and scheduling',
+      dataTypes: 'Customer names, account info, potentially PHI in conversation',
+      modelArchitecture: 'LLM-based chatbot with RAG for knowledge base',
       deploymentModel: 'Cloud-based (Azure), third-party AI vendor (OpenAI)',
-      regulatoryScope: 'HIPAA, state privacy laws, FDA (if clinical advice), SOC 2',
-      securityRequirements: 'Data encryption, access controls, audit logging, incident response',
-      vendorConsiderations: 'Data processing agreement needed, BAA for HIPAA, data residency',
+      applicableRegulations: 'HIPAA, state privacy laws, FDA (if clinical advice), SOC 2',
+      dataSources: 'Patient records (encrypted), scheduling system, knowledge base. Data processing agreement needed, BAA for HIPAA, data residency requirements.',
     },
   },
 
@@ -2528,11 +2634,16 @@ Survey data: NPS and satisfaction surveys (quarterly)`,
     defaultTestCaseId: 'ai-comm-package-default-1',
     description: 'Creating AI communication materials',
     inputPayload: {
-      aiInitiative: 'Enterprise-wide AI assistant rollout (like ChatGPT for work)',
-      audiences: 'Executive team, middle management, end users, IT team, legal/compliance, union',
-      messagingGoals: 'Build excitement, address concerns, explain governance, drive adoption',
-      keyMessages: 'AI augments not replaces, data stays private, guardrails in place, training available',
-      deliverables: 'Executive presentation, manager talking points, employee FAQ, training announcement, governance summary',
+      companyName: 'GlobalEnterprises Inc',
+      industry: 'Professional Services',
+      employeeCount: '5000+',
+      brandVoice: 'Professional, approachable, innovation-forward',
+      initiativeName: 'AI Assist - Enterprise AI Assistant',
+      aiUseCase: 'Enterprise-wide AI assistant rollout (like ChatGPT for work) - AI augments not replaces, data stays private, guardrails in place',
+      businessImpact: 'Improve employee productivity, reduce time on routine tasks, enhance decision-making',
+      timeline: 'Pilot: 3 months, Full rollout: 6 months',
+      keyAudiences: 'Executive team, middle management, end users, IT team, legal/compliance, union',
+      primaryGoals: 'Build excitement, address concerns, explain governance, drive adoption. Deliverables: Executive presentation, manager talking points, employee FAQ, training announcement.',
     },
   },
 };
@@ -2547,12 +2658,14 @@ export const CUSTOMER_SUCCESS_LEADER_TEST_DATA: Record<string, SkillDefaultTestD
     defaultTestCaseId: 'qbr-prep-default-1',
     description: 'Preparing for strategic customer QBR',
     inputPayload: {
-      accountName: 'Enterprise Manufacturing Co',
-      accountContext: '$2M ARR, 5-year customer, using 3 product modules. Key strategic account.',
-      quarterHighlights: 'Successful rollout to APAC region (+500 users), achieved 99.5% uptime, completed custom integration',
-      challenges: 'Adoption in European subsidiary lagging (40% vs 85% target). Support tickets up 25%.',
-      stakeholders: 'CIO (exec sponsor), VP Operations (champion), IT Director (day-to-day), Procurement (renewal)',
-      agenda: 'Value delivered, roadmap preview, adoption plan for EU, renewal discussion (due in 6 months)',
+      customerName: 'Enterprise Manufacturing Co',
+      accountTier: 'Enterprise',
+      contractValue: '$2M ARR',
+      renewalDate: '6 months from now',
+      usageData: 'Successful rollout to APAC region (+500 users), achieved 99.5% uptime, completed custom integration. Using 3 product modules.',
+      supportHistory: 'Adoption in European subsidiary lagging (40% vs 85% target). Support tickets up 25%.',
+      stakeholderNotes: 'CIO (exec sponsor), VP Operations (champion), IT Director (day-to-day), Procurement (renewal)',
+      businessObjectives: 'Value delivered, roadmap preview, adoption plan for EU, renewal discussion',
     },
   },
 
@@ -2561,15 +2674,16 @@ export const CUSTOMER_SUCCESS_LEADER_TEST_DATA: Record<string, SkillDefaultTestD
     defaultTestCaseId: 'renewal-risk-default-1',
     description: 'Mitigating renewal risk for key account',
     inputPayload: {
-      accountName: 'TechStart Solutions',
-      renewalContext: '$500K ARR renewal in 60 days. Contract is 15% price increase (standard). Customer pushed back.',
+      customerName: 'TechStart Solutions',
+      arrAtRisk: '$500K ARR',
+      renewalDate: '60 days from now',
       riskSignals: `Health score dropped from 85 to 62
 Executive sponsor departed
 Competitor demo scheduled
 Usage declined 30% after layoffs
 Budget review ongoing`,
-      relationshipHistory: '3-year customer, was reference customer, expanded 2x. New VP making changes.',
-      availableLevers: 'Pricing flexibility (up to 10%), extended term discount, professional services credits, product roadmap influence',
+      stakeholders: '3-year customer, was reference customer, expanded 2x. New VP making changes.',
+      valueDelivered: 'Available levers: Pricing flexibility (up to 10%), extended term discount, professional services credits, product roadmap influence',
     },
   },
 
@@ -2613,16 +2727,15 @@ export const SECURITY_COMPLIANCE_ANALYST_TEST_DATA: Record<string, SkillDefaultT
     defaultTestCaseId: 'policy-control-default-1',
     description: 'Mapping policies to security controls',
     inputPayload: {
-      complianceFramework: 'SOC 2 Type II',
-      policyArea: 'Access Control',
-      existingPolicy: `Access Control Policy v2.1:
+      framework: 'SOC 2 Type II',
+      controlDomain: 'Access Control',
+      currentPolicies: `Access Control Policy v2.1:
 - All access requires manager approval
 - Quarterly access reviews required
 - MFA required for all systems
 - Privileged access requires additional approval
 - Access removed within 24 hours of termination`,
-      controls: 'Need to map policy to specific technical and operational controls with evidence requirements',
-      systems: 'Primary systems: AWS, Okta, GitHub, Salesforce, Slack',
+      existingEvidence: 'Primary systems: AWS, Okta, GitHub, Salesforce, Slack. Need to map policy to specific technical and operational controls with evidence requirements.',
       auditTimeline: 'SOC 2 audit in 3 months',
     },
   },
@@ -2632,12 +2745,12 @@ export const SECURITY_COMPLIANCE_ANALYST_TEST_DATA: Record<string, SkillDefaultT
     defaultTestCaseId: 'incident-comm-default-1',
     description: 'Creating security incident communications',
     inputPayload: {
-      incidentSummary: 'Unauthorized access to customer data detected. Attacker gained access via compromised employee credentials. 500 customer records potentially exposed.',
-      incidentTimeline: 'Detected: 2pm today. Contained: 5pm. Investigation ongoing.',
-      impactAssessment: 'Customer PII (names, emails, phone numbers). No financial data or passwords exposed. Affected customers identified.',
+      incidentType: 'Data Breach',
+      severity: 'High',
+      incidentDetails: 'Unauthorized access to customer data detected. Attacker gained access via compromised employee credentials. 500 customer records potentially exposed. Detected: 2pm today. Contained: 5pm. Investigation ongoing.',
+      impactAssessment: 'Customer PII (names, emails, phone numbers). No financial data or passwords exposed. Affected customers identified. GDPR applies (EU customers affected). State breach notification laws may apply.',
+      mitigationStatus: 'Contained. Internal within 24 hours, external within 72 hours per GDPR.',
       audiences: 'Internal leadership, affected customers, regulators (if required), employees',
-      regulatoryContext: 'GDPR applies (EU customers affected). State breach notification laws may apply.',
-      communicationTiming: 'Internal within 24 hours, external within 72 hours per GDPR',
     },
   },
 
@@ -2676,13 +2789,12 @@ export const MARKETING_OPERATIONS_SPECIALIST_TEST_DATA: Record<string, SkillDefa
     defaultTestCaseId: 'campaign-qa-default-1',
     description: 'Auditing campaign tracking and attribution',
     inputPayload: {
-      campaignScope: 'Q4 product launch campaign - paid social, paid search, email, webinar',
-      trackingSetup: `UTM Structure: utm_source/medium/campaign/content/term
-Landing pages: 5 unique pages with form submissions
-Attribution model: First-touch for MQLs, multi-touch for pipeline
-Tools: HubSpot (marketing automation), Salesforce (CRM), GA4, Segment`,
-      knownIssues: 'Some leads showing "direct" source. LinkedIn data not syncing to Salesforce. Webinar attribution unclear.',
-      auditGoals: 'Ensure accurate campaign ROI reporting before Q4 close. Fix attribution gaps.',
+      campaignName: 'Q4 Product Launch Campaign',
+      channels: 'Paid social (LinkedIn, Facebook), paid search (Google), email, webinar',
+      utmStructure: 'utm_source/medium/campaign/content/term. 5 unique landing pages with form submissions.',
+      crmMappings: 'HubSpot (marketing automation) to Salesforce (CRM). Some leads showing "direct" source. LinkedIn data not syncing to Salesforce.',
+      leadRouting: 'Form submissions route to sales based on company size and geography. Webinar attribution unclear.',
+      attributionModel: 'First-touch for MQLs, multi-touch for pipeline. Using GA4 and Segment for tracking.',
     },
   },
 
@@ -2691,16 +2803,13 @@ Tools: HubSpot (marketing automation), Salesforce (CRM), GA4, Segment`,
     defaultTestCaseId: 'automation-flow-default-1',
     description: 'Building marketing automation workflow',
     inputPayload: {
-      workflowGoal: 'Lead nurture sequence for trial signups who have not converted after 14 days',
-      triggerCondition: 'Trial signup date was 14+ days ago AND status is not "Converted" AND has not unsubscribed',
-      desiredFlow: `Day 0: Check product usage score
-High usage → Path A (close to conversion)
-Low usage → Path B (needs education)
-No usage → Path C (re-engagement)
-Each path has 3-5 emails over 14 days with exit conditions`,
-      platform: 'HubSpot Marketing Hub Enterprise',
-      integration: 'Product usage data synced from Segment, updated daily',
-      constraints: 'Must respect send frequency limits (max 2 emails/week per contact)',
+      automationGoal: 'Lead nurture sequence for trial signups who have not converted after 14 days',
+      targetAudience: 'Trial signup date was 14+ days ago AND status is not "Converted" AND has not unsubscribed',
+      triggerEvents: 'Day 0: Check product usage score. High usage → Path A (close to conversion). Low usage → Path B (needs education). No usage → Path C (re-engagement).',
+      channels: 'Email (primary), in-app notifications (secondary)',
+      contentAssets: 'Each path has 3-5 emails over 14 days with exit conditions. Product usage data synced from Segment, updated daily.',
+      mapPlatform: 'HubSpot',
+      flowLength: 'Multi-week (2-4 weeks). Must respect send frequency limits (max 2 emails/week per contact)',
     },
   },
 
@@ -2743,12 +2852,12 @@ export const PRODUCT_DISCOVERY_LEAD_TEST_DATA: Record<string, SkillDefaultTestDa
     defaultTestCaseId: 'discovery-sprint-default-1',
     description: 'Facilitating product discovery sprint',
     inputPayload: {
-      problemStatement: 'Users are abandoning our onboarding flow at 60% rate. Need to understand why and identify solutions.',
-      teamComposition: '1 PM, 2 designers, 3 engineers, 1 data analyst. Team is new to structured discovery.',
-      timeline: '2-week discovery sprint',
-      constraints: 'Limited access to users (can schedule 5-8 interviews). Engineering capacity for prototyping is 1 engineer for 1 week.',
+      productArea: 'User Onboarding Flow',
+      desiredOutcome: 'Validated solution hypothesis ready for design sprint or direct implementation. 2-week discovery sprint.',
+      targetPersona: 'New users attempting product onboarding. Team is 1 PM, 2 designers, 3 engineers, 1 data analyst (new to structured discovery).',
+      hypotheses: 'Users are abandoning our onboarding flow at 60% rate due to complexity or unclear value proposition.',
       existingData: 'Analytics showing drop-off points, 3 support tickets about onboarding confusion, one customer churn exit survey mention',
-      desiredOutcome: 'Validated solution hypothesis ready for design sprint or direct implementation',
+      interviewDuration: '45 minutes. Limited access to users (can schedule 5-8 interviews). Engineering capacity for prototyping is 1 engineer for 1 week.',
     },
   },
 
@@ -2757,18 +2866,17 @@ export const PRODUCT_DISCOVERY_LEAD_TEST_DATA: Record<string, SkillDefaultTestDa
     defaultTestCaseId: 'insight-synthesizer-default-1',
     description: 'Synthesizing discovery research findings',
     inputPayload: {
-      researchConducted: `8 user interviews (mix of churned and active users)
-Competitive analysis of 5 competitors
-Analytics review of last 90 days
-Support ticket analysis (50 tickets reviewed)
-Sales call recordings (10 calls)`,
-      rawFindings: `Interviews: Users confused by pricing tiers, want simpler setup, value integrations most
-Competitive: Competitors offer guided setup wizards, better mobile experience
-Analytics: 70% drop at step 3 of onboarding, mobile users 2x more likely to abandon
-Support: Top issue is integration setup, second is billing questions
-Sales: Prospects ask about time-to-value, compare us to Competitor X`,
-      synthesisGoal: 'Identify top 3 opportunities with supporting evidence and confidence levels',
-      audience: 'Product leadership and stakeholders for roadmap planning',
+      researchObjective: 'Identify top 3 opportunities with supporting evidence and confidence levels for roadmap planning',
+      researchNotes: `8 user interviews (mix of churned and active users). Competitive analysis of 5 competitors. Analytics review of last 90 days. Support ticket analysis (50 tickets reviewed). Sales call recordings (10 calls).
+Findings:
+- Interviews: Users confused by pricing tiers, want simpler setup, value integrations most
+- Competitive: Competitors offer guided setup wizards, better mobile experience
+- Analytics: 70% drop at step 3 of onboarding, mobile users 2x more likely to abandon
+- Support: Top issue is integration setup, second is billing questions
+- Sales: Prospects ask about time-to-value, compare us to Competitor X`,
+      participantContext: 'Mix of churned and active users from mid-market segment. 8 participants interviewed.',
+      stakeholders: 'Product leadership and stakeholders for roadmap planning',
+      outputFormat: 'Insight cards with evidence',
     },
   },
 
