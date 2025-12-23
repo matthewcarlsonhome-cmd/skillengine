@@ -12,6 +12,7 @@
 
 import type { TestCase, SkillTestSuite, WorkflowTestSuite } from './testCaseGenerator';
 import { ROLE_TEMPLATE_DEFAULT_TEST_DATA } from './roleTemplateTestData';
+import { PROMPT_ENGINEERING_DEFAULT_TEST_DATA } from './promptEngineeringTestData';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -2025,6 +2026,7 @@ export const ALL_SKILL_DEFAULT_TEST_DATA: Record<string, SkillDefaultTestData> =
   ...AI_SOLUTIONS_ARCHITECT_DEFAULT_TEST_DATA,
   ...ROLE_TEMPLATE_DEFAULT_TEST_DATA,
   ...WAVE_SKILLS_DEFAULT_TEST_DATA,
+  ...PROMPT_ENGINEERING_DEFAULT_TEST_DATA,
 };
 
 /**
