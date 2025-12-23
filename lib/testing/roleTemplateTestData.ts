@@ -62,18 +62,24 @@ export class AuthService {
     defaultTestCaseId: 'tech-docs-default-1',
     description: 'Documenting a payment processing API',
     inputPayload: {
-      projectName: 'Payment Gateway API',
-      projectDescription: 'RESTful API for processing credit card payments, handling refunds, and managing subscriptions. Built with Node.js/Express, uses Stripe as payment processor.',
-      targetAudience: 'External developers integrating our payment system',
-      documentationType: 'API Reference Documentation',
-      existingCode: `// Sample endpoint
+      docType: 'API Reference (OpenAPI style)',
+      projectInfo: `Payment Gateway API - RESTful API for processing credit card payments, handling refunds, and managing subscriptions. Built with Node.js/Express, uses Stripe as payment processor.
+
+Sample Endpoints:
 POST /api/v1/payments/charge
 Request: { amount: number, currency: string, customerId: string, paymentMethodId: string }
 Response: { paymentId: string, status: 'succeeded' | 'failed', receiptUrl: string }
 
 POST /api/v1/subscriptions/create
 Request: { customerId: string, priceId: string, trialDays?: number }
-Response: { subscriptionId: string, status: string, currentPeriodEnd: string }`,
+Response: { subscriptionId: string, status: string, currentPeriodEnd: string }
+
+POST /api/v1/refunds/create
+Request: { paymentId: string, amount?: number, reason: string }
+Response: { refundId: string, status: string, amount: number }`,
+      audience: 'External API Consumers',
+      existingDocs: 'Basic README exists but is outdated. No API reference currently.',
+      requirements: 'Include authentication section, rate limiting info, and code examples in JavaScript, Python, and cURL.',
     },
   },
 
@@ -2326,6 +2332,32 @@ New business shortfall: 5 fewer new logos than planned`,
       audience: 'CRO, CFO, CEO',
     },
   },
+
+  'revenue-operations-manager-gtm-tech-stack-audit': {
+    skillId: 'revenue-operations-manager-gtm-tech-stack-audit',
+    defaultTestCaseId: 'gtm-tech-stack-default-1',
+    description: 'Auditing GTM technology stack for optimization',
+    inputPayload: {
+      currentStack: `CRM: Salesforce Enterprise
+Marketing Automation: HubSpot Marketing Hub Pro
+Sales Engagement: Outreach.io
+Conversation Intelligence: Gong
+Data Enrichment: ZoomInfo + Clearbit
+BI/Analytics: Tableau + Looker
+CPQ: Salesforce CPQ
+Revenue Intelligence: Clari
+Document Management: DocuSign
+Calendar Scheduling: Calendly Teams`,
+      monthlySpend: '$85,000/month across all tools',
+      teamSize: '45 sales reps, 12 SDRs, 8 marketing, 4 RevOps',
+      painPoints: `Duplicate data entry between HubSpot and Salesforce
+Low adoption of Gong (only 30% of reps using consistently)
+No single source of truth for pipeline data
+Manual reporting takes 10+ hours per week
+Integration gaps causing data sync issues`,
+      objectives: 'Reduce tool sprawl, improve data quality, increase rep productivity, enable self-serve reporting',
+    },
+  },
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -2540,6 +2572,35 @@ Budget review ongoing`,
       availableLevers: 'Pricing flexibility (up to 10%), extended term discount, professional services credits, product roadmap influence',
     },
   },
+
+  'customer-success-leader-voice-of-customer-synthesizer': {
+    skillId: 'customer-success-leader-voice-of-customer-synthesizer',
+    defaultTestCaseId: 'voc-synthesizer-default-1',
+    description: 'Synthesizing customer feedback across channels',
+    inputPayload: {
+      feedbackSources: `NPS Survey (Q4 2024):
+- Promoters (9-10): 45% - "Love the automation features", "Support team is excellent"
+- Passives (7-8): 30% - "Good product but expensive", "Missing mobile app"
+- Detractors (0-6): 25% - "Too complex", "Integration issues", "Slow performance"
+
+Support Tickets (Last 90 days):
+- 340 total tickets
+- Top issues: API timeouts (45), Dashboard slow loading (38), Export failures (25)
+- Avg resolution: 4.2 hours
+
+G2 Reviews (Last 6 months):
+- 4.2/5 average (87 reviews)
+- Pros: Feature-rich, Good integrations, Helpful support
+- Cons: Steep learning curve, Pricing, Mobile experience
+
+QBR Feedback:
+- 5 enterprise customers expressed concerns about performance at scale
+- 3 customers requested better reporting capabilities
+- 2 customers considering competitors due to pricing`,
+      timePeriod: 'Q4 2024',
+      customerSegment: 'Enterprise ($50K+ ARR)',
+    },
+  },
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -2579,6 +2640,30 @@ export const SECURITY_COMPLIANCE_ANALYST_TEST_DATA: Record<string, SkillDefaultT
       communicationTiming: 'Internal within 24 hours, external within 72 hours per GDPR',
     },
   },
+
+  'security-compliance-analyst-vendor-security-assessment': {
+    skillId: 'security-compliance-analyst-vendor-security-assessment',
+    defaultTestCaseId: 'vendor-security-default-1',
+    description: 'Assessing vendor security posture',
+    inputPayload: {
+      vendorName: 'DataSync Cloud Services',
+      vendorCategory: 'SaaS - Data Integration',
+      dataAccess: 'Will have access to customer PII, financial data, and proprietary business metrics. API integration with production systems.',
+      questionnaireResponses: `SOC 2 Type II: Yes, report available (dated 6 months ago)
+Encryption: AES-256 at rest, TLS 1.3 in transit
+Data Centers: AWS US-East-1, EU-West-1, with disaster recovery
+Penetration Testing: Annual third-party pentests, last completed 3 months ago
+Access Control: SSO via SAML, RBAC, MFA enforced
+Incident Response: 24/7 SOC, documented IR plan, 4-hour SLA for critical issues
+Data Retention: Configurable, default 90 days, compliant delete within 30 days
+Subprocessors: 3 listed (AWS, Datadog, PagerDuty)
+Insurance: $5M cyber liability coverage`,
+      companyRequirements: `Must comply with: SOC 2, GDPR, CCPA, HIPAA (we have healthcare customers)
+Require: Annual pentests, MFA, encryption at rest/transit, data residency options
+Prefer: Zero-trust architecture, FedRAMP (future government contracts)
+Risk appetite: Medium - strategic vendor, willing to accept reasonable risks with mitigations`,
+    },
+  },
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -2616,6 +2701,34 @@ Each path has 3-5 emails over 14 days with exit conditions`,
       platform: 'HubSpot Marketing Hub Enterprise',
       integration: 'Product usage data synced from Segment, updated daily',
       constraints: 'Must respect send frequency limits (max 2 emails/week per contact)',
+    },
+  },
+
+  'marketing-operations-specialist-data-enrichment-pipeline-designer': {
+    skillId: 'marketing-operations-specialist-data-enrichment-pipeline-designer',
+    defaultTestCaseId: 'data-enrichment-default-1',
+    description: 'Designing data enrichment pipeline for lead scoring',
+    inputPayload: {
+      enrichmentGoals: 'Improve lead scoring accuracy by enriching firmographic and technographic data. Enable better segmentation for personalized campaigns.',
+      currentSources: `Current data sources:
+- Form submissions (basic contact info)
+- Website activity (Segment)
+- Email engagement (HubSpot)
+- CRM records (Salesforce)`,
+      dataQualityIssues: `40% of records missing company size
+60% missing industry classification
+Job titles inconsistent (CEO vs Chief Executive Officer)
+Duplicate records estimated at 15%
+Phone numbers often invalid/outdated`,
+      scoringCriteria: `Current lead scoring:
+- Form fills: +10 points
+- Email opens: +2 points
+- Website visits: +5 points
+- Demo request: +50 points
+Need to add: company fit score, buying intent signals`,
+      techStack: 'HubSpot (marketing automation), Salesforce (CRM), Segment (CDP), Snowflake (data warehouse)',
+      budget: '$5,000/month for enrichment tools',
+      volumeEstimate: '10,000 new leads per month, 500,000 existing records needing enrichment',
     },
   },
 };
@@ -2658,6 +2771,104 @@ Sales: Prospects ask about time-to-value, compare us to Competitor X`,
       audience: 'Product leadership and stakeholders for roadmap planning',
     },
   },
+
+  'product-discovery-lead-assumption-testing-protocol': {
+    skillId: 'product-discovery-lead-assumption-testing-protocol',
+    defaultTestCaseId: 'assumption-testing-default-1',
+    description: 'Creating protocol to test product assumptions',
+    inputPayload: {
+      assumption: 'Enterprise customers will pay 3x more for a dedicated account manager and SLA guarantees.',
+      context: 'We are launching an Enterprise tier. Current largest customers pay $500/month. Proposed Enterprise tier would be $1,500/month with dedicated support.',
+      riskLevel: 'High (pricing strategy depends on this)',
+      constraints: `Time: 2 weeks to validate
+Budget: $2,000 for incentives/research
+Access: Have relationships with 20 enterprise prospects, 5 current large customers`,
+      experimentType: 'Qualitative + Quantitative Mix',
+    },
+  },
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ANALYTICS ENGINEER SKILLS
+// ═══════════════════════════════════════════════════════════════════════════
+
+export const ANALYTICS_ENGINEER_TEST_DATA: Record<string, SkillDefaultTestData> = {
+  'analytics-engineer-insight-pack-generator': {
+    skillId: 'analytics-engineer-insight-pack-generator',
+    defaultTestCaseId: 'insight-pack-default-1',
+    description: 'Generating data insight pack for stakeholders',
+    inputPayload: {
+      analysisGoal: 'Understand why Q4 revenue was 15% below forecast. Identify root causes and leading indicators we missed.',
+      dataSample: `Monthly Revenue (millions):
+Oct: $4.2 (forecast: $4.8)
+Nov: $3.9 (forecast: $5.0)
+Dec: $4.1 (forecast: $5.2)
+
+By Segment:
+Enterprise: $7.8 (on target)
+Mid-Market: $3.2 (20% below)
+SMB: $1.2 (35% below)
+
+Pipeline at Start of Q4: $45M
+Pipeline at End of Q4: $28M
+Win Rate: 18% (vs 25% historical)`,
+      dataDescription: 'Revenue data from Salesforce, pipeline metrics, segment breakdown. 3 years of historical data available for comparison.',
+      audience: 'CFO and revenue leadership team',
+      visualPreferences: 'Clear, executive-friendly charts. Waterfall for variance analysis. Trend lines for patterns.',
+    },
+  },
+
+  'analytics-engineer-data-quality-sla-monitor': {
+    skillId: 'analytics-engineer-data-quality-sla-monitor',
+    defaultTestCaseId: 'data-quality-sla-default-1',
+    description: 'Creating data quality SLA monitoring framework',
+    inputPayload: {
+      dataSource: 'Customer 360 Data Product',
+      dataSchema: `Tables:
+- customers (customer_id, name, email, created_at, segment, health_score)
+- events (event_id, customer_id, event_type, timestamp, properties)
+- subscriptions (sub_id, customer_id, plan, mrr, start_date, end_date)
+- support_tickets (ticket_id, customer_id, created_at, resolved_at, category)
+
+Refresh: Customers/Subscriptions hourly, Events real-time, Tickets every 15 min`,
+      businessCriticality: 'Critical - powers customer success dashboards, executive reporting, and automated health alerts',
+      knownIssues: `Occasional duplicate events (estimated 0.5%)
+Health score sometimes null for new customers
+MRR doesn't always match billing system
+Timezone inconsistencies in timestamps`,
+      stakeholders: 'Customer Success (primary), Finance (secondary), Product Analytics (tertiary)',
+      refreshFrequency: 'Hourly for most tables, real-time for events stream',
+    },
+  },
+
+  'analytics-engineer-self-serve-analytics-enabler': {
+    skillId: 'analytics-engineer-self-serve-analytics-enabler',
+    defaultTestCaseId: 'self-serve-analytics-default-1',
+    description: 'Enabling self-serve analytics for business users',
+    inputPayload: {
+      businessDomain: 'E-commerce operations - order fulfillment, inventory, and customer satisfaction',
+      targetUsers: `Ops Managers (5): Need daily operational dashboards, ad-hoc queries on fulfillment times
+Merchandising Team (8): Product performance, inventory levels, reorder triggers
+Customer Service Leads (3): Customer satisfaction trends, return analysis
+Current SQL skill level: Basic (can filter and group) to None`,
+      dataSources: `Available in Snowflake:
+- orders (10M rows, 3 years)
+- order_items (50M rows)
+- inventory (updated hourly)
+- products (50K SKUs)
+- customers (2M records)
+- returns (500K records)
+- customer_feedback (200K surveys)`,
+      keyMetrics: `Must support:
+- Fulfillment rate and time (by warehouse, product category)
+- Inventory turnover and stockout rates
+- Customer satisfaction (NPS, CSAT) by segment
+- Return rates and reasons
+- Revenue by product/category/region`,
+      existingTools: 'Looker (limited adoption), Snowflake (analytics engineers only), Google Sheets (heavily used)',
+      currentChallenges: 'Users rely on analytics team for basic questions. Looker dashboards outdated. No documentation. Metrics definitions inconsistent.',
+    },
+  },
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -2695,4 +2906,5 @@ export const ROLE_TEMPLATE_DEFAULT_TEST_DATA: Record<string, SkillDefaultTestDat
   ...SECURITY_COMPLIANCE_ANALYST_TEST_DATA,
   ...MARKETING_OPERATIONS_SPECIALIST_TEST_DATA,
   ...PRODUCT_DISCOVERY_LEAD_TEST_DATA,
+  ...ANALYTICS_ENGINEER_TEST_DATA,
 };

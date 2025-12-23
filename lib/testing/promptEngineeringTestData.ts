@@ -82,8 +82,8 @@ Structure your response as:
 // ═══════════════════════════════════════════════════════════════════════════
 
 export const PROMPT_INTAKE_ANALYZER_TEST_DATA: Record<string, SkillDefaultTestData> = {
-  'prompt-intake-analyzer-research': {
-    skillId: 'prompt-intake-analyzer',
+  'prompt-engineer-prompt-intake-analyzer': {
+    skillId: 'prompt-engineer-prompt-intake-analyzer',
     defaultTestCaseId: 'intake-research-1',
     description: 'Market research prompt idea - business context',
     inputPayload: {
@@ -94,7 +94,7 @@ export const PROMPT_INTAKE_ANALYZER_TEST_DATA: Record<string, SkillDefaultTestDa
     },
   },
   'prompt-intake-analyzer-code': {
-    skillId: 'prompt-intake-analyzer',
+    skillId: 'prompt-engineer-prompt-intake-analyzer',
     defaultTestCaseId: 'intake-code-1',
     description: 'Code review prompt idea - technical context',
     inputPayload: {
@@ -105,7 +105,7 @@ export const PROMPT_INTAKE_ANALYZER_TEST_DATA: Record<string, SkillDefaultTestDa
     },
   },
   'prompt-intake-analyzer-content': {
-    skillId: 'prompt-intake-analyzer',
+    skillId: 'prompt-engineer-prompt-intake-analyzer',
     defaultTestCaseId: 'intake-content-1',
     description: 'Content creation prompt idea - creative context',
     inputPayload: {
@@ -116,7 +116,7 @@ export const PROMPT_INTAKE_ANALYZER_TEST_DATA: Record<string, SkillDefaultTestDa
     },
   },
   'prompt-intake-analyzer-vague': {
-    skillId: 'prompt-intake-analyzer',
+    skillId: 'prompt-engineer-prompt-intake-analyzer',
     defaultTestCaseId: 'intake-vague-1',
     description: 'Very vague idea requiring extensive clarification',
     inputPayload: {
@@ -133,8 +133,8 @@ export const PROMPT_INTAKE_ANALYZER_TEST_DATA: Record<string, SkillDefaultTestDa
 // ═══════════════════════════════════════════════════════════════════════════
 
 export const MULTI_TIER_PROMPT_ARCHITECT_TEST_DATA: Record<string, SkillDefaultTestData> = {
-  'multi-tier-architect-analysis': {
-    skillId: 'multi-tier-prompt-architect',
+  'prompt-engineer-multi-tier-prompt-architect': {
+    skillId: 'prompt-engineer-multi-tier-prompt-architect',
     defaultTestCaseId: 'architect-analysis-1',
     description: 'Financial analysis prompt - enterprise tier',
     inputPayload: {
@@ -151,7 +151,7 @@ COMPLIANCE: Ensure all analysis complies with SEC reporting standards.`,
     },
   },
   'multi-tier-architect-code-review': {
-    skillId: 'multi-tier-prompt-architect',
+    skillId: 'prompt-engineer-multi-tier-prompt-architect',
     defaultTestCaseId: 'architect-code-1',
     description: 'Security-focused code review prompt',
     inputPayload: {
@@ -168,7 +168,7 @@ ACTIONABILITY: Every finding must have a specific remediation step.`,
     },
   },
   'multi-tier-architect-creative': {
-    skillId: 'multi-tier-prompt-architect',
+    skillId: 'prompt-engineer-multi-tier-prompt-architect',
     defaultTestCaseId: 'architect-creative-1',
     description: 'Creative writing assistant prompt',
     inputPayload: {
@@ -191,8 +191,8 @@ FEEDBACK: Be encouraging but honest about areas for improvement.`,
 // ═══════════════════════════════════════════════════════════════════════════
 
 export const VERIFICATION_MECHANISM_BUILDER_TEST_DATA: Record<string, SkillDefaultTestData> = {
-  'verification-builder-high-stakes': {
-    skillId: 'verification-mechanism-builder',
+  'prompt-engineer-verification-mechanism-builder': {
+    skillId: 'prompt-engineer-verification-mechanism-builder',
     defaultTestCaseId: 'verification-high-1',
     description: 'High-stakes medical information prompt',
     inputPayload: {
@@ -210,7 +210,7 @@ Always remind users to consult healthcare professionals for personalized advice.
     },
   },
   'verification-builder-research': {
-    skillId: 'verification-mechanism-builder',
+    skillId: 'prompt-engineer-verification-mechanism-builder',
     defaultTestCaseId: 'verification-research-1',
     description: 'Research analysis prompt needing objectivity checks',
     inputPayload: {
@@ -227,7 +227,7 @@ Present findings in an academic style.`,
     },
   },
   'verification-builder-code': {
-    skillId: 'verification-mechanism-builder',
+    skillId: 'prompt-engineer-verification-mechanism-builder',
     defaultTestCaseId: 'verification-code-1',
     description: 'Code generation prompt needing completeness checks',
     inputPayload: {
@@ -238,7 +238,7 @@ Present findings in an academic style.`,
     },
   },
   'verification-builder-balanced': {
-    skillId: 'verification-mechanism-builder',
+    skillId: 'prompt-engineer-verification-mechanism-builder',
     defaultTestCaseId: 'verification-balanced-1',
     description: 'Business analysis prompt needing balanced verification',
     inputPayload: {
@@ -259,8 +259,8 @@ Provide recommendations for go-to-market strategy.`,
 // ═══════════════════════════════════════════════════════════════════════════
 
 export const RESEARCH_GROUNDED_PROMPT_BUILDER_TEST_DATA: Record<string, SkillDefaultTestData> = {
-  'research-builder-ai-ethics': {
-    skillId: 'research-grounded-prompt-builder',
+  'prompt-engineer-research-grounded-prompt-builder': {
+    skillId: 'prompt-engineer-research-grounded-prompt-builder',
     defaultTestCaseId: 'research-ai-ethics-1',
     description: 'AI ethics analysis prompt requiring current research',
     inputPayload: {
@@ -271,7 +271,7 @@ export const RESEARCH_GROUNDED_PROMPT_BUILDER_TEST_DATA: Record<string, SkillDef
     },
   },
   'research-builder-devops': {
-    skillId: 'research-grounded-prompt-builder',
+    skillId: 'prompt-engineer-research-grounded-prompt-builder',
     defaultTestCaseId: 'research-devops-1',
     description: 'DevOps best practices prompt',
     inputPayload: {
@@ -282,7 +282,7 @@ export const RESEARCH_GROUNDED_PROMPT_BUILDER_TEST_DATA: Record<string, SkillDef
     },
   },
   'research-builder-content-strategy': {
-    skillId: 'research-grounded-prompt-builder',
+    skillId: 'prompt-engineer-research-grounded-prompt-builder',
     defaultTestCaseId: 'research-content-1',
     description: 'Content marketing strategy prompt',
     inputPayload: {
@@ -293,7 +293,7 @@ export const RESEARCH_GROUNDED_PROMPT_BUILDER_TEST_DATA: Record<string, SkillDef
     },
   },
   'research-builder-pitfalls': {
-    skillId: 'research-grounded-prompt-builder',
+    skillId: 'prompt-engineer-research-grounded-prompt-builder',
     defaultTestCaseId: 'research-pitfalls-1',
     description: 'Prompt focused on avoiding common mistakes',
     inputPayload: {
@@ -310,8 +310,8 @@ export const RESEARCH_GROUNDED_PROMPT_BUILDER_TEST_DATA: Record<string, SkillDef
 // ═══════════════════════════════════════════════════════════════════════════
 
 export const PROMPT_CRITIQUE_OPTIMIZER_TEST_DATA: Record<string, SkillDefaultTestData> = {
-  'critique-optimizer-basic': {
-    skillId: 'prompt-critique-optimizer',
+  'prompt-engineer-prompt-critique-optimizer': {
+    skillId: 'prompt-engineer-prompt-critique-optimizer',
     defaultTestCaseId: 'critique-basic-1',
     description: 'Basic prompt needing significant improvement',
     inputPayload: {
@@ -322,7 +322,7 @@ export const PROMPT_CRITIQUE_OPTIMIZER_TEST_DATA: Record<string, SkillDefaultTes
     },
   },
   'critique-optimizer-medium': {
-    skillId: 'prompt-critique-optimizer',
+    skillId: 'prompt-engineer-prompt-critique-optimizer',
     defaultTestCaseId: 'critique-medium-1',
     description: 'Medium-quality prompt needing refinement',
     inputPayload: {
@@ -333,7 +333,7 @@ export const PROMPT_CRITIQUE_OPTIMIZER_TEST_DATA: Record<string, SkillDefaultTes
     },
   },
   'critique-optimizer-complex': {
-    skillId: 'prompt-critique-optimizer',
+    skillId: 'prompt-engineer-prompt-critique-optimizer',
     defaultTestCaseId: 'critique-complex-1',
     description: 'Complex prompt with XML structure needing fine-tuning',
     inputPayload: {
@@ -344,7 +344,7 @@ export const PROMPT_CRITIQUE_OPTIMIZER_TEST_DATA: Record<string, SkillDefaultTes
     },
   },
   'critique-optimizer-verification': {
-    skillId: 'prompt-critique-optimizer',
+    skillId: 'prompt-engineer-prompt-critique-optimizer',
     defaultTestCaseId: 'critique-verification-1',
     description: 'Prompt specifically needing better verification',
     inputPayload: {
@@ -368,8 +368,8 @@ Provide a comprehensive report with your findings and recommendations.`,
 // ═══════════════════════════════════════════════════════════════════════════
 
 export const PRODUCTION_PROMPT_GENERATOR_TEST_DATA: Record<string, SkillDefaultTestData> = {
-  'production-generator-enterprise': {
-    skillId: 'production-prompt-generator',
+  'prompt-engineer-production-prompt-generator': {
+    skillId: 'prompt-engineer-production-prompt-generator',
     defaultTestCaseId: 'production-enterprise-1',
     description: 'Enterprise-grade financial analysis prompt',
     inputPayload: {
@@ -381,7 +381,7 @@ export const PRODUCTION_PROMPT_GENERATOR_TEST_DATA: Record<string, SkillDefaultT
     },
   },
   'production-generator-professional': {
-    skillId: 'production-prompt-generator',
+    skillId: 'prompt-engineer-production-prompt-generator',
     defaultTestCaseId: 'production-professional-1',
     description: 'Professional code review prompt',
     inputPayload: {
@@ -393,7 +393,7 @@ export const PRODUCTION_PROMPT_GENERATOR_TEST_DATA: Record<string, SkillDefaultT
     },
   },
   'production-generator-standard': {
-    skillId: 'production-prompt-generator',
+    skillId: 'prompt-engineer-production-prompt-generator',
     defaultTestCaseId: 'production-standard-1',
     description: 'Standard content writing prompt',
     inputPayload: {
@@ -405,7 +405,7 @@ export const PRODUCTION_PROMPT_GENERATOR_TEST_DATA: Record<string, SkillDefaultT
     },
   },
   'production-generator-rapid': {
-    skillId: 'production-prompt-generator',
+    skillId: 'prompt-engineer-production-prompt-generator',
     defaultTestCaseId: 'production-rapid-1',
     description: 'Rapid prototyping prompt',
     inputPayload: {
@@ -417,7 +417,7 @@ export const PRODUCTION_PROMPT_GENERATOR_TEST_DATA: Record<string, SkillDefaultT
     },
   },
   'production-generator-data': {
-    skillId: 'production-prompt-generator',
+    skillId: 'prompt-engineer-production-prompt-generator',
     defaultTestCaseId: 'production-data-1',
     description: 'Data analysis workflow prompt',
     inputPayload: {
@@ -443,14 +443,14 @@ export const PROMPT_ENGINEERING_DEFAULT_TEST_DATA: Record<string, SkillDefaultTe
   ...PRODUCTION_PROMPT_GENERATOR_TEST_DATA,
 };
 
-// Default test case for each skill (first one in each category)
+// Default test case for each skill (maps skill ID to test data key)
 export const PROMPT_ENGINEERING_SKILL_DEFAULTS: Record<string, string> = {
-  'prompt-intake-analyzer': 'prompt-intake-analyzer-research',
-  'multi-tier-prompt-architect': 'multi-tier-architect-analysis',
-  'verification-mechanism-builder': 'verification-builder-high-stakes',
-  'research-grounded-prompt-builder': 'research-builder-ai-ethics',
-  'prompt-critique-optimizer': 'critique-optimizer-basic',
-  'production-prompt-generator': 'production-generator-enterprise',
+  'prompt-engineer-prompt-intake-analyzer': 'prompt-engineer-prompt-intake-analyzer',
+  'prompt-engineer-multi-tier-prompt-architect': 'prompt-engineer-multi-tier-prompt-architect',
+  'prompt-engineer-verification-mechanism-builder': 'prompt-engineer-verification-mechanism-builder',
+  'prompt-engineer-research-grounded-prompt-builder': 'prompt-engineer-research-grounded-prompt-builder',
+  'prompt-engineer-prompt-critique-optimizer': 'prompt-engineer-prompt-critique-optimizer',
+  'prompt-engineer-production-prompt-generator': 'prompt-engineer-production-prompt-generator',
 };
 
 export default PROMPT_ENGINEERING_DEFAULT_TEST_DATA;
