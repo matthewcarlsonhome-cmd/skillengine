@@ -12,6 +12,8 @@
  */
 
 import { supabase } from '../supabase';
+import { getLibrarySkill } from '../skillLibrary';
+import { getSkill } from '../skills/registry';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -76,11 +78,19 @@ export interface SkillRegistryEntry {
  * Submit a grade to Supabase (anonymized - no user tracking)
  * The database trigger will automatically update aggregate scores
  * and check if improvement should be triggered.
+ *
+ * Auto-registers the skill if it doesn't exist in the registry.
  */
 export async function submitGrade(
   grade: GradeSubmission
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    // Ensure skill is registered before grading
+    const registered = await ensureSkillRegistered(grade.skillId);
+    if (!registered.success) {
+      console.warn('Could not register skill, attempting grade anyway:', registered.error);
+    }
+
     const { error } = await supabase.from('skill_grades_v2').insert({
       skill_id: grade.skillId,
       skill_version: grade.skillVersion,
@@ -106,6 +116,87 @@ export async function submitGrade(
   } catch (err) {
     console.error('Grade submission error:', err);
     return { success: false, error: 'Failed to submit grade' };
+  }
+}
+
+/**
+ * Ensure a skill is registered in the skill_registry table.
+ * Looks up skill info from library/registry and auto-registers if missing.
+ */
+async function ensureSkillRegistered(
+  skillId: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    // Check if already registered
+    const exists = await skillExistsInRegistry(skillId);
+    if (exists) {
+      return { success: true };
+    }
+
+    // Look up skill from library first (has richest data)
+    const librarySkill = getLibrarySkill(skillId);
+    if (librarySkill) {
+      // Get prompts - may be empty for builtin skills
+      const systemInstruction = librarySkill.prompts?.systemInstruction ||
+        '[Dynamic prompt - generated at runtime based on user inputs]';
+      const userPromptTemplate = librarySkill.prompts?.userPromptTemplate ||
+        '[Dynamic prompt - generated at runtime based on user inputs]';
+
+      // Determine skill type
+      let skillType: 'built-in' | 'dynamic' | 'community' | 'library' = 'library';
+      if (librarySkill.source === 'builtin') {
+        skillType = 'built-in';
+      } else if (librarySkill.source === 'role-template') {
+        skillType = 'library';
+      }
+
+      return await registerSkill(
+        skillId,
+        librarySkill.name,
+        skillType,
+        systemInstruction,
+        userPromptTemplate
+      );
+    }
+
+    // Try unified skill registry (static + dynamic)
+    const unifiedSkill = await getSkill(skillId);
+    if (unifiedSkill) {
+      const { skill, source } = unifiedSkill;
+      const skillType = source === 'static' ? 'built-in' : 'dynamic';
+
+      // Extract prompts based on skill type
+      let systemInstruction = '[Dynamic prompt - generated at runtime]';
+      let userPromptTemplate = '[Dynamic prompt - generated at runtime]';
+
+      if ('prompts' in skill && skill.prompts) {
+        // Dynamic skill with prompts object
+        systemInstruction = skill.prompts.systemInstruction || systemInstruction;
+        userPromptTemplate = skill.prompts.userPromptTemplate || userPromptTemplate;
+      }
+
+      return await registerSkill(
+        skillId,
+        skill.name,
+        skillType,
+        systemInstruction,
+        userPromptTemplate
+      );
+    }
+
+    // Skill not found in any source - register with minimal info
+    // This handles edge cases like community skills or external skills
+    console.warn(`Skill ${skillId} not found in any source, registering with minimal info`);
+    return await registerSkill(
+      skillId,
+      skillId, // Use ID as name if unknown
+      'community',
+      '[Unknown skill - prompt not available]',
+      '[Unknown skill - prompt not available]'
+    );
+  } catch (err) {
+    console.error('Failed to ensure skill registered:', err);
+    return { success: false, error: 'Failed to register skill' };
   }
 }
 

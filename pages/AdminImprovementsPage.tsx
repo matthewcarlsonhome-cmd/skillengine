@@ -463,7 +463,8 @@ const AdminImprovementsPage: React.FC = () => {
 
               {skills.length === 0 && (
                 <div className="text-center py-12 text-muted-foreground">
-                  No skills registered yet. Run the initialization script first.
+                  <p>No skills registered yet.</p>
+                  <p className="text-sm mt-2">Skills are automatically registered when users grade them.</p>
                 </div>
               )}
             </div>

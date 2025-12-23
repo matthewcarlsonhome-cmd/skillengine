@@ -1,5 +1,6 @@
 // Role Templates - Pre-built skill bundles for common professional roles
 import type { DynamicSkill } from './storage/types';
+import { PROMPT_ENGINEERING_SKILLS } from './skills/professional/promptEngineering';
 
 export interface RoleTemplate {
   id: string;
@@ -53600,6 +53601,23 @@ Generate a comprehensive self-serve analytics enablement plan.`,
         },
       },
     ],
+  },
+
+  // Prompt Engineer Role
+  {
+    id: 'prompt-engineer',
+    name: 'AI Prompt Engineer',
+    description: 'Design, optimize, and validate production-grade AI prompts using advanced engineering methodologies.',
+    icon: 'Wand2',
+    color: 'text-violet-500',
+    staticSkillIds: [
+      'job-readiness-score',
+      'skills-gap-analyzer',
+      'interview-prep',
+      'salary-negotiation-master',
+      'linkedin-optimizer-pro',
+    ],
+    dynamicSkills: PROMPT_ENGINEERING_SKILLS as Omit<DynamicSkill, 'id' | 'workspaceId' | 'version' | 'createdAt' | 'updatedAt' | 'executionCount'>[],
   },
 ];
 
