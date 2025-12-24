@@ -1,6 +1,7 @@
 // Skill Builder - Generates full skill definitions from recommendations
 
 import type { JDAnalysis, SkillRecommendation, DynamicSkill, DynamicFormInput } from '../../storage/types';
+import { logger } from '../../logger';
 
 // Theme palette for generated skills
 const THEME_PALETTE = [
@@ -219,7 +220,7 @@ export async function buildMultipleSkills(
       skills.push(skill);
       progress[i].status = 'complete';
     } catch (error) {
-      console.error(`Failed to build skill ${recommendation.name}:`, error);
+      logger.error(`Failed to build skill ${recommendation.name}`, { error: error instanceof Error ? error.message : String(error) });
       progress[i].status = 'error';
       progress[i].error = error instanceof Error ? error.message : 'Unknown error';
     }

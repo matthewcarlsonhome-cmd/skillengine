@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useDebounce } from '../hooks/useDebounce';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
+import { logger } from '../lib/logger';
 import {
   fetchCommunitySkills,
   incrementSkillUseCount,
@@ -84,7 +85,7 @@ const CommunitySkillsPage: React.FC = () => {
       roles.sort();
       setAvailableRoles(roles);
     } catch (error) {
-      console.error('Failed to load skills:', error);
+      logger.error('Failed to load skills', { error: error instanceof Error ? error.message : String(error) });
     } finally {
       setLoading(false);
     }

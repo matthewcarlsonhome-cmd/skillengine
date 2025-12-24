@@ -24,6 +24,8 @@ import { trackSkillUsage } from '../lib/admin';
 import { getApiKey } from '../lib/apiKeyStorage';
 import { useAuth } from './useAuth';
 import { useToast } from './useToast';
+import { useSkillRateLimiter } from './useRateLimiter';
+import { logger } from '../lib/logger';
 import type { SkillExecution } from '../lib/storage/types';
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -93,6 +95,10 @@ export interface UseSkillExecutionReturn {
   progress: number;
   error: string | null;
   reset: () => void;
+  /** Whether rate limit is active (cooldown period) */
+  isRateLimited: boolean;
+  /** Milliseconds remaining in cooldown */
+  cooldownRemaining: number;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -129,6 +135,7 @@ export function useSkillExecution(
 
   const { user, appUser } = useAuth();
   const { addToast } = useToast();
+  const rateLimiter = useSkillRateLimiter<ExecutionResult>();
 
   const [output, setOutput] = useState('');
   const [citations, setCitations] = useState<Citation[]>([]);
@@ -138,6 +145,9 @@ export function useSkillExecution(
 
   const abortControllerRef = useRef<AbortController | null>(null);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Create a child logger for this hook
+  const log = logger.child({ component: 'useSkillExecution' });
 
   const reset = useCallback(() => {
     setOutput('');
@@ -295,7 +305,8 @@ export function useSkillExecution(
     return { output: fullOutput, citations: [] };
   }, [onChunk]);
 
-  const execute = useCallback(async (
+  // Internal execution logic (called by rate limiter)
+  const executeInternal = useCallback(async (
     promptData: PromptData,
     config: ExecutionConfig,
     skillMetadata: SkillMetadata,
@@ -310,10 +321,17 @@ export function useSkillExecution(
       retryDelayMs = 1000,
     } = config;
 
+    log.info('Starting skill execution', {
+      skillId: skillMetadata.id,
+      skillName: skillMetadata.name,
+      provider: apiProvider,
+    });
+
     // Validate API key
     if (!apiKey) {
       const storedKey = getApiKey(apiProvider as 'gemini' | 'claude');
       if (!storedKey) {
+        log.warn('Missing API key for skill execution', { provider: apiProvider });
         throw new SkillExecutionError(
           'API key is required',
           'MISSING_API_KEY',
@@ -370,6 +388,12 @@ export function useSkillExecution(
       setCitations(result.citations);
       updateProgress(100);
 
+      log.info('Skill execution completed', {
+        skillId: skillMetadata.id,
+        durationMs: result.durationMs,
+        outputLength: result.output.length,
+      });
+
       // Save execution to history
       if (saveExecution) {
         const execution: SkillExecution = {
@@ -407,6 +431,13 @@ export function useSkillExecution(
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
       setError(errorMessage);
       addToast(errorMessage, 'error');
+
+      log.error('Skill execution failed', {
+        skillId: skillMetadata.id,
+        error: errorMessage,
+        durationMs: Date.now() - startTime,
+      });
+
       onError?.(err instanceof Error ? err : new Error(errorMessage));
 
       return {
@@ -426,6 +457,7 @@ export function useSkillExecution(
       setIsLoading(false);
     }
   }, [
+    log,
     reset,
     executeWithRetry,
     executeGemini,
@@ -441,6 +473,51 @@ export function useSkillExecution(
     onProgress,
   ]);
 
+  // Rate-limited execute wrapper
+  const execute = useCallback(async (
+    promptData: PromptData,
+    config: ExecutionConfig,
+    skillMetadata: SkillMetadata,
+    inputs?: Record<string, unknown>
+  ): Promise<ExecutionResult> => {
+    // Check if rate limited
+    if (rateLimiter.isLimited) {
+      const cooldownSec = Math.ceil(rateLimiter.cooldownRemaining / 1000);
+      log.warn('Skill execution rate limited', {
+        skillId: skillMetadata.id,
+        cooldownRemaining: rateLimiter.cooldownRemaining,
+      });
+      addToast(`Please wait ${cooldownSec}s before running another skill`, 'warning');
+      return {
+        output: '',
+        citations: [],
+        durationMs: 0,
+        success: false,
+        error: `Rate limited. Please wait ${cooldownSec} seconds.`,
+      };
+    }
+
+    // Execute through rate limiter
+    const result = await rateLimiter.execute(async () => {
+      return executeInternal(promptData, config, skillMetadata, inputs);
+    });
+
+    // If rate limiter returned null (queue full), return error
+    if (result === null) {
+      log.warn('Skill execution rejected - queue full', { skillId: skillMetadata.id });
+      addToast('Too many pending requests. Please wait.', 'warning');
+      return {
+        output: '',
+        citations: [],
+        durationMs: 0,
+        success: false,
+        error: 'Request queue full. Please wait.',
+      };
+    }
+
+    return result;
+  }, [rateLimiter, executeInternal, addToast, log]);
+
   return {
     execute,
     cancel,
@@ -450,6 +527,8 @@ export function useSkillExecution(
     progress,
     error,
     reset,
+    isRateLimited: rateLimiter.isLimited,
+    cooldownRemaining: rateLimiter.cooldownRemaining,
   };
 }
 

@@ -1,6 +1,7 @@
 // Job Description Analyzer - AI-powered analysis engine
 
 import type { JDAnalysis, SkillRecommendation } from '../../storage/types';
+import { logger } from '../../logger';
 
 // System prompt for JD analysis
 const JD_ANALYSIS_SYSTEM_PROMPT = `You are an expert job description analyzer. Your task is to deeply analyze job descriptions and extract structured information that will be used to generate AI-powered productivity skills.
@@ -133,7 +134,7 @@ export async function analyzeJobDescription(
     const cleaned = cleanJsonResponse(responseText);
     return JSON.parse(cleaned) as JDAnalysis;
   } catch (error) {
-    console.error('Failed to parse JD analysis:', error, responseText);
+    logger.error('Failed to parse JD analysis', { error: error instanceof Error ? error.message : String(error) });
     throw new Error('Failed to parse job description analysis. Please try again.');
   }
 }
@@ -169,7 +170,7 @@ Generate exactly 15 skill recommendations as a JSON array.`;
     // Ensure we have exactly 15 (or at least some)
     return recommendations.slice(0, 15);
   } catch (error) {
-    console.error('Failed to parse skill recommendations:', error, responseText);
+    logger.error('Failed to parse skill recommendations', { error: error instanceof Error ? error.message : String(error) });
     throw new Error('Failed to generate skill recommendations. Please try again.');
   }
 }
@@ -200,7 +201,7 @@ async function callGemini(
 ): Promise<string> {
   const { GoogleGenerativeAI } = await import('@google/generative-ai');
 
-  console.log('Calling Gemini API with @google/generative-ai SDK...');
+  logger.debug('Calling Gemini API with @google/generative-ai SDK...');
 
   const genAI = new GoogleGenerativeAI(apiKey);
   const model = genAI.getGenerativeModel({
@@ -217,8 +218,8 @@ async function callGemini(
   });
 
   const text = result.response.text() || '';
-  console.log('Gemini response length:', text.length);
-  console.log('Gemini response preview:', text.substring(0, 500));
+  logger.debug('Gemini response length:', text.length);
+  logger.debug('Gemini response preview:', text.substring(0, 500));
 
   return text;
 }
@@ -229,7 +230,7 @@ async function callClaude(
   systemPrompt: string,
   userPrompt: string
 ): Promise<string> {
-  console.log('Calling Claude API...');
+  logger.debug('Calling Claude API...');
 
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -250,15 +251,15 @@ async function callClaude(
 
     if (!response.ok) {
       const error = await response.text();
-      console.error('Claude API error response:', error);
+      logger.error('Claude API error response', { error });
       throw new Error(`Claude API error: ${error}`);
     }
 
     const data = await response.json();
-    console.log('Claude response received, length:', data.content?.[0]?.text?.length || 0);
+    logger.debug('Claude response received, length:', data.content?.[0]?.text?.length || 0);
     return data.content?.[0]?.text || '';
   } catch (error) {
-    console.error('Claude fetch error:', error);
+    logger.error('Claude fetch error', { error: error instanceof Error ? error.message : String(error) });
     if (error instanceof TypeError && error.message === 'Failed to fetch') {
       throw new Error('Failed to connect to Claude API. This may be due to: 1) Ad blocker blocking api.anthropic.com, 2) Network/firewall restrictions, 3) CORS issues. Try disabling ad blockers or check browser console for details.');
     }

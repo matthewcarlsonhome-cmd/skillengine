@@ -17,6 +17,7 @@ import { analyzeEvalRecords, type EvalRecord } from './grader';
 import type { SkillSchema } from './registrySnapshot';
 import { SKILLS } from '../skills/static';
 import { callGeminiAPI } from './apiHelper';
+import { logger } from '../logger';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -229,7 +230,7 @@ export async function generateOptimizationProposal(
 ): Promise<PromptOptimizationProposal | null> {
   const skill = SKILLS[skillId];
   if (!skill) {
-    console.error(`Skill not found: ${skillId}`);
+    logger.error(`Skill not found: ${skillId}`);
     return null;
   }
 
@@ -237,7 +238,7 @@ export async function generateOptimizationProposal(
   const analysis = await analyzeSkillForOptimization(skillId, options);
 
   if (!analysis.recommendsOptimization) {
-    console.log(`Optimization not recommended for ${skillId}: ${analysis.reason}`);
+    logger.info(`Optimization not recommended for ${skillId}: ${analysis.reason}`);
     return null;
   }
 
@@ -270,7 +271,7 @@ export async function generateOptimizationProposal(
       }
       parsed = JSON.parse(jsonStr);
     } catch {
-      console.error('Failed to parse optimization response');
+      logger.error('Failed to parse optimization response');
       return null;
     }
 
@@ -283,7 +284,7 @@ export async function generateOptimizationProposal(
       proposedPrompt: parsed.proposedPrompt || '',
     };
   } catch (error) {
-    console.error(`Optimization generation failed: ${error}`);
+    logger.error('Optimization generation failed', { error: error instanceof Error ? error.message : String(error) });
     return null;
   }
 }

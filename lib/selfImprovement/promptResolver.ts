@@ -9,6 +9,7 @@
  */
 
 import { getSkillPrompt, skillExistsInRegistry } from './supabaseGrading';
+import { logger } from '../logger';
 
 export interface ResolvedPrompt {
   systemInstruction: string;
@@ -47,7 +48,7 @@ export async function getEffectivePrompt(
       };
     }
   } catch (err) {
-    console.warn(`Failed to fetch prompt from registry for ${skillId}:`, err);
+    logger.warn(`Failed to fetch prompt from registry for ${skillId}`, { error: err instanceof Error ? err.message : String(err) });
   }
 
   // Fall back to code-defined prompt

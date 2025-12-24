@@ -28,6 +28,7 @@ import { Textarea } from './ui/Textarea';
 import { cn } from '../lib/theme';
 import type { QualityDimension } from '../lib/selfImprovement/types';
 import { submitGrade, hashInputs, getSkillVersion } from '../lib/selfImprovement/supabaseGrading';
+import { logger } from '../lib/logger';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -263,10 +264,10 @@ export const SkillGrading: React.FC<SkillGradingProps> = ({
             onDismiss?.();
           }, 2000);
         } else {
-          console.error('Failed to submit quick grade:', result.error);
+          logger.error('Failed to submit quick grade', { error: result.error });
         }
       } catch (error) {
-        console.error('Failed to submit quick grade:', error);
+        logger.error('Failed to submit quick grade', { error: error instanceof Error ? error.message : String(error) });
       } finally {
         setIsSubmitting(false);
       }
@@ -313,10 +314,10 @@ export const SkillGrading: React.FC<SkillGradingProps> = ({
           onDismiss?.();
         }, 2000);
       } else {
-        console.error('Failed to submit grade:', result.error);
+        logger.error('Failed to submit grade', { error: result.error });
       }
     } catch (error) {
-      console.error('Failed to submit grade:', error);
+      logger.error('Failed to submit grade', { error: error instanceof Error ? error.message : String(error) });
     } finally {
       setIsSubmitting(false);
     }

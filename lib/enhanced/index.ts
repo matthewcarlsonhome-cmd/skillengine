@@ -186,6 +186,7 @@ export {
 // CONVENIENCE FUNCTIONS
 // ═══════════════════════════════════════════════════════════════════════════
 
+import { logger } from '../logger';
 import {
   startTrace,
   completeTrace,
@@ -369,7 +370,7 @@ export function postExecutionComplete(params: {
   if (params.output) {
     const piiResult = detectPII(params.output);
     if (piiResult.found) {
-      console.warn('PII detected in output:', piiResult.detections.length, 'instances');
+      logger.warn('PII detected in output', { instanceCount: piiResult.detections.length });
     }
   }
 

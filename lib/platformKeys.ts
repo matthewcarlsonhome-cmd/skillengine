@@ -11,6 +11,7 @@
 
 import { getApiKey, hasStoredKey } from './apiKeyStorage';
 import { supabase, getSession } from './supabase';
+import { logger } from './logger';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -215,7 +216,7 @@ export function getPlatformConfig(): PlatformConfig {
       return JSON.parse(stored);
     }
   } catch (error) {
-    console.error('Failed to load platform config:', error);
+    logger.error('Failed to load platform config', { error: error instanceof Error ? error.message : String(error) });
   }
   return getDefaultPlatformConfig();
 }
@@ -230,7 +231,7 @@ export function savePlatformConfig(config: Partial<PlatformConfig>): void {
     };
     localStorage.setItem(PLATFORM_KEY_STORAGE, JSON.stringify(updated));
   } catch (error) {
-    console.error('Failed to save platform config:', error);
+    logger.error('Failed to save platform config', { error: error instanceof Error ? error.message : String(error) });
   }
 }
 
@@ -293,7 +294,7 @@ export function getStoredKeyMode(): StoredKeyMode {
       return JSON.parse(stored);
     }
   } catch (error) {
-    console.error('Failed to load key mode:', error);
+    logger.error('Failed to load key mode', { error: error instanceof Error ? error.message : String(error) });
   }
   return {
     mode: 'personal', // Default to personal keys until platform is set up
@@ -527,7 +528,7 @@ export async function fetchPlatformStatus(): Promise<PlatformStatusResponse> {
     const { data, error } = await supabase.functions.invoke('platform-status');
 
     if (error) {
-      console.error('Failed to fetch platform status:', error);
+      logger.error('Failed to fetch platform status', { error: error instanceof Error ? error.message : String(error) });
       return { available: false, providers: { gemini: false, claude: false, openai: false } };
     }
 
@@ -555,7 +556,7 @@ export async function fetchPlatformStatus(): Promise<PlatformStatusResponse> {
 
     return response;
   } catch (err) {
-    console.error('Platform status fetch error:', err);
+    logger.error('Platform status fetch error', { error: err instanceof Error ? err.message : String(err) });
     return { available: false, providers: { gemini: false, claude: false, openai: false } };
   }
 }
@@ -818,13 +819,13 @@ export async function getUserCreditBalance(): Promise<number> {
       .single();
 
     if (error) {
-      console.error('Failed to fetch credit balance:', error);
+      logger.error('Failed to fetch credit balance', { error: error instanceof Error ? error.message : String(error) });
       return 0;
     }
 
     return data?.balance ?? 0;
   } catch (err) {
-    console.error('Credit balance fetch error:', err);
+    logger.error('Credit balance fetch error', { error: err instanceof Error ? err.message : String(err) });
     return 0;
   }
 }
@@ -837,6 +838,6 @@ export async function initializePlatformKeys(): Promise<void> {
   try {
     await fetchPlatformStatus();
   } catch (err) {
-    console.warn('Failed to initialize platform keys:', err);
+    logger.warn('Failed to initialize platform keys', { error: err instanceof Error ? err.message : String(err) });
   }
 }

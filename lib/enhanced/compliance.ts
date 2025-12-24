@@ -5,6 +5,7 @@
  * for skills and workflows.
  */
 
+import { logger } from '../logger';
 import type {
   CompliancePolicy,
   PolicyRule,
@@ -525,7 +526,7 @@ export function logAudit(entry: Omit<AuditLogEntry, 'id' | 'timestamp'>): AuditL
     try {
       cb(fullEntry);
     } catch (e) {
-      console.error('Audit callback error:', e);
+      logger.error('Audit callback error', { error: e instanceof Error ? e.message : String(e) });
     }
   });
 

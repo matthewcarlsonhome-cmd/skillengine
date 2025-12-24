@@ -6,6 +6,7 @@ import { useDebounce } from '../hooks/useDebounce';
 import { db } from '../lib/storage/indexeddb';
 import type { DynamicSkill } from '../lib/storage/types';
 import { useToast } from '../hooks/useToast';
+import { logger } from '../lib/logger';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import {
@@ -42,7 +43,7 @@ const MySkillsPage: React.FC = () => {
       allSkills.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
       setSkills(allSkills);
     } catch (error) {
-      console.error('Failed to load skills:', error);
+      logger.error('Failed to load skills', { error: error instanceof Error ? error.message : String(error) });
       addToast('Failed to load skills', 'error');
     } finally {
       setLoading(false);

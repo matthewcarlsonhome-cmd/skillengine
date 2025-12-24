@@ -5,6 +5,7 @@
  * Logs email sends, filter applications, and subscription changes.
  */
 
+import { logger } from '../logger';
 import { supabase } from '../supabase';
 import type { AdminAuditLog, AdminActionType, SegmentationFilter } from './types';
 
@@ -58,7 +59,7 @@ export async function logAdminAction(
     if (!error) {
       return log;
     }
-    console.warn('Failed to save audit log to Supabase, falling back to localStorage', error);
+    logger.warn('Failed to save audit log to Supabase, falling back to localStorage', { error: error instanceof Error ? error.message : String(error) });
   }
 
   // Fallback to localStorage

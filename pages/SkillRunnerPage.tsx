@@ -66,6 +66,7 @@ import { InlineProviderSelector } from '../components/InlineProviderSelector';
 import { checkPlatformStatus, type PlatformStatus } from '../lib/platformProxy';
 import { hasStoredKey } from '../lib/apiKeyStorage';
 import { calculateCost } from '../lib/billing';
+import { logger } from '../lib/logger';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // MEMOIZED FORM INPUT COMPONENT
@@ -308,7 +309,9 @@ const SkillRunnerPage: React.FC = () => {
 
   // Fetch platform status on mount
   useEffect(() => {
-    checkPlatformStatus().then(setPlatformStatus).catch(console.error);
+    checkPlatformStatus().then(setPlatformStatus).catch((error) => {
+      logger.error('Failed to check platform status', { error: error instanceof Error ? error.message : String(error) });
+    });
   }, []);
 
   // Load test data

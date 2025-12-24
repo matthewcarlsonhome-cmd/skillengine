@@ -76,6 +76,7 @@ import { streamAIProxy } from '../lib/platformKeys';
 import { calculateCost } from '../lib/billing';
 import { recordUsage, createUsageRecordFromExecution } from '../lib/usageLedger';
 import { useAuth } from '../hooks/useAuth';
+import { logger } from '../lib/logger';
 
 // Icon mapping for workflows
 const WORKFLOW_ICONS: Record<string, React.FC<{ className?: string }>> = {
@@ -157,7 +158,9 @@ const WorkflowRunnerPage: React.FC = () => {
 
   // Fetch platform status on mount
   useEffect(() => {
-    checkPlatformStatus().then(setPlatformStatus).catch(console.error);
+    checkPlatformStatus().then(setPlatformStatus).catch((error) => {
+      logger.error('Failed to check platform status', { error: error instanceof Error ? error.message : String(error) });
+    });
   }, []);
 
   // Refresh profile data on mount

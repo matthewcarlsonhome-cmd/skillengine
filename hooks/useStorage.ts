@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { db } from '../lib/storage';
 import type { Workspace, DynamicSkill, SkillExecution } from '../lib/storage/types';
+import { logger } from '../lib/logger';
 
 // Hook to initialize storage
 export function useStorageInit() {
@@ -207,7 +208,7 @@ export function useExecutionHistory(skillId?: string, limit: number = 50) {
         : await db.getRecentExecutions(limit);
       setExecutions(data);
     } catch (err) {
-      console.error('Failed to load executions:', err);
+      logger.error('Failed to load executions', { error: err instanceof Error ? err.message : String(err) });
     } finally {
       setLoading(false);
     }

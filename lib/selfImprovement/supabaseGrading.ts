@@ -14,6 +14,7 @@
 import { supabase } from '../supabase';
 import { getLibrarySkill } from '../skillLibrary';
 import { getSkill } from '../skills/registry';
+import { logger } from '../logger';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -88,7 +89,7 @@ export async function submitGrade(
     // Ensure skill is registered before grading
     const registered = await ensureSkillRegistered(grade.skillId);
     if (!registered.success) {
-      console.warn('Could not register skill, attempting grade anyway:', registered.error);
+      logger.warn('Could not register skill, attempting grade anyway', { error: registered.error });
     }
 
     const { error } = await supabase.from('skill_grades_v2').insert({
@@ -108,13 +109,13 @@ export async function submitGrade(
     });
 
     if (error) {
-      console.error('Failed to submit grade:', error);
+      logger.error('Failed to submit grade', { error: error.message });
       return { success: false, error: error.message };
     }
 
     return { success: true };
   } catch (err) {
-    console.error('Grade submission error:', err);
+    logger.error('Grade submission error', { error: err instanceof Error ? err.message : String(err) });
     return { success: false, error: 'Failed to submit grade' };
   }
 }
@@ -186,7 +187,7 @@ async function ensureSkillRegistered(
 
     // Skill not found in any source - register with minimal info
     // This handles edge cases like community skills or external skills
-    console.warn(`Skill ${skillId} not found in any source, registering with minimal info`);
+    logger.warn(`Skill ${skillId} not found in any source, registering with minimal info`);
     return await registerSkill(
       skillId,
       skillId, // Use ID as name if unknown
@@ -195,7 +196,7 @@ async function ensureSkillRegistered(
       '[Unknown skill - prompt not available]'
     );
   } catch (err) {
-    console.error('Failed to ensure skill registered:', err);
+    logger.error('Failed to ensure skill registered', { error: err instanceof Error ? err.message : String(err) });
     return { success: false, error: 'Failed to register skill' };
   }
 }
@@ -231,7 +232,7 @@ export async function getSkillScores(skillId: string): Promise<SkillScores | nul
       .single();
 
     if (error || !data) {
-      console.warn('Skill not found in registry:', skillId);
+      logger.warn('Skill not found in registry', { skillId });
       return null;
     }
 
@@ -253,7 +254,7 @@ export async function getSkillScores(skillId: string): Promise<SkillScores | nul
       gradesUntilEligible: Math.max(0, data.min_grades_for_improvement - data.total_grades),
     };
   } catch (err) {
-    console.error('Failed to get skill scores:', err);
+    logger.error('Failed to get skill scores', { error: err instanceof Error ? err.message : String(err) });
     return null;
   }
 }
@@ -297,7 +298,7 @@ export async function getSkillPrompt(skillId: string): Promise<SkillPrompt | nul
       version: data.current_version,
     };
   } catch (err) {
-    console.error('Failed to get skill prompt:', err);
+    logger.error('Failed to get skill prompt', { error: err instanceof Error ? err.message : String(err) });
     return null;
   }
 }
@@ -350,13 +351,13 @@ export async function registerSkill(
     );
 
     if (error) {
-      console.error('Failed to register skill:', error);
+      logger.error('Failed to register skill', { error: error.message });
       return { success: false, error: error.message };
     }
 
     return { success: true };
   } catch (err) {
-    console.error('Skill registration error:', err);
+    logger.error('Skill registration error', { error: err instanceof Error ? err.message : String(err) });
     return { success: false, error: 'Failed to register skill' };
   }
 }

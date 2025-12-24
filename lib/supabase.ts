@@ -1,12 +1,13 @@
 // Supabase Client Configuration
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './database.types';
+import { logger } from './logger';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn('Supabase environment variables not configured. Community features will be disabled.');
+  logger.warn('Supabase environment variables not configured. Community features will be disabled.');
 }
 
 // Create Supabase client (will be null if not configured)
@@ -93,7 +94,7 @@ function getSafeRedirectUrl(): string {
   }
 
   // If current origin is not allowed, log a warning
-  console.warn('Current origin not in allowed redirect hosts:', window.location.origin);
+  logger.warn('Current origin not in allowed redirect hosts', { origin: window.location.origin });
 
   // Return just the path - Supabase will use the configured site URL
   return '/auth/callback';
@@ -223,7 +224,7 @@ export async function fetchCommunitySkills(options?: {
   const { data, error } = await query;
 
   if (error) {
-    console.error('Error fetching community skills:', error);
+    logger.error('Error fetching community skills', { error: error instanceof Error ? error.message : String(error) });
     return [];
   }
 
@@ -262,7 +263,7 @@ export async function publishSkillToCommunity(skill: {
     }, { onConflict: 'id' });
 
   if (profileError) {
-    console.error('Error ensuring profile exists:', profileError);
+    logger.error('Error ensuring profile exists', { error: profileError instanceof Error ? profileError.message : String(profileError) });
     // Continue anyway - profile might already exist
   }
 
@@ -291,11 +292,11 @@ export async function publishSkillToCommunity(skill: {
     .single();
 
   if (error) {
-    console.error('Error publishing skill:', error);
+    logger.error('Error publishing skill', { error: error instanceof Error ? error.message : String(error) });
     throw new Error(`Failed to publish skill: ${error.message}`);
   }
 
-  console.log('Skill published successfully:', data);
+  logger.info('Skill published successfully', { skillId: data.id, skillName: data.name });
   return data as CommunitySkill;
 }
 
@@ -307,7 +308,7 @@ export async function incrementSkillUseCount(skillId: string): Promise<void> {
     const { error: rpcError } = await supabase.rpc('increment_skill_use_count', { skill_id: skillId });
 
     if (rpcError) {
-      console.warn('RPC increment failed:', rpcError.message);
+      logger.warn('RPC increment failed', { error: rpcError.message });
       // Fall back: fetch current count and update
       const { data: skill } = await supabase
         .from('skill_templates')
@@ -323,7 +324,7 @@ export async function incrementSkillUseCount(skillId: string): Promise<void> {
       }
     }
   } catch (err) {
-    console.error('Failed to increment use count:', err);
+    logger.error('Failed to increment use count', { error: err instanceof Error ? err.message : String(err) });
   }
 }
 
@@ -333,7 +334,7 @@ export async function rateSkill(skillId: string, rating: number): Promise<void> 
   const user = await getCurrentUser();
   if (!user) throw new Error('Must be signed in to rate skills');
 
-  console.log('Rating skill:', skillId, 'with rating:', rating);
+  logger.debug('Rating skill', { skillId, rating });
 
   // Check if user has already rated this skill
   const { data: existingRating, error: fetchError } = await supabase
@@ -344,13 +345,13 @@ export async function rateSkill(skillId: string, rating: number): Promise<void> 
     .maybeSingle();
 
   if (fetchError) {
-    console.error('Error checking existing rating:', fetchError);
+    logger.error('Error checking existing rating', { error: fetchError instanceof Error ? fetchError.message : String(fetchError) });
   }
 
   const oldRating = existingRating?.rating || 0;
   const isNewRating = !existingRating;
 
-  console.log('Existing rating:', existingRating, 'isNewRating:', isNewRating);
+  logger.debug('Existing rating check', { existingRating, isNewRating });
 
   // Use INSERT for new ratings, UPDATE for existing
   if (isNewRating) {
@@ -363,10 +364,10 @@ export async function rateSkill(skillId: string, rating: number): Promise<void> 
       });
 
     if (insertError) {
-      console.error('Error inserting rating:', insertError);
+      logger.error('Error inserting rating', { error: insertError instanceof Error ? insertError.message : String(insertError) });
       throw insertError;
     }
-    console.log('Rating inserted successfully');
+    logger.debug('Rating inserted successfully');
 
     // Update skill_templates: increment count and add to sum
     const { data: skill } = await supabase
@@ -378,7 +379,7 @@ export async function rateSkill(skillId: string, rating: number): Promise<void> 
     if (skill) {
       const newSum = (skill.rating_sum || 0) + rating;
       const newCount = (skill.rating_count || 0) + 1;
-      console.log('Updating to:', { rating_sum: newSum, rating_count: newCount });
+      logger.debug('Updating rating aggregates', { rating_sum: newSum, rating_count: newCount });
 
       const { error: updateError } = await supabase
         .from('skill_templates')
@@ -389,9 +390,9 @@ export async function rateSkill(skillId: string, rating: number): Promise<void> 
         .eq('id', skillId);
 
       if (updateError) {
-        console.error('Error updating skill rating aggregates:', updateError);
+        logger.error('Error updating skill rating aggregates', { error: updateError instanceof Error ? updateError.message : String(updateError) });
       } else {
-        console.log('Rating aggregates updated successfully');
+        logger.debug('Rating aggregates updated successfully');
       }
     }
   } else {
@@ -402,10 +403,10 @@ export async function rateSkill(skillId: string, rating: number): Promise<void> 
       .eq('id', existingRating.id);
 
     if (updateRatingError) {
-      console.error('Error updating rating:', updateRatingError);
+      logger.error('Error updating rating', { error: updateRatingError instanceof Error ? updateRatingError.message : String(updateRatingError) });
       throw updateRatingError;
     }
-    console.log('Rating updated successfully');
+    logger.debug('Rating updated successfully');
 
     // Update skill_templates: adjust the sum (count stays same)
     const { data: skill } = await supabase
@@ -416,7 +417,7 @@ export async function rateSkill(skillId: string, rating: number): Promise<void> 
 
     if (skill) {
       const newSum = (skill.rating_sum || 0) - oldRating + rating;
-      console.log('Updating sum from', skill.rating_sum, 'to', newSum);
+      logger.debug('Updating rating sum', { oldSum: skill.rating_sum, newSum });
 
       const { error: updateError } = await supabase
         .from('skill_templates')
@@ -426,9 +427,9 @@ export async function rateSkill(skillId: string, rating: number): Promise<void> 
         .eq('id', skillId);
 
       if (updateError) {
-        console.error('Error updating skill rating sum:', updateError);
+        logger.error('Error updating skill rating sum', { error: updateError instanceof Error ? updateError.message : String(updateError) });
       } else {
-        console.log('Rating sum updated successfully');
+        logger.debug('Rating sum updated successfully');
       }
     }
   }
@@ -447,7 +448,7 @@ export async function deleteCommunitySkill(skillId: string): Promise<void> {
     .eq('created_by', user.id); // RLS also enforces this, but double-check
 
   if (error) {
-    console.error('Error deleting skill:', error);
+    logger.error('Error deleting skill', { error: error instanceof Error ? error.message : String(error) });
     throw new Error(`Failed to delete skill: ${error.message}`);
   }
 }

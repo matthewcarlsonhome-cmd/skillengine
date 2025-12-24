@@ -13,6 +13,7 @@
  */
 
 import { encrypt, decrypt, isCryptoAvailable } from './crypto';
+import { logger } from './logger';
 
 const STORAGE_KEY = 'skillengine_api_keys';
 const LEGACY_STORAGE_KEY = 'skillengine_api_keys'; // Same key for migration
@@ -67,7 +68,7 @@ async function migrateLegacyKeys(): Promise<void> {
     const parsed: StoredKeys = JSON.parse(stored);
     if (!isLegacyFormat(parsed)) return; // Already migrated
 
-    console.log('Migrating API keys to encrypted format...');
+    logger.info('Migrating API keys to encrypted format...');
 
     const providers: Array<'gemini' | 'claude' | 'chatgpt'> = [
       'gemini',
@@ -92,9 +93,9 @@ async function migrateLegacyKeys(): Promise<void> {
     }
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
-    console.log('API key migration complete');
+    logger.info('API key migration complete');
   } catch (error) {
-    console.error('Failed to migrate legacy keys:', error);
+    logger.error('Failed to migrate legacy keys', { error: error instanceof Error ? error.message : String(error) });
   }
 }
 
@@ -103,9 +104,7 @@ async function migrateLegacyKeys(): Promise<void> {
  */
 export async function initializeApiKeyStorage(): Promise<void> {
   if (!isCryptoAvailable()) {
-    console.warn(
-      'Web Crypto API not available - API key encryption will be limited'
-    );
+    logger.warn('Web Crypto API not available - API key encryption will be limited');
     return;
   }
 
@@ -136,7 +135,7 @@ export async function saveApiKey(
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
   } catch (error) {
-    console.error('Failed to save API key:', error);
+    logger.error('Failed to save API key', { error: error instanceof Error ? error.message : String(error) });
     throw new Error('Failed to save API key securely');
   }
 }
@@ -151,7 +150,7 @@ async function getStoredKeysInternal(): Promise<StoredKeys> {
       return JSON.parse(stored);
     }
   } catch (error) {
-    console.error('Failed to parse stored keys:', error);
+    logger.error('Failed to parse stored keys', { error: error instanceof Error ? error.message : String(error) });
   }
   return { _version: ENCRYPTION_VERSION };
 }
@@ -178,7 +177,7 @@ export async function getApiKey(
     // Decrypt with new method
     return await decrypt(encryptedKey);
   } catch (error) {
-    console.error('Failed to retrieve API key:', error);
+    logger.error('Failed to retrieve API key', { error: error instanceof Error ? error.message : String(error) });
     return '';
   }
 }
@@ -206,9 +205,7 @@ export function getApiKeySync(
 
     // For new format, we can't decrypt synchronously
     // Return empty and log warning
-    console.warn(
-      'getApiKeySync called on encrypted keys - use async getApiKey() instead'
-    );
+    logger.warn('getApiKeySync called on encrypted keys - use async getApiKey() instead');
     return '';
   } catch {
     return '';
@@ -233,7 +230,7 @@ export function getStoredKeys(): StoredKeys {
       };
     }
   } catch (error) {
-    console.error('Failed to parse stored keys:', error);
+    logger.error('Failed to parse stored keys', { error: error instanceof Error ? error.message : String(error) });
   }
   return {};
 }
@@ -266,7 +263,7 @@ export async function clearApiKey(
     existing.lastUpdated = new Date().toISOString();
     localStorage.setItem(STORAGE_KEY, JSON.stringify(existing));
   } catch (error) {
-    console.error('Failed to clear API key:', error);
+    logger.error('Failed to clear API key', { error: error instanceof Error ? error.message : String(error) });
   }
 }
 
@@ -277,7 +274,7 @@ export function clearAllApiKeys(): void {
   try {
     localStorage.removeItem(STORAGE_KEY);
   } catch (error) {
-    console.error('Failed to clear all API keys:', error);
+    logger.error('Failed to clear all API keys', { error: error instanceof Error ? error.message : String(error) });
   }
 }
 

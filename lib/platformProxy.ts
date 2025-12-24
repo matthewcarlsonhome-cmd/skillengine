@@ -7,6 +7,7 @@
  */
 
 import { supabase } from './supabase';
+import { logger } from './logger';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -121,7 +122,7 @@ export async function checkPlatformStatus(): Promise<PlatformStatus> {
       };
       return platformStatusCache;
     } catch (error) {
-      console.warn('Platform status check failed:', error);
+      logger.warn('Platform status check failed', { error: error instanceof Error ? error.message : String(error) });
       platformStatusCache = {
         available: false,
         providers: { gemini: false, claude: false, openai: false }

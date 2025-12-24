@@ -24,6 +24,7 @@ import {
   X,
 } from 'lucide-react';
 import { cn } from '../lib/theme';
+import { logger } from '../lib/logger';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -161,7 +162,7 @@ export const ValidatedInput: React.FC<ValidatedInputProps> = ({
       const text = await file.text();
       onChange(text);
     } catch (error) {
-      console.error('Error reading file:', error);
+      logger.error('Error reading file', { error: error instanceof Error ? error.message : String(error) });
     }
 
     // Reset file input

@@ -12,6 +12,7 @@ import {
   CHATGPT_MODELS,
   getModelsForProvider,
 } from './platformKeys';
+import { logger } from './logger';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -437,7 +438,7 @@ export function getUserCredits(): UserCredits {
       return credits;
     }
   } catch (error) {
-    console.error('Failed to load user credits:', error);
+    logger.error('Failed to load user credits', { error: error instanceof Error ? error.message : String(error) });
   }
 
   // Default: free tier
@@ -454,7 +455,7 @@ export function saveUserCredits(credits: UserCredits): void {
   try {
     localStorage.setItem(CREDITS_STORAGE_KEY, JSON.stringify(credits));
   } catch (error) {
-    console.error('Failed to save user credits:', error);
+    logger.error('Failed to save user credits', { error: error instanceof Error ? error.message : String(error) });
   }
 }
 

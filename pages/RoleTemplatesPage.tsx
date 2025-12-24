@@ -7,6 +7,7 @@ import { SKILLS } from '../lib/skills';
 import { db } from '../lib/storage/indexeddb';
 import type { DynamicSkill } from '../lib/storage/types';
 import { useToast } from '../hooks/useToast';
+import { logger } from '../lib/logger';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import {
@@ -77,7 +78,7 @@ const RoleTemplatesPage: React.FC = () => {
 
         setInstalledRoles(installedSet);
       } catch (error) {
-        console.error('Failed to check installed roles:', error);
+        logger.error('Failed to check installed roles', { error: error instanceof Error ? error.message : String(error) });
       }
     };
 
@@ -121,7 +122,7 @@ const RoleTemplatesPage: React.FC = () => {
         addToast(`${role.name} skills already installed`, 'success');
       }
     } catch (error) {
-      console.error('Failed to install role:', error);
+      logger.error('Failed to install role', { error: error instanceof Error ? error.message : String(error) });
       addToast('Failed to install skills', 'error');
     } finally {
       setInstalling(null);

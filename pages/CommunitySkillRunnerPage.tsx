@@ -40,6 +40,7 @@ import {
 } from 'lucide-react';
 import { TestDataPanel } from '../components/TestDataPanel';
 import { SkillGrading } from '../components/SkillGrading';
+import { logger } from '../lib/logger';
 
 // Theme palette for display
 const THEME = {
@@ -97,7 +98,7 @@ const CommunitySkillRunnerPage: React.FC = () => {
           setFormState(initial);
         }
       } catch (e) {
-        console.error('Failed to load community skill:', e);
+        logger.error('Failed to load community skill', { error: e instanceof Error ? e.message : String(e) });
       } finally {
         setLoading(false);
       }

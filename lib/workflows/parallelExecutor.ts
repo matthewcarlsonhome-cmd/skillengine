@@ -6,6 +6,7 @@
  * dependencies and groups independent steps together.
  */
 
+import { logger } from '../logger';
 import type { WorkflowStep } from '../storage/types';
 
 /**
@@ -67,7 +68,7 @@ export function buildExecutionGroups(steps: WorkflowStep[]): ExecutionGroup[] {
 
     if (readySteps.length === 0) {
       // Circular dependency or missing dependency
-      console.error('Circular or missing dependency detected');
+      logger.error('Circular or missing dependency detected');
       // Add remaining steps as a sequential fallback
       for (const stepId of remaining) {
         groups.push({ groupIndex: groupIndex++, stepIds: [stepId] });

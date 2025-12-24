@@ -12,6 +12,8 @@
  *   much better protection than plain text or XOR obfuscation
  */
 
+import { logger } from './logger';
+
 // Constants
 const ALGORITHM = 'AES-GCM';
 const KEY_LENGTH = 256;
@@ -117,7 +119,7 @@ export async function encrypt(plaintext: string): Promise<string> {
     // Return as base64
     return btoa(String.fromCharCode(...combined));
   } catch (error) {
-    console.error('Encryption failed:', error);
+    logger.error('Encryption failed', { error: error instanceof Error ? error.message : String(error) });
     throw new Error('Failed to encrypt data');
   }
 }
@@ -151,7 +153,7 @@ export async function decrypt(encryptedData: string): Promise<string> {
     return decoder.decode(decrypted);
   } catch (error) {
     // Don't log the actual error as it might leak information
-    console.error('Decryption failed - data may be corrupted or from another device');
+    logger.error('Decryption failed - data may be corrupted or from another device');
     throw new Error('Failed to decrypt data');
   }
 }

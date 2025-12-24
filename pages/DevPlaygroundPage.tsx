@@ -11,6 +11,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import { logger } from '../lib/logger';
 import {
   getAllSkillSchemas,
   getAllWorkflowSchemas,
@@ -350,7 +351,7 @@ const DevPlaygroundPage: React.FC = () => {
       await saveEvalRecord(evalRecord);
       setGradingResult(evalRecord);
     } catch (error) {
-      console.error('Grading failed:', error);
+      logger.error('Grading failed', { error: error instanceof Error ? error.message : String(error) });
       alert(`Grading failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsGrading(false);

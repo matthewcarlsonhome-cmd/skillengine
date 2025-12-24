@@ -7,6 +7,7 @@ import { Input } from '../components/ui/Input';
 import { useToast } from '../hooks/useToast';
 import { useTheme } from '../hooks/useTheme';
 import { useAuth } from '../hooks/useAuth';
+import { logger } from '../lib/logger';
 import {
   saveApiKey,
   getApiKey,
@@ -90,7 +91,7 @@ const SettingsPage: React.FC = () => {
           setMarketingOptIn(emailPref.marketingEmailOptIn);
         }
       } catch (e) {
-        console.error('Failed to load email preferences:', e);
+        logger.error('Failed to load email preferences', { error: e instanceof Error ? e.message : String(e) });
       }
     }
 
@@ -102,7 +103,7 @@ const SettingsPage: React.FC = () => {
       setSkillCount(skills.length);
       setOutputCount(outputs.length);
     } catch (e) {
-      console.error('Failed to load data counts:', e);
+      logger.error('Failed to load data counts', { error: e instanceof Error ? e.message : String(e) });
     }
   };
 

@@ -5,6 +5,7 @@
  */
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { logger } from '../logger';
 
 export interface ApiCallResult {
   response: string;
@@ -44,7 +45,7 @@ export async function callGeminiAPI(
       tokenCount: response.usageMetadata?.totalTokenCount,
     };
   } catch (error) {
-    console.error('Error calling Gemini API:', error);
+    logger.error('Error calling Gemini API', { error: error instanceof Error ? error.message : String(error) });
     if (error instanceof Error && error.message.includes('API key not valid')) {
       throw new Error('The provided API key is not valid. Please check your key and try again.');
     }

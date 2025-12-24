@@ -36,6 +36,7 @@ import {
   User,
   Briefcase,
 } from 'lucide-react';
+import { logger } from '../lib/logger';
 
 type TabType = 'saved' | 'favorites' | 'history';
 
@@ -65,28 +66,28 @@ const DashboardPage: React.FC = () => {
     try {
       // Initialize db first
       await db.init();
-      console.log('Dashboard: DB initialized');
+      logger.info('Dashboard: DB initialized');
 
       const [outputs, favorites, executions] = await Promise.all([
         db.getAllSavedOutputs().catch((e) => {
-          console.error('Failed to load saved outputs:', e);
+          logger.error('Failed to load saved outputs', { error: e instanceof Error ? e.message : String(e) });
           return [] as SavedOutput[];
         }),
         db.getAllFavoriteSkills().catch((e) => {
-          console.error('Failed to load favorites:', e);
+          logger.error('Failed to load favorites', { error: e instanceof Error ? e.message : String(e) });
           return [] as FavoriteSkill[];
         }),
         db.getRecentExecutions(100).catch((e) => {
-          console.error('Failed to load executions:', e);
+          logger.error('Failed to load executions', { error: e instanceof Error ? e.message : String(e) });
           return [] as SkillExecution[];
         })
       ]);
-      console.log('Dashboard: Data loaded', { outputs: outputs.length, favorites: favorites.length, executions: executions.length });
+      logger.info('Dashboard: Data loaded', { outputs: outputs.length, favorites: favorites.length, executions: executions.length });
       setSavedOutputs(outputs);
       setFavoriteSkills(favorites);
       setRecentExecutions(executions);
     } catch (err) {
-      console.error('Failed to load dashboard data:', err);
+      logger.error('Failed to load dashboard data', { error: err instanceof Error ? err.message : String(err) });
       setError(err instanceof Error ? err.message : 'Failed to load data');
       addToast('Failed to load dashboard data', 'error');
     } finally {

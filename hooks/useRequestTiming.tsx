@@ -13,6 +13,7 @@
  */
 
 import { useCallback, useRef, useState } from 'react';
+import { logger } from '../lib/logger';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -84,36 +85,24 @@ export function useRequestTiming() {
 
     logsRef.current.push(log);
 
-    // Console logging for demo debugging
+    // Logging for demo debugging
     const prefix = `[Request ${requestId}]`;
     const time = new Date().toISOString().split('T')[1];
 
     switch (event) {
       case 'start':
-        console.log(
-          `%c${prefix} Started at ${time}`,
-          'color: #3b82f6; font-weight: bold',
-          metadata
-        );
+        logger.info(`${prefix} Started at ${time}`, metadata);
         // Add performance mark
         performance.mark(`request-start-${requestId}`);
         break;
 
       case 'first-token':
-        console.log(
-          `%c${prefix} First token received`,
-          'color: #22c55e',
-          metadata
-        );
+        logger.info(`${prefix} First token received`, metadata);
         performance.mark(`request-first-token-${requestId}`);
         break;
 
       case 'complete':
-        console.log(
-          `%c${prefix} Completed`,
-          'color: #22c55e; font-weight: bold',
-          metadata
-        );
+        logger.info(`${prefix} Completed`, metadata);
         performance.mark(`request-complete-${requestId}`);
         // Measure duration
         try {
@@ -128,19 +117,11 @@ export function useRequestTiming() {
         break;
 
       case 'error':
-        console.error(
-          `%c${prefix} Error`,
-          'color: #ef4444; font-weight: bold',
-          metadata
-        );
+        logger.error(`${prefix} Error`, metadata);
         break;
 
       case 'cancel':
-        console.warn(
-          `%c${prefix} Cancelled`,
-          'color: #f59e0b',
-          metadata
-        );
+        logger.warn(`${prefix} Cancelled`, metadata);
         break;
     }
   }, []);
