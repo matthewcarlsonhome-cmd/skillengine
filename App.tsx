@@ -45,6 +45,12 @@ import { AppProvider } from './hooks/useAppContext';    // Global app state (res
 import { AuthProvider } from './hooks/useAuth';         // Supabase authentication state
 
 // ─────────────────────────────────────────────────────────────────────────────
+// ERROR HANDLING
+// Catches React errors and prevents full app crashes
+// ─────────────────────────────────────────────────────────────────────────────
+import { PageErrorBoundary } from './components/ErrorBoundary';
+
+// ─────────────────────────────────────────────────────────────────────────────
 // LAYOUT COMPONENTS
 // Persistent UI elements that appear on every page
 // ─────────────────────────────────────────────────────────────────────────────
@@ -156,10 +162,12 @@ function App() {
           <ThemeProvider>
             {/* ToastProvider: Global toast notification system */}
             <ToastProvider>
-              {/* Main app container with full viewport height and flex layout */}
-              <div className="min-h-screen bg-background font-sans antialiased flex flex-col">
-                {/* Sticky header with navigation */}
-                <Header />
+              {/* PageErrorBoundary: Catches React errors and displays fallback UI */}
+              <PageErrorBoundary>
+                {/* Main app container with full viewport height and flex layout */}
+                <div className="min-h-screen bg-background font-sans antialiased flex flex-col">
+                  {/* Sticky header with navigation */}
+                  <Header />
 
                 {/* Main content area - grows to fill available space */}
                 <main className="flex-1">
@@ -277,6 +285,7 @@ function App() {
                 {/* Command palette overlay (Cmd+K to open) */}
                 <CommandPalette />
               </div>
+              </PageErrorBoundary>
             </ToastProvider>
           </ThemeProvider>
         </Router>
