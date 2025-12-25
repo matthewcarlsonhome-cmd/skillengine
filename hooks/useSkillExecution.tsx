@@ -329,7 +329,7 @@ export function useSkillExecution(
 
     // Validate API key
     if (!apiKey) {
-      const storedKey = getApiKey(apiProvider as 'gemini' | 'claude');
+      const storedKey = await getApiKey(apiProvider as 'gemini' | 'claude');
       if (!storedKey) {
         log.warn('Missing API key for skill execution', { provider: apiProvider });
         throw new SkillExecutionError(

@@ -108,12 +108,41 @@ export function useRateLimiter<T = unknown>(
   const cooldownTimerRef = useRef<NodeJS.Timeout | null>(null);
   const cooldownIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const lastExecutionRef = useRef<number>(0);
+  // Track all pending timeouts for cleanup
+  const pendingTimersRef = useRef<Set<NodeJS.Timeout>>(new Set());
+  // Track if component is mounted to prevent state updates after unmount
+  const isMountedRef = useRef(true);
+
+  // Helper to safely set state only if mounted
+  const safeSetState = useCallback(<S>(setter: React.Dispatch<React.SetStateAction<S>>, value: React.SetStateAction<S>) => {
+    if (isMountedRef.current) {
+      setter(value);
+    }
+  }, []);
+
+  // Helper to create tracked timeouts
+  const createTrackedTimeout = useCallback((callback: () => void, delay: number): NodeJS.Timeout => {
+    const timeout = setTimeout(() => {
+      pendingTimersRef.current.delete(timeout);
+      if (isMountedRef.current) {
+        callback();
+      }
+    }, delay);
+    pendingTimersRef.current.add(timeout);
+    return timeout;
+  }, []);
 
   // Cleanup on unmount
   useEffect(() => {
+    isMountedRef.current = true;
     return () => {
+      isMountedRef.current = false;
+      // Clear all tracked timers
       if (cooldownTimerRef.current) clearTimeout(cooldownTimerRef.current);
       if (cooldownIntervalRef.current) clearInterval(cooldownIntervalRef.current);
+      // Clear all pending retry/other timers
+      pendingTimersRef.current.forEach((timer) => clearTimeout(timer));
+      pendingTimersRef.current.clear();
     };
   }, []);
 
@@ -121,6 +150,9 @@ export function useRateLimiter<T = unknown>(
    * Process the next item in the queue
    */
   const processQueue = useCallback(async () => {
+    // Check if component is still mounted
+    if (!isMountedRef.current) return;
+
     // Check if we can process more requests
     if (activeCountRef.current >= mergedConfig.maxConcurrent) return;
     if (queueRef.current.length === 0) return;
@@ -129,25 +161,32 @@ export function useRateLimiter<T = unknown>(
     const timeSinceLastExecution = Date.now() - lastExecutionRef.current;
     if (timeSinceLastExecution < mergedConfig.cooldownMs && lastExecutionRef.current > 0) {
       const remainingCooldown = mergedConfig.cooldownMs - timeSinceLastExecution;
-      setIsLimited(true);
-      setCooldownRemaining(remainingCooldown);
+      safeSetState(setIsLimited, true);
+      safeSetState(setCooldownRemaining, remainingCooldown);
 
       // Schedule processing after cooldown
       if (!cooldownTimerRef.current) {
-        cooldownTimerRef.current = setTimeout(() => {
+        cooldownTimerRef.current = createTrackedTimeout(() => {
           cooldownTimerRef.current = null;
-          setIsLimited(false);
-          setCooldownRemaining(0);
+          safeSetState(setIsLimited, false);
+          safeSetState(setCooldownRemaining, 0);
           processQueue();
         }, remainingCooldown);
 
         // Update cooldown remaining periodically
         cooldownIntervalRef.current = setInterval(() => {
+          if (!isMountedRef.current) {
+            if (cooldownIntervalRef.current) {
+              clearInterval(cooldownIntervalRef.current);
+              cooldownIntervalRef.current = null;
+            }
+            return;
+          }
           const remaining = Math.max(
             0,
             mergedConfig.cooldownMs - (Date.now() - lastExecutionRef.current)
           );
-          setCooldownRemaining(remaining);
+          safeSetState(setCooldownRemaining, remaining);
           if (remaining <= 0 && cooldownIntervalRef.current) {
             clearInterval(cooldownIntervalRef.current);
             cooldownIntervalRef.current = null;
@@ -162,21 +201,38 @@ export function useRateLimiter<T = unknown>(
     if (!request) return;
 
     activeCountRef.current++;
-    setActiveCount(activeCountRef.current);
-    setPendingCount(queueRef.current.length);
+    safeSetState(setActiveCount, activeCountRef.current);
+    safeSetState(setPendingCount, queueRef.current.length);
+
+    // Create a timeout that we can cancel
+    let timeoutId: NodeJS.Timeout | null = null;
 
     try {
-      // Execute with timeout
+      // Execute with timeout (track the timeout for cleanup)
       const result = await Promise.race([
         request.fn(),
-        new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error('Request timeout')), mergedConfig.timeoutMs)
-        ),
+        new Promise<never>((_, reject) => {
+          timeoutId = createTrackedTimeout(() => {
+            reject(new Error('Request timeout'));
+          }, mergedConfig.timeoutMs);
+        }),
       ]);
+
+      // Clear the timeout if request completed successfully
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+        pendingTimersRef.current.delete(timeoutId);
+      }
 
       lastExecutionRef.current = Date.now();
       request.resolve(result);
     } catch (error) {
+      // Clear timeout on error too
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+        pendingTimersRef.current.delete(timeoutId);
+      }
+
       // Handle retry
       if (
         mergedConfig.enableRetry &&
@@ -184,13 +240,14 @@ export function useRateLimiter<T = unknown>(
         error instanceof Error &&
         error.message !== 'Request timeout'
       ) {
-        // Exponential backoff
+        // Exponential backoff with tracked timeout
         const delay = mergedConfig.retryBaseDelayMs * Math.pow(2, request.retryCount);
         request.retryCount++;
 
-        setTimeout(() => {
+        createTrackedTimeout(() => {
+          if (!isMountedRef.current) return;
           queueRef.current.unshift(request);
-          setPendingCount(queueRef.current.length);
+          safeSetState(setPendingCount, queueRef.current.length);
           processQueue();
         }, delay);
       } else {
@@ -198,22 +255,22 @@ export function useRateLimiter<T = unknown>(
       }
     } finally {
       activeCountRef.current--;
-      setActiveCount(activeCountRef.current);
+      safeSetState(setActiveCount, activeCountRef.current);
       lastExecutionRef.current = Date.now();
 
       // Start cooldown
-      setIsLimited(true);
-      setCooldownRemaining(mergedConfig.cooldownMs);
+      safeSetState(setIsLimited, true);
+      safeSetState(setCooldownRemaining, mergedConfig.cooldownMs);
 
       // Process next after cooldown
-      cooldownTimerRef.current = setTimeout(() => {
+      cooldownTimerRef.current = createTrackedTimeout(() => {
         cooldownTimerRef.current = null;
-        setIsLimited(false);
-        setCooldownRemaining(0);
+        safeSetState(setIsLimited, false);
+        safeSetState(setCooldownRemaining, 0);
         processQueue();
       }, mergedConfig.cooldownMs);
     }
-  }, [mergedConfig]);
+  }, [mergedConfig, safeSetState, createTrackedTimeout]);
 
   /**
    * Execute a rate-limited function
@@ -256,15 +313,18 @@ export function useRateLimiter<T = unknown>(
       clearInterval(cooldownIntervalRef.current);
       cooldownIntervalRef.current = null;
     }
+    // Clear all pending timers
+    pendingTimersRef.current.forEach((timer) => clearTimeout(timer));
+    pendingTimersRef.current.clear();
 
     // Reset state
     activeCountRef.current = 0;
     lastExecutionRef.current = 0;
-    setIsLimited(false);
-    setCooldownRemaining(0);
-    setPendingCount(0);
-    setActiveCount(0);
-  }, []);
+    safeSetState(setIsLimited, false);
+    safeSetState(setCooldownRemaining, 0);
+    safeSetState(setPendingCount, 0);
+    safeSetState(setActiveCount, 0);
+  }, [safeSetState]);
 
   return {
     execute,
