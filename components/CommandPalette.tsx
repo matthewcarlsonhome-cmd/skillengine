@@ -1,8 +1,18 @@
-// Command Palette - Quick navigation with Ctrl+K
+/**
+ * CommandPalette - Enhanced spotlight-style search (Cmd+K / Ctrl+K)
+ *
+ * Features:
+ * - Keyboard shortcut activation (Cmd+K or Ctrl+K)
+ * - Search across skills, pages, and recent items
+ * - Keyboard navigation (arrows, enter, escape)
+ * - Smooth animations and transitions
+ * - Recent searches tracking
+ */
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDebounce } from '../hooks/useDebounce';
+import { SKILLS } from '../lib/skills';
 import {
   LayoutDashboard,
   Sparkles,
@@ -30,6 +40,14 @@ import {
   Calendar,
   User,
   Wand2,
+  Command,
+  BookOpen,
+  Layers,
+  ArrowUp,
+  ArrowDown,
+  CornerDownLeft,
+  X,
+  Clock,
 } from 'lucide-react';
 
 interface Command {
@@ -39,7 +57,33 @@ interface Command {
   icon: React.FC<{ className?: string }>;
   action: () => void;
   keywords: string[];
+  type?: 'page' | 'skill';
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// KEYBOARD SHORTCUT HINT COMPONENT
+// ═══════════════════════════════════════════════════════════════════════════
+
+export const CommandPaletteHint: React.FC<{ className?: string }> = ({ className }) => {
+  const isMac = typeof navigator !== 'undefined' && navigator.platform.toUpperCase().includes('MAC');
+
+  const openPalette = () => {
+    window.dispatchEvent(new CustomEvent('openCommandPalette'));
+  };
+
+  return (
+    <button
+      onClick={openPalette}
+      className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border bg-muted/50 hover:bg-muted transition-all duration-200 text-xs text-muted-foreground hover:text-foreground group ${className || ''}`}
+    >
+      <Search className="h-3.5 w-3.5 group-hover:scale-110 transition-transform" />
+      <span className="hidden sm:inline">Search</span>
+      <kbd className="ml-1 px-1.5 py-0.5 rounded bg-background border text-[10px] font-mono shadow-sm">
+        {isMac ? '⌘' : 'Ctrl'}K
+      </kbd>
+    </button>
+  );
+};
 
 const CommandPalette: React.FC = () => {
   const navigate = useNavigate();
@@ -49,6 +93,19 @@ const CommandPalette: React.FC = () => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Build skills commands from SKILLS registry
+  const skillCommands = useMemo<Command[]>(() => {
+    return Object.values(SKILLS).map((skill) => ({
+      id: `skill-${skill.id}`,
+      name: skill.name,
+      description: skill.description,
+      icon: Sparkles,
+      action: () => navigate(`/skill/${skill.id}`),
+      keywords: [skill.category, ...skill.name.toLowerCase().split(' ')],
+      type: 'skill' as const,
+    }));
+  }, [navigate]);
+
   const commands: Command[] = [
     {
       id: 'profile',
@@ -57,6 +114,7 @@ const CommandPalette: React.FC = () => {
       icon: User,
       action: () => navigate('/profile'),
       keywords: ['profile', 'resume', 'background', 'info', 'personal', 'me'],
+      type: 'page',
     },
     {
       id: 'dashboard',
@@ -252,14 +310,45 @@ const CommandPalette: React.FC = () => {
     },
   ];
 
-  const filteredCommands = commands.filter((cmd) => {
+  // Merge all commands
+  const allCommands = useMemo(() => [...commands, ...skillCommands], [skillCommands]);
+
+  const filteredCommands = useMemo(() => {
     const searchLower = debouncedSearch.toLowerCase();
-    return (
-      cmd.name.toLowerCase().includes(searchLower) ||
-      cmd.description.toLowerCase().includes(searchLower) ||
-      cmd.keywords.some((k) => k.includes(searchLower))
-    );
-  });
+    if (!searchLower) {
+      // Show pages first when no search
+      return commands.slice(0, 10);
+    }
+
+    const filtered = allCommands.filter((cmd) => {
+      return (
+        cmd.name.toLowerCase().includes(searchLower) ||
+        cmd.description.toLowerCase().includes(searchLower) ||
+        cmd.keywords.some((k) => k.toLowerCase().includes(searchLower))
+      );
+    });
+
+    // Sort: exact matches first, then starts with, then contains
+    filtered.sort((a, b) => {
+      const aExact = a.name.toLowerCase() === searchLower;
+      const bExact = b.name.toLowerCase() === searchLower;
+      if (aExact && !bExact) return -1;
+      if (!aExact && bExact) return 1;
+
+      const aStarts = a.name.toLowerCase().startsWith(searchLower);
+      const bStarts = b.name.toLowerCase().startsWith(searchLower);
+      if (aStarts && !bStarts) return -1;
+      if (!aStarts && bStarts) return 1;
+
+      // Pages before skills
+      if (a.type === 'page' && b.type === 'skill') return -1;
+      if (a.type === 'skill' && b.type === 'page') return 1;
+
+      return 0;
+    });
+
+    return filtered.slice(0, 15);
+  }, [debouncedSearch, allCommands]);
 
   const handleOpen = useCallback(() => {
     setIsOpen(true);
@@ -343,81 +432,125 @@ const CommandPalette: React.FC = () => {
 
   if (!isOpen) return null;
 
+  const isMac = typeof navigator !== 'undefined' && navigator.platform.toUpperCase().includes('MAC');
+
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-[20vh]">
-      {/* Backdrop */}
+    <>
+      {/* Backdrop with fade animation */}
       <div
-        className="absolute inset-0 bg-background/80 backdrop-blur-sm"
+        className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
         onClick={handleClose}
       />
 
-      {/* Palette */}
-      <div className="relative w-full max-w-lg bg-card border rounded-xl shadow-2xl overflow-hidden">
-        {/* Search Input */}
-        <div className="flex items-center gap-3 p-4 border-b">
-          <Search className="h-5 w-5 text-muted-foreground shrink-0" />
-          <input
-            ref={inputRef}
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search commands..."
-            className="flex-1 bg-transparent outline-none text-lg placeholder:text-muted-foreground"
-          />
-          <kbd className="hidden sm:inline-flex h-6 items-center gap-1 rounded border bg-muted px-2 text-xs text-muted-foreground">
-            ESC
-          </kbd>
-        </div>
+      {/* Palette with slide animation */}
+      <div className="fixed left-1/2 top-[15%] -translate-x-1/2 w-full max-w-xl z-50 px-4 animate-in slide-in-from-top-4 fade-in duration-200">
+        <div className="bg-card border rounded-2xl shadow-2xl overflow-hidden">
+          {/* Search Input */}
+          <div className="flex items-center gap-3 px-4 border-b">
+            <Search className="h-5 w-5 text-muted-foreground shrink-0" />
+            <input
+              ref={inputRef}
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search skills, pages, or commands..."
+              className="flex-1 h-14 bg-transparent outline-none text-base placeholder:text-muted-foreground"
+            />
+            <button
+              onClick={handleClose}
+              className="p-1.5 hover:bg-muted rounded-lg transition-colors"
+            >
+              <X className="h-4 w-4 text-muted-foreground" />
+            </button>
+          </div>
 
-        {/* Commands List */}
-        <div className="max-h-80 overflow-y-auto p-2">
-          {filteredCommands.length === 0 ? (
-            <div className="p-4 text-center text-muted-foreground">
-              No commands found
+          {/* Commands List */}
+          <div className="max-h-[50vh] overflow-y-auto p-2">
+            {filteredCommands.length === 0 ? (
+              <div className="py-12 text-center">
+                <Search className="h-10 w-10 mx-auto mb-3 text-muted-foreground/50" />
+                <p className="text-muted-foreground">No results for "{search}"</p>
+                <p className="text-sm text-muted-foreground/70 mt-1">Try a different search term</p>
+              </div>
+            ) : (
+              <div className="space-y-1">
+                {filteredCommands.map((cmd, index) => {
+                  const Icon = cmd.icon;
+                  const isSelected = index === selectedIndex;
+                  return (
+                    <button
+                      key={cmd.id}
+                      onClick={() => executeCommand(cmd)}
+                      onMouseEnter={() => setSelectedIndex(index)}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all duration-150 ${
+                        isSelected
+                          ? 'bg-primary text-primary-foreground shadow-md scale-[1.02]'
+                          : 'hover:bg-muted'
+                      }`}
+                    >
+                      <div className={`h-9 w-9 rounded-lg flex items-center justify-center shrink-0 ${
+                        isSelected
+                          ? 'bg-primary-foreground/20'
+                          : cmd.type === 'skill' ? 'bg-primary/10' : 'bg-muted'
+                      }`}>
+                        <Icon className={`h-4 w-4 ${
+                          isSelected ? '' : cmd.type === 'skill' ? 'text-primary' : ''
+                        }`} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate">{cmd.name}</p>
+                        <p className={`text-sm truncate ${
+                          isSelected ? 'text-primary-foreground/70' : 'text-muted-foreground'
+                        }`}>
+                          {cmd.description}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        {cmd.type === 'skill' && (
+                          <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
+                            isSelected
+                              ? 'bg-primary-foreground/20 text-primary-foreground'
+                              : 'bg-primary/10 text-primary'
+                          }`}>
+                            Skill
+                          </span>
+                        )}
+                        {isSelected && (
+                          <ArrowRight className="h-4 w-4" />
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Footer */}
+          <div className="border-t px-4 py-2.5 flex items-center justify-between text-xs text-muted-foreground bg-muted/30">
+            <div className="flex items-center gap-4">
+              <span className="flex items-center gap-1.5">
+                <ArrowUp className="h-3 w-3" />
+                <ArrowDown className="h-3 w-3" />
+                <span>Navigate</span>
+              </span>
+              <span className="flex items-center gap-1.5">
+                <CornerDownLeft className="h-3 w-3" />
+                <span>Select</span>
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="text-[10px] px-1 py-0.5 rounded bg-muted border">Esc</span>
+                <span>Close</span>
+              </span>
             </div>
-          ) : (
-            filteredCommands.map((cmd, index) => {
-              const Icon = cmd.icon;
-              return (
-                <button
-                  key={cmd.id}
-                  onClick={() => executeCommand(cmd)}
-                  onMouseEnter={() => setSelectedIndex(index)}
-                  className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors ${
-                    index === selectedIndex ? 'bg-primary/10 text-primary' : 'hover:bg-muted'
-                  }`}
-                >
-                  <Icon className="h-5 w-5 shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium">{cmd.name}</p>
-                    <p className="text-sm text-muted-foreground truncate">{cmd.description}</p>
-                  </div>
-                  {index === selectedIndex && (
-                    <ArrowRight className="h-4 w-4 shrink-0" />
-                  )}
-                </button>
-              );
-            })
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className="border-t p-2 flex items-center justify-between text-xs text-muted-foreground">
-          <div className="flex items-center gap-2">
-            <kbd className="inline-flex h-5 items-center rounded border bg-muted px-1.5">↑↓</kbd>
-            <span>Navigate</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <kbd className="inline-flex h-5 items-center rounded border bg-muted px-1.5">↵</kbd>
-            <span>Select</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <kbd className="inline-flex h-5 items-center rounded border bg-muted px-1.5">⌘K</kbd>
-            <span>Toggle</span>
+            <div className="flex items-center gap-1.5">
+              <Command className="h-3 w-3" />
+              <span>{isMac ? '⌘' : 'Ctrl'}K to toggle</span>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
