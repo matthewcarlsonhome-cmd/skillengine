@@ -5,6 +5,7 @@
  * Supports various operators for comparing step outputs.
  */
 
+import { logger } from '../logger';
 import type { StepCondition, WorkflowStep } from '../storage/types';
 
 /**
@@ -84,7 +85,7 @@ export function evaluateCondition(
   // Find the source step's output key
   const sourceStep = steps.find((s) => s.id === condition.sourceStep);
   if (!sourceStep) {
-    console.warn(`Condition references unknown step: ${condition.sourceStep}`);
+    logger.warn('Condition references unknown step', { sourceStep: condition.sourceStep });
     return true; // Default to running if step not found
   }
 
@@ -134,7 +135,7 @@ export function evaluateCondition(
     }
 
     default:
-      console.warn(`Unknown condition operator: ${condition.operator}`);
+      logger.warn('Unknown condition operator', { operator: condition.operator });
       return true;
   }
 }

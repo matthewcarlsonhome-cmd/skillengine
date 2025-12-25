@@ -5,6 +5,7 @@
  * for skills and workflows.
  */
 
+import { logger } from '../logger';
 import type {
   TraceSpan,
   ExecutionTrace,
@@ -424,7 +425,7 @@ function triggerAlert(event: AlertEvent): void {
     try {
       cb(event);
     } catch (e) {
-      console.error('Alert callback error:', e);
+      logger.error('Alert callback error', { error: e instanceof Error ? e.message : String(e) });
     }
   });
 
@@ -510,7 +511,7 @@ async function sendAlertWebhook(url: string, event: AlertEvent): Promise<void> {
       body: JSON.stringify(event),
     });
   } catch (error) {
-    console.error('Failed to send alert webhook:', error);
+    logger.error('Failed to send alert webhook', { error: error instanceof Error ? error.message : String(error) });
   }
 }
 

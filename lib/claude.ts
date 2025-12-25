@@ -2,6 +2,8 @@
 // Note: Direct browser access to Claude API requires special API key permissions
 // See: https://docs.anthropic.com/en/api/client-sdks#browser-usage
 
+import { logger } from './logger';
+
 // Available Claude models (fastest to most capable):
 // Using -latest aliases for reliability - these auto-update to newest snapshots
 // - claude-3-5-haiku-latest: Fastest, most cost-effective
@@ -65,7 +67,7 @@ export async function runSkillStream(
     if (!response.ok) {
       const errorBody = await response.json().catch(() => ({}));
       const modelDisplayName = MODEL_NAMES[modelType] || modelType;
-      console.error(`Error from Claude API (${modelDisplayName}):`, errorBody);
+      logger.error(`Claude API error (${modelDisplayName})`, { status: response.status, error: errorBody });
 
       // Provide specific error messages
       if (response.status === 401) {
@@ -89,7 +91,7 @@ export async function runSkillStream(
 
     return response;
   } catch (error) {
-    console.error("Error calling Claude API:", error);
+    logger.error('Claude API call failed', { error: error instanceof Error ? error.message : String(error) });
 
     // CORS or network error
     if (error instanceof TypeError && error.message === 'Failed to fetch') {

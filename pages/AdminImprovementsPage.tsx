@@ -42,6 +42,7 @@ import {
   type SkillRegistryEntry,
   type ImprovementRequest,
 } from '../lib/selfImprovement/supabaseGrading';
+import { logger } from '../lib/logger';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -130,7 +131,7 @@ const AdminImprovementsPage: React.FC = () => {
       setSkills(processedSkills);
       setPendingRequests(requestsData);
     } catch (err) {
-      console.error('Failed to load data:', err);
+      logger.error('Failed to load data', { error: err instanceof Error ? err.message : String(err) });
       addToast('Failed to load improvement data', 'error');
     } finally {
       setIsLoading(false);
@@ -160,7 +161,7 @@ const AdminImprovementsPage: React.FC = () => {
       addToast('Improvement generated! Review the proposed changes.', 'success');
       await loadData();
     } catch (err) {
-      console.error('Generate failed:', err);
+      logger.error('Generate failed', { error: err instanceof Error ? err.message : String(err) });
       addToast('Failed to generate improvement', 'error');
     } finally {
       setActionInProgress(null);
@@ -174,7 +175,7 @@ const AdminImprovementsPage: React.FC = () => {
       addToast('Improvement approved', 'success');
       await loadData();
     } catch (err) {
-      console.error('Approve failed:', err);
+      logger.error('Approve failed', { error: err instanceof Error ? err.message : String(err) });
       addToast('Failed to approve improvement', 'error');
     } finally {
       setActionInProgress(null);
@@ -189,7 +190,7 @@ const AdminImprovementsPage: React.FC = () => {
       addToast('Improvement rejected', 'success');
       await loadData();
     } catch (err) {
-      console.error('Reject failed:', err);
+      logger.error('Reject failed', { error: err instanceof Error ? err.message : String(err) });
       addToast('Failed to reject improvement', 'error');
     } finally {
       setActionInProgress(null);
@@ -206,7 +207,7 @@ const AdminImprovementsPage: React.FC = () => {
       addToast(`Improvement applied! New version: ${result.newVersion}`, 'success');
       await loadData();
     } catch (err) {
-      console.error('Apply failed:', err);
+      logger.error('Apply failed', { error: err instanceof Error ? err.message : String(err) });
       addToast('Failed to apply improvement', 'error');
     } finally {
       setActionInProgress(null);
@@ -223,7 +224,7 @@ const AdminImprovementsPage: React.FC = () => {
       addToast(`Rolled back to version ${result.restoredVersion}`, 'success');
       await loadData();
     } catch (err) {
-      console.error('Rollback failed:', err);
+      logger.error('Rollback failed', { error: err instanceof Error ? err.message : String(err) });
       addToast('Failed to rollback', 'error');
     } finally {
       setActionInProgress(null);
@@ -653,7 +654,7 @@ const PromptDiffModal: React.FC<PromptDiffModalProps> = ({ request, onClose }) =
           });
         }
       } catch (err) {
-        console.error('Failed to fetch current prompt:', err);
+        logger.error('Failed to fetch current prompt', { error: err instanceof Error ? err.message : String(err) });
       } finally {
         setIsLoading(false);
       }

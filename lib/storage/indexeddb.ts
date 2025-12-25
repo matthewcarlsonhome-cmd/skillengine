@@ -62,6 +62,7 @@ import type {
   WorkflowExecution,
   CustomWorkflow
 } from './types';
+import { logger } from '../logger';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DATABASE CONFIGURATION
@@ -133,7 +134,7 @@ class SkillEngineDB {
 
       // Handle errors (e.g., user denied storage permission)
       request.onerror = () => {
-        console.error('Failed to open database:', request.error);
+        logger.error('Failed to open database', { error: request.error instanceof Error ? request.error.message : String(request.error) });
         reject(request.error);
       };
 

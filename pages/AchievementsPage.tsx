@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '../components/ui/Button';
 import { useToast } from '../hooks/useToast';
+import { logger } from '../lib/logger';
 import {
   Trophy,
   Star,
@@ -110,7 +111,7 @@ const AchievementsPage: React.FC = () => {
       // Update progress from various sources
       updateProgressFromStorage();
     } catch (e) {
-      console.error('Failed to load achievements:', e);
+      logger.error('Failed to load achievements', { error: e instanceof Error ? e.message : String(e) });
     }
   };
 
@@ -193,7 +194,7 @@ const AchievementsPage: React.FC = () => {
       setStreak(streakData);
       localStorage.setItem(STREAK_KEY, JSON.stringify(streakData));
     } catch (e) {
-      console.error('Failed to update streak:', e);
+      logger.error('Failed to update streak', { error: e instanceof Error ? e.message : String(e) });
     }
   };
 

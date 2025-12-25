@@ -24,6 +24,7 @@ import {
   KeyRound,
   HelpCircle
 } from 'lucide-react';
+import { logger } from '../lib/logger';
 
 type AnalysisStep = 'input' | 'analyzing' | 'recommendations' | 'building';
 
@@ -60,7 +61,7 @@ const AnalyzeRolePage: React.FC = () => {
 
     try {
       // Step 1: Analyze JD
-      console.log('Starting JD analysis with provider:', selectedApi);
+      logger.info('Starting JD analysis', { provider: selectedApi });
       setProgress(20);
 
       const jdAnalysis = await analyzeJobDescription(
@@ -69,7 +70,7 @@ const AnalyzeRolePage: React.FC = () => {
         selectedApi as 'gemini' | 'claude'
       );
 
-      console.log('JD Analysis result:', jdAnalysis);
+      logger.info('JD Analysis result received', { hasRole: !!jdAnalysis?.role });
 
       if (!jdAnalysis || !jdAnalysis.role) {
         throw new Error('Invalid analysis response - missing role data');
@@ -86,7 +87,7 @@ const AnalyzeRolePage: React.FC = () => {
       // Step 2: Generate recommendations
       setStatusMessage('Generating skill recommendations...');
       setProgress(60);
-      console.log('Generating skill recommendations...');
+      logger.info('Generating skill recommendations');
 
       const skillRecs = await generateSkillRecommendations(
         jdAnalysis,
@@ -95,7 +96,7 @@ const AnalyzeRolePage: React.FC = () => {
         selectedApi as 'gemini' | 'claude'
       );
 
-      console.log('Skill recommendations:', skillRecs);
+      logger.info('Skill recommendations generated', { count: skillRecs?.length || 0 });
 
       if (!skillRecs || skillRecs.length === 0) {
         throw new Error('No skill recommendations generated');
@@ -115,7 +116,7 @@ const AnalyzeRolePage: React.FC = () => {
       setStep('recommendations');
       addToast('Analysis complete!', 'success');
     } catch (error) {
-      console.error('Analysis failed:', error);
+      logger.error('Analysis failed', { error: error instanceof Error ? error.message : String(error) });
       const errorMessage = error instanceof Error ? error.message : 'Analysis failed. Please try again.';
       addToast(errorMessage, 'error');
       setStep('input');

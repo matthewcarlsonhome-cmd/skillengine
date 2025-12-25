@@ -18,6 +18,7 @@ import {
   Sparkles,
   KeyRound
 } from 'lucide-react';
+import { logger } from '../lib/logger';
 
 const BuildSkillsPage: React.FC = () => {
   const { workspaceId } = useParams<{ workspaceId: string }>();
@@ -76,7 +77,7 @@ const BuildSkillsPage: React.FC = () => {
       setBuildComplete(true);
       addToast(`Successfully built ${builtSkills.length} skills!`, 'success');
     } catch (error) {
-      console.error('Build failed:', error);
+      logger.error('Build failed', { error: error instanceof Error ? error.message : String(error) });
       addToast(error instanceof Error ? error.message : 'Build failed', 'error');
     } finally {
       setIsBuilding(false);

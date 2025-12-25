@@ -5,6 +5,7 @@
  * for skills and workflows.
  */
 
+import { logger } from '../logger';
 import type {
   CostEstimate,
   BudgetConfig,
@@ -359,7 +360,7 @@ function checkBudgetNotifications(budget: BudgetConfig): void {
   for (const threshold of budget.notifyAt) {
     if (monthlyPercentage >= threshold) {
       // Emit notification (would integrate with alerting system)
-      console.log(`Budget ${budget.name} reached ${threshold}% of monthly limit`);
+      logger.info(`Budget ${budget.name} reached ${threshold}% of monthly limit`);
     }
   }
 }

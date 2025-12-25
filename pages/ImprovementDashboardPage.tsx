@@ -42,6 +42,7 @@ import {
   rollbackVersion,
   getImprovementHistory,
 } from '../lib/selfImprovement';
+import { logger } from '../lib/logger';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // HELPER COMPONENTS
@@ -555,7 +556,7 @@ const ImprovementDashboardPage: React.FC = () => {
         setHistories(loadedHistories);
       }
     } catch (e) {
-      console.error('Failed to load improvement data:', e);
+      logger.error('Failed to load improvement data', { error: e instanceof Error ? e.message : String(e) });
     } finally {
       setIsLoading(false);
     }
@@ -572,7 +573,7 @@ const ImprovementDashboardPage: React.FC = () => {
       await applyImprovements(requestId);
       loadData(); // Reload to get updated state
     } catch (e) {
-      console.error('Failed to apply improvements:', e);
+      logger.error('Failed to apply improvements', { error: e instanceof Error ? e.message : String(e) });
     } finally {
       setIsProcessing(false);
     }
@@ -599,7 +600,7 @@ const ImprovementDashboardPage: React.FC = () => {
         setRequests(updated);
       }
     } catch (e) {
-      console.error('Failed to reject improvement:', e);
+      logger.error('Failed to reject improvement', { error: e instanceof Error ? e.message : String(e) });
     }
   };
 
@@ -612,7 +613,7 @@ const ImprovementDashboardPage: React.FC = () => {
       await rollbackVersion(skillId, 'Manual rollback from dashboard');
       loadData();
     } catch (e) {
-      console.error('Failed to rollback:', e);
+      logger.error('Failed to rollback', { error: e instanceof Error ? e.message : String(e) });
     } finally {
       setIsProcessing(false);
     }

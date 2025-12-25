@@ -4,6 +4,7 @@ import { SKILLS } from './static';
 import { db } from '../storage';
 import type { Skill } from '../../types';
 import type { DynamicSkill } from '../storage/types';
+import { logger } from '../logger';
 
 export type SkillSource = 'static' | 'dynamic';
 
@@ -37,7 +38,7 @@ export async function getAllSkills(): Promise<UnifiedSkill[]> {
 
     return [...staticSkills, ...dynamicUnified];
   } catch (error) {
-    console.error('Failed to load dynamic skills:', error);
+    logger.error('Failed to load dynamic skills', { error: error instanceof Error ? error.message : String(error) });
     return staticSkills;
   }
 }
@@ -56,7 +57,7 @@ export async function getSkill(id: string): Promise<UnifiedSkill | null> {
       return { skill: dynamic, source: 'dynamic', workspaceId: dynamic.workspaceId };
     }
   } catch (error) {
-    console.error('Failed to load dynamic skill:', error);
+    logger.error('Failed to load dynamic skill', { error: error instanceof Error ? error.message : String(error) });
   }
 
   return null;
@@ -77,7 +78,7 @@ export async function getDynamicSkillsByWorkspace(workspaceId: string): Promise<
   try {
     return await db.getSkillsByWorkspace(workspaceId);
   } catch (error) {
-    console.error('Failed to load workspace skills:', error);
+    logger.error('Failed to load workspace skills', { error: error instanceof Error ? error.message : String(error) });
     return [];
   }
 }
@@ -87,7 +88,7 @@ export async function getAllDynamicSkills(): Promise<DynamicSkill[]> {
   try {
     return await db.getAllDynamicSkills();
   } catch (error) {
-    console.error('Failed to load dynamic skills:', error);
+    logger.error('Failed to load dynamic skills', { error: error instanceof Error ? error.message : String(error) });
     return [];
   }
 }

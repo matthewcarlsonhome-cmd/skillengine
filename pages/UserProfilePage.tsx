@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { useToast } from '../hooks/useToast';
 import { useAppContext } from '../hooks/useAppContext';
+import { logger } from '../lib/logger';
 
 export interface UserProfile {
   // Personal Information
@@ -87,7 +88,7 @@ export const getUserProfile = (): UserProfile => {
       return { ...DEFAULT_PROFILE, ...JSON.parse(saved) };
     }
   } catch (e) {
-    console.error('Failed to load user profile:', e);
+    logger.error('Failed to load user profile', { error: e instanceof Error ? e.message : String(e) });
   }
   return DEFAULT_PROFILE;
 };
@@ -97,7 +98,7 @@ export const saveUserProfile = (profile: UserProfile): void => {
     profile.lastUpdated = new Date().toISOString();
     localStorage.setItem(STORAGE_KEY, JSON.stringify(profile));
   } catch (e) {
-    console.error('Failed to save user profile:', e);
+    logger.error('Failed to save user profile', { error: e instanceof Error ? e.message : String(e) });
   }
 };
 

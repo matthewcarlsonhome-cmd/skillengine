@@ -55,6 +55,7 @@ import { ExecutionSummary } from '../components/ExecutionSummary';
 import { SkillGrading } from '../components/SkillGrading';
 import { checkPlatformStatus, type PlatformStatus } from '../lib/platformProxy';
 import { calculateCost } from '../lib/billing';
+import { logger } from '../lib/logger';
 
 const LibrarySkillRunnerPage: React.FC = () => {
   const navigate = useNavigate();
@@ -139,7 +140,7 @@ const LibrarySkillRunnerPage: React.FC = () => {
           setFormState(initial);
         }
       } catch (e) {
-        console.error('Failed to load library skill:', e);
+        logger.error('Failed to load library skill', { error: e instanceof Error ? e.message : String(e) });
       } finally {
         setLoading(false);
       }
@@ -157,7 +158,9 @@ const LibrarySkillRunnerPage: React.FC = () => {
 
   // Fetch platform status on mount
   useEffect(() => {
-    checkPlatformStatus().then(setPlatformStatus).catch(console.error);
+    checkPlatformStatus().then(setPlatformStatus).catch((error) => {
+      logger.error('Failed to check platform status', { error: error instanceof Error ? error.message : String(error) });
+    });
   }, []);
 
 

@@ -6,6 +6,7 @@
  */
 
 import type { RubricCriterion, TestCase } from './testCaseGenerator';
+import { logger } from '../logger';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -169,7 +170,7 @@ export function parseGradingResponse(
     };
   } catch (error) {
     // Return default scores if parsing fails
-    console.error('Failed to parse grading response:', error);
+    logger.error('Failed to parse grading response', { error: error instanceof Error ? error.message : String(error) });
 
     return {
       testCaseId: testCase.id,

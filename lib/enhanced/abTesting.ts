@@ -5,6 +5,7 @@
  * test different prompts, and measure success metrics.
  */
 
+import { logger } from '../logger';
 import type {
   ABExperiment,
   ABVariant,
@@ -132,7 +133,7 @@ export function updateExperiment(
 
   // Only allow updates if experiment is in draft status
   if (experiment.status !== 'draft') {
-    console.warn('Cannot update running or completed experiments');
+    logger.warn('Cannot update running or completed experiments');
     return experiment;
   }
 
@@ -148,7 +149,7 @@ export function startExperiment(id: string): ABExperiment | null {
   if (!experiment) return null;
 
   if (experiment.status !== 'draft' && experiment.status !== 'paused') {
-    console.warn('Can only start draft or paused experiments');
+    logger.warn('Can only start draft or paused experiments');
     return experiment;
   }
 
@@ -167,7 +168,7 @@ export function pauseExperiment(id: string): ABExperiment | null {
   if (!experiment) return null;
 
   if (experiment.status !== 'running') {
-    console.warn('Can only pause running experiments');
+    logger.warn('Can only pause running experiments');
     return experiment;
   }
 
@@ -243,7 +244,7 @@ export function addVariant(
   if (!experiment) return null;
 
   if (experiment.status !== 'draft') {
-    console.warn('Cannot add variants to non-draft experiments');
+    logger.warn('Cannot add variants to non-draft experiments');
     return experiment;
   }
 
@@ -289,12 +290,12 @@ export function removeVariant(
   if (!experiment) return null;
 
   if (experiment.status !== 'draft') {
-    console.warn('Cannot remove variants from non-draft experiments');
+    logger.warn('Cannot remove variants from non-draft experiments');
     return experiment;
   }
 
   if (variantId === experiment.controlVariantId) {
-    console.warn('Cannot remove control variant');
+    logger.warn('Cannot remove control variant');
     return experiment;
   }
 

@@ -5,6 +5,7 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Textarea } from '../components/ui/Textarea';
 import { useToast } from '../hooks/useToast';
+import { logger } from '../lib/logger';
 import {
   Building2,
   Plus,
@@ -87,7 +88,7 @@ const CompanyNotesPage: React.FC = () => {
         setCompanies(JSON.parse(stored));
       }
     } catch (e) {
-      console.error('Failed to load company notes:', e);
+      logger.error('Failed to load company notes', { error: e instanceof Error ? e.message : String(e) });
     }
   }, []);
 

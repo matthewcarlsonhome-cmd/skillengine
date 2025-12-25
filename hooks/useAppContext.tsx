@@ -1,6 +1,7 @@
 
 import React, { createContext, useContext, useState, useMemo, useEffect, useCallback, ReactNode } from 'react';
 import { ApiProviderType } from '../types.ts';
+import { logger } from '../lib/logger';
 
 // User Profile interface for centralized storage
 export interface UserProfile {
@@ -96,7 +97,7 @@ const loadProfileFromStorage = (): UserProfile => {
       return { ...DEFAULT_PROFILE, ...JSON.parse(saved) };
     }
   } catch (e) {
-    console.error('Failed to load user profile:', e);
+    logger.error('Failed to load user profile', { error: e instanceof Error ? e.message : String(e) });
   }
   return DEFAULT_PROFILE;
 };
@@ -107,7 +108,7 @@ const saveProfileToStorage = (profile: UserProfile): void => {
     profile.lastUpdated = new Date().toISOString();
     localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profile));
   } catch (e) {
-    console.error('Failed to save user profile:', e);
+    logger.error('Failed to save user profile', { error: e instanceof Error ? e.message : String(e) });
   }
 };
 

@@ -20,6 +20,7 @@ import type {
   DEFAULT_ROLE_CONFIGS,
 } from './storage/types';
 import { DEFAULT_ROLE_CONFIGS as DefaultConfigs } from './storage/types';
+import { logger } from './logger';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // LOCAL STORAGE KEYS
@@ -49,7 +50,7 @@ export function getAdminEmails(): string[] {
       return JSON.parse(stored);
     }
   } catch (e) {
-    console.error('Error loading admin emails:', e);
+    logger.error('Error loading admin emails', { error: e instanceof Error ? e.message : String(e) });
   }
   return DEFAULT_ADMIN_EMAILS;
 }
@@ -83,7 +84,7 @@ export function getRoleConfigs(): RoleConfig[] {
       return JSON.parse(stored);
     }
   } catch (e) {
-    console.error('Error loading role configs:', e);
+    logger.error('Error loading role configs', { error: e instanceof Error ? e.message : String(e) });
   }
   return DefaultConfigs;
 }
@@ -117,7 +118,7 @@ export function getCurrentAppUser(): AppUser | null {
       return JSON.parse(stored);
     }
   } catch (e) {
-    console.error('Error loading current user:', e);
+    logger.error('Error loading current user', { error: e instanceof Error ? e.message : String(e) });
   }
   return null;
 }
@@ -171,7 +172,7 @@ export function getCapturedEmails(): CapturedEmail[] {
       return JSON.parse(stored);
     }
   } catch (e) {
-    console.error('Error loading captured emails:', e);
+    logger.error('Error loading captured emails', { error: e instanceof Error ? e.message : String(e) });
   }
   return [];
 }
@@ -251,7 +252,7 @@ export function getSkillUsageRecords(): SkillUsageRecord[] {
       return JSON.parse(stored);
     }
   } catch (e) {
-    console.error('Error loading skill usage:', e);
+    logger.error('Error loading skill usage', { error: e instanceof Error ? e.message : String(e) });
   }
   return [];
 }

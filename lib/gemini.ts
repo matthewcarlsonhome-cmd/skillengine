@@ -1,5 +1,5 @@
-
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { logger } from './logger';
 
 export async function runSkillStream(
   apiKeyFromInput: string,
@@ -23,7 +23,7 @@ export async function runSkillStream(
     });
     return result;
   } catch (error) {
-    console.error("Error calling Gemini API:", error);
+    logger.error('Gemini API call failed', { error: error instanceof Error ? error.message : String(error) });
     if (error instanceof Error && error.message.includes('API key not valid')) {
         throw new Error("The provided API key is not valid. Please check your key and try again.");
     }

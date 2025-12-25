@@ -1,6 +1,8 @@
 // ChatGPT/OpenAI API configuration
 // Supports streaming responses from OpenAI's chat completions API
 
+import { logger } from './logger';
+
 // Available ChatGPT models:
 // - gpt-4o: Most capable model, best for complex tasks
 // - gpt-4o-mini: Fast and cost-effective, good for most tasks
@@ -73,7 +75,7 @@ export async function runSkillStream(
     if (!response.ok) {
       const errorBody = await response.json().catch(() => ({}));
       const modelDisplayName = MODEL_NAMES[modelType] || modelType;
-      console.error(`Error from OpenAI API (${modelDisplayName}):`, errorBody);
+      logger.error(`OpenAI API error (${modelDisplayName})`, { status: response.status, error: errorBody });
 
       // Provide specific error messages
       if (response.status === 401) {
@@ -128,7 +130,7 @@ export async function runSkillStream(
 
     return response;
   } catch (error) {
-    console.error('Error calling OpenAI API:', error);
+    logger.error('OpenAI API call failed', { error: error instanceof Error ? error.message : String(error) });
 
     // CORS or network error
     if (error instanceof TypeError && error.message === 'Failed to fetch') {

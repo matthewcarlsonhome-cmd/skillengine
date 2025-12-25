@@ -5,6 +5,7 @@
  * for the Admin Control Panel to send targeted emails.
  */
 
+import { logger } from '../logger';
 import { supabase } from '../supabase';
 import type { EmailSendRequest, EmailSendResponse, EmailCampaign } from './types';
 import { logEmailSend } from './audit';
@@ -79,15 +80,17 @@ export async function sendEmail(
 
     return result;
   } catch (error) {
-    console.error('Email send failed:', error);
+    logger.error('Email send failed', { error: error instanceof Error ? error.message : String(error) });
 
     // For development/mock mode, simulate success
     if (import.meta.env.DEV || !supabase) {
-      console.log('=== MOCK EMAIL SEND (Dev Mode) ===');
-      console.log('To:', request.recipientIds.length, 'recipients');
-      console.log('Subject:', request.subject);
-      console.log('Body:', request.body.substring(0, 200), '...');
-      console.log('==================================');
+      logger.info('=== MOCK EMAIL SEND (Dev Mode) ===');
+      logger.info('Email send mock', {
+        recipientCount: request.recipientIds.length,
+        subject: request.subject,
+        bodyPreview: request.body.substring(0, 200) + '...'
+      });
+      logger.info('==================================');
 
       const campaignId = crypto.randomUUID();
 
