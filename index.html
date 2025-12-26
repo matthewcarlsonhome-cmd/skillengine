@@ -6,6 +6,63 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AICareerSkills - AI-Powered Career Tools</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💼</text></svg>">
+    <script>
+      // OAuth callback handler - runs before React loads
+      // This handles the auth tokens from Supabase OAuth flow with HashRouter
+      (function() {
+        // Check if this is an OAuth callback
+        if (window.location.pathname === '/auth/callback') {
+          // Get tokens from URL fragment (Supabase implicit flow)
+          var hash = window.location.hash.substring(1);
+          if (hash) {
+            var params = new URLSearchParams(hash);
+            var accessToken = params.get('access_token');
+            var refreshToken = params.get('refresh_token');
+
+            if (accessToken && refreshToken) {
+              // Store tokens in sessionStorage for the auth callback page to process
+              sessionStorage.setItem('supabase_auth_tokens', JSON.stringify({
+                access_token: accessToken,
+                refresh_token: refreshToken,
+                expires_in: params.get('expires_in'),
+                token_type: params.get('token_type'),
+                provider_token: params.get('provider_token'),
+              }));
+              // Redirect to hash router auth callback (clean URL)
+              window.location.replace('/#/auth/callback');
+              return;
+            }
+
+            // Check for error in hash
+            var error = params.get('error');
+            var errorDescription = params.get('error_description');
+            if (error) {
+              sessionStorage.setItem('supabase_auth_error', JSON.stringify({
+                error: error,
+                error_description: errorDescription
+              }));
+              window.location.replace('/#/auth/callback');
+              return;
+            }
+          }
+
+          // Check for error in query string (PKCE flow errors)
+          var searchParams = new URLSearchParams(window.location.search);
+          var queryError = searchParams.get('error');
+          if (queryError) {
+            sessionStorage.setItem('supabase_auth_error', JSON.stringify({
+              error: queryError,
+              error_description: searchParams.get('error_description')
+            }));
+            window.location.replace('/#/auth/callback');
+            return;
+          }
+
+          // No tokens or error found, just redirect to auth callback
+          window.location.replace('/#/auth/callback');
+        }
+      })();
+    </script>
   </head>
   <body class="bg-background text-foreground antialiased">
     <div id="root"></div>

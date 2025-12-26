@@ -142,6 +142,7 @@ import AdminPage from './pages/AdminPage';                           // Admin co
 import DevPlaygroundPage from './pages/DevPlaygroundPage';           // Developer test playground
 import AccountPage from './pages/AccountPage';                       // User account & credits
 import AdminImprovementsPage from './pages/AdminImprovementsPage'; // Skill improvement review
+import AuthCallbackPage from './pages/AuthCallbackPage';           // OAuth callback handler
 
 /**
  * Main App Component
@@ -180,6 +181,9 @@ function App() {
                     <Route path="/dashboard" element={<RouteErrorBoundary pageName="Dashboard"><DashboardPage /></RouteErrorBoundary>} />
                     <Route path="/welcome" element={<RouteErrorBoundary pageName="Welcome"><WelcomePage /></RouteErrorBoundary>} />
                     <Route path="/profile" element={<RouteErrorBoundary pageName="Profile"><UserProfilePage /></RouteErrorBoundary>} />
+
+                    {/* Auth callback for OAuth redirect */}
+                    <Route path="/auth/callback" element={<RouteErrorBoundary pageName="Auth"><AuthCallbackPage /></RouteErrorBoundary>} />
 
                     {/* ═══════════════════════════════════════════════════════
                         ROLE TEMPLATES
