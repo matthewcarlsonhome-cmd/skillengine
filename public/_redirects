@@ -1,0 +1,6 @@
+# Netlify redirects
+# Handle OAuth callback - serve index.html so the app can process auth tokens
+/auth/callback    /index.html    200
+
+# Handle all other paths for SPA routing (when using HashRouter, this helps with deep links)
+/*    /index.html    200
