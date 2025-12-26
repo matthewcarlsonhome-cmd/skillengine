@@ -569,3 +569,136 @@ export function exportSkillUsageToCSV(): string {
 
   return csvContent;
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ENHANCED USER EXPORT WITH ONBOARDING DATA
+// ═══════════════════════════════════════════════════════════════════════════
+
+import {
+  getAutomationInterestLabel,
+  getRoleCategoryLabel,
+  getWorkflowCategoryLabel,
+} from './onboardingConfig';
+
+/**
+ * Get all users with their full profile data including onboarding
+ */
+export function getAllUsersWithProfiles(): AppUser[] {
+  // In localStorage mode, we only have the current user
+  // In a real implementation, this would fetch from Supabase
+  const currentUser = getCurrentAppUser();
+  if (currentUser) {
+    return [currentUser];
+  }
+  return [];
+}
+
+/**
+ * Export users with full profile and onboarding data to CSV
+ */
+export function exportUsersWithOnboardingToCSV(): string {
+  const emails = getCapturedEmails();
+  const currentUser = getCurrentAppUser();
+
+  const headers = [
+    'Email',
+    'Display Name',
+    'Role',
+    'Automation Interest',
+    'Role Categories',
+    'Workflow Interests',
+    'Onboarding Completed',
+    'First Seen',
+    'Last Seen',
+    'Login Count',
+    'Skills Used',
+    'Status',
+    'Email Opt-In',
+  ];
+
+  const rows = emails.map(e => {
+    // Try to match with current user for onboarding data
+    const isCurrentUser = currentUser && currentUser.email.toLowerCase() === e.email.toLowerCase();
+    const onboarding = isCurrentUser ? currentUser.onboarding : undefined;
+    const emailPrefs = isCurrentUser ? currentUser.emailPreferences : undefined;
+
+    return [
+      e.email,
+      e.displayName || '',
+      e.role || 'free',
+      onboarding?.automationInterest
+        ? getAutomationInterestLabel(onboarding.automationInterest)
+        : 'Not set',
+      onboarding?.roleCategories?.map(getRoleCategoryLabel).join('; ') || 'Not set',
+      onboarding?.workflowInterests?.map(getWorkflowCategoryLabel).join('; ') || 'Not set',
+      onboarding?.onboardingCompleted ? 'Yes' : 'No',
+      e.firstSeenAt,
+      e.lastSeenAt,
+      e.loginCount.toString(),
+      e.skillsUsed.toString(),
+      e.followUpStatus || 'pending',
+      emailPrefs?.marketingOptIn ? 'Yes' : 'Unknown',
+    ];
+  });
+
+  const csvContent = [
+    headers.join(','),
+    ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')),
+  ].join('\n');
+
+  return csvContent;
+}
+
+/**
+ * Get user statistics by onboarding interest
+ */
+export function getOnboardingStats(): {
+  byAutomationInterest: Record<string, number>;
+  byRoleCategory: Record<string, number>;
+  byWorkflowInterest: Record<string, number>;
+  onboardingCompletionRate: number;
+} {
+  const currentUser = getCurrentAppUser();
+  const emails = getCapturedEmails();
+
+  // In localStorage mode, we only have limited data
+  // This would be more comprehensive with Supabase
+  const byAutomationInterest: Record<string, number> = {};
+  const byRoleCategory: Record<string, number> = {};
+  const byWorkflowInterest: Record<string, number> = {};
+  let completedOnboarding = 0;
+
+  if (currentUser?.onboarding) {
+    const onboarding = currentUser.onboarding;
+
+    if (onboarding.onboardingCompleted) {
+      completedOnboarding++;
+    }
+
+    if (onboarding.automationInterest) {
+      const label = getAutomationInterestLabel(onboarding.automationInterest);
+      byAutomationInterest[label] = (byAutomationInterest[label] || 0) + 1;
+    }
+
+    if (onboarding.roleCategories) {
+      for (const role of onboarding.roleCategories) {
+        const label = getRoleCategoryLabel(role);
+        byRoleCategory[label] = (byRoleCategory[label] || 0) + 1;
+      }
+    }
+
+    if (onboarding.workflowInterests) {
+      for (const workflow of onboarding.workflowInterests) {
+        const label = getWorkflowCategoryLabel(workflow);
+        byWorkflowInterest[label] = (byWorkflowInterest[label] || 0) + 1;
+      }
+    }
+  }
+
+  return {
+    byAutomationInterest,
+    byRoleCategory,
+    byWorkflowInterest,
+    onboardingCompletionRate: emails.length > 0 ? (completedOnboarding / emails.length) * 100 : 0,
+  };
+}

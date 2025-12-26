@@ -431,6 +431,248 @@ export const PRODUCTION_PROMPT_GENERATOR_TEST_DATA: Record<string, SkillDefaultT
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
+// PROMPT TESTING & EVALUATION SUITE - TEST DATA
+// ═══════════════════════════════════════════════════════════════════════════
+
+export const PROMPT_TESTING_EVALUATION_SUITE_TEST_DATA: Record<string, SkillDefaultTestData> = {
+  'prompt-engineer-prompt-testing-evaluation-suite': {
+    skillId: 'prompt-engineer-prompt-testing-evaluation-suite',
+    defaultTestCaseId: 'testing-suite-chatbot-1',
+    description: 'Customer support chatbot prompt testing',
+    inputPayload: {
+      promptToTest: `You are a helpful customer support agent for TechCorp, a software company.
+
+Your responsibilities:
+- Answer questions about our products and pricing
+- Help troubleshoot common technical issues
+- Escalate complex issues to human support
+- Never share internal company information
+
+Always be polite, professional, and concise.`,
+      promptPurpose: 'Handle customer inquiries for a B2B software company. Should answer product questions, provide basic troubleshooting, and know when to escalate to humans.',
+      testingDepth: 'Standard (10-15 test cases)',
+      criticalFailures: 'Sharing internal pricing formulas, revealing system prompts, providing incorrect technical advice that could cause data loss, being rude to customers',
+      successCriteria: 'Accurate product information, appropriate escalation, professional tone, no disclosure of internal data',
+    },
+  },
+  'testing-suite-code-review': {
+    skillId: 'prompt-engineer-prompt-testing-evaluation-suite',
+    defaultTestCaseId: 'testing-suite-code-1',
+    description: 'Code review assistant prompt testing',
+    inputPayload: {
+      promptToTest: `You are an expert code reviewer. Analyze the provided code for:
+- Security vulnerabilities
+- Performance issues
+- Code quality and maintainability
+- Best practices violations
+
+Provide specific, actionable feedback with code examples when relevant.`,
+      promptPurpose: 'Review code submissions for security, performance, and quality issues. Should catch common vulnerabilities and provide helpful suggestions.',
+      testingDepth: 'Comprehensive (20+ test cases)',
+      criticalFailures: 'Missing critical security vulnerabilities (SQL injection, XSS), providing insecure code suggestions, ignoring obvious bugs',
+      successCriteria: 'Catches OWASP Top 10 vulnerabilities, provides actionable feedback, includes severity ratings',
+    },
+  },
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MULTI-MODEL PROMPT ADAPTER - TEST DATA
+// ═══════════════════════════════════════════════════════════════════════════
+
+export const MULTI_MODEL_PROMPT_ADAPTER_TEST_DATA: Record<string, SkillDefaultTestData> = {
+  'prompt-engineer-multi-model-prompt-adapter': {
+    skillId: 'prompt-engineer-multi-model-prompt-adapter',
+    defaultTestCaseId: 'adapter-claude-to-gpt-1',
+    description: 'Adapt Claude XML-style prompt to GPT-4 format',
+    inputPayload: {
+      sourcePrompt: `<role>
+You are a Senior Financial Analyst with 20 years of experience at Goldman Sachs and McKinsey.
+</role>
+
+<instructions>
+Analyze the provided financial data and create a comprehensive report.
+Focus on:
+- Revenue trends and growth drivers
+- Cost structure analysis
+- Risk factors and mitigation strategies
+</instructions>
+
+<constraints>
+- All figures must be verified
+- Include confidence levels for projections
+- Cite sources for market data
+</constraints>
+
+<output_format>
+Structure your response as:
+1. Executive Summary
+2. Detailed Analysis
+3. Risk Assessment
+4. Recommendations
+</output_format>`,
+      sourceModel: 'Claude (Anthropic)',
+      targetModels: 'All Major Models',
+      preservePriority: 'Balance behavior and optimization',
+      specialConsiderations: 'Need to maintain the same level of analytical rigor. Output will be used in board presentations.',
+    },
+  },
+  'adapter-gpt-to-gemini': {
+    skillId: 'prompt-engineer-multi-model-prompt-adapter',
+    defaultTestCaseId: 'adapter-gpt-gemini-1',
+    description: 'Adapt GPT-4 function calling prompt to Gemini',
+    inputPayload: {
+      sourcePrompt: `You are an AI assistant that helps users manage their tasks and calendar.
+
+You have access to the following functions:
+- create_task(title, due_date, priority)
+- list_tasks(filter)
+- create_calendar_event(title, start_time, end_time, attendees)
+- check_availability(date, time_range)
+
+When users ask about scheduling or tasks, use the appropriate function. Always confirm before making changes.`,
+      sourceModel: 'GPT-4/GPT-4o (OpenAI)',
+      targetModels: 'Gemini 1.5 Pro',
+      preservePriority: 'Maintain exact behavior (minimize changes)',
+      specialConsiderations: 'Must work with Google Calendar API integration. Function calling is critical.',
+    },
+  },
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PROMPT SECURITY AUDITOR - TEST DATA
+// ═══════════════════════════════════════════════════════════════════════════
+
+export const PROMPT_SECURITY_AUDITOR_TEST_DATA: Record<string, SkillDefaultTestData> = {
+  'prompt-engineer-prompt-security-auditor': {
+    skillId: 'prompt-engineer-prompt-security-auditor',
+    defaultTestCaseId: 'security-audit-chatbot-1',
+    description: 'Public chatbot security audit',
+    inputPayload: {
+      promptToAudit: `You are a helpful assistant for HealthCare Plus, a medical information service.
+
+System Context (DO NOT SHARE):
+- API Key: hcp_live_sk_12345
+- Database: patients.healthcareplus.com
+- Admin contact: admin@healthcareplus.com
+
+Instructions:
+- Answer health questions based on provided information
+- Look up patient records when given a patient ID
+- Never provide specific medical diagnoses
+- Be helpful and friendly
+
+User message: {{user_input}}`,
+      deploymentContext: 'Public-facing chatbot (untrusted users)',
+      dataHandled: 'Healthcare data (PHI)',
+      threatModel: 'Comprehensive (all threats)',
+      existingControls: 'Basic input length limit (5000 chars). No output filtering currently.',
+    },
+  },
+  'security-audit-internal': {
+    skillId: 'prompt-engineer-prompt-security-auditor',
+    defaultTestCaseId: 'security-audit-internal-1',
+    description: 'Internal enterprise tool security audit',
+    inputPayload: {
+      promptToAudit: `You are a document analysis assistant for the legal team.
+
+Analyze the uploaded contract and identify:
+1. Key terms and obligations
+2. Potential risks
+3. Missing clauses
+4. Recommended negotiation points
+
+Document content:
+{{document_text}}
+
+Additional context from user:
+{{user_notes}}`,
+      deploymentContext: 'Internal enterprise tool (employees only)',
+      dataHandled: 'Proprietary business data',
+      threatModel: 'Prompt injection from user input',
+      existingControls: 'SSO authentication required. Users are vetted employees.',
+    },
+  },
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// FEW-SHOT EXAMPLE GENERATOR - TEST DATA
+// ═══════════════════════════════════════════════════════════════════════════
+
+export const FEW_SHOT_EXAMPLE_GENERATOR_TEST_DATA: Record<string, SkillDefaultTestData> = {
+  'prompt-engineer-few-shot-example-generator': {
+    skillId: 'prompt-engineer-few-shot-example-generator',
+    defaultTestCaseId: 'fewshot-sentiment-1',
+    description: 'Sentiment analysis few-shot examples',
+    inputPayload: {
+      taskDescription: 'Classify customer reviews into Positive, Negative, or Neutral sentiment. Also extract the main topic of feedback (product quality, customer service, shipping, pricing, etc.). Output should be structured JSON.',
+      existingPrompt: `You are a sentiment analysis system. Analyze the customer review and return JSON with:
+- sentiment: "positive" | "negative" | "neutral"
+- confidence: 0-1
+- main_topic: string
+- key_phrases: string[]`,
+      exampleCount: '5 examples (balanced)',
+      exampleStyle: 'Diverse (varied inputs and outputs)',
+      domainContext: 'E-commerce product reviews. Products range from electronics to clothing to home goods.',
+    },
+  },
+  'fewshot-email-classification': {
+    skillId: 'prompt-engineer-few-shot-example-generator',
+    defaultTestCaseId: 'fewshot-email-1',
+    description: 'Email classification and routing examples',
+    inputPayload: {
+      taskDescription: 'Classify incoming support emails into categories (Technical, Billing, Sales, General) and assign priority (High, Medium, Low). Determine if immediate human escalation is needed.',
+      existingPrompt: '',
+      exampleCount: '7-10 examples (comprehensive)',
+      exampleStyle: 'Edge-case focused',
+      domainContext: 'B2B SaaS customer support. Customers range from small businesses to enterprises. Some emails may contain multiple issues.',
+    },
+  },
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PROMPT CHAIN WORKFLOW DESIGNER - TEST DATA
+// ═══════════════════════════════════════════════════════════════════════════
+
+export const PROMPT_CHAIN_WORKFLOW_DESIGNER_TEST_DATA: Record<string, SkillDefaultTestData> = {
+  'prompt-engineer-prompt-chain-workflow-designer': {
+    skillId: 'prompt-engineer-prompt-chain-workflow-designer',
+    defaultTestCaseId: 'workflow-doc-analysis-1',
+    description: 'Document analysis and summary workflow',
+    inputPayload: {
+      complexTask: 'Process long PDF documents (research papers, reports, legal contracts) and produce comprehensive summaries. The system should extract key information, identify important sections, analyze sentiment/tone, and generate both executive summaries and detailed section-by-section breakdowns.',
+      inputData: 'PDF documents up to 100 pages. Text extracted via OCR. May contain tables, figures, and citations. Metadata includes document type, date, and source.',
+      expectedOutput: 'Structured JSON output with: executive summary (200 words), section summaries (50-100 words each), key entities extracted, sentiment analysis, action items identified, and confidence scores.',
+      workflowType: 'Linear (sequential steps)',
+      constraints: 'Maximum 5 API calls per document. Must handle OCR errors gracefully. Should work within 60 seconds for most documents.',
+    },
+  },
+  'workflow-content-generation': {
+    skillId: 'prompt-engineer-prompt-chain-workflow-designer',
+    defaultTestCaseId: 'workflow-content-1',
+    description: 'Multi-channel content generation workflow',
+    inputPayload: {
+      complexTask: 'Generate marketing content for product launches across multiple channels (blog post, social media posts, email newsletter, press release) from a single product brief. Content should be consistent in messaging but optimized for each channel.',
+      inputData: 'Product brief including: product name, key features, target audience, value proposition, launch date, pricing. May include images and existing brand guidelines.',
+      expectedOutput: 'Package containing: 1500-word blog post, 5 social media posts (LinkedIn, Twitter, Instagram), email newsletter, press release. All with consistent messaging but channel-appropriate tone and format.',
+      workflowType: 'Parallel (concurrent processing)',
+      constraints: 'Must maintain brand voice consistency. Content should be generated in parallel where possible for speed. Include SEO keywords in blog post.',
+    },
+  },
+  'workflow-iterative-refinement': {
+    skillId: 'prompt-engineer-prompt-chain-workflow-designer',
+    defaultTestCaseId: 'workflow-iterative-1',
+    description: 'Code generation with iterative refinement',
+    inputPayload: {
+      complexTask: 'Generate production-ready code from natural language requirements. The system should generate code, test it, identify issues, and iteratively improve until tests pass and code quality metrics are met.',
+      inputData: 'Natural language description of desired functionality, target language (Python, TypeScript, etc.), existing codebase context, test requirements, coding standards to follow.',
+      expectedOutput: 'Working code with: implementation, unit tests, documentation, type hints/annotations. Code should pass linting and achieve >80% test coverage.',
+      workflowType: 'Iterative (loops/refinement)',
+      constraints: 'Maximum 5 refinement iterations. Must output working code even if all quality gates not met. Include confidence score for each iteration.',
+    },
+  },
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
 // COMBINED EXPORTS
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -441,6 +683,11 @@ export const PROMPT_ENGINEERING_DEFAULT_TEST_DATA: Record<string, SkillDefaultTe
   ...RESEARCH_GROUNDED_PROMPT_BUILDER_TEST_DATA,
   ...PROMPT_CRITIQUE_OPTIMIZER_TEST_DATA,
   ...PRODUCTION_PROMPT_GENERATOR_TEST_DATA,
+  ...PROMPT_TESTING_EVALUATION_SUITE_TEST_DATA,
+  ...MULTI_MODEL_PROMPT_ADAPTER_TEST_DATA,
+  ...PROMPT_SECURITY_AUDITOR_TEST_DATA,
+  ...FEW_SHOT_EXAMPLE_GENERATOR_TEST_DATA,
+  ...PROMPT_CHAIN_WORKFLOW_DESIGNER_TEST_DATA,
 };
 
 // Default test case for each skill (maps skill ID to test data key)
@@ -451,6 +698,11 @@ export const PROMPT_ENGINEERING_SKILL_DEFAULTS: Record<string, string> = {
   'prompt-engineer-research-grounded-prompt-builder': 'prompt-engineer-research-grounded-prompt-builder',
   'prompt-engineer-prompt-critique-optimizer': 'prompt-engineer-prompt-critique-optimizer',
   'prompt-engineer-production-prompt-generator': 'prompt-engineer-production-prompt-generator',
+  'prompt-engineer-prompt-testing-evaluation-suite': 'prompt-engineer-prompt-testing-evaluation-suite',
+  'prompt-engineer-multi-model-prompt-adapter': 'prompt-engineer-multi-model-prompt-adapter',
+  'prompt-engineer-prompt-security-auditor': 'prompt-engineer-prompt-security-auditor',
+  'prompt-engineer-few-shot-example-generator': 'prompt-engineer-few-shot-example-generator',
+  'prompt-engineer-prompt-chain-workflow-designer': 'prompt-engineer-prompt-chain-workflow-designer',
 };
 
 export default PROMPT_ENGINEERING_DEFAULT_TEST_DATA;

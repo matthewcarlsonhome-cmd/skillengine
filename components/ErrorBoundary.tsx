@@ -15,6 +15,7 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw, Home, Bug } from 'lucide-react';
 import { Button } from './ui/Button';
+import { logger } from '../lib/logger';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -68,8 +69,12 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-    // Log error to console in development
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
+    // Log error using centralized logger
+    logger.error('ErrorBoundary caught an error', {
+      message: error.message,
+      stack: error.stack,
+      componentStack: errorInfo.componentStack,
+    });
 
     this.setState({ errorInfo });
 
@@ -281,6 +286,49 @@ export function ComponentErrorBoundary({
       {children}
     </ErrorBoundary>
   );
+}
+
+/**
+ * Route-level error boundary wrapper
+ * Use this to wrap individual route elements for independent error handling
+ */
+export function RouteErrorBoundary({
+  children,
+  pageName,
+}: {
+  children: ReactNode;
+  pageName?: string;
+}): JSX.Element {
+  return (
+    <ErrorBoundary
+      level="page"
+      title={pageName ? `Error in ${pageName}` : 'Page Error'}
+      description="This page encountered an error. Please try refreshing or return to the home page."
+      showDetails={process.env.NODE_ENV === 'development'}
+    >
+      {children}
+    </ErrorBoundary>
+  );
+}
+
+/**
+ * Higher-order component to wrap a component with RouteErrorBoundary
+ * Useful for wrapping route elements: withRouteErrorBoundary(MyPage, 'My Page')
+ */
+export function withRouteErrorBoundary<P extends object>(
+  WrappedComponent: React.ComponentType<P>,
+  pageName?: string
+): React.FC<P> {
+  const displayName = pageName || WrappedComponent.displayName || WrappedComponent.name || 'Component';
+
+  const WithRouteErrorBoundary: React.FC<P> = (props) => (
+    <RouteErrorBoundary pageName={displayName}>
+      <WrappedComponent {...props} />
+    </RouteErrorBoundary>
+  );
+
+  WithRouteErrorBoundary.displayName = `WithRouteErrorBoundary(${displayName})`;
+  return WithRouteErrorBoundary;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

@@ -30,6 +30,16 @@ import { logger } from '../lib/logger';
 // TYPES
 // ═══════════════════════════════════════════════════════════════════════════
 
+/** Maximum file size in bytes (default 5MB) */
+const DEFAULT_MAX_FILE_SIZE = 5 * 1024 * 1024;
+
+/** Format bytes to human readable string */
+function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
 export interface ValidatedInputProps {
   /** Unique identifier for the input */
   id: string;
@@ -63,6 +73,10 @@ export interface ValidatedInputProps {
   allowFileUpload?: boolean;
   /** Accepted file types for upload */
   acceptedFileTypes?: string;
+  /** Maximum file size in bytes (default 5MB) */
+  maxFileSize?: number;
+  /** Callback when file upload fails */
+  onFileUploadError?: (error: string) => void;
   /** Whether the field was recently auto-filled (triggers highlight) */
   wasAutoFilled?: boolean;
   /** Additional CSS classes */
@@ -95,6 +109,8 @@ export const ValidatedInput: React.FC<ValidatedInputProps> = ({
   disabled = false,
   allowFileUpload = false,
   acceptedFileTypes = '.txt,.pdf,.doc,.docx',
+  maxFileSize = DEFAULT_MAX_FILE_SIZE,
+  onFileUploadError,
   wasAutoFilled = false,
   className = '',
 }) => {
@@ -158,11 +174,61 @@ export const ValidatedInput: React.FC<ValidatedInputProps> = ({
     const file = event.target.files?.[0];
     if (!file) return;
 
+    // Validate file size
+    if (file.size > maxFileSize) {
+      const errorMessage = `File too large: ${formatBytes(file.size)}. Maximum size is ${formatBytes(maxFileSize)}.`;
+      logger.warn('File upload rejected - size limit exceeded', {
+        fileName: file.name,
+        fileSize: file.size,
+        maxFileSize,
+      });
+      onFileUploadError?.(errorMessage);
+      setValidation({
+        status: 'invalid',
+        message: errorMessage,
+      });
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      return;
+    }
+
+    // Validate file type (additional security check beyond accept attribute)
+    const acceptedTypes = acceptedFileTypes.split(',').map(t => t.trim().toLowerCase());
+    const fileExtension = `.${file.name.split('.').pop()?.toLowerCase()}`;
+    if (!acceptedTypes.includes(fileExtension) && !acceptedTypes.includes('*')) {
+      const errorMessage = `Invalid file type: ${fileExtension}. Accepted types: ${acceptedFileTypes}`;
+      logger.warn('File upload rejected - invalid file type', {
+        fileName: file.name,
+        fileExtension,
+        acceptedTypes,
+      });
+      onFileUploadError?.(errorMessage);
+      setValidation({
+        status: 'invalid',
+        message: errorMessage,
+      });
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      return;
+    }
+
     try {
       const text = await file.text();
       onChange(text);
+      // Clear any previous validation errors
+      setValidation({ status: 'valid', message: null });
     } catch (error) {
+      const errorMessage = 'Error reading file. Please try again.';
       logger.error('Error reading file', { error: error instanceof Error ? error.message : String(error) });
+      onFileUploadError?.(errorMessage);
+      setValidation({
+        status: 'invalid',
+        message: errorMessage,
+      });
     }
 
     // Reset file input

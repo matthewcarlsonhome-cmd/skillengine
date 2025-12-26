@@ -48,7 +48,7 @@ import { AuthProvider } from './hooks/useAuth';         // Supabase authenticati
 // ERROR HANDLING
 // Catches React errors and prevents full app crashes
 // ─────────────────────────────────────────────────────────────────────────────
-import { PageErrorBoundary } from './components/ErrorBoundary';
+import { PageErrorBoundary, RouteErrorBoundary } from './components/ErrorBoundary';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // LAYOUT COMPONENTS
@@ -176,21 +176,21 @@ function App() {
                         HOME & CORE PAGES
                         Primary navigation destinations
                     ═══════════════════════════════════════════════════════ */}
-                    <Route path="/" element={<HomePage />} />
-                    <Route path="/dashboard" element={<DashboardPage />} />
-                    <Route path="/welcome" element={<WelcomePage />} />
-                    <Route path="/profile" element={<UserProfilePage />} />
+                    <Route path="/" element={<RouteErrorBoundary pageName="Home"><HomePage /></RouteErrorBoundary>} />
+                    <Route path="/dashboard" element={<RouteErrorBoundary pageName="Dashboard"><DashboardPage /></RouteErrorBoundary>} />
+                    <Route path="/welcome" element={<RouteErrorBoundary pageName="Welcome"><WelcomePage /></RouteErrorBoundary>} />
+                    <Route path="/profile" element={<RouteErrorBoundary pageName="Profile"><UserProfilePage /></RouteErrorBoundary>} />
 
                     {/* ═══════════════════════════════════════════════════════
                         ROLE TEMPLATES
                         Pre-configured skill sets for different job roles
                     ═══════════════════════════════════════════════════════ */}
-                    <Route path="/role-templates" element={<RoleTemplatesPage />} />
-                    <Route path="/my-skills" element={<MySkillsPage />} />
-                    <Route path="/library" element={<SkillLibraryPage />} />
-                    <Route path="/library/skill/:skillId" element={<LibrarySkillRunnerPage />} />
-                    <Route path="/library-skill-runner" element={<LibrarySkillRunnerPage />} />
-                    <Route path="/discover" element={<SkillQuizPage />} />
+                    <Route path="/role-templates" element={<RouteErrorBoundary pageName="Role Templates"><RoleTemplatesPage /></RouteErrorBoundary>} />
+                    <Route path="/my-skills" element={<RouteErrorBoundary pageName="My Skills"><MySkillsPage /></RouteErrorBoundary>} />
+                    <Route path="/library" element={<RouteErrorBoundary pageName="Skill Library"><SkillLibraryPage /></RouteErrorBoundary>} />
+                    <Route path="/library/skill/:skillId" element={<RouteErrorBoundary pageName="Skill Runner"><LibrarySkillRunnerPage /></RouteErrorBoundary>} />
+                    <Route path="/library-skill-runner" element={<RouteErrorBoundary pageName="Skill Runner"><LibrarySkillRunnerPage /></RouteErrorBoundary>} />
+                    <Route path="/discover" element={<RouteErrorBoundary pageName="Skill Quiz"><SkillQuizPage /></RouteErrorBoundary>} />
 
                     {/* ═══════════════════════════════════════════════════════
                         STATIC AI SKILLS (16 Built-in Skills)
@@ -198,8 +198,8 @@ function App() {
                         - /skills: Browse all available skills
                         - /skill/:skillId: Run a specific skill (e.g., /skill/resume-customizer)
                     ═══════════════════════════════════════════════════════ */}
-                    <Route path="/skills" element={<BrowseSkillsPage />} />
-                    <Route path="/skill/:skillId" element={<SkillRunnerPage />} />
+                    <Route path="/skills" element={<RouteErrorBoundary pageName="Browse Skills"><BrowseSkillsPage /></RouteErrorBoundary>} />
+                    <Route path="/skill/:skillId" element={<RouteErrorBoundary pageName="Skill Runner"><SkillRunnerPage /></RouteErrorBoundary>} />
 
                     {/* ═══════════════════════════════════════════════════════
                         DYNAMIC SKILL GENERATION
@@ -209,10 +209,10 @@ function App() {
                         - /workspace/:id/build: Configure and generate selected skills
                         - /workspace/:id/skill/:id: Run a custom-built skill
                     ═══════════════════════════════════════════════════════ */}
-                    <Route path="/analyze" element={<AnalyzeRolePage />} />
-                    <Route path="/workspace/:workspaceId" element={<WorkspacePage />} />
-                    <Route path="/workspace/:workspaceId/build" element={<BuildSkillsPage />} />
-                    <Route path="/workspace/:workspaceId/skill/:skillId" element={<DynamicSkillRunnerPage />} />
+                    <Route path="/analyze" element={<RouteErrorBoundary pageName="Analyze Role"><AnalyzeRolePage /></RouteErrorBoundary>} />
+                    <Route path="/workspace/:workspaceId" element={<RouteErrorBoundary pageName="Workspace"><WorkspacePage /></RouteErrorBoundary>} />
+                    <Route path="/workspace/:workspaceId/build" element={<RouteErrorBoundary pageName="Build Skills"><BuildSkillsPage /></RouteErrorBoundary>} />
+                    <Route path="/workspace/:workspaceId/skill/:skillId" element={<RouteErrorBoundary pageName="Dynamic Skill"><DynamicSkillRunnerPage /></RouteErrorBoundary>} />
 
                     {/* ═══════════════════════════════════════════════════════
                         COMMUNITY FEATURES (Supabase Backend)
@@ -221,9 +221,9 @@ function App() {
                         - /community/import: Import a skill from JSON
                         - /community-skill-runner: Execute a community skill
                     ═══════════════════════════════════════════════════════ */}
-                    <Route path="/community" element={<CommunitySkillsPage />} />
-                    <Route path="/community/import" element={<ImportSkillPage />} />
-                    <Route path="/community-skill-runner" element={<CommunitySkillRunnerPage />} />
+                    <Route path="/community" element={<RouteErrorBoundary pageName="Community Skills"><CommunitySkillsPage /></RouteErrorBoundary>} />
+                    <Route path="/community/import" element={<RouteErrorBoundary pageName="Import Skill"><ImportSkillPage /></RouteErrorBoundary>} />
+                    <Route path="/community-skill-runner" element={<RouteErrorBoundary pageName="Community Skill"><CommunitySkillRunnerPage /></RouteErrorBoundary>} />
 
                     {/* ═══════════════════════════════════════════════════════
                         BATCH PROCESSING & EXPORT
@@ -231,8 +231,8 @@ function App() {
                         - /batch: Run any skill on multiple CSV rows
                         - /export-skills: Download skill prompts as CSV/TXT
                     ═══════════════════════════════════════════════════════ */}
-                    <Route path="/batch" element={<BatchProcessingPage />} />
-                    <Route path="/export-skills" element={<SkillExportPage />} />
+                    <Route path="/batch" element={<RouteErrorBoundary pageName="Batch Processing"><BatchProcessingPage /></RouteErrorBoundary>} />
+                    <Route path="/export-skills" element={<RouteErrorBoundary pageName="Export Skills"><SkillExportPage /></RouteErrorBoundary>} />
 
                     {/* ═══════════════════════════════════════════════════════
                         WORKFLOWS
@@ -241,41 +241,41 @@ function App() {
                         - /workflow/:id: Run a pre-built workflow (job-application, interview-prep, post-interview)
                         - /workflow/:id/batch: Batch execution with multiple input sets
                     ═══════════════════════════════════════════════════════ */}
-                    <Route path="/workflows" element={<WorkflowsPage />} />
-                    <Route path="/workflow/:workflowId" element={<WorkflowRunnerPage />} />
-                    <Route path="/workflow/:workflowId/batch" element={<BatchRunnerPage />} />
+                    <Route path="/workflows" element={<RouteErrorBoundary pageName="Workflows"><WorkflowsPage /></RouteErrorBoundary>} />
+                    <Route path="/workflow/:workflowId" element={<RouteErrorBoundary pageName="Workflow Runner"><WorkflowRunnerPage /></RouteErrorBoundary>} />
+                    <Route path="/workflow/:workflowId/batch" element={<RouteErrorBoundary pageName="Batch Runner"><BatchRunnerPage /></RouteErrorBoundary>} />
 
                     {/* ═══════════════════════════════════════════════════════
                         JOB SEARCH TOOLS
                         Comprehensive toolkit for job seekers
                     ═══════════════════════════════════════════════════════ */}
-                    <Route path="/job-tracker" element={<JobTrackerPage />} />
-                    <Route path="/interview-bank" element={<InterviewBankPage />} />
-                    <Route path="/salary-calculator" element={<SalaryCalculatorPage />} />
-                    <Route path="/networking" element={<NetworkingTemplatesPage />} />
-                    <Route path="/company-notes" element={<CompanyNotesPage />} />
-                    <Route path="/skills-gap" element={<SkillsGapPage />} />
-                    <Route path="/progress" element={<ProgressReportPage />} />
-                    <Route path="/achievements" element={<AchievementsPage />} />
-                    <Route path="/mock-interview" element={<MockInterviewPage />} />
-                    <Route path="/follow-ups" element={<FollowUpRemindersPage />} />
-                    <Route path="/autofill-vault" element={<AutoFillVaultPage />} />
-                    <Route path="/referral-network" element={<ReferralNetworkPage />} />
-                    <Route path="/market-insights" element={<MarketInsightsPage />} />
-                    <Route path="/daily-planner" element={<DailyPlannerPage />} />
+                    <Route path="/job-tracker" element={<RouteErrorBoundary pageName="Job Tracker"><JobTrackerPage /></RouteErrorBoundary>} />
+                    <Route path="/interview-bank" element={<RouteErrorBoundary pageName="Interview Bank"><InterviewBankPage /></RouteErrorBoundary>} />
+                    <Route path="/salary-calculator" element={<RouteErrorBoundary pageName="Salary Calculator"><SalaryCalculatorPage /></RouteErrorBoundary>} />
+                    <Route path="/networking" element={<RouteErrorBoundary pageName="Networking"><NetworkingTemplatesPage /></RouteErrorBoundary>} />
+                    <Route path="/company-notes" element={<RouteErrorBoundary pageName="Company Notes"><CompanyNotesPage /></RouteErrorBoundary>} />
+                    <Route path="/skills-gap" element={<RouteErrorBoundary pageName="Skills Gap"><SkillsGapPage /></RouteErrorBoundary>} />
+                    <Route path="/progress" element={<RouteErrorBoundary pageName="Progress Report"><ProgressReportPage /></RouteErrorBoundary>} />
+                    <Route path="/achievements" element={<RouteErrorBoundary pageName="Achievements"><AchievementsPage /></RouteErrorBoundary>} />
+                    <Route path="/mock-interview" element={<RouteErrorBoundary pageName="Mock Interview"><MockInterviewPage /></RouteErrorBoundary>} />
+                    <Route path="/follow-ups" element={<RouteErrorBoundary pageName="Follow-ups"><FollowUpRemindersPage /></RouteErrorBoundary>} />
+                    <Route path="/autofill-vault" element={<RouteErrorBoundary pageName="AutoFill Vault"><AutoFillVaultPage /></RouteErrorBoundary>} />
+                    <Route path="/referral-network" element={<RouteErrorBoundary pageName="Referral Network"><ReferralNetworkPage /></RouteErrorBoundary>} />
+                    <Route path="/market-insights" element={<RouteErrorBoundary pageName="Market Insights"><MarketInsightsPage /></RouteErrorBoundary>} />
+                    <Route path="/daily-planner" element={<RouteErrorBoundary pageName="Daily Planner"><DailyPlannerPage /></RouteErrorBoundary>} />
 
                     {/* ═══════════════════════════════════════════════════════
                         UTILITY PAGES
                         Configuration and help resources
                     ═══════════════════════════════════════════════════════ */}
-                    <Route path="/api-keys" element={<ApiKeyInstructionsPage />} />
-                    <Route path="/docs/platform-keys-setup" element={<PlatformKeysSetupPage />} />
-                    <Route path="/settings" element={<SettingsPage />} />
-                    <Route path="/pricing" element={<PricingPage />} />
-                    <Route path="/account" element={<AccountPage />} />
-                    <Route path="/admin" element={<AdminPage />} />
-                    <Route path="/admin/improvements" element={<AdminImprovementsPage />} />
-                    <Route path="/dev/playground" element={<DevPlaygroundPage />} />
+                    <Route path="/api-keys" element={<RouteErrorBoundary pageName="API Keys"><ApiKeyInstructionsPage /></RouteErrorBoundary>} />
+                    <Route path="/docs/platform-keys-setup" element={<RouteErrorBoundary pageName="Platform Keys Setup"><PlatformKeysSetupPage /></RouteErrorBoundary>} />
+                    <Route path="/settings" element={<RouteErrorBoundary pageName="Settings"><SettingsPage /></RouteErrorBoundary>} />
+                    <Route path="/pricing" element={<RouteErrorBoundary pageName="Pricing"><PricingPage /></RouteErrorBoundary>} />
+                    <Route path="/account" element={<RouteErrorBoundary pageName="Account"><AccountPage /></RouteErrorBoundary>} />
+                    <Route path="/admin" element={<RouteErrorBoundary pageName="Admin"><AdminPage /></RouteErrorBoundary>} />
+                    <Route path="/admin/improvements" element={<RouteErrorBoundary pageName="Admin Improvements"><AdminImprovementsPage /></RouteErrorBoundary>} />
+                    <Route path="/dev/playground" element={<RouteErrorBoundary pageName="Dev Playground"><DevPlaygroundPage /></RouteErrorBoundary>} />
                   </Routes>
                 </main>
 

@@ -5,7 +5,7 @@
  * Supports both platform keys and personal keys with model selection.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Key,
   Sparkles,
@@ -239,7 +239,65 @@ export const ProviderConfig: React.FC<ProviderConfigProps> = ({
 }) => {
   const [showKey, setShowKey] = useState(false);
   const [showProviderDropdown, setShowProviderDropdown] = useState(false);
+  const [focusedProviderIndex, setFocusedProviderIndex] = useState(-1);
   const { user, appUser } = useAuth();
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const providerButtonRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  const providers: ApiProvider[] = ['gemini', 'claude', 'chatgpt'];
+
+  // Handle keyboard navigation for provider dropdown
+  const handleDropdownKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (!showProviderDropdown) {
+      if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        setShowProviderDropdown(true);
+        setFocusedProviderIndex(providers.indexOf(selectedProvider));
+      }
+      return;
+    }
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        setFocusedProviderIndex(prev => Math.min(prev + 1, providers.length - 1));
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        setFocusedProviderIndex(prev => Math.max(prev - 1, 0));
+        break;
+      case 'Enter':
+      case ' ':
+        e.preventDefault();
+        if (focusedProviderIndex >= 0) {
+          onProviderChange(providers[focusedProviderIndex]);
+          setShowProviderDropdown(false);
+        }
+        break;
+      case 'Escape':
+        e.preventDefault();
+        setShowProviderDropdown(false);
+        break;
+      case 'Tab':
+        setShowProviderDropdown(false);
+        break;
+      case 'Home':
+        e.preventDefault();
+        setFocusedProviderIndex(0);
+        break;
+      case 'End':
+        e.preventDefault();
+        setFocusedProviderIndex(providers.length - 1);
+        break;
+    }
+  }, [showProviderDropdown, focusedProviderIndex, providers, selectedProvider, onProviderChange]);
+
+  // Focus the selected item when dropdown opens
+  useEffect(() => {
+    if (showProviderDropdown && focusedProviderIndex >= 0 && providerButtonRefs.current[focusedProviderIndex]) {
+      providerButtonRefs.current[focusedProviderIndex]?.focus();
+    }
+  }, [showProviderDropdown, focusedProviderIndex]);
 
   // Get user tier info if not provided via props
   const userEmail = appUser?.email || user?.email;
@@ -296,19 +354,22 @@ export const ProviderConfig: React.FC<ProviderConfigProps> = ({
 
       {/* Key Mode Toggle */}
       <div>
-        <label className="text-sm font-medium mb-2 block">API Key Mode</label>
-        <div className="flex gap-2">
+        <label id="keymode-label" className="text-sm font-medium mb-2 block">API Key Mode</label>
+        <div className="flex gap-2" role="radiogroup" aria-labelledby="keymode-label">
           <button
             onClick={() => onKeyModeChange('platform')}
             disabled={isRunning}
-            className={`flex-1 px-3 py-2 rounded-lg border text-sm font-medium transition-all ${
+            role="radio"
+            aria-checked={keyMode === 'platform'}
+            aria-label={`Use platform key${platformAvailable ? `, ${(platformBalance / 100).toFixed(2)} credits available` : ', not configured'}`}
+            className={`flex-1 px-3 py-2 rounded-lg border text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-primary/50 ${
               keyMode === 'platform'
                 ? 'border-primary bg-primary/10 text-primary'
                 : 'border-border hover:border-muted-foreground/50'
             } ${!platformAvailable ? 'opacity-50' : ''}`}
           >
             <div className="flex items-center justify-center gap-2">
-              <Sparkles className="h-4 w-4" />
+              <Sparkles className="h-4 w-4" aria-hidden="true" />
               <span>Platform Key</span>
             </div>
             {platformAvailable && (
@@ -325,14 +386,17 @@ export const ProviderConfig: React.FC<ProviderConfigProps> = ({
           <button
             onClick={() => onKeyModeChange('personal')}
             disabled={isRunning}
-            className={`flex-1 px-3 py-2 rounded-lg border text-sm font-medium transition-all ${
+            role="radio"
+            aria-checked={keyMode === 'personal'}
+            aria-label={`Use personal API key${hasPersonalKey ? ', configured' : ', not set'}`}
+            className={`flex-1 px-3 py-2 rounded-lg border text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-primary/50 ${
               keyMode === 'personal'
                 ? 'border-primary bg-primary/10 text-primary'
                 : 'border-border hover:border-muted-foreground/50'
             }`}
           >
             <div className="flex items-center justify-center gap-2">
-              <Key className="h-4 w-4" />
+              <Key className="h-4 w-4" aria-hidden="true" />
               <span>My Key</span>
             </div>
             <div className="text-xs text-muted-foreground mt-1">
@@ -344,26 +408,38 @@ export const ProviderConfig: React.FC<ProviderConfigProps> = ({
 
       {/* Provider Selection */}
       <div>
-        <label className="text-sm font-medium mb-2 block">AI Provider</label>
-        <div className="relative">
+        <label id="provider-label" className="text-sm font-medium mb-2 block">AI Provider</label>
+        <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setShowProviderDropdown(!showProviderDropdown)}
+            onKeyDown={handleDropdownKeyDown}
             disabled={isRunning}
-            className="w-full px-3 py-2 rounded-lg border bg-background text-left flex items-center justify-between hover:border-muted-foreground/50 transition-colors"
+            aria-haspopup="listbox"
+            aria-expanded={showProviderDropdown}
+            aria-labelledby="provider-label"
+            aria-controls="provider-listbox"
+            className="w-full px-3 py-2 rounded-lg border bg-background text-left flex items-center justify-between hover:border-muted-foreground/50 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50"
           >
             <div className="flex items-center gap-2">
               <span className={`font-medium ${providerInfo.color}`}>
                 {providerInfo.name}
               </span>
             </div>
-            <ChevronDown className={`h-4 w-4 transition-transform ${showProviderDropdown ? 'rotate-180' : ''}`} />
+            <ChevronDown className={`h-4 w-4 transition-transform ${showProviderDropdown ? 'rotate-180' : ''}`} aria-hidden="true" />
           </button>
 
           {showProviderDropdown && (
             <>
-              <div className="fixed inset-0 z-40" onClick={() => setShowProviderDropdown(false)} />
-              <div className="absolute top-full left-0 right-0 mt-1 rounded-lg border bg-card shadow-lg z-50">
-                {(['gemini', 'claude', 'chatgpt'] as ApiProvider[]).map((provider) => {
+              <div className="fixed inset-0 z-40" onClick={() => setShowProviderDropdown(false)} aria-hidden="true" />
+              <div
+                id="provider-listbox"
+                role="listbox"
+                aria-labelledby="provider-label"
+                aria-activedescendant={focusedProviderIndex >= 0 ? `provider-option-${providers[focusedProviderIndex]}` : undefined}
+                className="absolute top-full left-0 right-0 mt-1 rounded-lg border bg-card shadow-lg z-50"
+                onKeyDown={handleDropdownKeyDown}
+              >
+                {providers.map((provider, index) => {
                   const info = PROVIDER_INFO[provider];
                   const isAvailable = keyMode === 'platform'
                     ? isPlatformKeyAvailable(provider)
@@ -372,18 +448,23 @@ export const ProviderConfig: React.FC<ProviderConfigProps> = ({
                   return (
                     <button
                       key={provider}
+                      id={`provider-option-${provider}`}
+                      ref={(el) => { providerButtonRefs.current[index] = el; }}
+                      role="option"
+                      aria-selected={selectedProvider === provider}
                       onClick={() => {
                         onProviderChange(provider);
                         setShowProviderDropdown(false);
                       }}
-                      className={`w-full px-3 py-2 text-left hover:bg-muted transition-colors first:rounded-t-lg last:rounded-b-lg ${
+                      onKeyDown={handleDropdownKeyDown}
+                      className={`w-full px-3 py-2 text-left hover:bg-muted transition-colors first:rounded-t-lg last:rounded-b-lg focus:outline-none focus:bg-primary/10 ${
                         selectedProvider === provider ? 'bg-muted' : ''
-                      }`}
+                      } ${focusedProviderIndex === index ? 'bg-primary/10' : ''}`}
                     >
                       <div className="flex items-center justify-between">
                         <span className={`font-medium ${info.color}`}>{info.name}</span>
                         {isAvailable && (
-                          <CheckCircle2 className="h-4 w-4 text-green-500" />
+                          <CheckCircle2 className="h-4 w-4 text-green-500" aria-label="Available" />
                         )}
                       </div>
                       <p className="text-xs text-muted-foreground">{info.description}</p>
@@ -399,14 +480,17 @@ export const ProviderConfig: React.FC<ProviderConfigProps> = ({
       {/* Model Selection */}
       {showModelSelector && (
         <div>
-          <label className="text-sm font-medium mb-2 block">Model</label>
-          <div className="grid grid-cols-1 gap-2">
+          <label id="model-label" className="text-sm font-medium mb-2 block">Model</label>
+          <div className="grid grid-cols-1 gap-2" role="radiogroup" aria-labelledby="model-label">
             {models.map((model) => (
               <button
                 key={model.id}
                 onClick={() => onModelChange(model.id)}
                 disabled={isRunning}
-                className={`px-3 py-2 rounded-lg border text-left transition-all ${
+                role="radio"
+                aria-checked={selectedModel === model.id}
+                aria-label={`${model.name}${model.qualityTier === 'premium' ? ', premium model' : ''}, ${model.speedTier === 'fast' ? 'fast' : model.speedTier === 'slow' ? 'slower' : 'balanced'}, $${model.costPer1kTokens.toFixed(3)} per 1000 tokens`}
+                className={`px-3 py-2 rounded-lg border text-left transition-all focus:outline-none focus:ring-2 focus:ring-primary/50 ${
                   selectedModel === model.id
                     ? 'border-primary bg-primary/10'
                     : 'border-border hover:border-muted-foreground/50'
@@ -416,19 +500,19 @@ export const ProviderConfig: React.FC<ProviderConfigProps> = ({
                   <div className="flex items-center gap-2">
                     <span className="font-medium text-sm">{model.name}</span>
                     {model.qualityTier === 'premium' && (
-                      <Crown className="h-3.5 w-3.5 text-yellow-500" />
+                      <Crown className="h-3.5 w-3.5 text-yellow-500" aria-label="Premium model" />
                     )}
                   </div>
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     {model.speedTier === 'fast' && (
                       <span className="flex items-center gap-1">
-                        <Zap className="h-3 w-3 text-yellow-500" />
+                        <Zap className="h-3 w-3 text-yellow-500" aria-hidden="true" />
                         Fast
                       </span>
                     )}
                     {model.speedTier === 'slow' && (
                       <span className="flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
+                        <Clock className="h-3 w-3" aria-hidden="true" />
                         Slower
                       </span>
                     )}
@@ -467,9 +551,11 @@ export const ProviderConfig: React.FC<ProviderConfigProps> = ({
             <button
               type="button"
               onClick={() => setShowKey(!showKey)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 rounded"
+              aria-label={showKey ? 'Hide API key' : 'Show API key'}
+              aria-pressed={showKey}
             >
-              {showKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              {showKey ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
             </button>
           </div>
           {!apiKey && !hasPersonalKey && (

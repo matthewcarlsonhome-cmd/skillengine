@@ -414,6 +414,82 @@ export interface RoleConfig {
 }
 
 /**
+ * User's primary interest in automation
+ */
+export type AutomationInterest =
+  | 'work'        // Automation for my job/career
+  | 'education'   // Automation for learning/school
+  | 'personal'    // Automation for home life/personal projects
+  | 'business'    // Automation for my own business
+  | 'general';    // General interest / exploring
+
+/**
+ * Professional role categories the user resonates with
+ */
+export type RoleCategory =
+  | 'marketing'
+  | 'sales'
+  | 'copywriting'
+  | 'management'
+  | 'analysis'
+  | 'engineering'
+  | 'design'
+  | 'operations'
+  | 'hr'
+  | 'finance'
+  | 'consulting'
+  | 'other';
+
+/**
+ * Workflow categories for user interest selection
+ */
+export type WorkflowCategory =
+  | 'job-search'           // Job applications, interviews, career
+  | 'marketing-campaigns'  // Marketing, SEO, social media
+  | 'sales-business'       // Sales, proposals, client work
+  | 'project-management'   // Planning, tracking, reporting
+  | 'content-creation'     // Writing, copywriting, content
+  | 'data-analysis'        // Research, analytics, insights
+  | 'business-strategy'    // Business cases, strategy, consulting
+  | 'training-education'   // Workshops, courses, learning
+  | 'governance-compliance'; // Policies, compliance, risk
+
+/**
+ * User onboarding and preference profile
+ */
+export interface UserOnboardingProfile {
+  // Step 1: Primary interest in automation
+  automationInterest?: AutomationInterest;
+
+  // Step 2: Role categories that resonate (multi-select)
+  roleCategories?: RoleCategory[];
+
+  // Step 3: Workflow categories of interest (multi-select)
+  workflowInterests?: WorkflowCategory[];
+
+  // Specific selections (optional deeper engagement)
+  specificRoleTitle?: string;       // e.g., "Marketing Director"
+  specificSkillIds?: string[];      // Specific skills they've bookmarked
+  specificWorkflowIds?: string[];   // Specific workflows they want to use
+
+  // Onboarding status
+  onboardingCompleted: boolean;
+  onboardingCompletedAt?: string;
+  onboardingSkippedAt?: string;     // If they skipped onboarding
+}
+
+/**
+ * Email preferences for marketing communications
+ */
+export interface EmailPreferences {
+  marketingOptIn: boolean;
+  productUpdates: boolean;
+  weeklyDigest: boolean;
+  frequency: 'realtime' | 'daily' | 'weekly' | 'monthly' | 'never';
+  unsubscribedAt?: string;
+}
+
+/**
  * User profile with role and tracking
  */
 export interface AppUser {
@@ -442,6 +518,21 @@ export interface AppUser {
   // Admin notes
   adminNotes?: string;
   isAdmin?: boolean;
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // NEW: Onboarding & Profile (added for user interest tracking)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  // User's onboarding profile with interests
+  onboarding?: UserOnboardingProfile;
+
+  // Email communication preferences
+  emailPreferences?: EmailPreferences;
+
+  // Stripe integration
+  stripeCustomerId?: string;
+  stripeSubscriptionId?: string;
+  subscriptionStatus?: 'active' | 'canceled' | 'past_due' | 'trialing';
 }
 
 /**

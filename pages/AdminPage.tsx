@@ -72,12 +72,14 @@ import { runSkillStream as runClaudeStream } from '../lib/claude';
 import { runSkillStream as runChatGPTStream, type ChatGPTModelType } from '../lib/chatgpt';
 import { EmailSegmentationPanel } from '../components/EmailSegmentationPanel';
 import { EmailComposer } from '../components/EmailComposer';
+import { UserManagementPanel } from '../components/UserManagementPanel';
 import { useEmailSegments } from '../hooks/useEmailSegments';
 import { useSkillUsageStats } from '../hooks/useSkillUsageStats';
 import { sendEmail } from '../lib/emailSegmentation';
 import type { EmailSendRequest } from '../lib/emailSegmentation/types';
+import { UserCheck } from 'lucide-react';
 
-type TabId = 'overview' | 'emails' | 'email-targeting' | 'roles' | 'usage' | 'api-test' | 'settings';
+type TabId = 'overview' | 'users' | 'emails' | 'email-targeting' | 'roles' | 'usage' | 'api-test' | 'settings';
 
 const ROLE_ICONS: Record<UserRole, React.FC<{ className?: string }>> = {
   free: Users,
@@ -239,6 +241,7 @@ const AdminPage: React.FC = () => {
 
   const tabs: { id: TabId; label: string; icon: React.FC<{ className?: string }> }[] = [
     { id: 'overview', label: 'Overview', icon: BarChart3 },
+    { id: 'users', label: 'Users', icon: UserCheck },
     { id: 'emails', label: 'Email List', icon: Mail },
     { id: 'email-targeting', label: 'Email Targeting', icon: Target },
     { id: 'roles', label: 'Role Config', icon: Crown },
@@ -435,6 +438,21 @@ const AdminPage: React.FC = () => {
               </div>
             </div>
           </div>
+        )}
+
+        {/* Users Tab - Enhanced User Management with Onboarding Data */}
+        {activeTab === 'users' && (
+          <UserManagementPanel
+            onSelectUsers={(ids) => {
+              // Update selected recipients for email targeting
+              emailSegments.deselectAll();
+              ids.forEach(id => emailSegments.toggleRecipient(id));
+            }}
+            onSendEmail={() => {
+              setActiveTab('email-targeting');
+              setShowEmailComposer(true);
+            }}
+          />
         )}
 
         {/* Emails Tab */}

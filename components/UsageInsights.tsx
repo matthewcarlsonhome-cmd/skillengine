@@ -13,6 +13,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { db } from '../lib/storage/indexeddb';
 import type { SkillExecution } from '../lib/storage/types';
 import { Card, StatCard } from './ui/Card';
+import { logger } from '../lib/logger';
 import {
   TrendingUp,
   TrendingDown,
@@ -168,7 +169,7 @@ export const UsageInsights: React.FC<UsageInsightsProps> = ({
           dailyActivity: getDailyActivity(executions),
         });
       } catch (error) {
-        console.error('Failed to load usage stats:', error);
+        logger.error('Failed to load usage stats', { error: error instanceof Error ? error.message : String(error) });
       } finally {
         setLoading(false);
       }

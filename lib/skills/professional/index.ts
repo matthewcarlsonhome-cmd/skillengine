@@ -6,9 +6,9 @@
  * - Digital Marketing (8 skills)
  * - Project Management (7 skills)
  * - Business Analysis (7 skills)
- * - Prompt Engineering (6 skills)
+ * - Prompt Engineering (11 skills)
  *
- * Total: 36 production-ready skills
+ * Total: 41 production-ready skills
  */
 
 export { MARKETING_SKILLS } from './marketing';
