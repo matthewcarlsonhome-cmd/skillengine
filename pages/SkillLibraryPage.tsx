@@ -383,24 +383,27 @@ const SkillLibraryPage: React.FC = () => {
             >
               All Roles
             </button>
-            {ROLE_DEFINITIONS.slice(0, 8).map((role) => {
-              const Icon = ROLE_ICONS[role.id] || Briefcase;
-              const isSelected = filters.roles.includes(role.id);
-              return (
-                <button
-                  key={role.id}
-                  onClick={() => selectRole(role.id)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                    isSelected
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  <Icon className="h-3.5 w-3.5" />
-                  {role.name}
-                </button>
-              );
-            })}
+            {[...ROLE_DEFINITIONS]
+              .sort((a, b) => a.name.localeCompare(b.name))
+              .slice(0, 8)
+              .map((role) => {
+                const Icon = ROLE_ICONS[role.id] || Briefcase;
+                const isSelected = filters.roles.includes(role.id);
+                return (
+                  <button
+                    key={role.id}
+                    onClick={() => selectRole(role.id)}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                      isSelected
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                    {role.name}
+                  </button>
+                );
+              })}
             {ROLE_DEFINITIONS.length > 8 && (
               <button
                 onClick={() => toggleSection('roles')}
@@ -492,12 +495,14 @@ const SkillLibraryPage: React.FC = () => {
                 {renderFilterSection(
                   'Professional Role',
                   'roles',
-                  ROLE_DEFINITIONS.map((r) => ({
-                    value: r.id,
-                    label: r.name,
-                    count: skillCountByRole[r.id],
-                    icon: ROLE_ICONS[r.id] || Briefcase,
-                  })),
+                  [...ROLE_DEFINITIONS]
+                    .sort((a, b) => a.name.localeCompare(b.name))
+                    .map((r) => ({
+                      value: r.id,
+                      label: r.name,
+                      count: skillCountByRole[r.id],
+                      icon: ROLE_ICONS[r.id] || Briefcase,
+                    })),
                   'roles',
                   true
                 )}
