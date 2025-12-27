@@ -5,14 +5,11 @@
  * used by the Developer Test Playground for test case generation and validation.
  */
 
-import { SKILLS } from '../skills/static';
+import { SKILLS, GOVERNANCE_SKILLS, EXCEL_SKILLS, ENTERPRISE_SKILLS, EXTENDED_SKILLS } from '../skills/static';
 import { WORKFLOWS, WORKFLOW_LIST } from '../workflows';
 import { ROLE_TEMPLATES } from '../roleTemplates';
-import { ENTERPRISE_SKILLS } from '../skills/enterprise';
-import { EXCEL_SKILLS } from '../skills/excel';
-import { AI_GOVERNANCE_SKILLS } from '../skills/governance';
-import { OPERATIONS_SKILLS } from '../skills/operations';
 import type { Workflow, SkillDefinition } from '../storage/types';
+import type { Skill } from '../../types';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -207,12 +204,12 @@ export function generateRegistrySnapshot(): RegistrySnapshot {
   const staticSkills = Object.values(SKILLS).map(extractStaticSkillSchema);
   const enterpriseSkills = Object.values(ENTERPRISE_SKILLS).map((s) => extractEnterpriseSkillSchema(s, 'enterprise'));
   const excelSkills = Object.values(EXCEL_SKILLS).map((s) => extractEnterpriseSkillSchema(s, 'excel'));
-  const governanceSkills = Object.values(AI_GOVERNANCE_SKILLS).map((s) => extractEnterpriseSkillSchema(s, 'governance'));
-  const operationsSkills = Object.values(OPERATIONS_SKILLS).map((s) => extractEnterpriseSkillSchema(s, 'operations'));
+  const governanceSkills = Object.values(GOVERNANCE_SKILLS).map((s) => extractEnterpriseSkillSchema(s, 'governance'));
+  const extendedSkills = Object.values(EXTENDED_SKILLS).map((s) => extractEnterpriseSkillSchema(s, 'extended'));
   const roleBasedSkills = extractRoleBasedSkillSchemas();
   const workflows = WORKFLOW_LIST.map(extractWorkflowSchema);
 
-  const allStaticSkills = [...staticSkills, ...enterpriseSkills, ...excelSkills, ...governanceSkills, ...operationsSkills];
+  const allStaticSkills = [...staticSkills, ...enterpriseSkills, ...excelSkills, ...governanceSkills, ...extendedSkills];
 
   return {
     generatedAt: new Date().toISOString(),
@@ -233,16 +230,16 @@ export function generateRegistrySnapshot(): RegistrySnapshot {
 }
 
 /**
- * Get all skill schemas (static + enterprise + excel + governance + operations + role-based)
+ * Get all skill schemas (static + enterprise + excel + governance + extended + role-based)
  */
 export function getAllSkillSchemas(): SkillSchema[] {
   const staticSkills = Object.values(SKILLS).map(extractStaticSkillSchema);
   const enterpriseSkills = Object.values(ENTERPRISE_SKILLS).map((s) => extractEnterpriseSkillSchema(s, 'enterprise'));
   const excelSkills = Object.values(EXCEL_SKILLS).map((s) => extractEnterpriseSkillSchema(s, 'excel'));
-  const governanceSkills = Object.values(AI_GOVERNANCE_SKILLS).map((s) => extractEnterpriseSkillSchema(s, 'governance'));
-  const operationsSkills = Object.values(OPERATIONS_SKILLS).map((s) => extractEnterpriseSkillSchema(s, 'operations'));
+  const governanceSkills = Object.values(GOVERNANCE_SKILLS).map((s) => extractEnterpriseSkillSchema(s, 'governance'));
+  const extendedSkills = Object.values(EXTENDED_SKILLS).map((s) => extractEnterpriseSkillSchema(s, 'extended'));
   const roleBasedSkills = extractRoleBasedSkillSchemas();
-  return [...staticSkills, ...enterpriseSkills, ...excelSkills, ...governanceSkills, ...operationsSkills, ...roleBasedSkills];
+  return [...staticSkills, ...enterpriseSkills, ...excelSkills, ...governanceSkills, ...extendedSkills, ...roleBasedSkills];
 }
 
 /**
