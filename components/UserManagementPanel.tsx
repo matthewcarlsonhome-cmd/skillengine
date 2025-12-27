@@ -63,12 +63,15 @@ export const UserManagementPanel: React.FC<UserManagementPanelProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [filterInterest, setFilterInterest] = useState<string>('all');
   const [filterRole, setFilterRole] = useState<string>('all');
+  const [filterRoleCategory, setFilterRoleCategory] = useState<string>('all');
+  const [filterWorkflow, setFilterWorkflow] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [selectedUserIds, setSelectedUserIds] = useState<Set<string>>(new Set());
   const [showFilters, setShowFilters] = useState(false);
   const [viewingUser, setViewingUser] = useState<UserWithProfile | null>(null);
 
   // Get users with profile data
+  // Onboarding data is now stored directly in CapturedEmail
   const users = useMemo((): UserWithProfile[] => {
     const emails = getCapturedEmails();
     const currentUser = getCurrentAppUser();
@@ -77,9 +80,29 @@ export const UserManagementPanel: React.FC<UserManagementPanelProps> = ({
       const isCurrentUser = currentUser &&
         currentUser.email.toLowerCase() === email.email.toLowerCase();
 
+      // Build onboarding object from CapturedEmail fields
+      // For current user, fall back to AppUser data if CapturedEmail is missing
+      const hasOnboardingData = email.automationInterest ||
+        email.roleCategories?.length ||
+        email.workflowInterests?.length ||
+        email.onboardingCompleted;
+
+      const onboarding = hasOnboardingData || (isCurrentUser && currentUser.onboarding) ? {
+        automationInterest: email.automationInterest ||
+          (isCurrentUser ? currentUser.onboarding?.automationInterest : undefined),
+        roleCategories: email.roleCategories ||
+          (isCurrentUser ? currentUser.onboarding?.roleCategories : undefined),
+        workflowInterests: email.workflowInterests ||
+          (isCurrentUser ? currentUser.onboarding?.workflowInterests : undefined),
+        onboardingCompleted: email.onboardingCompleted ||
+          (isCurrentUser ? currentUser.onboarding?.onboardingCompleted : false),
+        onboardingCompletedAt: email.onboardingCompletedAt ||
+          (isCurrentUser ? currentUser.onboarding?.onboardingCompletedAt : undefined),
+      } : undefined;
+
       return {
         ...email,
-        onboarding: isCurrentUser ? currentUser.onboarding : undefined,
+        onboarding,
         emailPreferences: isCurrentUser ? currentUser.emailPreferences : undefined,
       };
     });
@@ -107,7 +130,21 @@ export const UserManagementPanel: React.FC<UserManagementPanelProps> = ({
         }
       }
 
-      // Role filter
+      // Role category filter (from onboarding)
+      if (filterRoleCategory !== 'all') {
+        if (!user.onboarding?.roleCategories?.includes(filterRoleCategory as RoleCategory)) {
+          return false;
+        }
+      }
+
+      // Workflow interest filter
+      if (filterWorkflow !== 'all') {
+        if (!user.onboarding?.workflowInterests?.includes(filterWorkflow as WorkflowCategory)) {
+          return false;
+        }
+      }
+
+      // User role filter (free/pro/team/custom)
       if (filterRole !== 'all') {
         if (user.role !== filterRole) {
           return false;
@@ -123,7 +160,7 @@ export const UserManagementPanel: React.FC<UserManagementPanelProps> = ({
 
       return true;
     });
-  }, [users, searchQuery, filterInterest, filterRole, filterStatus]);
+  }, [users, searchQuery, filterInterest, filterRoleCategory, filterWorkflow, filterRole, filterStatus]);
 
   const handleSelectAll = () => {
     if (selectedUserIds.size === filteredUsers.length) {
@@ -248,7 +285,7 @@ export const UserManagementPanel: React.FC<UserManagementPanelProps> = ({
       {/* Filters Panel */}
       {showFilters && (
         <div className="rounded-xl border bg-card p-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
             <div>
               <label className="text-sm font-medium mb-2 block">Automation Interest</label>
               <Select
@@ -262,12 +299,36 @@ export const UserManagementPanel: React.FC<UserManagementPanelProps> = ({
               </Select>
             </div>
             <div>
-              <label className="text-sm font-medium mb-2 block">User Role</label>
+              <label className="text-sm font-medium mb-2 block">Role Category</label>
+              <Select
+                value={filterRoleCategory}
+                onChange={(e) => setFilterRoleCategory(e.target.value)}
+              >
+                <option value="all">All Categories</option>
+                {ROLE_CATEGORY_OPTIONS.map(opt => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </Select>
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">Workflow Interest</label>
+              <Select
+                value={filterWorkflow}
+                onChange={(e) => setFilterWorkflow(e.target.value)}
+              >
+                <option value="all">All Workflows</option>
+                {WORKFLOW_CATEGORY_OPTIONS.map(opt => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </Select>
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">User Tier</label>
               <Select
                 value={filterRole}
                 onChange={(e) => setFilterRole(e.target.value)}
               >
-                <option value="all">All Roles</option>
+                <option value="all">All Tiers</option>
                 <option value="free">Free</option>
                 <option value="pro">Pro</option>
                 <option value="team">Team</option>
@@ -292,13 +353,15 @@ export const UserManagementPanel: React.FC<UserManagementPanelProps> = ({
                 variant="ghost"
                 onClick={() => {
                   setFilterInterest('all');
+                  setFilterRoleCategory('all');
+                  setFilterWorkflow('all');
                   setFilterRole('all');
                   setFilterStatus('all');
                   setSearchQuery('');
                 }}
               >
                 <RefreshCw className="w-4 h-4 mr-2" />
-                Clear Filters
+                Clear
               </Button>
             </div>
           </div>
@@ -357,7 +420,8 @@ export const UserManagementPanel: React.FC<UserManagementPanelProps> = ({
                     )}
                   </td>
                   <td className="py-3 px-4">
-                    <div className="text-sm">
+                    <div className="text-sm space-y-1">
+                      {/* Role Categories */}
                       {user.onboarding?.roleCategories && user.onboarding.roleCategories.length > 0 ? (
                         <div className="flex flex-wrap gap-1">
                           {user.onboarding.roleCategories.slice(0, 2).map(role => (
@@ -374,7 +438,27 @@ export const UserManagementPanel: React.FC<UserManagementPanelProps> = ({
                             </span>
                           )}
                         </div>
-                      ) : (
+                      ) : null}
+                      {/* Workflow Interests */}
+                      {user.onboarding?.workflowInterests && user.onboarding.workflowInterests.length > 0 ? (
+                        <div className="flex flex-wrap gap-1">
+                          {user.onboarding.workflowInterests.slice(0, 2).map(workflow => (
+                            <span
+                              key={workflow}
+                              className="text-xs px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-400"
+                            >
+                              {getWorkflowCategoryLabel(workflow)}
+                            </span>
+                          ))}
+                          {user.onboarding.workflowInterests.length > 2 && (
+                            <span className="text-xs text-muted-foreground">
+                              +{user.onboarding.workflowInterests.length - 2}
+                            </span>
+                          )}
+                        </div>
+                      ) : null}
+                      {/* Show dash if nothing selected */}
+                      {(!user.onboarding?.roleCategories?.length && !user.onboarding?.workflowInterests?.length) && (
                         <span className="text-muted-foreground">-</span>
                       )}
                     </div>
