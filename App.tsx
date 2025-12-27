@@ -143,6 +143,7 @@ import DevPlaygroundPage from './pages/DevPlaygroundPage';           // Develope
 import AccountPage from './pages/AccountPage';                       // User account & credits
 import AdminImprovementsPage from './pages/AdminImprovementsPage'; // Skill improvement review
 import AuthCallbackPage from './pages/AuthCallbackPage';           // OAuth callback handler
+import { AuthGate } from './components/AuthGate';                  // Login gate with onboarding
 
 /**
  * Main App Component
@@ -163,6 +164,8 @@ function App() {
           <ThemeProvider>
             {/* ToastProvider: Global toast notification system */}
             <ToastProvider>
+              {/* AuthGate: Shows onboarding wizard for new logged-in users */}
+              <AuthGate allowAnonymous={true}>
               {/* PageErrorBoundary: Catches React errors and displays fallback UI */}
               <PageErrorBoundary>
                 {/* Main app container with full viewport height and flex layout */}
@@ -290,6 +293,7 @@ function App() {
                 <CommandPalette />
               </div>
               </PageErrorBoundary>
+              </AuthGate>
             </ToastProvider>
           </ThemeProvider>
         </Router>
