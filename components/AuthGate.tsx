@@ -15,7 +15,7 @@ import { Loader2, Sparkles, LogIn, Mail, Shield, Zap, Target, ChevronRight } fro
 import { Button } from './ui/Button';
 import { OnboardingWizard } from './OnboardingWizard';
 import { useAuth } from '../hooks/useAuth';
-import { getCurrentAppUser, saveCurrentAppUser } from '../lib/admin';
+import { getCurrentAppUser, saveCurrentAppUser, updateCapturedEmail } from '../lib/admin';
 import type { UserOnboardingProfile, AppUser } from '../lib/storage/types';
 
 interface AuthGateProps {
@@ -54,6 +54,15 @@ export const AuthGate: React.FC<AuthGateProps> = ({
         onboarding: profile,
       };
       saveCurrentAppUser(updatedUser);
+
+      // Also save to CapturedEmail for admin targeting
+      updateCapturedEmail(currentUser.email, {
+        automationInterest: profile.automationInterest,
+        roleCategories: profile.roleCategories,
+        workflowInterests: profile.workflowInterests,
+        onboardingCompleted: true,
+        onboardingCompletedAt: profile.onboardingCompletedAt,
+      });
     }
     setShowOnboarding(false);
   };
@@ -70,6 +79,11 @@ export const AuthGate: React.FC<AuthGateProps> = ({
         },
       };
       saveCurrentAppUser(updatedUser);
+
+      // Also mark as skipped in CapturedEmail
+      updateCapturedEmail(currentUser.email, {
+        onboardingCompleted: false,
+      });
     }
     setShowOnboarding(false);
   };

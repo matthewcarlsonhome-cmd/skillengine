@@ -598,7 +598,6 @@ export function getAllUsersWithProfiles(): AppUser[] {
  */
 export function exportUsersWithOnboardingToCSV(): string {
   const emails = getCapturedEmails();
-  const currentUser = getCurrentAppUser();
 
   const headers = [
     'Email',
@@ -617,27 +616,23 @@ export function exportUsersWithOnboardingToCSV(): string {
   ];
 
   const rows = emails.map(e => {
-    // Try to match with current user for onboarding data
-    const isCurrentUser = currentUser && currentUser.email.toLowerCase() === e.email.toLowerCase();
-    const onboarding = isCurrentUser ? currentUser.onboarding : undefined;
-    const emailPrefs = isCurrentUser ? currentUser.emailPreferences : undefined;
-
+    // Onboarding data is now stored directly in CapturedEmail
     return [
       e.email,
       e.displayName || '',
       e.role || 'free',
-      onboarding?.automationInterest
-        ? getAutomationInterestLabel(onboarding.automationInterest)
+      e.automationInterest
+        ? getAutomationInterestLabel(e.automationInterest)
         : 'Not set',
-      onboarding?.roleCategories?.map(getRoleCategoryLabel).join('; ') || 'Not set',
-      onboarding?.workflowInterests?.map(getWorkflowCategoryLabel).join('; ') || 'Not set',
-      onboarding?.onboardingCompleted ? 'Yes' : 'No',
+      e.roleCategories?.map(getRoleCategoryLabel).join('; ') || 'Not set',
+      e.workflowInterests?.map(getWorkflowCategoryLabel).join('; ') || 'Not set',
+      e.onboardingCompleted ? 'Yes' : 'No',
       e.firstSeenAt,
       e.lastSeenAt,
       e.loginCount.toString(),
       e.skillsUsed.toString(),
       e.followUpStatus || 'pending',
-      emailPrefs?.marketingOptIn ? 'Yes' : 'Unknown',
+      e.hasOptedIn ? 'Yes' : 'Unknown',
     ];
   });
 
@@ -658,37 +653,37 @@ export function getOnboardingStats(): {
   byWorkflowInterest: Record<string, number>;
   onboardingCompletionRate: number;
 } {
-  const currentUser = getCurrentAppUser();
   const emails = getCapturedEmails();
 
-  // In localStorage mode, we only have limited data
-  // This would be more comprehensive with Supabase
+  // Aggregate stats from all captured emails (onboarding data is now stored in CapturedEmail)
   const byAutomationInterest: Record<string, number> = {};
   const byRoleCategory: Record<string, number> = {};
   const byWorkflowInterest: Record<string, number> = {};
   let completedOnboarding = 0;
 
-  if (currentUser?.onboarding) {
-    const onboarding = currentUser.onboarding;
-
-    if (onboarding.onboardingCompleted) {
+  for (const email of emails) {
+    // Count completed onboarding
+    if (email.onboardingCompleted) {
       completedOnboarding++;
     }
 
-    if (onboarding.automationInterest) {
-      const label = getAutomationInterestLabel(onboarding.automationInterest);
+    // Count by automation interest
+    if (email.automationInterest) {
+      const label = getAutomationInterestLabel(email.automationInterest);
       byAutomationInterest[label] = (byAutomationInterest[label] || 0) + 1;
     }
 
-    if (onboarding.roleCategories) {
-      for (const role of onboarding.roleCategories) {
+    // Count by role categories
+    if (email.roleCategories) {
+      for (const role of email.roleCategories) {
         const label = getRoleCategoryLabel(role);
         byRoleCategory[label] = (byRoleCategory[label] || 0) + 1;
       }
     }
 
-    if (onboarding.workflowInterests) {
-      for (const workflow of onboarding.workflowInterests) {
+    // Count by workflow interests
+    if (email.workflowInterests) {
+      for (const workflow of email.workflowInterests) {
         const label = getWorkflowCategoryLabel(workflow);
         byWorkflowInterest[label] = (byWorkflowInterest[label] || 0) + 1;
       }

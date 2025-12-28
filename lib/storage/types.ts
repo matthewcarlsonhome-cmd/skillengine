@@ -575,6 +575,13 @@ export interface CapturedEmail {
   hasOptedIn?: boolean;
   followUpStatus?: 'pending' | 'contacted' | 'converted' | 'declined';
   followUpNotes?: string;
+
+  // Onboarding data (from wizard) - for email targeting
+  automationInterest?: AutomationInterest;
+  roleCategories?: RoleCategory[];
+  workflowInterests?: WorkflowCategory[];
+  onboardingCompleted?: boolean;
+  onboardingCompletedAt?: string;
 }
 
 /**
