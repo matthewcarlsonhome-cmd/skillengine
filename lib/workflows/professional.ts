@@ -1416,6 +1416,656 @@ export const COMPETITIVE_INTELLIGENCE_WORKFLOW: Workflow = {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
+// WORKFLOW 11: NEW HIRE ONBOARDING SUITE
+// Complete new hire onboarding workflow
+// ═══════════════════════════════════════════════════════════════════════════
+
+export const NEW_HIRE_ONBOARDING_WORKFLOW: Workflow = {
+  id: 'new-hire-onboarding-suite',
+  name: 'New Hire Onboarding Suite',
+  description: 'Complete new hire onboarding from offer acceptance to 90-day integration',
+  longDescription: 'Create a comprehensive onboarding experience for new hires including personalized plans, job descriptions, performance frameworks, and integration tracking.',
+  icon: 'UserPlus',
+  color: 'green',
+  estimatedTime: '40-50 minutes',
+
+  outputs: [
+    'Optimized job description',
+    'Comprehensive onboarding plan',
+    'Performance review framework',
+    '30-60-90 day success metrics'
+  ],
+
+  globalInputs: [
+    {
+      id: 'newHireName',
+      label: 'New Hire Name & Role',
+      type: 'text',
+      placeholder: 'Jane Smith, Senior Product Manager',
+      required: true,
+    },
+    {
+      id: 'department',
+      label: 'Department/Team',
+      type: 'text',
+      placeholder: 'Product - Growth Team',
+      required: true,
+    },
+    {
+      id: 'startDate',
+      label: 'Start Date',
+      type: 'text',
+      placeholder: 'January 15, 2025',
+      required: true,
+    },
+    {
+      id: 'roleResponsibilities',
+      label: 'Role Responsibilities',
+      type: 'textarea',
+      placeholder: 'Key responsibilities, expectations, and success criteria for this role...',
+      required: true,
+      rows: 5,
+    },
+    {
+      id: 'teamContext',
+      label: 'Team Context',
+      type: 'textarea',
+      placeholder: 'Team structure, key projects, culture, stakeholders...',
+      required: true,
+      rows: 4,
+    },
+    {
+      id: 'companyInfo',
+      label: 'Company Information',
+      type: 'textarea',
+      placeholder: 'Company mission, values, benefits...',
+      required: true,
+      rows: 3,
+    },
+  ],
+
+  steps: [
+    {
+      id: 'step-job-description',
+      skillId: 'job-description-optimizer',
+      name: 'Finalize Job Description',
+      description: 'Create or refine job description for the role',
+      inputMappings: {
+        jobTitle: { type: 'global', inputId: 'newHireName' },
+        department: { type: 'global', inputId: 'department' },
+        requirements: { type: 'global', inputId: 'roleResponsibilities' },
+        responsibilities: { type: 'global', inputId: 'roleResponsibilities' },
+        companyInfo: { type: 'global', inputId: 'companyInfo' },
+        compensation: { type: 'static', value: '' },
+      },
+      outputKey: 'jobDescription',
+    },
+    {
+      id: 'step-onboarding-plan',
+      skillId: 'employee-onboarding-planner',
+      name: 'Create Onboarding Plan',
+      description: 'Build comprehensive 30-60-90 day onboarding plan',
+      inputMappings: {
+        newHireName: { type: 'global', inputId: 'newHireName' },
+        startDate: { type: 'global', inputId: 'startDate' },
+        teamContext: { type: 'global', inputId: 'teamContext' },
+        roleExpectations: { type: 'global', inputId: 'roleResponsibilities' },
+        keyStakeholders: { type: 'global', inputId: 'teamContext' },
+        tools: { type: 'static', value: '' },
+      },
+      outputKey: 'onboardingPlan',
+    },
+    {
+      id: 'step-performance-framework',
+      skillId: 'performance-review-writer',
+      name: 'Create Performance Framework',
+      description: 'Establish performance expectations and review structure',
+      inputMappings: {
+        employeeName: { type: 'global', inputId: 'newHireName' },
+        reviewPeriod: { type: 'static', value: '90-Day Review' },
+        accomplishments: { type: 'previous', stepId: 'step-onboarding-plan', outputKey: 'onboardingPlan' },
+        strengths: { type: 'static', value: 'To be observed during onboarding' },
+        growthAreas: { type: 'static', value: 'To be identified during onboarding' },
+        ratingContext: { type: 'static', value: 'New hire 90-day evaluation' },
+      },
+      outputKey: 'performanceFramework',
+    },
+  ],
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// WORKFLOW 12: SALES DEAL ACCELERATOR
+// Complete sales deal acceleration workflow
+// ═══════════════════════════════════════════════════════════════════════════
+
+export const SALES_DEAL_ACCELERATOR_WORKFLOW: Workflow = {
+  id: 'sales-deal-accelerator',
+  name: 'Sales Deal Accelerator',
+  description: 'Accelerate enterprise deals with comprehensive sales enablement materials',
+  longDescription: 'Generate all materials needed to advance and close enterprise deals including call prep, proposals, competitive battle cards, and customer health tracking.',
+  icon: 'TrendingUp',
+  color: 'blue',
+  estimatedTime: '45-60 minutes',
+
+  outputs: [
+    'Pre-call intelligence brief',
+    'Customized sales proposal',
+    'Competitive battle card',
+    'Customer health scorecard'
+  ],
+
+  globalInputs: [
+    {
+      id: 'prospectCompany',
+      label: 'Prospect Company',
+      type: 'text',
+      placeholder: 'Acme Corporation',
+      required: true,
+    },
+    {
+      id: 'prospectContact',
+      label: 'Primary Contact',
+      type: 'text',
+      placeholder: 'Jane Smith, VP of Operations',
+      required: true,
+    },
+    {
+      id: 'yourSolution',
+      label: 'Your Solution',
+      type: 'textarea',
+      placeholder: 'Describe your product/service and value proposition...',
+      required: true,
+      rows: 4,
+    },
+    {
+      id: 'dealContext',
+      label: 'Deal Context',
+      type: 'textarea',
+      placeholder: 'Deal stage, size, timeline, known pain points...',
+      required: true,
+      rows: 4,
+    },
+    {
+      id: 'competitor',
+      label: 'Primary Competitor',
+      type: 'text',
+      placeholder: 'CompetitorCo',
+      required: true,
+    },
+    {
+      id: 'pricingInfo',
+      label: 'Pricing Information',
+      type: 'textarea',
+      placeholder: 'Pricing tiers, discounts, terms...',
+      required: true,
+      rows: 3,
+    },
+  ],
+
+  steps: [
+    {
+      id: 'step-call-prep',
+      skillId: 'sales-call-prep-pro',
+      name: 'Prepare Call Brief',
+      description: 'Generate comprehensive pre-call intelligence and talking points',
+      inputMappings: {
+        prospectCompany: { type: 'global', inputId: 'prospectCompany' },
+        prospectContact: { type: 'global', inputId: 'prospectContact' },
+        yourCompany: { type: 'global', inputId: 'yourSolution' },
+        meetingType: { type: 'static', value: 'Demo/Presentation' },
+        knownInfo: { type: 'global', inputId: 'dealContext' },
+        dealStage: { type: 'static', value: 'Proposal' },
+      },
+      outputKey: 'callPrep',
+    },
+    {
+      id: 'step-proposal',
+      skillId: 'proposal-builder',
+      name: 'Create Proposal',
+      description: 'Build customized sales proposal',
+      inputMappings: {
+        prospectCompany: { type: 'global', inputId: 'prospectCompany' },
+        prospectContact: { type: 'global', inputId: 'prospectContact' },
+        yourSolution: { type: 'global', inputId: 'yourSolution' },
+        identifiedNeeds: { type: 'global', inputId: 'dealContext' },
+        pricingInfo: { type: 'global', inputId: 'pricingInfo' },
+        competitiveSituation: { type: 'global', inputId: 'competitor' },
+        timeline: { type: 'static', value: '' },
+      },
+      outputKey: 'proposal',
+    },
+    {
+      id: 'step-battle-card',
+      skillId: 'competitive-battle-card',
+      name: 'Create Battle Card',
+      description: 'Generate competitive positioning and objection handling',
+      inputMappings: {
+        yourCompany: { type: 'global', inputId: 'yourSolution' },
+        competitor: { type: 'global', inputId: 'competitor' },
+        competitorInfo: { type: 'static', value: '' },
+        targetMarket: { type: 'global', inputId: 'dealContext' },
+        commonObjections: { type: 'previous', stepId: 'step-call-prep', outputKey: 'callPrep' },
+        winLossData: { type: 'static', value: '' },
+      },
+      outputKey: 'battleCard',
+    },
+    {
+      id: 'step-health-scorecard',
+      skillId: 'customer-health-scorecard',
+      name: 'Initialize Health Tracking',
+      description: 'Set up customer health tracking framework',
+      inputMappings: {
+        customerName: { type: 'global', inputId: 'prospectCompany' },
+        contractDetails: { type: 'global', inputId: 'pricingInfo' },
+        usageData: { type: 'static', value: 'New customer - baseline to be established' },
+        relationshipInfo: { type: 'previous', stepId: 'step-call-prep', outputKey: 'callPrep' },
+        businessContext: { type: 'global', inputId: 'dealContext' },
+        concernsFlags: { type: 'static', value: '' },
+      },
+      outputKey: 'healthScorecard',
+    },
+  ],
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// WORKFLOW 13: QUARTERLY BUSINESS REVIEW PACK
+// Complete QBR preparation workflow
+// ═══════════════════════════════════════════════════════════════════════════
+
+export const QUARTERLY_BUSINESS_REVIEW_WORKFLOW: Workflow = {
+  id: 'quarterly-business-review-pack',
+  name: 'Quarterly Business Review Pack',
+  description: 'Prepare comprehensive QBR materials with performance analysis and strategic recommendations',
+  longDescription: 'Create all materials needed for executive quarterly business reviews including customer health analysis, performance metrics, strategic recommendations, and presentation materials.',
+  icon: 'BarChart',
+  color: 'purple',
+  estimatedTime: '50-65 minutes',
+
+  outputs: [
+    'Customer health assessment',
+    'Performance variance analysis',
+    'OKR progress review',
+    'QBR presentation deck outline'
+  ],
+
+  globalInputs: [
+    {
+      id: 'customerAccount',
+      label: 'Customer/Account Name',
+      type: 'text',
+      placeholder: 'Acme Corporation',
+      required: true,
+    },
+    {
+      id: 'reviewPeriod',
+      label: 'Review Period',
+      type: 'select',
+      options: ['Q1', 'Q2', 'Q3', 'Q4'],
+      required: true,
+    },
+    {
+      id: 'contractDetails',
+      label: 'Contract & Engagement Details',
+      type: 'textarea',
+      placeholder: 'ARR, contract dates, products, key milestones...',
+      required: true,
+      rows: 4,
+    },
+    {
+      id: 'performanceData',
+      label: 'Performance Data',
+      type: 'textarea',
+      placeholder: 'Usage metrics, KPIs, support tickets, NPS...',
+      required: true,
+      rows: 5,
+    },
+    {
+      id: 'relationshipInfo',
+      label: 'Relationship Information',
+      type: 'textarea',
+      placeholder: 'Key stakeholders, recent interactions, sentiment...',
+      required: true,
+      rows: 4,
+    },
+    {
+      id: 'okrProgress',
+      label: 'OKR/Goal Progress',
+      type: 'textarea',
+      placeholder: 'Goals set at start of period and progress...',
+      required: true,
+      rows: 4,
+    },
+  ],
+
+  steps: [
+    {
+      id: 'step-health-assessment',
+      skillId: 'customer-health-scorecard',
+      name: 'Assess Customer Health',
+      description: 'Comprehensive customer health analysis',
+      inputMappings: {
+        customerName: { type: 'global', inputId: 'customerAccount' },
+        contractDetails: { type: 'global', inputId: 'contractDetails' },
+        usageData: { type: 'global', inputId: 'performanceData' },
+        relationshipInfo: { type: 'global', inputId: 'relationshipInfo' },
+        businessContext: { type: 'global', inputId: 'okrProgress' },
+        concernsFlags: { type: 'static', value: '' },
+      },
+      outputKey: 'healthAssessment',
+    },
+    {
+      id: 'step-variance-analysis',
+      skillId: 'budget-variance-narrator',
+      name: 'Analyze Performance Variance',
+      description: 'Deep-dive into performance against targets',
+      inputMappings: {
+        reportTitle: { type: 'computed', template: '{{customerAccount}} {{reviewPeriod}} Performance Review' },
+        budgetData: { type: 'global', inputId: 'performanceData' },
+        actualData: { type: 'global', inputId: 'performanceData' },
+        periodType: { type: 'global', inputId: 'reviewPeriod' },
+        audience: { type: 'static', value: 'Executive Leadership' },
+        knownFactors: { type: 'global', inputId: 'okrProgress' },
+        focusAreas: { type: 'static', value: '' },
+      },
+      outputKey: 'varianceAnalysis',
+    },
+    {
+      id: 'step-okr-review',
+      skillId: 'okr-workshop-facilitator',
+      name: 'Review OKR Progress',
+      description: 'Assess progress on objectives and plan next quarter',
+      inputMappings: {
+        teamContext: { type: 'global', inputId: 'contractDetails' },
+        timeframe: { type: 'global', inputId: 'reviewPeriod' },
+        companyObjectives: { type: 'global', inputId: 'okrProgress' },
+        focusAreas: { type: 'previous', stepId: 'step-health-assessment', outputKey: 'healthAssessment' },
+        constraints: { type: 'static', value: '' },
+        currentMetrics: { type: 'global', inputId: 'performanceData' },
+      },
+      outputKey: 'okrReview',
+    },
+    {
+      id: 'step-presentation',
+      skillId: 'meeting-minutes-pro',
+      name: 'Create QBR Agenda',
+      description: 'Prepare QBR presentation structure',
+      inputMappings: {
+        meetingInfo: { type: 'computed', template: '{{customerAccount}} {{reviewPeriod}} QBR' },
+        rawNotes: { type: 'previous', stepId: 'step-health-assessment', outputKey: 'healthAssessment' },
+        meetingType: { type: 'static', value: 'QBR/Check-in' },
+        additionalContext: { type: 'previous', stepId: 'step-variance-analysis', outputKey: 'varianceAnalysis' },
+      },
+      outputKey: 'qbrAgenda',
+    },
+  ],
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// WORKFLOW 14: PRODUCT LAUNCH READINESS
+// Complete product launch preparation workflow
+// ═══════════════════════════════════════════════════════════════════════════
+
+export const PRODUCT_LAUNCH_READINESS_WORKFLOW: Workflow = {
+  id: 'product-launch-readiness',
+  name: 'Product Launch Readiness',
+  description: 'Comprehensive product launch preparation with PRD, specs, and go-to-market',
+  longDescription: 'Prepare for product launch with complete documentation including PRD, technical specifications, market sizing, and competitive positioning.',
+  icon: 'Rocket',
+  color: 'orange',
+  estimatedTime: '55-70 minutes',
+
+  outputs: [
+    'Product Requirements Document',
+    'Technical specification',
+    'Market sizing analysis',
+    'Competitive landscape map'
+  ],
+
+  globalInputs: [
+    {
+      id: 'productName',
+      label: 'Product/Feature Name',
+      type: 'text',
+      placeholder: 'Customer Analytics Dashboard',
+      required: true,
+    },
+    {
+      id: 'problemStatement',
+      label: 'Problem Statement',
+      type: 'textarea',
+      placeholder: 'What problem does this solve? For whom?',
+      required: true,
+      rows: 4,
+    },
+    {
+      id: 'targetUsers',
+      label: 'Target Users',
+      type: 'textarea',
+      placeholder: 'Who will use this? What are their needs?',
+      required: true,
+      rows: 4,
+    },
+    {
+      id: 'proposedSolution',
+      label: 'Proposed Solution',
+      type: 'textarea',
+      placeholder: 'High-level solution description...',
+      required: true,
+      rows: 4,
+    },
+    {
+      id: 'technicalContext',
+      label: 'Technical Context',
+      type: 'textarea',
+      placeholder: 'Existing systems, tech stack, constraints...',
+      required: true,
+      rows: 3,
+    },
+    {
+      id: 'competitors',
+      label: 'Key Competitors',
+      type: 'textarea',
+      placeholder: 'Competitive products and their positioning...',
+      required: true,
+      rows: 3,
+    },
+  ],
+
+  steps: [
+    {
+      id: 'step-prd',
+      skillId: 'prd-writer',
+      name: 'Create PRD',
+      description: 'Write comprehensive Product Requirements Document',
+      inputMappings: {
+        productName: { type: 'global', inputId: 'productName' },
+        problemStatement: { type: 'global', inputId: 'problemStatement' },
+        targetUsers: { type: 'global', inputId: 'targetUsers' },
+        proposedSolution: { type: 'global', inputId: 'proposedSolution' },
+        constraints: { type: 'global', inputId: 'technicalContext' },
+        successMetrics: { type: 'static', value: '' },
+      },
+      outputKey: 'prd',
+    },
+    {
+      id: 'step-tech-spec',
+      skillId: 'technical-spec-writer',
+      name: 'Create Technical Spec',
+      description: 'Write detailed technical specification',
+      inputMappings: {
+        projectName: { type: 'global', inputId: 'productName' },
+        problemStatement: { type: 'previous', stepId: 'step-prd', outputKey: 'prd' },
+        existingSystem: { type: 'global', inputId: 'technicalContext' },
+        proposedApproach: { type: 'global', inputId: 'proposedSolution' },
+        nonFunctional: { type: 'static', value: '' },
+        constraints: { type: 'global', inputId: 'technicalContext' },
+      },
+      outputKey: 'techSpec',
+    },
+    {
+      id: 'step-market-sizing',
+      skillId: 'market-sizing-analyst',
+      name: 'Size the Market',
+      description: 'Analyze TAM/SAM/SOM for the product',
+      inputMappings: {
+        productService: { type: 'global', inputId: 'proposedSolution' },
+        targetMarket: { type: 'global', inputId: 'targetUsers' },
+        pricingModel: { type: 'static', value: '' },
+        knownData: { type: 'global', inputId: 'competitors' },
+        analysisGoal: { type: 'static', value: 'Product Launch' },
+      },
+      outputKey: 'marketSizing',
+    },
+    {
+      id: 'step-competitive-landscape',
+      skillId: 'competitive-landscape-mapper',
+      name: 'Map Competitive Landscape',
+      description: 'Analyze competitive positioning and differentiation',
+      inputMappings: {
+        yourCompany: { type: 'global', inputId: 'proposedSolution' },
+        competitors: { type: 'global', inputId: 'competitors' },
+        marketContext: { type: 'previous', stepId: 'step-market-sizing', outputKey: 'marketSizing' },
+        comparisonDimensions: { type: 'static', value: '' },
+        analysisGoal: { type: 'static', value: 'Product Positioning' },
+      },
+      outputKey: 'competitiveLandscape',
+    },
+  ],
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// WORKFLOW 15: VENDOR EVALUATION PIPELINE
+// Complete vendor selection workflow
+// ═══════════════════════════════════════════════════════════════════════════
+
+export const VENDOR_EVALUATION_PIPELINE_WORKFLOW: Workflow = {
+  id: 'vendor-evaluation-pipeline',
+  name: 'Vendor Evaluation Pipeline',
+  description: 'Comprehensive vendor evaluation from requirements to recommendation',
+  longDescription: 'Execute a complete vendor evaluation process including requirements documentation, vendor comparison, security assessment, and policy compliance analysis.',
+  icon: 'CheckCircle',
+  color: 'teal',
+  estimatedTime: '50-65 minutes',
+
+  outputs: [
+    'SOP for vendor evaluation',
+    'Vendor comparison matrix',
+    'Security assessment questionnaire',
+    'Policy gap analysis'
+  ],
+
+  globalInputs: [
+    {
+      id: 'purchaseName',
+      label: 'Purchase/Project Name',
+      type: 'text',
+      placeholder: 'CRM Platform Selection',
+      required: true,
+    },
+    {
+      id: 'purchaseContext',
+      label: 'Purchase Context',
+      type: 'textarea',
+      placeholder: 'What are you buying? Why? What problem does it solve?',
+      required: true,
+      rows: 4,
+    },
+    {
+      id: 'vendors',
+      label: 'Vendors to Evaluate',
+      type: 'textarea',
+      placeholder: 'List vendors with key information...',
+      required: true,
+      rows: 5,
+    },
+    {
+      id: 'requirements',
+      label: 'Key Requirements',
+      type: 'textarea',
+      placeholder: 'Must-haves and nice-to-haves...',
+      required: true,
+      rows: 4,
+    },
+    {
+      id: 'budgetConstraints',
+      label: 'Budget & Constraints',
+      type: 'textarea',
+      placeholder: 'Budget, timeline, policies...',
+      required: true,
+      rows: 3,
+    },
+    {
+      id: 'securityRequirements',
+      label: 'Security/Compliance Requirements',
+      type: 'textarea',
+      placeholder: 'SOC 2, HIPAA, GDPR, internal policies...',
+      required: true,
+      rows: 3,
+    },
+  ],
+
+  steps: [
+    {
+      id: 'step-evaluation-sop',
+      skillId: 'sop-documentation-builder',
+      name: 'Create Evaluation SOP',
+      description: 'Document the vendor evaluation process',
+      inputMappings: {
+        processName: { type: 'computed', template: '{{purchaseName}} Vendor Evaluation' },
+        processDescription: { type: 'global', inputId: 'purchaseContext' },
+        currentSteps: { type: 'static', value: '1. Define requirements\n2. Identify vendors\n3. Request proposals\n4. Evaluate\n5. Select\n6. Contract' },
+        stakeholders: { type: 'static', value: 'Procurement, IT, Business stakeholders, Legal, Finance' },
+        compliance: { type: 'global', inputId: 'securityRequirements' },
+        exceptions: { type: 'static', value: '' },
+      },
+      outputKey: 'evaluationSOP',
+    },
+    {
+      id: 'step-vendor-comparison',
+      skillId: 'vendor-comparison-matrix',
+      name: 'Compare Vendors',
+      description: 'Create comprehensive vendor comparison matrix',
+      inputMappings: {
+        purchaseContext: { type: 'global', inputId: 'purchaseContext' },
+        vendors: { type: 'global', inputId: 'vendors' },
+        requirements: { type: 'global', inputId: 'requirements' },
+        constraints: { type: 'global', inputId: 'budgetConstraints' },
+        stakeholders: { type: 'static', value: '' },
+      },
+      outputKey: 'vendorComparison',
+    },
+    {
+      id: 'step-security-assessment',
+      skillId: 'security-assessment-questionnaire',
+      name: 'Prepare Security Assessment',
+      description: 'Create security questionnaire for vendors',
+      inputMappings: {
+        companyInfo: { type: 'global', inputId: 'purchaseContext' },
+        questions: { type: 'global', inputId: 'securityRequirements' },
+        certifications: { type: 'global', inputId: 'securityRequirements' },
+        technicalDetails: { type: 'global', inputId: 'requirements' },
+        dataHandling: { type: 'static', value: '' },
+      },
+      outputKey: 'securityAssessment',
+    },
+    {
+      id: 'step-policy-gap',
+      skillId: 'policy-gap-analyzer',
+      name: 'Analyze Policy Gaps',
+      description: 'Ensure vendor compliance with policies',
+      inputMappings: {
+        policyContent: { type: 'previous', stepId: 'step-evaluation-sop', outputKey: 'evaluationSOP' },
+        standard: { type: 'global', inputId: 'securityRequirements' },
+        policyContext: { type: 'global', inputId: 'purchaseContext' },
+        knownIssues: { type: 'static', value: '' },
+        constraints: { type: 'global', inputId: 'budgetConstraints' },
+      },
+      outputKey: 'policyGapAnalysis',
+    },
+  ],
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
 // EXPORT ALL PROFESSIONAL WORKFLOWS
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -1430,6 +2080,11 @@ export const PROFESSIONAL_WORKFLOWS: Record<string, Workflow> = {
   'process-improvement': PROCESS_IMPROVEMENT_WORKFLOW,
   'influencer-campaign': INFLUENCER_CAMPAIGN_WORKFLOW,
   'competitive-intelligence': COMPETITIVE_INTELLIGENCE_WORKFLOW,
+  'new-hire-onboarding-suite': NEW_HIRE_ONBOARDING_WORKFLOW,
+  'sales-deal-accelerator': SALES_DEAL_ACCELERATOR_WORKFLOW,
+  'quarterly-business-review-pack': QUARTERLY_BUSINESS_REVIEW_WORKFLOW,
+  'product-launch-readiness': PRODUCT_LAUNCH_READINESS_WORKFLOW,
+  'vendor-evaluation-pipeline': VENDOR_EVALUATION_PIPELINE_WORKFLOW,
 };
 
 export const PROFESSIONAL_WORKFLOW_LIST: Workflow[] = Object.values(PROFESSIONAL_WORKFLOWS);

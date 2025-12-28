@@ -21,7 +21,22 @@
  * 5. EXTENDED (20 skills) - ./extended/
  *    Advanced professional skills (Wave 1-5)
  *
- * TOTAL: 53 skills
+ * 6. SALES (4 skills) - ./sales/
+ *    Sales enablement, proposals, customer success
+ *
+ * 7. PRODUCT (4 skills) - ./product/
+ *    Product management, strategy, OKRs
+ *
+ * 8. TECHNICAL (4 skills) - ./technical/
+ *    Technical specs, postmortems, code review
+ *
+ * 9. HR (4 skills) - ./hr/
+ *    HR operations, onboarding, performance
+ *
+ * 10. OPERATIONS (4 skills) - ./operations/
+ *     SOPs, vendor management, policies
+ *
+ * TOTAL: 73 skills
  *
  * ADDING NEW SKILLS:
  * ==================
@@ -38,6 +53,11 @@ import { GOVERNANCE_SKILLS } from './governance';
 import { EXCEL_SKILLS } from './excel';
 import { ENTERPRISE_SKILLS } from './enterprise';
 import { EXTENDED_SKILLS } from './extended';
+import { SALES_SKILLS } from './sales';
+import { PRODUCT_SKILLS } from './product';
+import { TECHNICAL_SKILLS } from './technical';
+import { HR_SKILLS } from './hr';
+import { OPERATIONS_SKILLS } from './operations';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SKILLS EXPORT
@@ -59,6 +79,21 @@ export const SKILLS: Record<string, Skill> = {
 
   // Extended/Wave Skills (20)
   ...EXTENDED_SKILLS,
+
+  // Sales & Revenue Skills (4)
+  ...SALES_SKILLS,
+
+  // Product & Strategy Skills (4)
+  ...PRODUCT_SKILLS,
+
+  // Technical & Engineering Skills (4)
+  ...TECHNICAL_SKILLS,
+
+  // HR & People Operations Skills (4)
+  ...HR_SKILLS,
+
+  // Legal & Operations Skills (4)
+  ...OPERATIONS_SKILLS,
 };
 
 // Re-export category modules for direct access if needed
@@ -68,4 +103,9 @@ export {
   EXCEL_SKILLS,
   ENTERPRISE_SKILLS,
   EXTENDED_SKILLS,
+  SALES_SKILLS,
+  PRODUCT_SKILLS,
+  TECHNICAL_SKILLS,
+  HR_SKILLS,
+  OPERATIONS_SKILLS,
 };
