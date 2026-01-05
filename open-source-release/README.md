@@ -25,6 +25,7 @@ Free. Open source. No strings attached.
 | **Project Management** | 7 | Status reports, risk management, stakeholder comms |
 | **Business Analysis** | 7 | Requirements, process mapping, feasibility studies |
 | **Prompt Engineering** | 11 | Meta-prompts for building better prompts |
+| **Claude Skills** | 10 | Specialized Claude Code integrations |
 
 **Total: 124 prompts**
 
