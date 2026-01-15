@@ -757,3 +757,103 @@ export const DEFAULT_ROLE_CONFIGS: RoleConfig[] = [
     },
   },
 ];
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CLIENT MANAGEMENT TYPES
+// For managing B2B client outreach with curated skill/workflow selections
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Status of client outreach
+ */
+export type ClientStatus = 'prospect' | 'contacted' | 'demo_scheduled' | 'active' | 'inactive';
+
+/**
+ * Industry categories for clients
+ */
+export type ClientIndustry =
+  | 'insurance'
+  | 'financial_services'
+  | 'healthcare'
+  | 'technology'
+  | 'retail'
+  | 'manufacturing'
+  | 'professional_services'
+  | 'marketing_advertising'
+  | 'real_estate'
+  | 'hospitality'
+  | 'education'
+  | 'nonprofit'
+  | 'other';
+
+/**
+ * Client contact information
+ */
+export interface ClientContact {
+  name: string;
+  title?: string;
+  email?: string;
+  phone?: string;
+  isPrimary?: boolean;
+}
+
+/**
+ * Client/Company record for B2B outreach
+ */
+export interface Client {
+  id: string;
+  companyName: string;
+  industry: ClientIndustry;
+  website?: string;
+  description?: string;
+
+  // Contacts
+  contacts: ClientContact[];
+
+  // Selected skills and workflows for this client
+  selectedSkillIds: string[];
+  selectedWorkflowIds: string[];
+
+  // Custom messaging
+  customHeadline?: string;
+  customMessage?: string;
+
+  // Portal settings
+  portalSlug: string;  // URL-friendly identifier for their portal page
+  portalEnabled: boolean;
+
+  // Status tracking
+  status: ClientStatus;
+  notes?: string;
+
+  // Timestamps
+  createdAt: string;
+  updatedAt: string;
+  lastContactedAt?: string;
+}
+
+/**
+ * Default companies to target (can be edited by admin)
+ */
+export const DEFAULT_TARGET_COMPANIES: Partial<Client>[] = [
+  { companyName: 'State Farm', industry: 'insurance' },
+  { companyName: 'Progressive', industry: 'insurance' },
+  { companyName: 'Allstate', industry: 'insurance' },
+  { companyName: 'Liberty Mutual', industry: 'insurance' },
+  { companyName: 'Nationwide', industry: 'insurance' },
+  { companyName: 'USAA', industry: 'insurance' },
+  { companyName: 'Farmers Insurance', industry: 'insurance' },
+  { companyName: 'American Family Insurance', industry: 'insurance' },
+  { companyName: 'Travelers', industry: 'insurance' },
+  { companyName: 'Hartford', industry: 'insurance' },
+  { companyName: 'Cigna', industry: 'insurance' },
+  { companyName: 'Aetna', industry: 'insurance' },
+  { companyName: 'Blue Cross Blue Shield', industry: 'insurance' },
+  { companyName: 'MetLife', industry: 'insurance' },
+  { companyName: 'Prudential', industry: 'insurance' },
+  { companyName: 'New York Life', industry: 'insurance' },
+  { companyName: 'Northwestern Mutual', industry: 'insurance' },
+  { companyName: 'Mass Mutual', industry: 'insurance' },
+  { companyName: 'Lincoln Financial', industry: 'insurance' },
+  { companyName: 'Principal Financial', industry: 'insurance' },
+];

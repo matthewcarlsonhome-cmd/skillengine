@@ -143,6 +143,7 @@ import DevPlaygroundPage from './pages/DevPlaygroundPage';           // Develope
 import AccountPage from './pages/AccountPage';                       // User account & credits
 import AdminImprovementsPage from './pages/AdminImprovementsPage'; // Skill improvement review
 import AuthCallbackPage from './pages/AuthCallbackPage';           // OAuth callback handler
+import ClientPortalPage from './pages/ClientPortalPage';           // B2B client marketing portal
 import { AuthGate } from './components/AuthGate';                  // Login gate with onboarding
 
 /**
@@ -283,6 +284,13 @@ function App() {
                     <Route path="/admin" element={<RouteErrorBoundary pageName="Admin"><AdminPage /></RouteErrorBoundary>} />
                     <Route path="/admin/improvements" element={<RouteErrorBoundary pageName="Admin Improvements"><AdminImprovementsPage /></RouteErrorBoundary>} />
                     <Route path="/dev/playground" element={<RouteErrorBoundary pageName="Dev Playground"><DevPlaygroundPage /></RouteErrorBoundary>} />
+
+                    {/* ═══════════════════════════════════════════════════════
+                        CLIENT PORTAL
+                        Marketing-friendly pages for B2B client outreach
+                        - /portal/:slug: Dedicated portal for each client
+                    ═══════════════════════════════════════════════════════ */}
+                    <Route path="/portal/:slug" element={<RouteErrorBoundary pageName="Client Portal"><ClientPortalPage /></RouteErrorBoundary>} />
                   </Routes>
                 </main>
 
