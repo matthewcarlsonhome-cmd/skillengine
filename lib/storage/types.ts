@@ -858,6 +858,7 @@ export interface Client {
 /**
  * Default companies to target - Madison, WI area marketing agencies and businesses
  * Priority: HIGH = Strong fit, MEDIUM = Good fit, LOW = Limited fit, RESEARCH = Needs more info
+ * Skills and workflows are auto-curated based on industry via clientRecommendations.ts
  */
 export const DEFAULT_TARGET_COMPANIES: Partial<Client>[] = [
   // ═══════════════════════════════════════════════════════════════════════════
