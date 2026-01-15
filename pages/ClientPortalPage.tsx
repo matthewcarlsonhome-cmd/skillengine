@@ -206,6 +206,53 @@ const ClientPortalPage: React.FC = () => {
         </div>
       </section>
 
+      {/* ROI & Pain Points Section */}
+      {(client.estimatedTimeSavings || client.estimatedCostSavings || client.painPoints) && (
+        <section className="py-12 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border-y">
+          <div className="container mx-auto max-w-6xl px-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+              {/* ROI Numbers */}
+              <div>
+                <h2 className="text-2xl font-bold mb-6">
+                  Estimated ROI for {client.companyName}
+                </h2>
+                <div className="grid grid-cols-2 gap-4">
+                  {client.estimatedTimeSavings && (
+                    <div className="rounded-xl bg-white dark:bg-card p-6 shadow-sm">
+                      <Clock className="h-8 w-8 text-green-600 mb-3" />
+                      <p className="text-3xl font-bold text-green-600">{client.estimatedTimeSavings}</p>
+                      <p className="text-sm text-muted-foreground">Weekly Time Savings</p>
+                    </div>
+                  )}
+                  {client.estimatedCostSavings && (
+                    <div className="rounded-xl bg-white dark:bg-card p-6 shadow-sm">
+                      <TrendingUp className="h-8 w-8 text-green-600 mb-3" />
+                      <p className="text-3xl font-bold text-green-600">{client.estimatedCostSavings}</p>
+                      <p className="text-sm text-muted-foreground">Monthly Cost Savings</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Pain Points */}
+              {client.painPoints && (
+                <div>
+                  <h3 className="text-lg font-semibold mb-4">Challenges We Address</h3>
+                  <div className="space-y-3">
+                    {client.painPoints.split(',').map((point, i) => (
+                      <div key={i} className="flex items-start gap-3">
+                        <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                        <span className="text-sm">{point.trim()}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Skills Section */}
       <section id="skills-section" className="py-16 sm:py-20">
         <div className="container mx-auto max-w-6xl px-4">

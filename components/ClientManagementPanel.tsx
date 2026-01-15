@@ -51,7 +51,7 @@ import {
 } from '../lib/clients';
 import { getStaticSkills } from '../lib/skills/registry';
 import { WORKFLOWS } from '../lib/workflows';
-import type { Client, ClientStatus, ClientIndustry } from '../lib/storage/types';
+import type { Client, ClientStatus, ClientIndustry, ClientPriority } from '../lib/storage/types';
 import type { Skill } from '../types';
 import type { Workflow } from '../lib/storage/types';
 
@@ -63,16 +63,28 @@ const STATUS_OPTIONS: { value: ClientStatus; label: string; color: string }[] = 
   { value: 'inactive', label: 'Inactive', color: 'bg-red-500' },
 ];
 
+const PRIORITY_OPTIONS: { value: ClientPriority; label: string; color: string }[] = [
+  { value: 'HIGH', label: 'High Priority', color: 'bg-green-500' },
+  { value: 'MEDIUM', label: 'Medium Priority', color: 'bg-yellow-500' },
+  { value: 'LOW', label: 'Low Priority', color: 'bg-gray-400' },
+  { value: 'RESEARCH', label: 'Research Needed', color: 'bg-blue-400' },
+];
+
 const INDUSTRY_OPTIONS: { value: ClientIndustry; label: string }[] = [
+  { value: 'marketing_advertising', label: 'Marketing & Advertising' },
   { value: 'insurance', label: 'Insurance' },
   { value: 'financial_services', label: 'Financial Services' },
   { value: 'healthcare', label: 'Healthcare' },
+  { value: 'biotechnology', label: 'Biotechnology' },
   { value: 'technology', label: 'Technology' },
   { value: 'retail', label: 'Retail' },
   { value: 'manufacturing', label: 'Manufacturing' },
-  { value: 'professional_services', label: 'Professional Services' },
-  { value: 'marketing_advertising', label: 'Marketing & Advertising' },
+  { value: 'construction', label: 'Construction' },
   { value: 'real_estate', label: 'Real Estate' },
+  { value: 'automotive', label: 'Automotive' },
+  { value: 'food_beverage', label: 'Food & Beverage' },
+  { value: 'utilities', label: 'Utilities' },
+  { value: 'professional_services', label: 'Professional Services' },
   { value: 'hospitality', label: 'Hospitality' },
   { value: 'education', label: 'Education' },
   { value: 'nonprofit', label: 'Non-Profit' },
@@ -91,6 +103,7 @@ export const ClientManagementPanel: React.FC<ClientManagementPanelProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterIndustry, setFilterIndustry] = useState<string>('all');
+  const [filterPriority, setFilterPriority] = useState<string>('all');
   const [expandedClientId, setExpandedClientId] = useState<string | null>(null);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [showNewClientForm, setShowNewClientForm] = useState(false);
@@ -123,7 +136,9 @@ export const ClientManagementPanel: React.FC<ClientManagementPanelProps> = ({
         const query = searchQuery.toLowerCase();
         const matchesSearch =
           client.companyName.toLowerCase().includes(query) ||
-          client.contacts.some(c => c.name.toLowerCase().includes(query));
+          client.contacts.some(c => c.name.toLowerCase().includes(query)) ||
+          client.services?.toLowerCase().includes(query) ||
+          client.painPoints?.toLowerCase().includes(query);
         if (!matchesSearch) return false;
       }
 
@@ -137,9 +152,14 @@ export const ClientManagementPanel: React.FC<ClientManagementPanelProps> = ({
         return false;
       }
 
+      // Priority filter
+      if (filterPriority !== 'all' && client.priority !== filterPriority) {
+        return false;
+      }
+
       return true;
     });
-  }, [clients, searchQuery, filterStatus, filterIndustry]);
+  }, [clients, searchQuery, filterStatus, filterIndustry, filterPriority]);
 
   const refreshClients = () => {
     setClients(getClients());
@@ -271,6 +291,17 @@ export const ClientManagementPanel: React.FC<ClientManagementPanelProps> = ({
           ))}
         </Select>
 
+        <Select
+          value={filterPriority}
+          onChange={e => setFilterPriority(e.target.value)}
+          className="w-[150px]"
+        >
+          <option value="all">All Priorities</option>
+          {PRIORITY_OPTIONS.map(opt => (
+            <option key={opt.value} value={opt.value}>{opt.label}</option>
+          ))}
+        </Select>
+
         <Button variant="outline" onClick={refreshClients}>
           <RefreshCw className="h-4 w-4 mr-2" />
           Refresh
@@ -375,6 +406,7 @@ const ClientCard: React.FC<ClientCardProps> = ({
 }) => {
   const statusOption = STATUS_OPTIONS.find(o => o.value === client.status);
   const industryOption = INDUSTRY_OPTIONS.find(o => o.value === client.industry);
+  const priorityOption = PRIORITY_OPTIONS.find(o => o.value === client.priority);
 
   return (
     <div className="rounded-xl border bg-card overflow-hidden">
@@ -384,8 +416,14 @@ const ClientCard: React.FC<ClientCardProps> = ({
         onClick={onToggleExpand}
       >
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             <h3 className="font-semibold truncate">{client.companyName}</h3>
+            {client.priority && (
+              <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs ${priorityOption?.color}/20`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${priorityOption?.color}`} />
+                {priorityOption?.label}
+              </span>
+            )}
             <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs ${statusOption?.color}/20`}>
               <span className={`w-1.5 h-1.5 rounded-full ${statusOption?.color}`} />
               {statusOption?.label}
@@ -397,8 +435,11 @@ const ClientCard: React.FC<ClientCardProps> = ({
               </span>
             )}
           </div>
-          <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
+          <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground flex-wrap">
             <span>{industryOption?.label}</span>
+            {client.companyType && <span>{client.companyType}</span>}
+            {client.revenue && <span>{client.revenue}</span>}
+            {client.employeeCount && <span>{client.employeeCount} employees</span>}
             <span>{client.selectedSkillIds.length} skills</span>
             <span>{client.selectedWorkflowIds.length} workflows</span>
             {client.contacts.length > 0 && (
@@ -450,8 +491,49 @@ const ClientCard: React.FC<ClientCardProps> = ({
       {/* Expanded Content */}
       {isExpanded && (
         <div className="border-t p-4 space-y-6">
+          {/* Company Details Summary */}
+          {(client.description || client.services || client.painPoints || client.estimatedTimeSavings) && (
+            <div className="rounded-lg border p-4 bg-blue-50/50 dark:bg-blue-950/20">
+              {client.description && (
+                <p className="text-sm mb-3">{client.description}</p>
+              )}
+              {client.services && (
+                <div className="mb-3">
+                  <span className="text-xs font-medium text-muted-foreground">Services: </span>
+                  <span className="text-sm">{client.services}</span>
+                </div>
+              )}
+              {client.painPoints && (
+                <div className="mb-3">
+                  <span className="text-xs font-medium text-muted-foreground">Pain Points: </span>
+                  <span className="text-sm text-orange-700 dark:text-orange-400">{client.painPoints}</span>
+                </div>
+              )}
+              <div className="flex flex-wrap gap-4 text-sm">
+                {client.estimatedTimeSavings && (
+                  <div className="flex items-center gap-1">
+                    <span className="font-medium text-green-600">Time Savings:</span>
+                    <span>{client.estimatedTimeSavings}</span>
+                  </div>
+                )}
+                {client.estimatedCostSavings && (
+                  <div className="flex items-center gap-1">
+                    <span className="font-medium text-green-600">Cost Savings:</span>
+                    <span>{client.estimatedCostSavings}</span>
+                  </div>
+                )}
+                {client.location && (
+                  <div className="flex items-center gap-1">
+                    <span className="font-medium">Location:</span>
+                    <span>{client.location}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Basic Info */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
               <label className="text-sm font-medium text-muted-foreground">Status</label>
               <Select
@@ -460,6 +542,18 @@ const ClientCard: React.FC<ClientCardProps> = ({
                 className="mt-1"
               >
                 {STATUS_OPTIONS.map(opt => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </Select>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-muted-foreground">Priority</label>
+              <Select
+                value={client.priority || 'MEDIUM'}
+                onChange={e => onUpdate({ priority: e.target.value as ClientPriority })}
+                className="mt-1"
+              >
+                {PRIORITY_OPTIONS.map(opt => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </Select>
