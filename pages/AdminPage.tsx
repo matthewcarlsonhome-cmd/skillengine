@@ -73,13 +73,14 @@ import { runSkillStream as runChatGPTStream, type ChatGPTModelType } from '../li
 import { EmailSegmentationPanel } from '../components/EmailSegmentationPanel';
 import { EmailComposer } from '../components/EmailComposer';
 import { UserManagementPanel } from '../components/UserManagementPanel';
+import { ClientManagementPanel } from '../components/ClientManagementPanel';
 import { useEmailSegments } from '../hooks/useEmailSegments';
 import { useSkillUsageStats } from '../hooks/useSkillUsageStats';
 import { sendEmail } from '../lib/emailSegmentation';
 import type { EmailSendRequest } from '../lib/emailSegmentation/types';
 import { UserCheck } from 'lucide-react';
 
-type TabId = 'overview' | 'users' | 'emails' | 'email-targeting' | 'roles' | 'usage' | 'api-test' | 'settings';
+type TabId = 'overview' | 'users' | 'clients' | 'emails' | 'email-targeting' | 'roles' | 'usage' | 'api-test' | 'settings';
 
 const ROLE_ICONS: Record<UserRole, React.FC<{ className?: string }>> = {
   free: Users,
@@ -242,6 +243,7 @@ const AdminPage: React.FC = () => {
   const tabs: { id: TabId; label: string; icon: React.FC<{ className?: string }> }[] = [
     { id: 'overview', label: 'Overview', icon: BarChart3 },
     { id: 'users', label: 'Users', icon: UserCheck },
+    { id: 'clients', label: 'Clients', icon: Building2 },
     { id: 'emails', label: 'Email List', icon: Mail },
     { id: 'email-targeting', label: 'Email Targeting', icon: Target },
     { id: 'roles', label: 'Role Config', icon: Crown },
@@ -453,6 +455,24 @@ const AdminPage: React.FC = () => {
               setShowEmailComposer(true);
             }}
           />
+        )}
+
+        {/* Clients Tab - B2B Client Management with Skill/Workflow Selection */}
+        {activeTab === 'clients' && (
+          <div className="space-y-4">
+            <div>
+              <h2 className="text-xl font-semibold">Client Management</h2>
+              <p className="text-sm text-muted-foreground">
+                Manage B2B client outreach with curated skill and workflow selections. Create dedicated portal pages for each client.
+              </p>
+            </div>
+            <ClientManagementPanel
+              onViewPortal={(client) => {
+                // Open portal in new tab
+                window.open(`/#/portal/${client.portalSlug}`, '_blank');
+              }}
+            />
+          </div>
         )}
 
         {/* Emails Tab */}
