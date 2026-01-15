@@ -59,6 +59,250 @@ const VALUE_PROPS = [
   { icon: Target, title: 'Results Focused', description: 'Proven templates that deliver' },
 ];
 
+// ═══════════════════════════════════════════════════════════════════════════
+// ROI CALCULATION HELPERS
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Parse a range string like "18-28 hrs" or "$4,500-$11,200" and return min/max/avg
+ */
+function parseRange(rangeStr: string): { min: number; max: number; avg: number } | null {
+  if (!rangeStr) return null;
+
+  // Remove currency symbols, commas, and common suffixes
+  const cleaned = rangeStr.replace(/[$,]/g, '').replace(/\s*(hrs?|hours?|\/mo|\/month|per month)\s*/gi, '');
+
+  // Match patterns like "18-28" or "4500-11200"
+  const match = cleaned.match(/(\d+(?:\.\d+)?)\s*[-–]\s*(\d+(?:\.\d+)?)/);
+  if (match) {
+    const min = parseFloat(match[1]);
+    const max = parseFloat(match[2]);
+    return { min, max, avg: (min + max) / 2 };
+  }
+
+  // Single value
+  const singleMatch = cleaned.match(/(\d+(?:\.\d+)?)/);
+  if (singleMatch) {
+    const val = parseFloat(singleMatch[1]);
+    return { min: val, max: val, avg: val };
+  }
+
+  return null;
+}
+
+/**
+ * Format a number as currency
+ */
+function formatCurrency(value: number): string {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
+/**
+ * Format a number with commas
+ */
+function formatNumber(value: number): string {
+  return new Intl.NumberFormat('en-US').format(Math.round(value));
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ROI SECTION COMPONENT
+// ═══════════════════════════════════════════════════════════════════════════
+
+interface ROISectionProps {
+  client: Client;
+}
+
+const ROISection: React.FC<ROISectionProps> = ({ client }) => {
+  // Parse time savings (assuming weekly hours)
+  const timeSavings = parseRange(client.estimatedTimeSavings || '');
+  const weeklyHours = timeSavings?.avg || 0;
+  const monthlyHours = weeklyHours * 4.33;
+  const annualHours = weeklyHours * 52;
+  const fteEquivalent = annualHours / 2080; // 2080 = 40hrs * 52 weeks
+
+  // Parse cost savings (assuming monthly)
+  const costSavings = parseRange(client.estimatedCostSavings || '');
+  const monthlyCost = costSavings?.avg || 0;
+  const annualCost = monthlyCost * 12;
+
+  // Estimate hourly rate from cost/time if both available
+  const impliedHourlyRate = monthlyHours > 0 && monthlyCost > 0 ? monthlyCost / monthlyHours : 75;
+
+  return (
+    <section className="py-16 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 dark:from-green-950/30 dark:via-emerald-950/20 dark:to-teal-950/30 border-y">
+      <div className="container mx-auto max-w-6xl px-4">
+        {/* Section Header */}
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-500/10 text-green-700 dark:text-green-400 text-sm font-medium mb-4">
+            <TrendingUp className="h-4 w-4" />
+            Projected Return on Investment
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-bold mb-4">
+            Transform {client.companyName}'s Productivity
+          </h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Based on your team size and workflow complexity, here's what AI automation can deliver for your organization.
+          </p>
+        </div>
+
+        {/* Main ROI Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          {/* Time Savings Card */}
+          {timeSavings && (
+            <div className="rounded-2xl bg-white dark:bg-card p-8 shadow-lg border border-green-200 dark:border-green-900">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="h-12 w-12 rounded-xl bg-green-500/10 flex items-center justify-center">
+                  <Clock className="h-6 w-6 text-green-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Time Saved</p>
+                  <p className="font-semibold text-green-700 dark:text-green-400">Weekly Hours</p>
+                </div>
+              </div>
+
+              <p className="text-5xl font-bold text-green-600 mb-2">
+                {client.estimatedTimeSavings}
+              </p>
+              <p className="text-sm text-muted-foreground mb-6">
+                per week reclaimed for high-value work
+              </p>
+
+              <div className="space-y-3 pt-4 border-t">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Monthly</span>
+                  <span className="font-semibold">{formatNumber(monthlyHours)} hours</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Annually</span>
+                  <span className="font-semibold text-green-600">{formatNumber(annualHours)} hours</span>
+                </div>
+                {fteEquivalent >= 0.1 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">FTE Equivalent</span>
+                    <span className="font-semibold text-green-600">{fteEquivalent.toFixed(1)} FTE</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Cost Savings Card */}
+          {costSavings && (
+            <div className="rounded-2xl bg-white dark:bg-card p-8 shadow-lg border border-green-200 dark:border-green-900">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="h-12 w-12 rounded-xl bg-green-500/10 flex items-center justify-center">
+                  <TrendingUp className="h-6 w-6 text-green-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Cost Savings</p>
+                  <p className="font-semibold text-green-700 dark:text-green-400">Monthly Value</p>
+                </div>
+              </div>
+
+              <p className="text-5xl font-bold text-green-600 mb-2">
+                {client.estimatedCostSavings}
+              </p>
+              <p className="text-sm text-muted-foreground mb-6">
+                in labor and efficiency gains
+              </p>
+
+              <div className="space-y-3 pt-4 border-t">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Quarterly</span>
+                  <span className="font-semibold">{formatCurrency(monthlyCost * 3)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Annually</span>
+                  <span className="font-semibold text-green-600">{formatCurrency(annualCost)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">5-Year Value</span>
+                  <span className="font-semibold text-green-600">{formatCurrency(annualCost * 5)}</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ROI Summary Card */}
+          <div className="rounded-2xl bg-gradient-to-br from-green-600 to-emerald-600 p-8 shadow-lg text-white">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="h-12 w-12 rounded-xl bg-white/20 flex items-center justify-center">
+                <Target className="h-6 w-6" />
+              </div>
+              <div>
+                <p className="text-sm text-green-100">Annual Impact</p>
+                <p className="font-semibold">Total Value</p>
+              </div>
+            </div>
+
+            <p className="text-5xl font-bold mb-2">
+              {annualCost > 0 ? formatCurrency(annualCost) : `${formatNumber(annualHours)}+ hrs`}
+            </p>
+            <p className="text-sm text-green-100 mb-6">
+              projected first-year return
+            </p>
+
+            <div className="space-y-3 pt-4 border-t border-white/20">
+              <div className="flex items-center gap-2 text-sm">
+                <CheckCircle2 className="h-4 w-4" />
+                <span>Immediate productivity gains</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <CheckCircle2 className="h-4 w-4" />
+                <span>Reduced manual errors</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <CheckCircle2 className="h-4 w-4" />
+                <span>Faster time-to-delivery</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Pain Points Section */}
+        {client.painPoints && (
+          <div className="rounded-2xl bg-white dark:bg-card p-8 shadow-lg">
+            <h3 className="text-xl font-bold mb-6 text-center">
+              Workflows We'll Automate for {client.companyName}
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {client.painPoints.split(',').map((point, i) => (
+                <div
+                  key={i}
+                  className="flex items-start gap-3 p-4 rounded-xl bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-900"
+                >
+                  <div className="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                    <CheckCircle2 className="h-4 w-4 text-white" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm">{point.trim()}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Bottom CTA */}
+        <div className="text-center mt-12">
+          <p className="text-muted-foreground mb-4">
+            These estimates are based on typical efficiency gains. Your actual results may be even higher.
+          </p>
+          <Button size="lg" className="bg-green-600 hover:bg-green-700 gap-2">
+            <Calendar className="h-5 w-5" />
+            Schedule a Custom ROI Analysis
+          </Button>
+        </div>
+      </div>
+    </section>
+  );
+};
+
 const ClientPortalPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
@@ -206,51 +450,9 @@ const ClientPortalPage: React.FC = () => {
         </div>
       </section>
 
-      {/* ROI & Pain Points Section */}
+      {/* ROI & Value Proposition Section */}
       {(client.estimatedTimeSavings || client.estimatedCostSavings || client.painPoints) && (
-        <section className="py-12 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border-y">
-          <div className="container mx-auto max-w-6xl px-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-              {/* ROI Numbers */}
-              <div>
-                <h2 className="text-2xl font-bold mb-6">
-                  Estimated ROI for {client.companyName}
-                </h2>
-                <div className="grid grid-cols-2 gap-4">
-                  {client.estimatedTimeSavings && (
-                    <div className="rounded-xl bg-white dark:bg-card p-6 shadow-sm">
-                      <Clock className="h-8 w-8 text-green-600 mb-3" />
-                      <p className="text-3xl font-bold text-green-600">{client.estimatedTimeSavings}</p>
-                      <p className="text-sm text-muted-foreground">Weekly Time Savings</p>
-                    </div>
-                  )}
-                  {client.estimatedCostSavings && (
-                    <div className="rounded-xl bg-white dark:bg-card p-6 shadow-sm">
-                      <TrendingUp className="h-8 w-8 text-green-600 mb-3" />
-                      <p className="text-3xl font-bold text-green-600">{client.estimatedCostSavings}</p>
-                      <p className="text-sm text-muted-foreground">Monthly Cost Savings</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Pain Points */}
-              {client.painPoints && (
-                <div>
-                  <h3 className="text-lg font-semibold mb-4">Challenges We Address</h3>
-                  <div className="space-y-3">
-                    {client.painPoints.split(',').map((point, i) => (
-                      <div key={i} className="flex items-start gap-3">
-                        <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
-                        <span className="text-sm">{point.trim()}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
+        <ROISection client={client} />
       )}
 
       {/* Skills Section */}
