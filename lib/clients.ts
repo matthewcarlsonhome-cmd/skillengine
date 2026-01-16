@@ -7,6 +7,7 @@
 
 import type { Client, ClientStatus, ClientIndustry, DEFAULT_TARGET_COMPANIES } from './storage/types';
 import { DEFAULT_TARGET_COMPANIES as defaultCompanies } from './storage/types';
+import { getRecommendedSkills, getRecommendedWorkflows } from './clientRecommendations';
 import { logger } from './logger';
 
 const CLIENTS_STORAGE_KEY = 'skillengine_clients';
@@ -205,24 +206,41 @@ export function toggleClientPortal(id: string, enabled: boolean): Client | null 
 
 /**
  * Initialize with default target companies if no clients exist
+ * Auto-applies curated skills and workflows based on company industry
  */
 export function initializeDefaultClients(): Client[] {
   const existing = getClients();
   if (existing.length > 0) return existing;
 
-  const clients: Client[] = defaultCompanies.map(company => ({
-    id: generateId(),
-    companyName: company.companyName || 'Unknown',
-    industry: company.industry || 'other',
-    contacts: [],
-    selectedSkillIds: [],
-    selectedWorkflowIds: [],
-    portalSlug: generateSlug(company.companyName || 'unknown'),
-    portalEnabled: false,
-    status: 'prospect' as ClientStatus,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  }));
+  const clients: Client[] = defaultCompanies.map(company => {
+    const industry = company.industry || 'other';
+    return {
+      id: generateId(),
+      companyName: company.companyName || 'Unknown',
+      industry,
+      companyType: company.companyType,
+      services: company.services,
+      revenue: company.revenue,
+      employeeCount: company.employeeCount,
+      location: company.location,
+      priority: company.priority,
+      description: company.description,
+      painPoints: company.painPoints,
+      estimatedTimeSavings: company.estimatedTimeSavings,
+      estimatedCostSavings: company.estimatedCostSavings,
+      website: company.website,
+      notes: company.notes,
+      contacts: [],
+      // Auto-apply curated skills/workflows, or use from company data if provided
+      selectedSkillIds: company.selectedSkillIds || getRecommendedSkills(industry),
+      selectedWorkflowIds: company.selectedWorkflowIds || getRecommendedWorkflows(industry),
+      portalSlug: generateSlug(company.companyName || 'unknown'),
+      portalEnabled: false,
+      status: 'prospect' as ClientStatus,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+  });
 
   saveClients(clients);
   return clients;
